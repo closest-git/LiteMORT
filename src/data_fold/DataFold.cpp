@@ -18,6 +18,7 @@ using json = nlohmann::json;
 
 using namespace Grusoft;
 
+FeatsOnFold::STAT FeatsOnFold::stat;
 /*
 流形上的结构化数据
 需求：

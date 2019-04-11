@@ -387,6 +387,7 @@ void ManifoldTree::BeforeEachBatch(size_t nMost, size_t rng_seed, int flag) {
 	其数据类型始终是tpDOWN
 */
 void ManifoldTree::Train(int flag) {	
+	GST_TIC(t1);
 	int nTree=hForest->forest.size( ),iter=0;
 	if (nTree == 24)
 		nTree = 24;		//仅用于调试
@@ -411,6 +412,7 @@ void ManifoldTree::Train(int flag) {
 		}
 
 	}
+	//FeatsOnFold::stat.tX += GST_TOC(t1);
 
 	while (true) {		//参见GBRT::GetBlit
 		if(leafs.size()>=hData_->config.num_leaves )

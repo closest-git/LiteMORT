@@ -186,7 +186,7 @@ namespace Grusoft {
 		void UpdateResi_binary(FeatsOnFold *hData_, int round, int flag) {
 			const string objective = hData_->config.objective, metric = hData_->config.eval_metric;
 			bool isOutlier = objective == "outlier";
-			Tx fuyi = -1, *y1 = ((FeatVec_T<Tx>*)predict)->arr(), *y0 = ((FeatVec_T<Tx>*)y)->arr();
+			Tx fuyi = -1, *y1 = ((FeatVec_T<Tx>*)predict)->arr(), *label = ((FeatVec_T<Tx>*)y)->arr(),a;
 			tpDOWN *vResi = VECTOR2ARR(resi), *pDown = GetDownDirection();
 			tpDOWN *vHess = VECTOR2ARR(hessian);
 			size_t dim = resi.size(), nSamp = hData_->nSample(), step = dim, start, end;
@@ -212,26 +212,34 @@ namespace Grusoft {
 					for (i = start; i < end; i++) {
 						//y_exp[i] = exp(y_exp[i]);
 						a_logloss += log(1 + y_exp[i]);
-						if (y0[i] == 1)
+						if (label[i] == 1)
 							a_logloss -= y1[i];
 					};
 				}
 				err_logloss = a_logloss / dim;
 				
 			}	else {	//'auc'
-				bool isJonson = round<100;
+				bool isJonson = round < 50;
 				if(isJonson)	//应该渐进
-					err_auc = decrimi_2.AUC_Jonson(dim,y0,y1);
+					err_auc = decrimi_2.AUC_Jonson(dim, label,y1);
 				else
-					err_auc = decrimi_2.AUC_cys(dim, y0, y1);
+					err_auc = decrimi_2.AUC_cys(dim, label, y1);
 			}
 			if (pDown != nullptr) {
+				Tx P_0 = decrimi_2.P_0, P_1 = decrimi_2.P_1, N_0 = decrimi_2.N_0, N_1 = decrimi_2.N_1;
 #pragma omp parallel for schedule(static,1)
 				for (int thread = 0; thread < num_threads; thread++) {
 					size_t start = thread*step, end = min(start + step, dim), i;
 					for (i = start; i < end; i++) {
+						a = y1[i];
 						double sig = y_exp[i] / (1 + y_exp[i]);
-						pDown[i] = -(sig - y0[i]);								vHess[i] = sig*(1 - sig);
+						pDown[i] = -(sig - label[i]);								vHess[i] = sig*(1 - sig);
+						/*if (label[i] == 0 && a > P_0) {	//很奇怪，这样就是不行
+							//pDown[i] *= 10;							
+						}
+						else if (label[i] == 1 && a < N_1) {
+							//pDown[i] *= 10;							
+						}*/
 					}
 				}
 			}

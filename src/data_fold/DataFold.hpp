@@ -108,7 +108,7 @@ namespace Grusoft {
 
 			double tX = 0;	//统计时间
 		};
-		STAT stat;
+		static STAT stat;
 		ExploreDA *edaX = nullptr;
 		LiteBOM_Config config;			//configuration paramters
 										//tree每个node都有samp_set，会影响data

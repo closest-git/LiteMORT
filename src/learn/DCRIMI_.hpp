@@ -102,7 +102,7 @@ namespace Grusoft{
 				dot += y0[idx[i]]*(i+1);
 			}
 			auc = 1 + ((N_pos + 1.) / (2 * N_neg)) - (1. / (N_pos * N_neg)) * dot;
-			tX += ((clock() - (t1))*1.0f / CLOCKS_PER_SEC);
+			//tX += ((clock() - (t1))*1.0f / CLOCKS_PER_SEC);
 			return auc;
 		}
 
@@ -207,7 +207,7 @@ namespace Grusoft{
 			auc = (dot - (N_pos + 1)*N_pos / 2.0) / (N_pos*N_neg);
 			//double auc_0 = AUC_Jonson(dim, label, y1, flag);
 			delete[] ptr;
-			tX += ((clock() - (t1))*1.0f / CLOCKS_PER_SEC);
+			//tX += ((clock() - (t1))*1.0f / CLOCKS_PER_SEC);
 			return auc;
 		}
 	};

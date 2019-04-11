@@ -180,7 +180,7 @@ double GBRT::Predict(FeatsOnFold *hData_, bool isX,bool checkLossy, bool resumeL
 		if (BIT_TEST(hData_->dType, FeatsOnFold::DF_EVAL)) {
 			if ((skdu.noT < 100 && skdu.noT % 5 == 0) || skdu.noT % 500 == 0) {
 				printf("%s_%d=%-8.5g_t=%.3g ", hData_->nam.c_str(),skdu.noT,  err, GST_TOC(tick));
-				if(skdu.noT > 100)	printf("tX=%.3g ", hTrainData->stat.tX + DCRIMI_2::tX);
+				if(skdu.noT > 100)	printf("tX=%.3g ", FeatsOnFold::stat.tX + DCRIMI_2::tX);
 			}
 
 		}
@@ -240,7 +240,6 @@ int GBRT::Train(string sTitle, int x, int flag) {
 	DForest curF;
 	for (t = 0; t<rounds; t++) {
 		skdu.noT = t;
-		GST_TIC(t1);		
 		if (isEvalTrain) {
 			err_0 = this->Predict(hTrainData,false,true, true);		//可以继续优化
 			if (hTrainData->lossy->isOK(0x0,FLT_EPSILON)) {
@@ -268,7 +267,6 @@ int GBRT::Train(string sTitle, int x, int flag) {
 				break;
 			}
 		}
-		//hTrainData->stat.tX += GST_TOC(t1);
 		this->BeforeTrain(hTrainData);
 		//gradients = self.loss.negative_gradient(preds, y)
 		ManifoldTree *hTree = new ManifoldTree(this, to_string(666) + "_" + to_string(t));
