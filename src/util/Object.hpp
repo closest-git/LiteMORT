@@ -68,10 +68,18 @@ public:
 bool G_isFolder( const string& sFolder );
 
 #ifdef WIN32
-	#include <time.h>
+	/*#include <time.h>
 	#define GST_NOW( )		(clock( ))
 	#define GST_TIC(tick)	clock_t tick=clock( );
-	#define GST_TOC(tick)	((clock()-(tick))*1.0f/CLOCKS_PER_SEC)
+	#define GST_TOC(tick)	((clock()-(tick))*1.0f/CLOCKS_PER_SEC)*/
+	#include <chrono>
+	#include <thread>
+
+	typedef std::chrono::high_resolution_clock Clock;
+	#define GST_NOW( )	(Clock::now( ))
+	#define GST_TIC(tick)	auto tick = Clock::now( );
+	#define GST_TOC(tick)	( (std::chrono::duration_cast<std::chrono::microseconds>(Clock::now( )-(tick)).count( ))/1000000.0)
+
 #else
 	#include <chrono>
 	#include <thread>
@@ -79,7 +87,7 @@ bool G_isFolder( const string& sFolder );
 	typedef std::chrono::high_resolution_clock Clock;
 	#define GST_NOW( )	(Clock::now( ))
 	#define GST_TIC(tick)	auto tick = Clock::now( );
-	#define GST_TOC(tick)	( (std::chrono::duration_cast<std::chrono::milliseconds>(Clock::now( )-(tick)).count( ))/1000.0)
+	#define GST_TOC(tick)	( (std::chrono::duration_cast<std::chrono::microseconds>(Clock::now( )-(tick)).count( ))/1000000.0)
 #endif
 
 

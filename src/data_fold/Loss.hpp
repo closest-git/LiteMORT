@@ -149,7 +149,7 @@ namespace Grusoft {
 			G_INT_64 i;
 			double sum = 0, *y_exp = nullptr, a_logloss = 0;
 
-			int num_threads = hData_->OMP_FOR_STATIC_1(dim, step);		
+			int num_threads = OMP_FOR_STATIC_1(dim, step);		
 			bool isJonson = round<100;
 			if (isJonson)	//Ó¦¸Ã½¥½ø
 				err_auc = decrimi_2.AUC_Jonson(dim, label, y1);
@@ -193,7 +193,7 @@ namespace Grusoft {
 			G_INT_64 i;
 			double sum = 0,*y_exp = nullptr, a_logloss = 0;
 
-			int num_threads = hData_->OMP_FOR_STATIC_1(dim, step);
+			int num_threads = OMP_FOR_STATIC_1(dim, step);
 			if (metric == "logloss" || pDown != nullptr) {		//get y_exp
 				y_exp = new double[dim];
 				//memcpy(y_exp, y1, sizeof(double)*dim);

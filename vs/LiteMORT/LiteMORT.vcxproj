@@ -104,6 +104,7 @@
       <PreprocessorDefinitions>PYMORT_DLL_EXPORTS;_DEBUG;_CRT_SECURE_NO_WARNINGS;_WINDOWS;_USRDLL;LITEMORT_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -190,6 +191,8 @@
     <ClInclude Include="..\..\src\tree\BoostingForest.hpp" />
     <ClInclude Include="..\..\src\tree\GBRT.hpp" />
     <ClInclude Include="..\..\src\tree\ManifoldTree.hpp" />
+    <ClInclude Include="..\..\src\util\Parallel_t.hpp" />
+    <ClInclude Include="..\..\src\util\samp_set.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

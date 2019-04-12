@@ -3,6 +3,8 @@
 #include <float.h>
 #include <string.h>
 #include <assert.h>
+#include "Parallel_t.hpp"
+
 using namespace std;
 
 typedef int tpSAMP_ID;			//SAMP_SET需要节省内存
@@ -107,21 +109,31 @@ public:
 		}
 	}
 
+	//v0.2	parallel
 	template<typename Tx>
-	void STA_at(const Tx *vec, Tx&a2, Tx&sum, Tx&x_0, Tx&x_1,bool hasY) {
-		tpSAMP_ID samp;
-		Tx a;
-		size_t i;
-		a2 = 0;	sum = 0;
+	void STA_at(const Tx *vec, Tx&a2_, Tx&sum_, Tx&x_0, Tx&x_1,bool hasY) {
+		size_t step;
+		Tx a2 = 0,sum = 0;
 		x_0 = vec[samps[0]], x_1 = x_0;
-		for (i = 0; i<nSamp; i++) {
-			samp=samps[i];
-			a = vec[samp];
-			//if(IS_NAN_INF(a))
-			//{	continue;	}
-			a2 += a*a;				sum += a;
-			x_0 = MIN(x_0, a);		x_1 = MAX(x_1, a);
+		int num_threads = OMP_FOR_STATIC_1(nSamp, step,1024);
+#pragma omp parallel for schedule(static,1) reduction(+ : a2,sum)
+		for (int thread = 0; thread < num_threads; thread++) {
+			size_t start = thread*step, end = min(start + step, nSamp), i;
+			Tx local_0 = vec[samps[start]], local_1 = local_0,a;
+			tpSAMP_ID samp;
+			for (i = start; i < end; i++) {
+			//for (i = 0; i<nSamp; i++) {
+				samp=samps[i];
+				a = vec[samp];
+				//if(IS_NAN_INF(a))
+				//{	continue;	}
+				a2 += a*a;				sum += a;
+				local_0 = MIN(local_0, a);		local_1 = MAX(local_1, a);
+			}
+#pragma omp critical
+			{	x_0 = MIN(local_0, x_0);			x_1 = MAX(local_1, x_1);	}
 		}
+		a2_ = a2;	sum_ = sum;
 		if (hasY) {
 			Y_sum_1 = sum;		Y_sum_2 = a2;
 			Y_0 =x_0,			Y_1 =x_1;

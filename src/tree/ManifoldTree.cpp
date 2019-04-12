@@ -348,6 +348,7 @@ void ManifoldTree::GrowLeaf(hMTNode hBlit, const char*info, int flag) {
 			//throw "ManifoldTree::GrowLeaf !!!isMatch!!!";
 		}
 	}
+
 }
 
 /*
@@ -387,7 +388,6 @@ void ManifoldTree::BeforeEachBatch(size_t nMost, size_t rng_seed, int flag) {
 	其数据类型始终是tpDOWN
 */
 void ManifoldTree::Train(int flag) {	
-	GST_TIC(t1);
 	int nTree=hForest->forest.size( ),iter=0;
 	if (nTree == 24)
 		nTree = 24;		//仅用于调试
@@ -412,8 +412,6 @@ void ManifoldTree::Train(int flag) {
 		}
 
 	}
-	//FeatsOnFold::stat.tX += GST_TOC(t1);
-
 	while (true) {		//参见GBRT::GetBlit
 		if(leafs.size()>=hData_->config.num_leaves )
 			break;
@@ -433,10 +431,9 @@ void ManifoldTree::Train(int flag) {
 				delete hNode->fruit;		 hNode->fruit = nullptr;
 				hNode->feat_id = -1;		hNode->gain = 0;
 			}*/
+			GST_TIC(t1);
 			if( hNode->feat_id==-1 &&/**/ hNode->impuri>0 )	{//have checked before
 				hNode->gain=0;
-				if(nz ==4 )		//仅用于调试
-					hNode->gain = 0;
 				hNode->CheckGain(hData_, pick_feats, 0);
 				//hNode->CheckGain(hData_, 0);
 			}	else {
@@ -445,7 +442,8 @@ void ManifoldTree::Train(int flag) {
 				}
 				nPass++;
 			}
-			
+			FeatsOnFold::stat.tX += GST_TOC(t1);
+
 			if (hNode->gain > gain) {
 				sprintf(info,"leaf_%d(%d@%d) gain=%8g(%8g)", hNode->id,nz,leafs.size(), hNode->gain,gain);
 				hBest = hNode;		gain = hBest->gain;	

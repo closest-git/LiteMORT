@@ -39,7 +39,6 @@ void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const SAMP_SET *from, size_t nMos
 		//memcpy(root_set, from->samps,sizeof(tpSAMP_ID)*nFrom);
 		return;
 	}
-	GST_TIC(t1);
 	size_t T_1 = nFrom / std::log2(nMost*1.0);
 	unsigned int x = 123456789,next; 
 	//srand(time(0)); 
@@ -53,7 +52,7 @@ void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const SAMP_SET *from, size_t nMos
 		for (i = 0; i < n_X; i++) {
 			root_set[n_2+i] = i+x;
 		}*/
-		size_t grid = max(int(nMost/1024), 1);
+		size_t grid = max(int(nMost/100), 1);
 		while (nz < nMost) {	
 			size_t start = hData_->rander_samp.RandInt32() % nFrom,end=min(grid, nFrom-start);
 			end = min(end, nMost - nz);
@@ -62,7 +61,7 @@ void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const SAMP_SET *from, size_t nMos
 				root_set[nz++] = i;
 			}
 		}
-		
+		//std::sort(root_set, root_set + nMost);
 	}else	if (nMost > T_1) {
 		for (nz=0, i = 0; i < nFrom; ++i) {
 			double prob = (nMost - nz) / static_cast<double>(nFrom - i);
@@ -87,7 +86,6 @@ void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const SAMP_SET *from, size_t nMos
 		delete[] mask;
 		std::sort(root_set, root_set + nMost);
 	}
-	FeatsOnFold::stat.tX += GST_TOC(t1);
 	assert(nz <= nMost);
 }
 
@@ -292,7 +290,7 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 	//fBlits.resize(picks.size());
 	tpDOWN *yDown = hData_->GetDownDirection();
 	//picks.clear();		picks.push_back(24);		//仅用于调试
-	int num_threads = hData_->OMP_FOR_STATIC_1(picks.size(), step);
+	int num_threads = OMP_FOR_STATIC_1(picks.size(), step);
 	if (false) {
 		BinFold bf(hData_,picks, samp_set);
 		//bf.GreedySplit(hData_, picks ,0x0 );
@@ -390,7 +388,7 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 			}
 		}
 	}
-	FeatsOnFold::stat.tX += GST_TOC(t1);
+	//FeatsOnFold::stat.tX += GST_TOC(t1);
 	return gain;
 }
 

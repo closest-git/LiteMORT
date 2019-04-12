@@ -214,7 +214,7 @@ namespace Grusoft {
 
 		}
 
-		int  OMP_FOR_STATIC_1(const size_t nSamp, size_t& step, int flag = 0x0);
+		//int  OMP_FOR_STATIC_1(const size_t nSamp, size_t& step, int flag = 0x0);
 		/*
 			æ°¡ø”≈ªØ
 		*/

@@ -495,7 +495,7 @@ tpDOWN *FeatsOnFold::GetHessian() const {
 }
 
 int *FeatsOnFold::Tag() { return lossy->Tag(); }
-
+/*
 int  FeatsOnFold::OMP_FOR_STATIC_1(const size_t nSamp, size_t& step, int flag) {
 	int num_threads = 1;
 	step = nSamp;
@@ -504,7 +504,7 @@ int  FeatsOnFold::OMP_FOR_STATIC_1(const size_t nSamp, size_t& step, int flag) {
 	{	num_threads = omp_get_num_threads();	}
 	step = (nSamp + num_threads - 1) / num_threads;
 	return num_threads;
-}
+}*/
 
 /*
 https://ask.julyedu.com/question/7603
