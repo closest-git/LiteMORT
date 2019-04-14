@@ -128,5 +128,14 @@
     <ClInclude Include="..\..\src\util\samp_set.hpp">
       <Filter>源文件\util</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\util\Statistics_t.hpp">
+      <Filter>源文件\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\util\GST_def.h">
+      <Filter>源文件\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\util\Object.hpp">
+      <Filter>源文件\util</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

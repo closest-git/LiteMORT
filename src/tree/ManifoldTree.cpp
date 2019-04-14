@@ -431,7 +431,6 @@ void ManifoldTree::Train(int flag) {
 				delete hNode->fruit;		 hNode->fruit = nullptr;
 				hNode->feat_id = -1;		hNode->gain = 0;
 			}*/
-			GST_TIC(t1);
 			if( hNode->feat_id==-1 &&/**/ hNode->impuri>0 )	{//have checked before
 				hNode->gain=0;
 				hNode->CheckGain(hData_, pick_feats, 0);
@@ -442,7 +441,6 @@ void ManifoldTree::Train(int flag) {
 				}
 				nPass++;
 			}
-			FeatsOnFold::stat.tX += GST_TOC(t1);
 
 			if (hNode->gain > gain) {
 				sprintf(info,"leaf_%d(%d@%d) gain=%8g(%8g)", hNode->id,nz,leafs.size(), hNode->gain,gain);

@@ -282,3 +282,5 @@ ModelManifest.xml
 *.ogv
 *.asv
 *.code
+/tests/python_package_test/.pytest_cache/v/cache
+/tests/python_package_test/categorical.model

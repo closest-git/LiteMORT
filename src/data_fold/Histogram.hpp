@@ -133,7 +133,7 @@ namespace Grusoft {
 		virtual ~FRUIT();
 		/*
 		²Î¼ûFeatVec_T::SplitOn
-		*/
+		
 		template<typename Tx>
 		Tx Get_() {
 			assert(histo == nullptr);
@@ -141,7 +141,7 @@ namespace Grusoft {
 			//a = *reinterpret_cast<double*>(buf);		//https://stackoverflow.com/questions/15464427/cast-char-to-double-as-bytes
 			//memcpy(&a, buf, sizeof(Tx));
 			return a;
-		}
+		}*/
 		
 	};
 	

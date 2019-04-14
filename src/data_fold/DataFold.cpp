@@ -254,7 +254,7 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 			pBin= pBins+ quanti[samp];	//HISTO_BIN& bin = histo->bins[no];
 
 		pBin->G_sum += -a;		
-		pBin->H_sum += hessian[samp]; //pBin->H_sum += hessian==nullptr? 1 : hessian[samp];
+		pBin->H_sum += hessian == nullptr ? 1 : hessian[samp]; //pBin->H_sum += hessian==nullptr? 1 : hessian[samp];
 		pBin->nz++;
 	}	
 #ifdef _DEBUG

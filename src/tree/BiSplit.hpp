@@ -8,13 +8,18 @@
 
 #include "../util/GST_def.h"
 #include "../util/samp_set.hpp"
+#include "../util/Statistics_t.hpp"
 #include "../data_fold/Histogram.hpp"
 #include "../data_fold/Binfold.hpp"
 #include "../learn/Regression.hpp"
 
 using namespace std;
-
-
+#if (defined _WINDOWS) || (defined WIN32)
+//多线程crash，难以理解
+	#include <Windows.h>
+	#define ATOM_INC_64(a)		InterlockedIncrement64(&(a))	
+#else
+#endif
 
 /*
 	WeakLearner理解有误，实为BiSplit
@@ -101,57 +106,55 @@ namespace Grusoft {
 
 		template<typename Tx>
 		void SplitOn(FeatsOnFold *hData_, const std::vector<Tx>&vals, bool isQuanti, int flag = 0x0) {
+			//GST_TIC(t1);
 			SAMP_SET& lSet = left->samp_set;
 			SAMP_SET& rSet = right->samp_set;
 			lSet = this->samp_set;		rSet = this->samp_set;
 			lSet.isRef = true;			rSet.isRef = true;
 			size_t i, nSamp = samp_set.nSamp;
-			size_t &nLeft = samp_set.nLeft;
-			size_t &nRigt = samp_set.nRigt;
+			//size_t &nLeft = samp_set.nLeft;
+			//size_t &nRigt = samp_set.nRigt;
+			//assert(nLeft == 0 && nRigt == 0);
 			tpSAMP_ID samp, *samps = samp_set.samps,*rigt= samp_set.rigt,*left= samp_set.left;
-			assert(nLeft == 0 && nRigt == 0);
-			nLeft = 0;		nRigt = 0;
+			G_INT_64 nLeft = 0,nRigt = 0;
 			//double thrsh = isQuanti ? fruit->T_quanti : fruit->thrshold;
 			double thrsh = fruit->Thrshold(isQuanti);
 			//clock_t t1 = clock();
-			if (false) {	//std::sort确实要慢啊
-				std::sort(samps, samps+ nSamp, [&vals](size_t i1, size_t i2) {return vals[i1] < vals[i2]; });
-				for (i = 0; i < nSamp; i++) {
-					samp = samps[i];
-					//if (i > 0)	assert(vals[samp]>= vals[samps[i-1]]);
-					if (vals[samp] < thrsh)
-						nLeft++;
-					else		{		break;		}
-				}
-				nRigt = nSamp - nLeft;
-			}			else {
-				for (i = 0; i < nSamp; i++) {
-					samp = samps[i];
-					//教训啊，排序能有效提升速度		3/27/2019
-					//if (i > 1)		assert(samp>samps[i-1]);
-					bool isNana = (isQuanti && vals[samp] == -1) || (!isQuanti && IS_NAN_INF(vals[samp]));
-					if (isNana) {
-						if (fruit->isNanaLeft) {
-							samps[nLeft++] = samp;	continue;
-						}	else {
-							rigt[nRigt++] = samp;	continue;
-						}
+			
+			for (i = 0; i < nSamp; i++) {
+				samp = samps[i];
+				//教训啊，排序能有效提升速度		3/27/2019
+				//if (i > 1)		assert(samps[i]>=samps[i-1]);
+				bool isNana = (isQuanti && vals[samp] == -1) || (!isQuanti && IS_NAN_INF(vals[samp]));
+				if (isNana) {
+					if (fruit->isNanaLeft) {
+						samps[nLeft++] = samp;	continue;
+						//samps[ATOM_INC_64(nLeft)] = samp;	continue;
 					}	else {
-						if (vals[samp] < thrsh)
-							samps[nLeft++] = samp;
-							//left[nLeft++] = samp;
-						else
-							rigt[nRigt++] = samp;
+						rigt[nRigt++] = samp;	continue;
+						//rigt[ATOM_INC_64(nRigt)] = samp;	continue;
+					}
+				}	else {
+					if (vals[samp] < thrsh) {
+						samps[nLeft++] = samp;
+						//samps[ATOM_INC_64(nLeft)] = samp;
+					}	else {
+						rigt[nRigt++] = samp;
+						//rigt[ATOM_INC_64(nRigt)] = samp;
 					}
 				}
-				//memcpy(samps, samp_set.left, sizeof(tpSAMP_ID)*nLeft);
-				memcpy(samps + nLeft, samp_set.rigt, sizeof(tpSAMP_ID)*nRigt);
 			}
+			//nLeft++;							nRigt++;
+			//memcpy(samps, samp_set.left, sizeof(tpSAMP_ID)*nLeft);
+			memcpy(samps + nLeft, samp_set.rigt, sizeof(tpSAMP_ID)*nRigt);
+			
+			samp_set.nLeft = nLeft;				samp_set.nRigt = nRigt;
 			//tX += ((clock() - (t1))*1.0f / CLOCKS_PER_SEC);
 			lSet.samps = samps;				lSet.nSamp = nLeft;
 			//std::sort(lSet.samps, lSet.samps + lSet.nSamp);
 			rSet.samps = samps + nLeft;		rSet.nSamp = nRigt;
 			//std::sort(rSet.samps, rSet.samps + rSet.nSamp);
+			//FeatsOnFold::stat.tX += GST_TOC(t1);
 		}
 	};
 	typedef MT_BiSplit *hMTNode;

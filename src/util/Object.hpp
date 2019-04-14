@@ -67,30 +67,6 @@ public:
 
 bool G_isFolder( const string& sFolder );
 
-#ifdef WIN32
-	/*#include <time.h>
-	#define GST_NOW( )		(clock( ))
-	#define GST_TIC(tick)	clock_t tick=clock( );
-	#define GST_TOC(tick)	((clock()-(tick))*1.0f/CLOCKS_PER_SEC)*/
-	#include <chrono>
-	#include <thread>
-
-	typedef std::chrono::high_resolution_clock Clock;
-	#define GST_NOW( )	(Clock::now( ))
-	#define GST_TIC(tick)	auto tick = Clock::now( );
-	#define GST_TOC(tick)	( (std::chrono::duration_cast<std::chrono::microseconds>(Clock::now( )-(tick)).count( ))/1000000.0)
-
-#else
-	#include <chrono>
-	#include <thread>
-
-	typedef std::chrono::high_resolution_clock Clock;
-	#define GST_NOW( )	(Clock::now( ))
-	#define GST_TIC(tick)	auto tick = Clock::now( );
-	#define GST_TOC(tick)	( (std::chrono::duration_cast<std::chrono::microseconds>(Clock::now( )-(tick)).count( ))/1000000.0)
-#endif
-
-
 template <typename T> double ABS_1( const T&a )		{	assert(0);		return 0;	}
 template<> double ABS_1<float>( const float &a );
 template<> double ABS_1<double>( const double &a );

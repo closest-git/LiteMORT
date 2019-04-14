@@ -1,0 +1,3 @@
+[
+  "tests/python_package_test/test_sklearn.py::TestSklearn::test_regression"
+]
