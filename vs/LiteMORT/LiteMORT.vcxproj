@@ -112,6 +112,7 @@
     </Link>
     <PostBuildEvent>
       <Command>copy $(OutDir)$(TargetName)$(TargetExt) F:\Project\LiteMORT\
+copy $(OutDir)$(TargetName)$(TargetExt) F:\Project\LiteMORT\python-package\LiteMORT
 copy $(OutDir)$(TargetName)$(TargetExt) D:\Anaconda3\Lib\site-packages\litemort</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -155,6 +156,7 @@ copy $(OutDir)$(TargetName)$(TargetExt) D:\Anaconda3\Lib\site-packages\litemort<
     </Link>
     <PostBuildEvent>
       <Command>copy $(OutDir)$(TargetName)$(TargetExt) F:\Project\LiteMORT\
+copy $(OutDir)$(TargetName)$(TargetExt) F:\Project\LiteMORT\python-package\LiteMORT\
 copy $(OutDir)$(TargetName)$(TargetExt) D:\Anaconda3\Lib\site-packages\litemort</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>

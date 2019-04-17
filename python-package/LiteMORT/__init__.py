@@ -8,7 +8,8 @@ import os
 
 
 try:
-    from .LiteMORT import LiteMORT
+    #from .LiteMORT_problems import Mort_Problems
+    from .LiteMORT import LiteMORT    
 except ImportError:
     pass
 '''
@@ -27,4 +28,4 @@ if os.path.isfile(os.path.join(dir_path, 'VERSION.txt')):
 
 __all__ = ['LiteMORT']
 
-from .core import *
+

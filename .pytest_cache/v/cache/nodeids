@@ -1,3 +1,4 @@
 [
-  "tests/python_package_test/test_sklearn.py::TestSklearn::test_regression"
+  "tests/python_package_test/test_sklearn.py::TestSklearn::test_binary",
+  "tests/python_package_test/test_sklearn.py::TestSklearn::test_pandas_categorical"
 ]

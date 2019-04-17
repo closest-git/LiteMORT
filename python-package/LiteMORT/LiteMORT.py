@@ -2,8 +2,10 @@ import gc
 import numpy as np
 import pandas as pd
 from ctypes import *
-pd.options.display.max_columns = 999
-pd.set_option('expand_frame_repr', False)
+from libpath import find_lib_path
+from LiteMORT_problems import *
+from sklearn import preprocessing
+
 
 '''
     sklearn style
@@ -38,8 +40,8 @@ class LiteMORT_params(object):
             self.n_estimators = dict_param['num_boost_round']
 
 
-    def __init__(self,objective,fold=5,lr=0.01,round=1000,early_stop=50,subsample=1,feature_sample=1,leaves=32,
-                 max_bin=256,metric='mse',min_child=20,argv=None):
+    def __init__(self,objective,fold=5,lr=0.1,round=50,early_stop=50,subsample=1,feature_sample=1,leaves=31,
+                 max_bin=256,metric='mse',min_child=20,max_depth=-1,subsample_for_bin=200000,argv=None):
         #objective='outlier'
         self.isOK = False
         self.env = 'default'
@@ -65,80 +67,6 @@ class LiteMORT_params(object):
 
         self.OnArgs(argv)
 
-def fancy_impute():
-    # https://www.kaggle.com/athi94/investigating-imputation-methods
-    # user_train = KNN(k=1).fit_transform(user_train);        user_test = KNN(k=1).fit_transform(user_test)
-    # user_train = SimpleFill.fit_transform(user_train)
-    # user_test = SimpleFill.fit_transform(user_test)
-    return
-
-# https://www.kaggle.com/ashishpatel26/1-23-pb-first-try-to-think
-def clearRare(train,test,columnname, limit=1000):
-    # you may search for rare categories in train, train&test, or just test
-    # vc = pd.concat([train[columnname], test[columnname]], sort=False).value_counts()
-    vc = test[columnname].value_counts()
-
-    common = vc > limit
-    common = set(common.index[common].values)
-    print("Set", sum(vc <= limit), columnname, "categories to 'other';", end=" ")
-
-    train.loc[train[columnname].map(lambda x: x not in common), columnname] = 'other'
-    test.loc[test[columnname].map(lambda x: x not in common), columnname] = 'other'
-    print("now there are", train[columnname].nunique(), "categories in train")
-
-#https://www.kaggle.com/karkun/sergey-ivanov-msu-mmp
-def replace_atypical_categories(df_train, df_test, columnname, pct = .01, base_df = "test"):
-    """ Replace all categories in a categorical variable whenever the number of
-    observations in the test or train data set is lower than pct percetage of the
-    total number of observations.  The replaced categories are assigned to "other" category.
-    """
-    if base_df == "test":
-        limit  = len(df_test) *pct
-        vc = df_test[columnname].value_counts()
-    else:
-        limit  = len(df_train) *pct
-        vc = df_train[columnname].value_counts()
-
-    common = vc > limit
-    common = set(common.index[common].values)
-    print("Set", sum(vc < limit), columnname, "categories to 'other';", end=" ")
-
-    df_train.loc[df_train[columnname].map(lambda x: x not in common), columnname] = 'other'
-    df_test.loc[df_test[columnname].map(lambda x: x not in common), columnname] = 'other'
-    print("now there are", df_train[columnname].nunique(), "categories in train")
-    return df_train, df_test
-
-#https://www.kaggle.com/maheshdadhich/strength-of-visualization-python-visuals-tutorial
-#https://www.kaggle.com/maheshdadhich/strength-of-visualization-python-visuals-tutorial
-#https://stackoverflow.com/questions/18689235/numpy-array-replace-nan-values-with-average-of-columns
-# For numerical values you should go with mean, and if there are some outliers try median (since it is much less sensitive to them).
-# Imputer过于简单，以后转为由C库处理
-def OnMissingValue(df):
-    if False:
-        imputer = Imputer(missing_values="NaN", strategy="mean")
-        imputed_DF = pd.DataFrame(imputer.fit_transform(df))
-        #imputed_DF = pd.DataFrame(fill_NaN.fit_transform(DF))
-        imputed_DF.columns = df.columns
-        imputed_DF.index = df.index
-        df = imputed_DF
-        #import missingno as msno
-        #msno.matrix(census_data)
-    df.fillna(0, inplace=True)
-    return df
-    #
-    mA = df.values
-    col_mean = np.nanmean(mA, axis=0)
-    print(col_mean)
-    # Find indicies that you need to replace
-    inds = np.where(np.isnan(mA))
-    # Place column means in the indices. Align the arrays using take
-    mA[inds] = np.take(col_mean, inds[1])
-
-    gc.collect()
-    #print(" user_train.fillna={}".format(user_train.shape))
-    # user_train.dropna(inplace=True);       print(" user_train.dropna={}".format(user_train.shape))
-    return df
-
 class M_argument(Structure):
     _fields_ = [    ('Keys',c_char_p),
                     ('Values',c_float),
@@ -146,31 +74,37 @@ class M_argument(Structure):
                ]
 
 class LiteMORT(object):
-    def __init__(self, params,dll_path='F:/Project/LiteMORT/LiteMORT.dll', fix_seed=None):
-        # dll_path = 'F:/Project/LiteMORT/LiteMORT.dll'
-        self.dll_path = dll_path
+    problem = None
+    def load_dll(self):
+        lib_path = find_lib_path()
+        if len(lib_path) == 0:
+            return None
+        # lib_path.append( 'F:/Project/LiteMORT/LiteMORT.dll' )
+
+        self.dll_path = lib_path[0]
         if False:
             arr_path = "../input/df_ndarray.csv"
             np.savetxt(arr_path, data, delimiter="", fmt='%12g', )
-            print("====== arr_file@{} size={} dll={}".format(arr_path, data.shape, dll_path))
-        self.dll = cdll.LoadLibrary(dll_path)
-
+            print("====== arr_file@{} size={} dll={}".format(arr_path, data.shape, self.dll_path))
+        self.dll = cdll.LoadLibrary(self.dll_path)
+        print("======Load LiteMORT library @{}".format(self.dll_path))
         self.mort_init = self.dll.LiteMORT_init
-        self.mort_init.argtypes = [POINTER(M_argument), c_int,c_size_t]
+        self.mort_init.argtypes = [POINTER(M_argument), c_int, c_size_t]
 
-        #self.mort_set_feat = self.dll.LiteMORT_set_feat
-        #self.mort_set_feat.argtypes = [POINTER(M_argument), c_int, c_size_t]
+        # self.mort_set_feat = self.dll.LiteMORT_set_feat
+        # self.mort_set_feat.argtypes = [POINTER(M_argument), c_int, c_size_t]
 
         self.mort_fit = self.dll.LiteMORT_fit
         self.mort_fit.argtypes = [POINTER(c_float), POINTER(c_double), c_size_t, c_size_t,
-                                  POINTER(c_float),POINTER(c_double),c_size_t, c_size_t]
+                                  POINTER(c_float), POINTER(c_double), c_size_t, c_size_t]
         self.mort_fit.restype = None
 
         self.mort_predcit = self.dll.LiteMORT_predict
         self.mort_predcit.argtypes = [POINTER(c_float), POINTER(c_double), c_size_t, c_size_t, c_size_t]
 
         self.mort_eda = self.dll.LiteMORT_EDA
-        self.mort_eda.argtypes = [POINTER(c_float), POINTER(c_double), c_size_t, c_size_t,c_size_t, POINTER(M_argument), c_int,c_size_t]
+        self.mort_eda.argtypes = [POINTER(c_float), POINTER(c_double), c_size_t, c_size_t, c_size_t,
+                                  POINTER(M_argument), c_int, c_size_t]
 
         self.mort_imputer_f = self.dll.LiteMORT_Imputer_f
         self.mort_imputer_f.argtypes = [POINTER(c_float), POINTER(c_double), c_size_t, c_size_t, c_size_t]
@@ -180,7 +114,14 @@ class LiteMORT(object):
 
         self.mort_clear = self.dll.LiteMORT_clear
 
+    def __init__(self, params,fix_seed=None):
+        self.load_dll()
+        self._n_classes = None
         self.init(params)
+        if self.params.objective == "binary":
+            self.problem = Mort_BinaryClass
+        elif self.params.objective == "regression":
+            self.problem = Mort_Regressor
 
     #  注意 Y_t与y_train不一样
     def Y_t(self, y_train, np_type):
@@ -226,6 +167,11 @@ class LiteMORT(object):
         else:
             self.params = params
 
+        if self.params.objective=="binary":
+            self._n_classes = 2
+        else:
+            pass
+
         ca_list = []
         for k, v in self.params.__dict__.items():
             ca = M_argument()
@@ -242,29 +188,72 @@ class LiteMORT(object):
         ca_array = (M_argument * len(ca_list))(*ca_list)
         self.mort_init(ca_array, len(ca_array),0)
 
+
+    def EDA(self,X_train_0, y_train,eval_set=None,  feat_dict=None,categorical_feature=None, params=None,flag=0x0):
+        nFeat = X_train_0.shape[1]
+        if feat_dict is not None:
+            print("feat_dict={}".format(feat_dict))
+        features = None
+        if isinstance(X_train_0, pd.DataFrame):
+            features = list(X_train_0.columns.values)
+        if  categorical_feature is None:
+            return
+
+        #category = []  # ['feature_1','feature_2','feature_3','month','weekofyear','hist_month_lag','new_month_lag','refer_date_month']
+        for feat in features:
+            ca = M_argument()
+            ca.Keys = feat.encode('utf8')
+            ca.Values = (c_float)(0)
+            # if feat=='hist_merchant_id_nunique':
+            if feat in category:
+                # ca.Values = (c_float)(1)
+                ca.text = 'category'.encode('utf8')
+            ca_list.append(ca)
+        #self.EDA_000(self.mort_params, all_data, None, user_test.shape[0], ca_list)
+        self.mort_eda(dataX.ctypes.data_as(POINTER(c_float)), dataY_.ctypes.data_as(POINTER(c_double)), nFeat, nSamp,
+                      nValid,ca_array, nFeat_desc, 0)
+
+    def EDA_000(self, params,dataX_, dataY_,nValid,desc_list, flag=0x0):
+        # print("====== LiteMORT_EDA X_={} ......".format(X_.shape))
+        nSamp, nFeat = dataX_.shape[0], dataX_.shape[1];
+        ca_array,nFeat_desc = None,len(desc_list)
+        if nFeat_desc>0:
+            assert(nFeat_desc==nFeat)
+            ca_array = (M_argument * len(desc_list))(*desc_list)
+        #nValid, nFeat = validX_.shape[0], trainX_.shape[1];
+        if dataY_ is None:
+            dataY_ = np.zeros(nSamp, dtype=np.float64)
+        dataX = self.X_t(dataX_, np.float32)
+        #validX = self.X_t(validX_, np.float32)
+        self.mort_eda(dataX.ctypes.data_as(POINTER(c_float)),dataY_.ctypes.data_as(POINTER(c_double)) ,nFeat, nSamp,nValid,
+                      ca_array,nFeat_desc,  0)
+        return
+
     '''
             # v0.2
             # v0.3
                 feat_dict   cys@1/10/2019
     '''
-    def fit(self,X_train_0, y_train, X_test, y_test, feat_dict=None, params=None,flag=0x0):
+    def fit(self,X_train_0, y_train,eval_set=None,  feat_dict=None,categorical_feature=None, params=None,flag=0x0):
         gc.collect()
-
-        nFeat = X_train_0.shape[1]
-        if feat_dict is not None:
-            print("feat_dict={}".format(feat_dict))
+        self.EDA(X_train_0, y_train,eval_set,feat_dict,categorical_feature, params,flag)
+        if(eval_set is not None and len(eval_set)>0):
+            X_test, y_test=eval_set[0]
 
         print("====== LiteMORT_fit X_train_0={} y_train={}......".format(X_train_0.shape, y_train.shape))
         train_y = self.Y_t(y_train, np.float64)
-        eval_y = self.Y_t(y_test, np.float64)
         train_X = self.X_t(X_train_0, np.float32)
-        eval_X = self.X_t(X_test, np.float32)
-        nTrain, nFeat, nTest = train_X.shape[0], train_X.shape[1], eval_X.shape[0]
+        nTrain, nFeat, nTest = train_X.shape[0], train_X.shape[1], 0
+        eval_X,eval_y=None,None
+        if  eval_set is not None:
+            eval_y0 = self.Y_t(y_test, np.float64)
+            eval_X0 = self.X_t(X_test, np.float32)
+            nTest = eval_X0.shape[0]
+            eval_X,eval_y = eval_X0.ctypes.data_as(POINTER(c_float)), eval_y0.ctypes.data_as(POINTER(c_double))
 
         self.mort_fit(
-                      train_X.ctypes.data_as(POINTER(c_float)), train_y.ctypes.data_as(POINTER(c_double)), nFeat, nTrain,
-                      eval_X.ctypes.data_as(POINTER(c_float)), eval_y.ctypes.data_as(POINTER(c_double)), nTest,
-                      0)  # 1 : classification
+            train_X.ctypes.data_as(POINTER(c_float)), train_y.ctypes.data_as(POINTER(c_double)), nFeat, nTrain,
+            eval_X, eval_y, nTest,0)  # 1 : classification
         if not(train_X is X_train_0):
             del train_X;     gc.collect()
         if not(eval_X is X_test):
@@ -286,21 +275,7 @@ class LiteMORT(object):
             del tX;     gc.collect()
         return Y_
 
-    def EDA(self, params,dataX_, dataY_,nValid,desc_list, flag=0x0):
-        # print("====== LiteMORT_EDA X_={} ......".format(X_.shape))
-        nSamp, nFeat = dataX_.shape[0], dataX_.shape[1];
-        ca_array,nFeat_desc = None,len(desc_list)
-        if nFeat_desc>0:
-            assert(nFeat_desc==nFeat)
-            ca_array = (M_argument * len(desc_list))(*desc_list)
-        #nValid, nFeat = validX_.shape[0], trainX_.shape[1];
-        if dataY_ is None:
-            dataY_ = np.zeros(nSamp, dtype=np.float64)
-        dataX = self.X_t(dataX_, np.float32)
-        #validX = self.X_t(validX_, np.float32)
-        self.mort_eda(dataX.ctypes.data_as(POINTER(c_float)),dataY_.ctypes.data_as(POINTER(c_double)) ,nFeat, nSamp,nValid,
-                      ca_array,nFeat_desc,  0)
-        return
+
 
     #奇怪的教训，会影响其它列,需要重写，暂时这样！！！
     def Imputer(self, params,X_, Y_,np_float, flag=0x0):
@@ -323,46 +298,60 @@ class LiteMORT(object):
         #print("head={}\ntail={}".format(X_.head(), X_.tail()))
         return X_
 
+    def predict_proba(self, X, raw_score=False, num_iteration=-1,
+                      pred_leaf=False, pred_contrib=False, **kwargs):
+        """Return the predicted probability for each class for each sample.
+
+        Parameters
+        ----------
+        X : array-like or sparse matrix of shape = [n_samples, n_features]
+            Input features matrix.
+        raw_score : bool, optional (default=False)
+            Whether to predict raw scores.
+        num_iteration : int, optional (default=-1)
+            Limit number of iterations in the prediction.
+            If <= 0, uses all trees (no limits).
+        pred_leaf : bool, optional (default=False)
+            Whether to predict leaf index.
+        pred_contrib : bool, optional (default=False)
+            Whether to predict feature contributions.
+        **kwargs : other parameters for the prediction
+
+        Returns
+        -------
+        predicted_probability : array-like of shape = [n_samples, n_classes]
+            The predicted probability for each class for each sample.
+        X_leaves : array-like of shape = [n_samples, n_trees * n_classes]
+            If ``pred_leaf=True``, the predicted leaf every tree for each sample.
+        X_SHAP_values : array-like of shape = [n_samples, (n_features + 1) * n_classes]
+            If ``pred_contrib=True``, the each feature contributions for each sample.
+        """
+        result = self.predict(X)
+        if self._n_classes > 2 or pred_leaf or pred_contrib:
+            return result
+        else:
+            return np.vstack((1. - result, result)).transpose()
+
     def Clear(self):
         self.mort_clear();
 
+from sklearn.datasets import (load_boston, load_breast_cancer, load_digits,load_iris, load_svmlight_file)
+from sklearn.metrics import log_loss, mean_squared_error
+from sklearn.model_selection import GridSearchCV, train_test_split
 if __name__ == "__main__":
-
-    df=pd.read_csv('D:\\LightGBM-master\\examples\\regression\\test_000.txt',header=None,sep='\t' )
-    df =df.astype(np.float32)
-    cols = df.columns
-    train_X = df[cols[1:]]
-    train_Y = df[cols[0]]
-    if False:
-        for i in range(len(y_devel)):
-            y_devel[i] = 0  # 测试各种情况
-    valid_X, valid_Y=train_X,train_Y
-    eval_set = [(valid_X, valid_Y)]  # [(valid, y_valid)]
-
-    mort_params = {
-        'histo_bins': 0, 'feature_quanti': 1024, 'feature_sample': 1, 'min_child_samples': 1, 'subsample': 1,
-         'NA': -1, 'normal': 0,
-        'histo_bin_map':1,    #0-quantile,1-frequency                                   #'histo_algorithm': 0,
-        'k_fold': 5,
-        'learning_rate': 0.03,
-        'n_estimators': 1, 'num_leaves': 31,
-        "early_stopping_rounds": 50, "verbose": 100,
+    params = {
+        "objective": "binary", "metric": "logloss", 'early_stop': 5, 'num_boost_round': 50,
+        "verbosity": 1,
     }
-    mort = LiteMORT()
-    mort.init(mort_params)
-    if mort_params['NA'] == -1:
-        print("---- !!!No data imputation!!!----")
-    else:
-        if True:  # 奇怪的教训，会影响其它列,需要重写，暂时这样！！！
-            user_train[features] = mort.Imputer(mort_params, user_train[features], None, np.float32)
-            user_test[features] = mort.Imputer(mort_params, user_test[features], None, np.float32)
-        else:
-            user_train = OnMissingValue(user_train);
-            user_test = OnMissingValue(user_test)
-    if True:   # EDA algorithm
-        all_data = train_X
-        print("====== all_data for EDA={}\n".format(all_data.shape))
-        mort.EDA(mort_params,train_X, None,0)
-        del all_data;
-    gc.collect()
-    mort.fit(mort_params, train_X, train_Y, valid_X, valid_Y)
+    X, y = load_breast_cancer(True)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
+    print("X_test={}\ny_test={}".format(X_test, y_test))
+    mort = LiteMORT(params)
+    mort.fit(X_train, y_train, eval_set=[(X_test, y_test)], params=params)
+    result = mort.predict(X_test)
+    ret = log_loss(y_test, mort.predict_proba(X_test))
+    print("ret={}\nresult={}".format(ret,result[0]))
+    input("...")
+    #ret = log_loss(y_test, mort.predict_proba(X_test))
+
+

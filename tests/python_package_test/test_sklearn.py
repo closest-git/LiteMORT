@@ -43,18 +43,19 @@ class TestSklearn(unittest.TestCase):
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
         if isMORT:
             mort = LiteMORT(params)
-            mort.fit(X_train, y_train, X_test, y_test, params)
+            mort.fit(X_train, y_train, eval_set=[(X_test, y_test)], params=params)
             result = mort.predict(X_test)
             ret = log_loss(y_test, mort.predict_proba(X_test))
         else:
             gbm = lgb.LGBMClassifier(n_estimators=50, silent=True)
             gbm.fit(X_train, y_train, eval_set=[(X_test, y_test)], early_stopping_rounds=5, verbose=False)
+            result = gbm.predict(X_test)
             ret = log_loss(y_test, gbm.predict_proba(X_test))
             self.assertAlmostEqual(ret, gbm.evals_result_['valid_0']['binary_logloss'][gbm.best_iteration_ - 1],places=5)
         self.assertLess(ret, 0.15)
 
 
-    def ttest_regression(self):
+    def test_regression(self):
         params = {
             "objective": "regression",  'early_stop': 5, 'num_boost_round': 50, "verbosity": 1,
         }
@@ -62,7 +63,7 @@ class TestSklearn(unittest.TestCase):
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
         if isMORT:
             mort = LiteMORT(params)
-            mort.fit(X_train, y_train, X_test, y_test, params)
+            mort.fit(X_train, y_train, eval_set=[(X_test, y_test)], params=params)
             ret = mean_squared_error(y_test, mort.predict(X_test))
         else:
             gbm = lgb.LGBMRegressor(n_estimators=50, silent=True)
@@ -72,8 +73,8 @@ class TestSklearn(unittest.TestCase):
         self.assertLess(ret, 16)
 
     
-    @unittest.skipIf(not lgb.compat.PANDAS_INSTALLED, 'pandas is not installed')
-    def test_pandas_categorical(self):
+    #@unittest.skipIf(not litemort.combat.PANDAS_INSTALLED, 'pandas is not installed')
+    def ttest_pandas_categorical(self):
         params = {
             "objective": "binary", "metric": "logloss", 'early_stop': 5, 'num_boost_round': 50,
             "verbosity": 1,
@@ -91,12 +92,20 @@ class TestSklearn(unittest.TestCase):
         for col in ["A", "B", "C", "D"]:
             X[col] = X[col].astype('category')
             X_test[col] = X_test[col].astype('category')
+        #trn_data = lgb.Dataset(X, label=y)
+
         if isMORT:
             mort0 = LiteMORT(params).fit(X, y)
             pred0 = list(mort0.predict(X_test))
             mort1 = LiteMORT(params).fit(X, y, categorical_feature=[0])
-            pred1 = list(mort0.predict(X_test))
+            pred1 = list(mort1.predict(X_test))
+            mort2 = LiteMORT(params).fit(X, y, categorical_feature=['A'])
+            pred2 = list(mort2.predict(X_test))
+            mort3 = LiteMORT(params).fit(X, y, categorical_feature=['A', 'B', 'C', 'D'])
+            pred3 = list(mort3.predict(X_test))
         else:
+            clf=lgb.sklearn.LGBMClassifier()
+            gbm_ = clf.fit(X, y)
             gbm0 = lgb.sklearn.LGBMClassifier().fit(X, y)
             pred0 = list(gbm0.predict(X_test))
             gbm1 = lgb.sklearn.LGBMClassifier().fit(X, y, categorical_feature=[0])
@@ -109,10 +118,11 @@ class TestSklearn(unittest.TestCase):
             gbm4 = lgb.Booster(model_file='categorical.model')
             pred4 = list(gbm4.predict(X_test))
             pred_prob = list(gbm0.predict_proba(X_test)[:, 1])
+            np.testing.assert_almost_equal(pred_prob, pred4)
         np.testing.assert_almost_equal(pred0, pred1)
         np.testing.assert_almost_equal(pred0, pred2)
         np.testing.assert_almost_equal(pred0, pred3)
-        np.testing.assert_almost_equal(pred_prob, pred4)
+
 
 
 
