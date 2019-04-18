@@ -83,20 +83,22 @@ namespace Grusoft {
 				if(ZERO_DEVIA(distri.vMin, distri.vMax) )
 				{	nConstFeat++;	}				
 				distri.X2Histo_(config,nSamp_, x, Y_);
-				//distri.Dump(feat,false,flag);
+				distri.Dump(feat,false,flag);
 				arrD.push_back(distri.corr.D_sum);
 			}
-			vector<int> idx,feats;
-			idx.resize(ldX_);// initialize original index locations
-			std::iota(idx.begin(), idx.end(), 0);
-			// sort indexes based on comparing values in v
-			std::sort(idx.begin(), idx.end(), [&arrD](int i1, int i2) {return arrD[i1] > arrD[i2]; });
-			feats.push_back(idx[0]);	feats.push_back(idx[1]);	feats.push_back(idx[2]);	
-			feats.push_back(idx[3]);	feats.push_back(idx[4]);	feats.push_back(idx[5]);
-			feats.push_back(idx[nFeat-3]);	feats.push_back(idx[nFeat-2]);	feats.push_back(idx[nFeat-1]);
-			printf("DCRIMI:\t");
-			for (auto feat : feats) {
-				printf("%.4g(%d) ", arrD[feat], feat);
+			if (nFeat > 9) {	//
+				vector<int> idx,feats;
+				idx.resize(ldX_);// initialize original index locations
+				std::iota(idx.begin(), idx.end(), 0);
+				// sort indexes based on comparing values in v
+				std::sort(idx.begin(), idx.end(), [&arrD](int i1, int i2) {return arrD[i1] > arrD[i2]; });
+				feats.push_back(idx[0]);	feats.push_back(idx[1]);	feats.push_back(idx[2]);	
+				feats.push_back(idx[3]);	feats.push_back(idx[4]);	feats.push_back(idx[5]);
+				feats.push_back(idx[nFeat-3]);	feats.push_back(idx[nFeat-2]);	feats.push_back(idx[nFeat-1]);
+				printf("DCRIMI:\t");
+				for (auto feat : feats) {
+					printf("%.4g(%d) ", arrD[feat], feat);
+				}
 			}
 			sparse/=(nSamp_*ldX_);		nana /= (nSamp_*ldX_);
 			printf("\n********* EDA::Analysis const=%lld sparse=%g NAN=%g T=%.3g........OK\n",  nConstFeat, sparse, nana, (clock() - t0) / 1000.0);

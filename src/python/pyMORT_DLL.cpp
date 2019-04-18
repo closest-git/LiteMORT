@@ -220,7 +220,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	}*/
 	sparse /= (nSamp_*ldX_);
 	nana /= (nSamp_*ldX_);
-	assert(nana == 0.0);
+	//assert(nana == 0.0);
 	printf("\r********* Fold_[%s] nSamp=%lld nFeat=%lld(const=%lld) QUANT=%lld\n\tsparse=%g NAN=%g nLocalConst=%lld time=%g sec\r\n",
 		hFold->nam.c_str(), nSamp_, ldX_, nConstFeat, nQuant, sparse,nana, nLocalConst,(clock() - t0) / 1000.0);
 	//if(nLocalConst>0)

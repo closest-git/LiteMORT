@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from ctypes import *
 from libpath import find_lib_path
+from LiteMORT_preprocess import *
 from LiteMORT_problems import *
 from sklearn import preprocessing
 
@@ -24,6 +25,8 @@ class LiteMORT_params(object):
             self.learning_rate = dict_param['learning_rate']
         if 'bagging_fraction' in dict_param:
             self.subsample = dict_param['bagging_fraction']
+        if 'subsample' in dict_param:
+            self.subsample = dict_param['subsample']
         if 'feature_fraction' in dict_param:
             self.feature_sample = dict_param['feature_fraction']
         if 'max_bin' in dict_param:
@@ -75,6 +78,7 @@ class M_argument(Structure):
 
 class LiteMORT(object):
     problem = None
+    preprocess = Mort_Preprocess()
     def load_dll(self):
         lib_path = find_lib_path()
         if len(lib_path) == 0:
@@ -189,29 +193,29 @@ class LiteMORT(object):
         self.mort_init(ca_array, len(ca_array),0)
 
 
-    def EDA(self,X_train_0, y_train,eval_set=None,  feat_dict=None,categorical_feature=None, params=None,flag=0x0):
-        nFeat = X_train_0.shape[1]
+    def EDA(self,dataX, dataY_,eval_set=None,  feat_dict=None,categorical_feature=None, params=None,flag=0x0):
+        nSamp,nFeat = dataX.shape[0],dataX.shape[1]
         if feat_dict is not None:
             print("feat_dict={}".format(feat_dict))
         features = None
-        if isinstance(X_train_0, pd.DataFrame):
-            features = list(X_train_0.columns.values)
+        if isinstance(dataX, pd.DataFrame):
+            features = list(dataX.columns.values)
         if  categorical_feature is None:
             return
 
-        #category = []  # ['feature_1','feature_2','feature_3','month','weekofyear','hist_month_lag','new_month_lag','refer_date_month']
+        ca_list = []
         for feat in features:
             ca = M_argument()
             ca.Keys = feat.encode('utf8')
             ca.Values = (c_float)(0)
             # if feat=='hist_merchant_id_nunique':
-            if feat in category:
+            if feat in categorical_feature:
                 # ca.Values = (c_float)(1)
                 ca.text = 'category'.encode('utf8')
             ca_list.append(ca)
         #self.EDA_000(self.mort_params, all_data, None, user_test.shape[0], ca_list)
-        self.mort_eda(dataX.ctypes.data_as(POINTER(c_float)), dataY_.ctypes.data_as(POINTER(c_double)), nFeat, nSamp,
-                      nValid,ca_array, nFeat_desc, 0)
+        self.mort_eda(dataX.ctypes.data_as(POINTER(c_float)), dataY_.ctypes.data_as(POINTER(c_double)),
+                      nFeat, nSamp,0,ca_list, len(ca_list), 0)
 
     def EDA_000(self, params,dataX_, dataY_,nValid,desc_list, flag=0x0):
         # print("====== LiteMORT_EDA X_={} ......".format(X_.shape))
@@ -236,6 +240,7 @@ class LiteMORT(object):
     '''
     def fit(self,X_train_0, y_train,eval_set=None,  feat_dict=None,categorical_feature=None, params=None,flag=0x0):
         gc.collect()
+        X_train_numeric = self.preprocess.ToNumeric()
         self.EDA(X_train_0, y_train,eval_set,feat_dict,categorical_feature, params,flag)
         if(eval_set is not None and len(eval_set)>0):
             X_test, y_test=eval_set[0]
@@ -256,13 +261,14 @@ class LiteMORT(object):
             eval_X, eval_y, nTest,0)  # 1 : classification
         if not(train_X is X_train_0):
             del train_X;     gc.collect()
-        if not(eval_X is X_test):
-            del eval_X;     gc.collect()
-        if not(eval_y is y_test):
-            del eval_y;     gc.collect()
         if not(train_y is y_train):
             del train_y;     gc.collect()
+        if eval_X is not None and not(eval_X is X_test):
+            del eval_X;     gc.collect()
+        if eval_y is not None and not(eval_y is y_test):
+            del eval_y;     gc.collect()
 
+        return self
 
     def predict(self, X_, flag=0x0):
         # print("====== LiteMORT_predict X_={} ......".format(X_.shape))
@@ -341,16 +347,37 @@ from sklearn.model_selection import GridSearchCV, train_test_split
 if __name__ == "__main__":
     params = {
         "objective": "binary", "metric": "logloss", 'early_stop': 5, 'num_boost_round': 50,
-        "verbosity": 1,
+        "verbosity": 1,'subsample':1,
     }
-    X, y = load_breast_cancer(True)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
-    print("X_test={}\ny_test={}".format(X_test, y_test))
-    mort = LiteMORT(params)
-    mort.fit(X_train, y_train, eval_set=[(X_test, y_test)], params=params)
-    result = mort.predict(X_test)
-    ret = log_loss(y_test, mort.predict_proba(X_test))
-    print("ret={}\nresult={}".format(ret,result[0]))
+    import pandas as pd
+
+    X = pd.DataFrame({"A": np.random.permutation(['a', 'b', 'c', 'd'] * 75),  # str
+                      "B": np.random.permutation([1, 2, 3] * 100),  # int
+                      "C": np.random.permutation([0.1, 0.2, -0.1, -0.1, 0.2] * 60),  # float
+                      "D": np.random.permutation([True, False] * 150)})  # bool
+
+    y = np.random.permutation([0, 1] * 150)
+    X_test = pd.DataFrame({"A": np.random.permutation(['a', 'b', 'e'] * 20),
+                           "B": np.random.permutation([1, 3] * 30),
+                           "C": np.random.permutation([0.1, -0.1, 0.2, 0.2] * 15),
+                           "D": np.random.permutation([True, False] * 30)})
+    if True:
+        prepocess = Mort_Preprocess()
+        X, X_test = prepocess.LabelEncode(X, X_test)
+    for col in ["A", "B", "C", "D"]:
+        X[col] = X[col].astype('category')
+        X_test[col] = X_test[col].astype('category')
+    #mort0 = LiteMORT(params).fit(X, y)
+    #pred0 = list(mort0.predict(X_test))
+    mort1 = LiteMORT(params).fit(X, y, categorical_feature=[0])
+    pred1 = list(mort1.predict(X_test))
+    mort2 = LiteMORT(params).fit(X, y, categorical_feature=['A'])
+    pred2 = list(mort2.predict(X_test))
+    mort3 = LiteMORT(params).fit(X, y, categorical_feature=['A', 'B', 'C', 'D'])
+    pred3 = list(mort3.predict(X_test))
+    np.testing.assert_almost_equal(pred0, pred1)
+    np.testing.assert_almost_equal(pred0, pred2)
+    np.testing.assert_almost_equal(pred0, pred3)
     input("...")
     #ret = log_loss(y_test, mort.predict_proba(X_test))
 

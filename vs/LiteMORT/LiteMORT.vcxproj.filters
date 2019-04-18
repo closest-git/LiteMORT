@@ -137,5 +137,8 @@
     <ClInclude Include="..\..\src\util\Object.hpp">
       <Filter>源文件\util</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\include\LiteBOM_config.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

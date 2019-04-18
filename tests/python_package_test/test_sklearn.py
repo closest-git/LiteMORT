@@ -8,6 +8,7 @@ from litemort import LiteMORT
 import lightgbm as lgb
 import numpy as np
 from sklearn.base import clone
+from sklearn import preprocessing
 from sklearn.datasets import (load_boston, load_breast_cancer, load_digits,
                               load_iris, load_svmlight_file)
 from sklearn.externals import joblib
@@ -89,7 +90,10 @@ class TestSklearn(unittest.TestCase):
                                "B": np.random.permutation([1, 3] * 30),
                                "C": np.random.permutation([0.1, -0.1, 0.2, 0.2] * 15),
                                "D": np.random.permutation([True, False] * 30)})
+        if True:
+            Mort_Preprocess.LabelEncode(X,X_test)
         for col in ["A", "B", "C", "D"]:
+            le = preprocessing.LabelEncoder()
             X[col] = X[col].astype('category')
             X_test[col] = X_test[col].astype('category')
         #trn_data = lgb.Dataset(X, label=y)

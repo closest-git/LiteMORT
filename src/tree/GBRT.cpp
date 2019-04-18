@@ -250,6 +250,8 @@ int GBRT::Train(string sTitle, int x, int flag) {
 				printf("\n====== %d: ERR@%s=%8.5g nNode=%g nPickFeat=%d nPickSamp=%lld time=%.3g======\n", skdu.noT, hTrainData->nam.c_str(), err_0, 
 					a, hTrainData->nPickFeat, nPickSamp, GST_TOC(tick));
 			}
+			if (hEvalData == nullptr)
+				stopping.Add(err_0);
 		}
 		if (hEvalData != nullptr) {
 			if (t > 0) {
@@ -260,12 +262,12 @@ int GBRT::Train(string sTitle, int x, int flag) {
 			stopping.Add(err);
 			if (hEvalData->lossy->isOK(0x0, FLT_EPSILON)) {
 				eOOB = 0;	printf("\n********* You are so LUCKY!!! *********\n\n");	return 0x0;
-			}
-			if (stopping.isOK()) {
-				printf("\n********* early_stopping@[%d]!!! bst=%g ERR@train[%d]=%-8.5g overfit=%-8.5g*********\n\n",
-					stopping.best_no, stopping.e_best, skdu.noT, err_0, err - err_0);
-				break;
-			}
+			}			
+		}	
+		if (stopping.isOK()) {
+			printf("\n********* early_stopping@[%d]!!! bst=%g ERR@train[%d]=%-8.5g overfit=%-8.5g*********\n\n",
+				stopping.best_no, stopping.e_best, skdu.noT, err_0, err - err_0);
+			break;
 		}
 		this->BeforeTrain(hTrainData);
 		//gradients = self.loss.negative_gradient(preds, y)
@@ -287,8 +289,9 @@ int GBRT::Train(string sTitle, int x, int flag) {
 	}
 	forest.resize(stopping.best_no + 1);
 	hTrainData->AfterTrain();
+	string sEval = hEvalData == nullptr ? (isEvalTrain ? hTrainData->nam : "None") : hEvalData->nam;
 	printf("\n********* GBRT::Train nTree=%d err@%s=%.8g thread=%d train=%g sec\r\n", 
-		forest.size(), hEvalData->nam.c_str(), stopping.e_best,nThread, GST_TOC(tick));
+		forest.size(), sEval.c_str(), stopping.e_best,nThread, GST_TOC(tick));
 
 	if (nOOB>0)
 		TestOOB(hTrainData);
