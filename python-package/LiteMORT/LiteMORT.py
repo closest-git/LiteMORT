@@ -92,6 +92,7 @@ class LiteMORT(object):
         print("======Load LiteMORT library @{}".format(self.dll_path))
         self.mort_init = self.dll.LiteMORT_init
         self.mort_init.argtypes = [POINTER(M_argument), c_int, c_size_t]
+        self.mort_init.restype = c_void_p
 
         # self.mort_set_feat = self.dll.LiteMORT_set_feat
         # self.mort_set_feat.argtypes = [POINTER(M_argument), c_int, c_size_t]
@@ -105,9 +106,9 @@ class LiteMORT(object):
         self.mort_predcit.argtypes = [c_void_p,POINTER(c_float), POINTER(c_double), c_size_t, c_size_t, c_size_t]
 
         self.mort_eda = self.dll.LiteMORT_EDA
-        self.mort_eda.argtypes = [POINTER(c_float), POINTER(c_double), c_size_t, c_size_t, c_size_t,
+        self.mort_eda.argtypes = [c_void_p,POINTER(c_float), POINTER(c_double), c_size_t, c_size_t, c_size_t,
                                   POINTER(M_argument), c_int, c_size_t]
-        self.mort_eda.restype = c_void_p
+        #self.mort_eda.restype = c_void_p
 
         self.mort_imputer_f = self.dll.LiteMORT_Imputer_f
         self.mort_imputer_f.argtypes = [POINTER(c_float), POINTER(c_double), c_size_t, c_size_t, c_size_t]
@@ -120,7 +121,7 @@ class LiteMORT(object):
     def __init__(self, params,fix_seed=None):
         self.problem = None
         self.preprocess = None
-        self.hEDA = None
+        self.hLIB = None
         self.load_dll()
         self._n_classes = None
         self.init(params)
@@ -192,7 +193,7 @@ class LiteMORT(object):
             # ca.Index = v[3]
             ca_list.append(ca)
         ca_array = (M_argument * len(ca_list))(*ca_list)
-        self.mort_init(ca_array, len(ca_array),0)
+        self.hLIB = self.mort_init(ca_array, len(ca_array),0)
 
 
     def EDA(self,flag=0x0):
@@ -218,7 +219,7 @@ class LiteMORT(object):
         ca_array = (M_argument * len(ca_list))(*ca_list)
         #self.EDA_000(self.mort_params, all_data, None, user_test.shape[0], ca_list)
         X,y=self.preprocess.train_X,self.preprocess.train_y
-        self.hEDA = self.mort_eda(X,y, nFeat, nSamp,0,ca_array, len(ca_list), 0)
+        self.mort_eda(self.hLIB,X,y, nFeat, nSamp,0,ca_array, len(ca_list), 0)
 
     def EDA_000(self, params,dataX_, dataY_,nValid,desc_list, flag=0x0):
         # print("====== LiteMORT_EDA X_={} ......".format(X_.shape))
@@ -264,7 +265,7 @@ class LiteMORT(object):
             self.preprocess.eval_X,self.preprocess.eval_y = eval_X0.ctypes.data_as(POINTER(c_float)), eval_y0.ctypes.data_as(POINTER(c_double))
         self.EDA(flag)
 
-        self.mort_fit(self.hEDA,self.preprocess.train_X,self.preprocess.train_y, nFeat, nTrain,
+        self.mort_fit(self.hLIB,self.preprocess.train_X,self.preprocess.train_y, nFeat, nTrain,
                       self.preprocess.eval_X, self.preprocess.eval_y, nTest,0)  # 1 : classification
         if not(train_X is X_train_0):
             del train_X;     gc.collect()
@@ -283,7 +284,7 @@ class LiteMORT(object):
         Y_ = np.zeros(dim, dtype=np.float64)
         tY = Y_ #self.Y_t(Y_, np.float64)
         tX = self.X_t(X_, np.float32)
-        self.mort_predcit(self.hEDA,tX.ctypes.data_as(POINTER(c_float)), tY.ctypes.data_as(POINTER(c_double)), nFeat, dim, 0)
+        self.mort_predcit(self.hLIB,tX.ctypes.data_as(POINTER(c_float)), tY.ctypes.data_as(POINTER(c_double)), nFeat, dim, 0)
         if not(tX is X_):
             del tX;     gc.collect()
         return Y_
@@ -383,9 +384,9 @@ if __name__ == "__main__":
     pred2 = list(mort2.predict(X_test))
     mort3 = LiteMORT(params).fit(X, y, categorical_feature=['A', 'B', 'C', 'D'])
     pred3 = list(mort3.predict(X_test))
-    np.testing.assert_almost_equal(pred0, pred1)
-    np.testing.assert_almost_equal(pred0, pred2)
-    np.testing.assert_almost_equal(pred0, pred3)
+    np.testing.assert_almost_equal(pred1, pred1)
+    np.testing.assert_almost_equal(pred1, pred2)
+    np.testing.assert_almost_equal(pred1, pred3)
     input("...")
     #ret = log_loss(y_test, mort.predict_proba(X_test))
 
