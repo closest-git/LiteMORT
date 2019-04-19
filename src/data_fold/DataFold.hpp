@@ -671,13 +671,15 @@ namespace Grusoft {
 			}
 			if (edaX != nullptr) {/*¸´ÖÆÐÅÏ¢*/
 				const Distribution& distri = edaX->arrDistri[id];
-				assert(hDistri->vMin >= distri.vMin && hDistri->vMax <= distri.vMax);
+				if (distri.vMin != DBL_MAX) {
+					assert(hDistri->vMin >= distri.vMin && hDistri->vMax <= distri.vMax);
+					/*if (hDistri->vMin > distri.vMin)
+						hDistri->vMin = distri.vMin;
+					if (hDistri->vMax < distri.vMax)
+						hDistri->vMax = distri.vMax;*/
+				}
 				nam = distri.nam;
 				BIT_SET(type, distri.type);
-				/*if (hDistri->vMin > distri.vMin)
-					hDistri->vMin = distri.vMin;
-				if (hDistri->vMax < distri.vMax)
-					hDistri->vMax = distri.vMax;*/
 			}
 		}
 

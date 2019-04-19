@@ -37,7 +37,7 @@ using namespace Grusoft;
 
 
 LiteBOM_Config config;
-ExploreDA *g_hEDA=nullptr;
+//ExploreDA *g_hEDA=nullptr;
 
 void OnUserParams(LiteBOM_Config&config, PY_ITEM* params, int nParam, int flag = 0x0) {
 	char sERR[10000];
@@ -266,7 +266,8 @@ void Imputer_At_(Tx *X_, Ty *y, size_t nFeat, size_t nSamp_, size_t flag) {
 /*
 	v0.1
 */
-PYMORT_DLL_API void LiteMORT_predict(float *X, tpY *y, size_t nFeat_0, size_t nSamp, size_t flag) {
+PYMORT_DLL_API void LiteMORT_predict(void *hEDA_0,float *X, tpY *y, size_t nFeat_0, size_t nSamp, size_t flag) {
+	ExploreDA *hEDA = (ExploreDA *)(hEDA_0);
 	if (hGBRT == nullptr) {
 		printf("********* LiteMORT_predict model is NULL!!!\n" );
 		return;
@@ -283,7 +284,8 @@ PYMORT_DLL_API void LiteMORT_predict(float *X, tpY *y, size_t nFeat_0, size_t nS
 	}
 
 	//y应设为nullptr
-	FeatsOnFold *hDat = FeatsOnFold_InitInstance<float, tpY>(config, g_hEDA, "predict",X, y, nSamp, nFeat_0, 1, flag| FeatsOnFold::DF_PREDIC);
+	FeatsOnFold *hDat = FeatsOnFold_InitInstance<float, tpY>(config, hEDA, "predict",X, y, nSamp, nFeat_0, 1, flag| FeatsOnFold::DF_PREDIC);
+	printf("\n********* LiteMORT_predict nSamp=%d,nFeat=%d hEDA=%p********* \n\n", nSamp, nFeat_0, hEDA);
 	//hDat->nam = "predict";
 	hGBRT->Predict(hDat);
 	FeatVector *pred = hDat->GetPrecict();
@@ -318,17 +320,18 @@ PYMORT_DLL_API void LiteMORT_Imputer_d(double *X, tpY *y, size_t nFeat, size_t n
 */
 //PYMORT_DLL_API void LiteMORT_EDA(const float *X, const tpY *y, size_t nFeat_0, size_t nSamp, size_t flag) {
 
-PYMORT_DLL_API	PYMORT_DLL_API void LiteMORT_EDA(const float *dataX, const tpY *dataY, const size_t nFeat_0, const size_t nSamp_,
+PYMORT_DLL_API	PYMORT_DLL_API void* LiteMORT_EDA(const float *dataX, const tpY *dataY, const size_t nFeat_0, const size_t nSamp_,
 	const size_t nValid, PY_ITEM* descs, int nParam, const size_t flag)		{
 	assert(nValid>=0 && nValid <= nSamp_);
-	if (g_hEDA == nullptr)
-		g_hEDA = new ExploreDA(config, nFeat_0, flag);
-	int nDistr = g_hEDA->arrDistri.size(),i;
+	//if (g_hEDA == nullptr)
+	//	g_hEDA = new ExploreDA(config, nFeat_0, flag);
+	ExploreDA *hEDA = new ExploreDA(config, nFeat_0, flag);
+	int nDistr = hEDA->arrDistri.size(),i;
 	if (nParam > 0) {
 		assert(nParam == nDistr);
 		for (i = 0; i < nDistr; i++) {
 			PY_ITEM* desc = descs + i;
-			Distribution &distri = g_hEDA->arrDistri[i];
+			Distribution &distri = hEDA->arrDistri[i];
 			distri.nam = desc->Keys;
 			//int type = (int)(desc->Values);
 			//distri.type = type == 1 ? FeatVector::CATEGORY : 0x0;
@@ -338,11 +341,15 @@ PYMORT_DLL_API	PYMORT_DLL_API void LiteMORT_EDA(const float *dataX, const tpY *d
 			}else
 				distri.type = strcmp(type, "category") == 0 ? Distribution::CATEGORY : 0x0;
 		}
+	}
+	if (dataX != nullptr && dataY != nullptr) {
+		hEDA->Analysis(config, (float *)dataX, (tpY *)dataY, nSamp_, nFeat_0, 1, flag);
+		hEDA->CheckDuplicate(config, flag);
+	}	else {
 
 	}
-	g_hEDA->Analysis(config, (float *)dataX, (tpY *)dataY, nSamp_, nFeat_0, 1, flag);
-	g_hEDA->CheckDuplicate(config, flag);
 	//g_hEDA->InitBundle(config, (float *)dataX, nSamp_, nFeat_0, flag);
+	return hEDA;
 }
 
 /*	增量式EDA很难设计
@@ -374,20 +381,21 @@ PYMORT_DLL_API	PYMORT_DLL_API void LiteMORT_EDA(const float *dataX, const tpY *d
 /*
 	v0.2
 */
-PYMORT_DLL_API void LiteMORT_fit( float *train_data, tpY *train_target, size_t nFeat_0, size_t nSamp,
+PYMORT_DLL_API void LiteMORT_fit(void *hEDA_0, float *train_data, tpY *train_target, size_t nFeat_0, size_t nSamp,
 		float *eval_data, tpY *eval_target,size_t nEval,size_t flag) {
 	try {
 	GST_TIC(tick);
 	if(hGBRT!=nullptr)
 		LiteMORT_clear();
 	bool isDelEDA = false;
-	if (g_hEDA == nullptr) {
+	ExploreDA *hEDA = (ExploreDA *)(hEDA_0);
+	if (hEDA == nullptr) {
 		printf("\n********* g_hEDA on train_data ********* \n");
-		LiteMORT_EDA(train_data, train_target, nFeat_0, nSamp,0,nullptr,0x0,flag );
+		hEDA = (ExploreDA *)LiteMORT_EDA(train_data, train_target, nFeat_0, nSamp,0,nullptr,0x0,flag );
 		isDelEDA = true;
 	}
 	size_t nFeat = nFeat_0,i,feat, nTrain= nSamp;
-	printf( "\n********* LiteMORT_fit nSamp=%d,nFeat=%d ********* \n\n", nSamp, nFeat);	
+	printf( "\n********* LiteMORT_fit nSamp=%d,nFeat=%d hEDA=%p********* \n\n", nSamp, nFeat, hEDA);
 	Distribution disY;	
 	disY.STA_at(nSamp, train_target, true, 0x0);
 	if (disY.nNA > 0) {
@@ -401,7 +409,7 @@ PYMORT_DLL_API void LiteMORT_fit( float *train_data, tpY *train_target, size_t n
 
 	size_t f1= FeatsOnFold::DF_TRAIN ;	
 	vector<FeatsOnFold*> folds;
-	FeatsOnFold *hFold = FeatsOnFold_InitInstance<float, tpY>(config, g_hEDA, "train",train_data, train_target, nSamp, nFeat_0, 1, flag | f1),
+	FeatsOnFold *hFold = FeatsOnFold_InitInstance<float, tpY>(config, hEDA, "train",train_data, train_target, nSamp, nFeat_0, 1, flag | f1),
 		*hEval=nullptr;
 	folds.push_back(hFold);
 	//hFold->nam = "train";
@@ -409,7 +417,7 @@ PYMORT_DLL_API void LiteMORT_fit( float *train_data, tpY *train_target, size_t n
 	//int nTree = 501;		//出现过拟合
 	int nTree = hFold->config.num_trees;
 	if (nEval > 0) {
-		ExploreDA *edaX_ = isDelEDA ? nullptr : g_hEDA;
+		ExploreDA *edaX_ = isDelEDA ? nullptr : hEDA;
 		hEval= FeatsOnFold_InitInstance<float, tpY>(config, edaX_, "eval",eval_data,eval_target, nEval,nFeat_0, 1,flag | FeatsOnFold::DF_EVAL);
 		//hEval->nam = "eval";
 		folds.push_back(hEval);
@@ -424,7 +432,7 @@ PYMORT_DLL_API void LiteMORT_fit( float *train_data, tpY *train_target, size_t n
 	//hGBRT->Test("",);
 	//delete hGBRT;
 	if (isDelEDA) {
-		delete g_hEDA;			g_hEDA = nullptr;
+		delete hEDA;			hEDA = nullptr;
 	}
 	printf("\n********* LiteMORT_fit::OK time=%.3g(%.3g)*********\n\n", GST_TOC(tick), hFold->stat.tX+ DCRIMI_2::tX );
 

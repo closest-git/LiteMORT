@@ -77,8 +77,10 @@ class M_argument(Structure):
                ]
 
 class LiteMORT(object):
-    problem = None
-    preprocess = Mort_Preprocess()
+    #problem = None
+    #preprocess = None
+    #hEDA=None
+
     def load_dll(self):
         lib_path = find_lib_path()
         if len(lib_path) == 0:
@@ -86,10 +88,6 @@ class LiteMORT(object):
         # lib_path.append( 'F:/Project/LiteMORT/LiteMORT.dll' )
 
         self.dll_path = lib_path[0]
-        if False:
-            arr_path = "../input/df_ndarray.csv"
-            np.savetxt(arr_path, data, delimiter="", fmt='%12g', )
-            print("====== arr_file@{} size={} dll={}".format(arr_path, data.shape, self.dll_path))
         self.dll = cdll.LoadLibrary(self.dll_path)
         print("======Load LiteMORT library @{}".format(self.dll_path))
         self.mort_init = self.dll.LiteMORT_init
@@ -99,16 +97,17 @@ class LiteMORT(object):
         # self.mort_set_feat.argtypes = [POINTER(M_argument), c_int, c_size_t]
 
         self.mort_fit = self.dll.LiteMORT_fit
-        self.mort_fit.argtypes = [POINTER(c_float), POINTER(c_double), c_size_t, c_size_t,
+        self.mort_fit.argtypes = [c_void_p,POINTER(c_float), POINTER(c_double), c_size_t, c_size_t,
                                   POINTER(c_float), POINTER(c_double), c_size_t, c_size_t]
         self.mort_fit.restype = None
 
         self.mort_predcit = self.dll.LiteMORT_predict
-        self.mort_predcit.argtypes = [POINTER(c_float), POINTER(c_double), c_size_t, c_size_t, c_size_t]
+        self.mort_predcit.argtypes = [c_void_p,POINTER(c_float), POINTER(c_double), c_size_t, c_size_t, c_size_t]
 
         self.mort_eda = self.dll.LiteMORT_EDA
         self.mort_eda.argtypes = [POINTER(c_float), POINTER(c_double), c_size_t, c_size_t, c_size_t,
                                   POINTER(M_argument), c_int, c_size_t]
+        self.mort_eda.restype = c_void_p
 
         self.mort_imputer_f = self.dll.LiteMORT_Imputer_f
         self.mort_imputer_f.argtypes = [POINTER(c_float), POINTER(c_double), c_size_t, c_size_t, c_size_t]
@@ -119,6 +118,9 @@ class LiteMORT(object):
         self.mort_clear = self.dll.LiteMORT_clear
 
     def __init__(self, params,fix_seed=None):
+        self.problem = None
+        self.preprocess = None
+        self.hEDA = None
         self.load_dll()
         self._n_classes = None
         self.init(params)
@@ -193,29 +195,30 @@ class LiteMORT(object):
         self.mort_init(ca_array, len(ca_array),0)
 
 
-    def EDA(self,dataX, dataY_,eval_set=None,  feat_dict=None,categorical_feature=None, params=None,flag=0x0):
-        nSamp,nFeat = dataX.shape[0],dataX.shape[1]
-        if feat_dict is not None:
-            print("feat_dict={}".format(feat_dict))
-        features = None
-        if isinstance(dataX, pd.DataFrame):
-            features = list(dataX.columns.values)
-        if  categorical_feature is None:
-            return
+    def EDA(self,flag=0x0):
+        '''
 
+        :param flag:
+        :return:
+        '''
+
+        nFeat,nSamp,no=self.preprocess.nFeature,self.preprocess.nSample,0
+        categorical_feature = self.preprocess.categorical_feature
         ca_list = []
-        for feat in features:
+        for feat in self.preprocess.features:
             ca = M_argument()
             ca.Keys = feat.encode('utf8')
             ca.Values = (c_float)(0)
             # if feat=='hist_merchant_id_nunique':
-            if feat in categorical_feature:
+            if (categorical_feature is not None) and (feat in categorical_feature or no in categorical_feature):
                 # ca.Values = (c_float)(1)
                 ca.text = 'category'.encode('utf8')
             ca_list.append(ca)
+            no=no+1
+        ca_array = (M_argument * len(ca_list))(*ca_list)
         #self.EDA_000(self.mort_params, all_data, None, user_test.shape[0], ca_list)
-        self.mort_eda(dataX.ctypes.data_as(POINTER(c_float)), dataY_.ctypes.data_as(POINTER(c_double)),
-                      nFeat, nSamp,0,ca_list, len(ca_list), 0)
+        X,y=self.preprocess.train_X,self.preprocess.train_y
+        self.hEDA = self.mort_eda(X,y, nFeat, nSamp,0,ca_array, len(ca_list), 0)
 
     def EDA_000(self, params,dataX_, dataY_,nValid,desc_list, flag=0x0):
         # print("====== LiteMORT_EDA X_={} ......".format(X_.shape))
@@ -240,25 +243,29 @@ class LiteMORT(object):
     '''
     def fit(self,X_train_0, y_train,eval_set=None,  feat_dict=None,categorical_feature=None, params=None,flag=0x0):
         gc.collect()
-        X_train_numeric = self.preprocess.ToNumeric()
-        self.EDA(X_train_0, y_train,eval_set,feat_dict,categorical_feature, params,flag)
+        #self.preprocess.fit(X_train_0, y_train)
+        #self.preprocess.transform(eval_set)
+        self.preprocess = Mort_Preprocess( X_train_0,y_train,categorical_feature=categorical_feature)
+
         if(eval_set is not None and len(eval_set)>0):
             X_test, y_test=eval_set[0]
 
         print("====== LiteMORT_fit X_train_0={} y_train={}......".format(X_train_0.shape, y_train.shape))
         train_y = self.Y_t(y_train, np.float64)
         train_X = self.X_t(X_train_0, np.float32)
+        self.preprocess.train_X = train_X.ctypes.data_as(POINTER(c_float))
+        self.preprocess.train_y = train_y.ctypes.data_as(POINTER(c_double))
         nTrain, nFeat, nTest = train_X.shape[0], train_X.shape[1], 0
         eval_X,eval_y=None,None
         if  eval_set is not None:
             eval_y0 = self.Y_t(y_test, np.float64)
             eval_X0 = self.X_t(X_test, np.float32)
             nTest = eval_X0.shape[0]
-            eval_X,eval_y = eval_X0.ctypes.data_as(POINTER(c_float)), eval_y0.ctypes.data_as(POINTER(c_double))
+            self.preprocess.eval_X,self.preprocess.eval_y = eval_X0.ctypes.data_as(POINTER(c_float)), eval_y0.ctypes.data_as(POINTER(c_double))
+        self.EDA(flag)
 
-        self.mort_fit(
-            train_X.ctypes.data_as(POINTER(c_float)), train_y.ctypes.data_as(POINTER(c_double)), nFeat, nTrain,
-            eval_X, eval_y, nTest,0)  # 1 : classification
+        self.mort_fit(self.hEDA,self.preprocess.train_X,self.preprocess.train_y, nFeat, nTrain,
+                      self.preprocess.eval_X, self.preprocess.eval_y, nTest,0)  # 1 : classification
         if not(train_X is X_train_0):
             del train_X;     gc.collect()
         if not(train_y is y_train):
@@ -276,7 +283,7 @@ class LiteMORT(object):
         Y_ = np.zeros(dim, dtype=np.float64)
         tY = Y_ #self.Y_t(Y_, np.float64)
         tX = self.X_t(X_, np.float32)
-        self.mort_predcit(tX.ctypes.data_as(POINTER(c_float)), tY.ctypes.data_as(POINTER(c_double)), nFeat, dim, 0)
+        self.mort_predcit(self.hEDA,tX.ctypes.data_as(POINTER(c_float)), tY.ctypes.data_as(POINTER(c_double)), nFeat, dim, 0)
         if not(tX is X_):
             del tX;     gc.collect()
         return Y_
@@ -362,15 +369,16 @@ if __name__ == "__main__":
                            "C": np.random.permutation([0.1, -0.1, 0.2, 0.2] * 15),
                            "D": np.random.permutation([True, False] * 30)})
     if True:
-        prepocess = Mort_Preprocess()
-        X, X_test = prepocess.LabelEncode(X, X_test)
+        #prepocess = Mort_Preprocess()
+        X, X_test = Mort_Preprocess.OrdinalEncode_(X, X_test)
     for col in ["A", "B", "C", "D"]:
         X[col] = X[col].astype('category')
         X_test[col] = X_test[col].astype('category')
-    #mort0 = LiteMORT(params).fit(X, y)
-    #pred0 = list(mort0.predict(X_test))
+    mort0 = LiteMORT(params).fit(X, y)
+    pred0 = list(mort0.predict(X_test))
     mort1 = LiteMORT(params).fit(X, y, categorical_feature=[0])
     pred1 = list(mort1.predict(X_test))
+
     mort2 = LiteMORT(params).fit(X, y, categorical_feature=['A'])
     pred2 = list(mort2.predict(X_test))
     mort3 = LiteMORT(params).fit(X, y, categorical_feature=['A', 'B', 'C', 'D'])

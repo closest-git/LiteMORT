@@ -309,11 +309,9 @@ void FeatVec_Q::UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst,
 			distri.ClearHisto();
 			distri.X2Histo_(hData_->config, nSamp, x, yDown);
 		}
-		//nam = distri.nam;		
-		//BIT_SET(type,distri.type);
-		//vThrsh = distri.vThrsh;
-		qHisto->CopyBins(*(distri.histo));
 
+		if(distri.histo!=nullptr)
+			qHisto->CopyBins(*(distri.histo));
 		hFeat->QuantiAtEDA(edaX, qHisto->quanti, nMostBin);
 	}	else{
 		//hFeat->Split2Quanti(hData_->config,edaX, vThrsh, qHisto, yDown, nMostBin);
