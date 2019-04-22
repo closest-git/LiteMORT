@@ -673,8 +673,8 @@ namespace Grusoft {
 			if (edaX != nullptr) {/*¸´ÖÆÐÅÏ¢*/
 				const Distribution& distri = edaX->arrDistri[id];
 				if (distri.vMin != DBL_MAX) {
-					assert(hDistri->vMin >= distri.vMin && hDistri->vMax <= distri.vMax);
-					/*if (hDistri->vMin > distri.vMin)
+					/*assert(hDistri->vMin >= distri.vMin && hDistri->vMax <= distri.vMax);
+					if (hDistri->vMin > distri.vMin)
 						hDistri->vMin = distri.vMin;
 					if (hDistri->vMax < distri.vMax)
 						hDistri->vMax = distri.vMax;*/

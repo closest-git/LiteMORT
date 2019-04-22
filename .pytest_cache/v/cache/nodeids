@@ -1,3 +1,7 @@
 [
-  "tests/python_package_test/test_sklearn.py::TestSklearn::test_binary"
+  "tests/python_package_test/test_sklearn.py::TestSklearn::test_binary_breast",
+  "tests/python_package_test/test_sklearn.py::TestSklearn::test_binary_digits",
+  "tests/python_package_test/test_sklearn.py::TestSklearn::test_pandas_categorical",
+  "tests/python_package_test/test_sklearn.py::TestSklearn::test_regression",
+  "tests/python_package_test/test_sklearn.py::TestSklearn::test_regression_boston_housing"
 ]

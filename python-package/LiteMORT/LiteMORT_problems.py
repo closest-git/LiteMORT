@@ -3,8 +3,8 @@ import numpy as np
 import pandas as pd
 from ctypes import *
 from sklearn import preprocessing
-from LiteMORT import *
-from compat import (_MortModelBase,_MortClassifierBase,_MortRegressorBase)
+
+from .compat import (_MortModelBase,_MortClassifierBase,_MortRegressorBase)
 
 
 class Mort_Problems(_MortModelBase):

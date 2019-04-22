@@ -2,15 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1f20a82c-2842-4728-bc01-7f01847a5972" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/LiteMORT.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/LiteMORT.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.pytest_cache/v/cache/lastfailed" beforeDir="false" afterPath="$PROJECT_DIR$/.pytest_cache/v/cache/lastfailed" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.pytest_cache/v/cache/nodeids" beforeDir="false" afterPath="$PROJECT_DIR$/.pytest_cache/v/cache/nodeids" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/python-package/LiteMORT/LiteMORT.py" beforeDir="false" afterPath="$PROJECT_DIR$/python-package/LiteMORT/LiteMORT.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/python-package/LiteMORT/LiteMORT_problems.py" beforeDir="false" afterPath="$PROJECT_DIR$/python-package/LiteMORT/LiteMORT_problems.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/python/pyMORT_DLL.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/python/pyMORT_DLL.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/python/pyMORT_DLL.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/python/pyMORT_DLL.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tree/BiSplit.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/BiSplit.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tree/BiSplit.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/BiSplit.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/python_package_test/test_sklearn.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/python_package_test/test_sklearn.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -22,35 +20,30 @@
   </component>
   <component name="CoverageDataManager">
     <SUITE FILE_PATH="coverage/LiteMORT$LiteMORT.coverage" NAME="LiteMORT Coverage Results" MODIFIED="1555480294744" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/python" />
-    <SUITE FILE_PATH="coverage/LiteMORT$py_test_in_test_sklearn_py.coverage" NAME="py.test in test_sklearn.py Coverage Results" MODIFIED="1555902878354" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests/python_package_test" />
-    <SUITE FILE_PATH="coverage/LiteMORT$LiteMORT__1_.coverage" NAME="LiteMORT (1) Coverage Results" MODIFIED="1555918573519" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package/LiteMORT" />
+    <SUITE FILE_PATH="coverage/LiteMORT$py_test_in_test_sklearn_py.coverage" NAME="py.test in test_sklearn.py Coverage Results" MODIFIED="1555923414801" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests/python_package_test" />
+    <SUITE FILE_PATH="coverage/LiteMORT$LiteMORT__1_.coverage" NAME="LiteMORT (1) Coverage Results" MODIFIED="1555923827922" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package/LiteMORT" />
+    <SUITE FILE_PATH="coverage/LiteMORT$pycharm_test.coverage" NAME="pycharm_test Coverage Results" MODIFIED="1555924842354" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
     <SUITE FILE_PATH="coverage/LiteMORT$py_test_in_test_basic_py.coverage" NAME="py.test in test_basic.py Coverage Results" MODIFIED="1555221586793" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests/python_package_test" />
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="case.py" pinned="false" current-in-tab="false">
-        <entry file="file://D:/Anaconda3/Lib/unittest/case.py">
+      <file leaf-file-name="test_sklearn.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/tests/python_package_test/test_sklearn.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="120">
-              <caret line="604" selection-start-line="604" selection-end-line="604" />
+            <state relative-caret-position="2247">
+              <caret line="120" column="4" selection-start-line="120" selection-start-column="4" selection-end-line="120" selection-end-column="4" />
+              <folding>
+                <element signature="e#36#47#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="basic.py" pinned="false" current-in-tab="false">
-        <entry file="file://D:/Anaconda3/Lib/site-packages/lightgbm/basic.py">
+      <file leaf-file-name="pycharm_test.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/python-package/pycharm_test.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="28690">
-              <caret line="1525" column="53" selection-start-line="1525" selection-start-column="28" selection-end-line="1525" selection-end-column="53" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="LiteMORT.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/python-package/LiteMORT/LiteMORT.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="157">
-              <caret line="399" column="5" selection-start-line="399" selection-start-column="5" selection-end-line="399" selection-end-column="5" />
+            <state relative-caret-position="-76">
+              <caret line="2" column="39" selection-start-line="2" selection-start-column="39" selection-end-line="2" selection-end-column="39" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -58,41 +51,23 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="_pydev_execfile.py" pinned="false" current-in-tab="false">
-        <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/_pydev_imps/_pydev_execfile.py">
+      <file leaf-file-name="LiteMORT_problems.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/python-package/LiteMORT/LiteMORT_problems.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="294">
-              <caret line="17" selection-start-line="17" selection-end-line="17" />
+            <state relative-caret-position="95">
+              <caret line="5" lean-forward="true" selection-start-line="5" selection-end-line="5" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="__init__.py" pinned="false" current-in-tab="false">
-        <entry file="file://D:/Anaconda3/Lib/ctypes/__init__.py">
+      <file leaf-file-name="LiteMORT.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/python-package/LiteMORT/LiteMORT.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="370">
-              <caret line="365" selection-start-line="365" selection-end-line="365" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="LiteMORT_preprocess.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/python-package/LiteMORT/LiteMORT_preprocess.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="76">
-              <caret line="4" column="6" selection-start-line="4" selection-start-column="6" selection-end-line="4" selection-end-column="6" />
+            <state relative-caret-position="303">
+              <caret line="369" selection-start-line="369" selection-end-line="369" />
               <folding>
-                <element signature="e#0#19#0" expanded="true" />
+                <element signature="e#0#9#0" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="codecs.py" pinned="false" current-in-tab="false">
-        <entry file="file://D:/Anaconda3/Lib/codecs.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="231">
-              <caret line="308" selection-start-line="308" selection-end-line="308" />
             </state>
           </provider>
         </entry>
@@ -108,7 +83,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>objective</find>
       <find>_n_classes</find>
       <find>dll_path</find>
       <find>category</find>
@@ -136,6 +110,8 @@
       <find>mort_clear</find>
       <find>mort_predcit</find>
       <find>hLib</find>
+      <find>Load LiteMORT library</find>
+      <find>dll</find>
       <find>hLIB</find>
     </findStrings>
     <dirStrings>
@@ -151,16 +127,17 @@
         <option value="$PROJECT_DIR$/tests/python_package_test/test_basic.py" />
         <option value="D:/Anaconda3/Lib/site-packages/litemort/libpath.py" />
         <option value="D:/Anaconda3/Lib/site-packages/litemort/LiteMORT_EDA.py" />
-        <option value="D:/Anaconda3/Lib/site-packages/litemort/__init__.py" />
         <option value="D:/Anaconda3/Lib/site-packages/litemort/LiteMORT_problems.py" />
         <option value="$PROJECT_DIR$/src/python/LiteMORT.py" />
         <option value="$PROJECT_DIR$/python-package/LiteMORT/libpath.py" />
-        <option value="D:/Anaconda3/Lib/site-packages/litemort/LiteMORT.py" />
-        <option value="$PROJECT_DIR$/python-package/LiteMORT/LiteMORT_problems.py" />
         <option value="$PROJECT_DIR$/python-package/LiteMORT/LiteMORT_preprocess.py" />
-        <option value="$PROJECT_DIR$/tests/python_package_test/test_sklearn.py" />
         <option value="$PROJECT_DIR$/vs_0/pyMORT/LiteMORT.py" />
+        <option value="D:/Anaconda3/Lib/site-packages/litemort/LiteMORT.py" />
+        <option value="D:/Anaconda3/Lib/site-packages/litemort/__init__.py" />
+        <option value="$PROJECT_DIR$/tests/python_package_test/test_sklearn.py" />
+        <option value="$PROJECT_DIR$/python-package/pycharm_test.py" />
         <option value="$PROJECT_DIR$/python-package/LiteMORT/LiteMORT.py" />
+        <option value="$PROJECT_DIR$/python-package/LiteMORT/LiteMORT_problems.py" />
       </list>
     </option>
   </component>
@@ -209,6 +186,17 @@
               <item name="LiteMORT" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="LiteMORT" type="b2602c69:ProjectViewProjectNode" />
+              <item name="LiteMORT" type="462c0819:PsiDirectoryNode" />
+              <item name="tests" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="LiteMORT" type="b2602c69:ProjectViewProjectNode" />
+              <item name="LiteMORT" type="462c0819:PsiDirectoryNode" />
+              <item name="tests" type="462c0819:PsiDirectoryNode" />
+              <item name="python_package_test" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
@@ -234,7 +222,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.LiteMORT (1)">
+  <component name="RunManager" selected="Python.pycharm_test">
     <configuration name="LiteMORT (1)" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="LiteMORT" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -292,6 +280,25 @@
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
     </configuration>
+    <configuration name="pycharm_test" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="LiteMORT" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/python-package" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/python-package/pycharm_test.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+    </configuration>
     <configuration name="py.test in test_basic.py" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="LiteMORT" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -327,9 +334,11 @@
       <item itemvalue="Python tests.py.test in test_sklearn.py" />
       <item itemvalue="Python.LiteMORT" />
       <item itemvalue="Python.LiteMORT (1)" />
+      <item itemvalue="Python.pycharm_test" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.pycharm_test" />
         <item itemvalue="Python.LiteMORT (1)" />
         <item itemvalue="Python tests.py.test in test_sklearn.py" />
         <item itemvalue="Python.LiteMORT" />
@@ -351,34 +360,34 @@
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="py_test_in_test_sklearn_py - 2019.04.18 at 15h 35m 57s.xml">
+    <history-entry file="py_test_in_test_sklearn_py - 2019.04.22 at 15h 58m 00s.xml">
       <configuration name="py.test in test_sklearn.py" configurationId="tests" />
     </history-entry>
-    <history-entry file="py_test_in_test_sklearn_py - 2019.04.18 at 17h 10m 16s.xml">
+    <history-entry file="py_test_in_test_sklearn_py - 2019.04.22 at 15h 58m 25s.xml">
       <configuration name="py.test in test_sklearn.py" configurationId="tests" />
     </history-entry>
-    <history-entry file="py_test_in_test_sklearn_py - 2019.04.18 at 17h 10m 38s.xml">
+    <history-entry file="py_test_in_test_sklearn_py - 2019.04.22 at 15h 58m 43s.xml">
       <configuration name="py.test in test_sklearn.py" configurationId="tests" />
     </history-entry>
-    <history-entry file="py_test_in_test_sklearn_py - 2019.04.18 at 17h 11m 04s.xml">
+    <history-entry file="py_test_in_test_sklearn_py - 2019.04.22 at 16h 51m 03s.xml">
       <configuration name="py.test in test_sklearn.py" configurationId="tests" />
     </history-entry>
-    <history-entry file="py_test_in_test_sklearn_py - 2019.04.18 at 17h 11m 27s.xml">
+    <history-entry file="py_test_in_test_sklearn_py - 2019.04.22 at 16h 51m 54s.xml">
       <configuration name="py.test in test_sklearn.py" configurationId="tests" />
     </history-entry>
-    <history-entry file="py_test_in_test_sklearn_py - 2019.04.18 at 17h 26m 20s.xml">
+    <history-entry file="py_test_in_test_sklearn_py - 2019.04.22 at 16h 52m 38s.xml">
       <configuration name="py.test in test_sklearn.py" configurationId="tests" />
     </history-entry>
-    <history-entry file="py_test_in_test_sklearn_py - 2019.04.18 at 17h 26m 26s.xml">
+    <history-entry file="py_test_in_test_sklearn_py - 2019.04.22 at 16h 53m 12s.xml">
       <configuration name="py.test in test_sklearn.py" configurationId="tests" />
     </history-entry>
-    <history-entry file="py_test_in_test_sklearn_py - 2019.04.22 at 11h 14m 10s.xml">
+    <history-entry file="py_test_in_test_sklearn_py - 2019.04.22 at 16h 55m 01s.xml">
       <configuration name="py.test in test_sklearn.py" configurationId="tests" />
     </history-entry>
-    <history-entry file="py_test_in_test_sklearn_py - 2019.04.22 at 11h 14m 32s.xml">
+    <history-entry file="py_test_in_test_sklearn_py - 2019.04.22 at 16h 56m 20s.xml">
       <configuration name="py.test in test_sklearn.py" configurationId="tests" />
     </history-entry>
-    <history-entry file="py_test_in_test_sklearn_py - 2019.04.22 at 11h 14m 45s.xml">
+    <history-entry file="py_test_in_test_sklearn_py - 2019.04.22 at 16h 57m 02s.xml">
       <configuration name="py.test in test_sklearn.py" configurationId="tests" />
     </history-entry>
   </component>
@@ -392,18 +401,18 @@
       <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="bottom" id="Python Console" order="7" weight="0.32984293" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.32984293" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.40052357" />
       <window_info anchor="bottom" id="Terminal" order="7" />
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4751553" visible="true" weight="0.1660827" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.6731302" visible="true" weight="0.1660827" />
       <window_info anchor="right" id="R Packages" order="3" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="right" id="R Graphics" order="4" />
       <window_info anchor="right" id="Database" order="5" />
       <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="right" id="SciView" order="6" sideWeight="0.4842932" visible="true" weight="0.09039944" />
-      <window_info id="Structure" order="1" sideWeight="0.5248447" side_tool="true" visible="true" weight="0.1660827" />
+      <window_info id="Structure" order="1" sideWeight="0.32686982" side_tool="true" visible="true" weight="0.1660827" />
       <window_info id="Favorites" order="2" side_tool="true" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.578534" />
+      <window_info anchor="bottom" id="Debug" order="3" visible="true" weight="0.5274869" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -427,49 +436,14 @@
           <option name="timeStamp" value="3" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/tests/python_package_test/test_sklearn.py</url>
-          <line>103</line>
-          <option name="timeStamp" value="49" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://D:/Anaconda3/Lib/site-packages/litemort/LiteMORT.py</url>
-          <line>202</line>
+          <line>224</line>
           <option name="timeStamp" value="66" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/tests/python_package_test/test_sklearn.py</url>
-          <line>118</line>
+          <line>162</line>
           <option name="timeStamp" value="84" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/tests/python_package_test/test_sklearn.py</url>
-          <line>101</line>
-          <option name="timeStamp" value="94" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/tests/python_package_test/test_sklearn.py</url>
-          <line>94</line>
-          <option name="timeStamp" value="97" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/tests/python_package_test/test_sklearn.py</url>
-          <line>93</line>
-          <option name="timeStamp" value="99" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/tests/python_package_test/test_sklearn.py</url>
-          <line>48</line>
-          <option name="timeStamp" value="157" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/tests/python_package_test/test_sklearn.py</url>
-          <line>46</line>
-          <option name="timeStamp" value="158" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/python-package/LiteMORT/LiteMORT.py</url>
-          <line>410</line>
-          <option name="timeStamp" value="167" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -479,17 +453,10 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="170" />
+      <option name="time" value="190" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://D:/Anaconda3/Lib/site-packages/litemort/libpath.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="551">
-          <caret line="31" selection-start-line="31" selection-end-line="31" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://D:/Anaconda3/Lib/site-packages/_pytest/assertion/rewrite.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="3876">
@@ -655,13 +622,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://D:/Anaconda3/Lib/site-packages/litemort/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="190">
-          <caret line="11" column="34" selection-start-line="11" selection-start-column="34" selection-end-line="11" selection-end-column="34" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://D:/Anaconda3/Lib/site-packages/lightgbm/compat.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="481">
@@ -705,33 +665,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/LiteMORT/libpath.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="280">
-          <caret line="31" selection-start-line="31" selection-end-line="31" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://D:/Anaconda3/Lib/site-packages/litemort/LiteMORT.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="228">
-          <caret line="249" column="19" selection-start-line="249" selection-start-column="12" selection-end-line="249" selection-end-column="19" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/LiteMORT/LiteMORT_problems.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="57">
-          <caret line="9" selection-start-line="9" selection-end-line="11" selection-end-column="12" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/python-package/LiteMORT/LiteMORT_EDA.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -763,34 +696,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://D:/Anaconda3/Lib/site-packages/lightgbm/basic.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="28690">
-          <caret line="1525" column="53" selection-start-line="1525" selection-start-column="28" selection-end-line="1525" selection-end-column="53" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tests/python_package_test/test_sklearn.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="278">
-          <caret line="55" column="34" lean-forward="true" selection-start-line="55" selection-start-column="34" selection-end-line="55" selection-end-column="34" />
-          <folding>
-            <element signature="e#36#47#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/python-package/LiteMORT/test_sklearn.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="114">
           <caret line="21" column="77" selection-start-line="21" selection-start-column="77" selection-end-line="21" selection-end-column="77" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://D:/Anaconda3/Lib/unittest/case.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="604" selection-start-line="604" selection-end-line="604" />
         </state>
       </provider>
     </entry>
@@ -829,6 +738,13 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/_pydev_imps/_pydev_execfile.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="294">
+          <caret line="17" selection-start-line="17" selection-end-line="17" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/python-package/LiteMORT/LiteMORT_preprocess.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="76">
@@ -839,26 +755,84 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/_pydev_imps/_pydev_execfile.py">
+    <entry file="file://D:/Anaconda3/Lib/site-packages/litemort/LiteMORT.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="294">
-          <caret line="17" selection-start-line="17" selection-end-line="17" />
+        <state relative-caret-position="-4075">
+          <caret line="120" column="45" lean-forward="true" selection-start-line="120" selection-start-column="45" selection-end-line="120" selection-end-column="45" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://D:/Anaconda3/Lib/unittest/case.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="604" selection-start-line="604" selection-end-line="604" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://D:/Anaconda3/Lib/site-packages/litemort/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="190">
+          <caret line="12" column="4" selection-start-line="12" selection-start-column="4" selection-end-line="12" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://D:/Anaconda3/Lib/site-packages/lightgbm/basic.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8324">
+          <caret line="1525" column="53" selection-start-line="1525" selection-start-column="28" selection-end-line="1525" selection-end-column="53" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python-package/LiteMORT/libpath.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="285">
+          <caret line="17" column="54" selection-start-line="17" selection-start-column="54" selection-end-line="17" selection-end-column="54" />
         </state>
       </provider>
     </entry>
     <entry file="file://D:/Anaconda3/Lib/codecs.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="231">
-          <caret line="308" selection-start-line="308" selection-end-line="308" />
+        <state relative-caret-position="79">
+          <caret line="300" lean-forward="true" selection-start-line="300" selection-end-line="301" selection-end-column="53" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/python-package/LiteMORT/LiteMORT.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="157">
-          <caret line="399" column="5" selection-start-line="399" selection-start-column="5" selection-end-line="399" selection-end-column="5" />
+        <state relative-caret-position="303">
+          <caret line="369" selection-start-line="369" selection-end-line="369" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python-package/pycharm_test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-76">
+          <caret line="2" column="39" selection-start-line="2" selection-start-column="39" selection-end-line="2" selection-end-column="39" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python-package/LiteMORT/LiteMORT_problems.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="95">
+          <caret line="5" lean-forward="true" selection-start-line="5" selection-end-line="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/python_package_test/test_sklearn.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2247">
+          <caret line="120" column="4" selection-start-line="120" selection-start-column="4" selection-end-line="120" selection-end-column="4" />
+          <folding>
+            <element signature="e#36#47#0" expanded="true" />
           </folding>
         </state>
       </provider>
