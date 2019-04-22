@@ -6,8 +6,20 @@ from libpath import find_lib_path
 from LiteMORT_preprocess import *
 from LiteMORT_problems import *
 from sklearn import preprocessing
+import os
 
-
+class MORT_exception(Exception):
+    """Error throwed by LiteMORT"""
+    pass
+def _check_call(ret,normal_value=0x0):
+    """Check the return value of C API call
+    Parameters
+    ----------
+    ret : int
+        return value from API calls
+    """
+    if ret != normal_value:
+        raise MORT_exception("_check_call failed at {}-{}".format(ret,normal_value))
 '''
     sklearn style
 '''
@@ -117,6 +129,7 @@ class LiteMORT(object):
         self.mort_imputer_d.argtypes = [POINTER(c_double), POINTER(c_double), c_size_t, c_size_t, c_size_t]
 
         self.mort_clear = self.dll.LiteMORT_clear
+        self.mort_clear.argtypes = [c_void_p]
 
     def __init__(self, params,fix_seed=None):
         self.problem = None
@@ -129,6 +142,15 @@ class LiteMORT(object):
             self.problem = Mort_BinaryClass
         elif self.params.objective == "regression":
             self.problem = Mort_Regressor
+
+    def __del__(self):
+        try:
+            print("LiteMORT::__del__...".format())
+            if self.hLIB is not None:
+                self.mort_clear(self.hLIB)
+            self.hLIB = None
+        except AttributeError:
+            pass
 
     #  注意 Y_t与y_train不一样
     def Y_t(self, y_train, np_type):
@@ -346,9 +368,6 @@ class LiteMORT(object):
         else:
             return np.vstack((1. - result, result)).transpose()
 
-    def Clear(self):
-        self.mort_clear();
-
 from sklearn.datasets import (load_boston, load_breast_cancer, load_digits,load_iris, load_svmlight_file)
 from sklearn.metrics import log_loss, mean_squared_error
 from sklearn.model_selection import GridSearchCV, train_test_split
@@ -377,17 +396,19 @@ if __name__ == "__main__":
         X_test[col] = X_test[col].astype('category')
     mort0 = LiteMORT(params).fit(X, y)
     pred0 = list(mort0.predict(X_test))
-    mort1 = LiteMORT(params).fit(X, y, categorical_feature=[0])
-    pred1 = list(mort1.predict(X_test))
-
-    mort2 = LiteMORT(params).fit(X, y, categorical_feature=['A'])
-    pred2 = list(mort2.predict(X_test))
-    mort3 = LiteMORT(params).fit(X, y, categorical_feature=['A', 'B', 'C', 'D'])
-    pred3 = list(mort3.predict(X_test))
-    np.testing.assert_almost_equal(pred1, pred1)
-    np.testing.assert_almost_equal(pred1, pred2)
-    np.testing.assert_almost_equal(pred1, pred3)
-    input("...")
+    #del mort0
+    #gc.collect()
+    if True:
+        mort1 = LiteMORT(params).fit(X, y, categorical_feature=[0])
+        pred1 = list(mort1.predict(X_test))
+        mort2 = LiteMORT(params).fit(X, y, categorical_feature=['A'])
+        pred2 = list(mort2.predict(X_test))
+        mort3 = LiteMORT(params).fit(X, y, categorical_feature=['A', 'B', 'C', 'D'])
+        pred3 = list(mort3.predict(X_test))
+        #np.testing.assert_almost_equal(pred1, pred1)
+        np.testing.assert_almost_equal(pred1, pred2)
+        #np.testing.assert_almost_equal(pred1, pred3)
+        input("...")
     #ret = log_loss(y_test, mort.predict_proba(X_test))
 
 

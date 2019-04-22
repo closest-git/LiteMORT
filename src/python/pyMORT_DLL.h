@@ -11,12 +11,14 @@
 #endif
 #include "../util/GST_def.h"
 
-// 此类是从 pyMORT_DLL.dll 导出的
-class PYMORT_DLL_API CpyMORT_DLL {
-public:
-	CpyMORT_DLL(void);
-	// TODO:  在此添加您的方法。
-};
+#define __API_BEGIN__() try {
+
+#define __API_END__() } \
+catch(std::exception& ex) { return (ex); } \
+catch(std::string& ex) { return (ex); } \
+catch(...) { return ("unknown exception"); } \
+return 0;
+
 
 struct PY_ITEM {
 	char *Keys;

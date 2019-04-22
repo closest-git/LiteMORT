@@ -503,7 +503,8 @@ namespace Grusoft {
 			if (hBlit->fruit->isY) {
 				SAMP_SET &lSet = left->samp_set, &rSet = rigt->samp_set;
 				tpSAMP_ID *samps = hBlit->samp_set.samps, *left = hBlit->samp_set.left, *rigt = hBlit->samp_set.rigt;
-				lSet = hBlit->samp_set;		rSet = hBlit->samp_set;
+				lSet = hBlit->samp_set;		rSet = hBlit->samp_set;	//直接复制父节点的一些数据
+				lSet.isRef = true;			rSet.isRef = true;
 				HistoGRAM *histo = hBlit->fruit->histo;
 				for (i = 0; i < nSamp; i++) {
 					samp = hBlit->samp_set.samps[i];

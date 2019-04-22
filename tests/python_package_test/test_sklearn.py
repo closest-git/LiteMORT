@@ -16,7 +16,7 @@ from sklearn.metrics import log_loss, mean_squared_error
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.utils.estimator_checks import (_yield_all_checks, SkipTest,
                                             check_parameters_default_constructible)
-isMORT=False
+isMORT=True
 
 try:
     from sklearn.utils.estimator_checks import check_no_fit_attributes_set_in_init
@@ -35,7 +35,7 @@ def multi_logloss(y_true, y_pred):
 
 class TestSklearn(unittest.TestCase):
 
-    def ttest_binary(self):
+    def test_binary(self):
         params = {
             "objective": "binary", "metric": "logloss",'early_stop': 5, 'num_boost_round': 50,
             "verbosity": 1,
@@ -56,7 +56,7 @@ class TestSklearn(unittest.TestCase):
         self.assertLess(ret, 0.15)
 
 
-    def test_regression(self):
+    def ttest_regression(self):
         params = {
             "objective": "regression",  'early_stop': 5, 'num_boost_round': 50, "verbosity": 1,
         }

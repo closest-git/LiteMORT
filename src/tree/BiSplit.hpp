@@ -54,7 +54,7 @@ namespace Grusoft {
 		std::string sX;
 
 		int id;				//为了节省内存，很难想象fold会超过65536
-		float *distri = nullptr;
+		//float *distri = nullptr;
 		SAMP_SET samp_set;
 		MT_BiSplit	*left = nullptr, *right = nullptr;
 		//size_t nzSamp = 0;
@@ -78,8 +78,8 @@ namespace Grusoft {
 				delete regression;
 			if (fruit != nullptr)
 				delete fruit;
-			if (distri != nullptr)
-				delete distri;
+			//if (distri != nullptr)
+			//	delete distri;
 		}
 
 		virtual size_t nSample() { return samp_set.nSamp; }

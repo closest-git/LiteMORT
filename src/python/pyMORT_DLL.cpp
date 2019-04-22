@@ -40,6 +40,10 @@ struct MORT{
 	GBRT *hGBRT = nullptr;
 	ExploreDA *hEDA = nullptr;
 
+	MORT() {
+
+	}
+
 	static MORT *From(void *mort_0, int flag = 0x0) {
 		MORT *mort = static_cast<MORT *>(mort_0);
 		return mort;
@@ -137,18 +141,21 @@ PYMORT_DLL_API void* LiteMORT_init(PY_ITEM* params, int nParam, int flag = 0x0) 
 	try {
 		MORT *mort = new MORT();
 		OnUserParams(mort->config, params, nParam);
+		printf("\n======LiteMORT_api init @%p(hEDA=%p,hGBRT=%p)...OK\n", mort,mort->hEDA,mort->hGBRT);
 		return mort;
 
 	}
 	catch (...) {
-		printf("\n======mtc_init FAILED...");
+		printf("\n======LiteMORT_init FAILED...");
 		return nullptr;
 	}
 
 }
 PYMORT_DLL_API void LiteMORT_clear(void *mort_0) {
 	MORT *mort = MORT::From(mort_0);
+	printf("\n======LiteMORT_api clear @%p(hEDA=%p,hGBRT=%p)...", mort_0,mort->hEDA, mort->hGBRT);
 	delete mort;
+	printf("\r======LiteMORT_api clear @%p...OK\n", mort_0);
 }
 
 PYMORT_DLL_API void LiteMORT_set_feat(PY_ITEM* params, int nParam, int flag = 0x0) {
@@ -157,7 +164,7 @@ PYMORT_DLL_API void LiteMORT_set_feat(PY_ITEM* params, int nParam, int flag = 0x
 
 	}
 	catch (...) {
-		printf("\n======mtc_init FAILED...");
+		printf("\n======LiteMORT_set_feat FAILED...");
 	}
 
 }
@@ -323,6 +330,7 @@ PYMORT_DLL_API void LiteMORT_predict(void *mort_0,float *X, tpY *y, size_t nFeat
 		}
 	}
 	delete hDat;
+
 }
 
 /*
@@ -418,7 +426,7 @@ PYMORT_DLL_API void LiteMORT_fit(void *mort_0, float *train_data, tpY *train_tar
 	if (hEDA == nullptr) {
 		printf("\n********* g_hEDA on train_data ********* \n");
 		LiteMORT_EDA(mort,train_data, train_target, nFeat_0, nSamp,0,nullptr,0x0,flag );
-		hEDA = mort->hEDA;		isDelEDA = true;
+		hEDA = mort->hEDA;		//isDelEDA = true;
 	}
 	size_t nFeat = nFeat_0,i,feat, nTrain= nSamp;
 	printf( "\n********* LiteMORT_fit nSamp=%d,nFeat=%d hEDA=%p********* \n\n", nSamp, nFeat, hEDA);
@@ -451,11 +459,11 @@ PYMORT_DLL_API void LiteMORT_fit(void *mort_0, float *train_data, tpY *train_tar
 	mort->hGBRT = new GBRT(hFold, hEval, 0, flag==0 ? BoostingForest::REGRESSION : BoostingForest::CLASIFY, nTree);
 	
 	mort->hGBRT->Train("", 50, 0x0);
-
+	//delete mort;		//仅用于测试 
 	if (isDelEDA) {
 		delete hEDA;			hEDA = nullptr;
 	}
-	printf("\n********* LiteMORT_fit::OK time=%.3g(%.3g)*********\n\n", GST_TOC(tick), hFold->stat.tX+ DCRIMI_2::tX );
+	printf("\n********* LiteMORT_api fit @%p(hEDA=%p,hGBRT=%p) time=%.3g(%.3g)......OK\n\n",mort,mort->hEDA,mort->hGBRT, GST_TOC(tick), hFold->stat.tX+ DCRIMI_2::tX );
 
 	}
 	catch (char * sInfo) {
@@ -468,9 +476,3 @@ PYMORT_DLL_API void LiteMORT_fit(void *mort_0, float *train_data, tpY *train_tar
 	return ;
 }
 
-// 这是已导出类的构造函数。
-// 有关类定义的信息，请参阅 pyMORT_DLL.h
-CpyMORT_DLL::CpyMORT_DLL()
-{
-    return;
-}
