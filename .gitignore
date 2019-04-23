@@ -25,7 +25,9 @@ docs/_build
 tests/bin
 lib
 data
-vs_0
+_000
+python-package/dist
+.pytest_cache/v/cache
 
 # Visual Studio 2015 cache/options directory
 .vs/
@@ -95,6 +97,8 @@ __pycache__
 *.scc
 *.rar
 *.ym
+*.model
+
 
 # Chutzpah Test files
 _Chutzpah*

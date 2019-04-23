@@ -55,7 +55,7 @@ class TestSklearn(unittest.TestCase):
             self.assertAlmostEqual(ret, gbm.evals_result_['valid_0']['binary_logloss'][gbm.best_iteration_ - 1],places=5)
         self.assertLess(ret, 0.15)
 
-    def test_binary_digits(self):
+    def ttest_binary_digits(self):
         from sklearn.datasets import load_digits
         from sklearn.model_selection import KFold
         rng = np.random.RandomState(1994)
@@ -78,7 +78,7 @@ class TestSklearn(unittest.TestCase):
             assert err < 0.1
 
 
-    def test_regression(self):
+    def ttest_regression(self):
         params = {
             "objective": "regression",  'early_stop': 5, 'num_boost_round': 50, "verbosity": 1,
         }
@@ -95,7 +95,7 @@ class TestSklearn(unittest.TestCase):
             self.assertAlmostEqual(ret, gbm.evals_result_['valid_0']['l2'][gbm.best_iteration_ - 1], places=5)
         self.assertLess(ret, 16)
 
-    def test_regression_boston_housing(self):
+    def ttest_regression_boston_housing(self):
         rng = np.random.RandomState(1994)
         params = {
             "objective": "regression", 'early_stop': 5, 'num_boost_round': 50, "verbosity": 1,
@@ -121,7 +121,7 @@ class TestSklearn(unittest.TestCase):
     
     #@unittest.skipIf(not litemort.combat.PANDAS_INSTALLED, 'pandas is not installed')
     def test_pandas_categorical(self):
-        params = {
+        params = {      #需要更详细的的测试
             "objective": "binary", "metric": "logloss", 'early_stop': 5, 'num_boost_round': 50,
             "verbosity": 1,
         }
@@ -167,6 +167,7 @@ class TestSklearn(unittest.TestCase):
             pred4 = list(gbm4.predict(X_test))
             pred_prob = list(gbm0.predict_proba(X_test)[:, 1])
             np.testing.assert_almost_equal(pred_prob, pred4)
+            input("...")
         #np.testing.assert_almost_equal(pred0, pred1)
         #np.testing.assert_almost_equal(pred0, pred2)
         #np.testing.assert_almost_equal(pred0, pred3)

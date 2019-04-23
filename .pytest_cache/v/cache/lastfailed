@@ -1,4 +1,7 @@
 {
   "tests/python_package_test/test_basic.py::TestBasic::test": true,
-  "tests/python_package_test/test_sklearn.py::TestSklearn::test_binary": true
+  "tests/python_package_test/test_sklearn.py": true,
+  "tests/python_package_test/test_sklearn.py::TestSklearn": true,
+  "tests/python_package_test/test_sklearn.py::TestSklearn::test_binary": true,
+  "tests/python_package_test/test_sklearn.py::TestSklearn::test_pandas_categorical": true
 }

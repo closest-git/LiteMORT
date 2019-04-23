@@ -139,9 +139,9 @@ class LiteMORT(object):
         self._n_classes = None
         self.init(params)
         if self.params.objective == "binary":
-            self.problem = Mort_BinaryClass
+            self.problem = Mort_BinaryClass()
         elif self.params.objective == "regression":
-            self.problem = Mort_Regressor
+            self.problem = Mort_Regressor()
 
     def __del__(self):
         try:
@@ -300,7 +300,7 @@ class LiteMORT(object):
 
         return self
 
-    def predict(self, X_, flag=0x0):
+    def predict(self, X_,pred_leaf=False, pred_contrib=False,raw_score=False, flag=0x0):
         # print("====== LiteMORT_predict X_={} ......".format(X_.shape))
         dim, nFeat = X_.shape[0], X_.shape[1];
         Y_ = np.zeros(dim, dtype=np.float64)
@@ -309,6 +309,7 @@ class LiteMORT(object):
         self.mort_predcit(self.hLIB,tX.ctypes.data_as(POINTER(c_float)), tY.ctypes.data_as(POINTER(c_double)), nFeat, dim, 0)
         if not(tX is X_):
             del tX;     gc.collect()
+        Y_ = self.problem.OnResult(Y_,pred_leaf,pred_contrib,raw_score)
         return Y_
 
 
@@ -333,39 +334,5 @@ class LiteMORT(object):
         X_ = imputed_DF
         #print("head={}\ntail={}".format(X_.head(), X_.tail()))
         return X_
-
-    def predict_proba(self, X, raw_score=False, num_iteration=-1,
-                      pred_leaf=False, pred_contrib=False, **kwargs):
-        """Return the predicted probability for each class for each sample.
-
-        Parameters
-        ----------
-        X : array-like or sparse matrix of shape = [n_samples, n_features]
-            Input features matrix.
-        raw_score : bool, optional (default=False)
-            Whether to predict raw scores.
-        num_iteration : int, optional (default=-1)
-            Limit number of iterations in the prediction.
-            If <= 0, uses all trees (no limits).
-        pred_leaf : bool, optional (default=False)
-            Whether to predict leaf index.
-        pred_contrib : bool, optional (default=False)
-            Whether to predict feature contributions.
-        **kwargs : other parameters for the prediction
-
-        Returns
-        -------
-        predicted_probability : array-like of shape = [n_samples, n_classes]
-            The predicted probability for each class for each sample.
-        X_leaves : array-like of shape = [n_samples, n_trees * n_classes]
-            If ``pred_leaf=True``, the predicted leaf every tree for each sample.
-        X_SHAP_values : array-like of shape = [n_samples, (n_features + 1) * n_classes]
-            If ``pred_contrib=True``, the each feature contributions for each sample.
-        """
-        result = self.predict(X)
-        if self._n_classes > 2 or pred_leaf or pred_contrib:
-            return result
-        else:
-            return np.vstack((1. - result, result)).transpose()
 
 

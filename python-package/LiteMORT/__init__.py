@@ -9,7 +9,8 @@ import os
 
 try:
     #from .LiteMORT_problems import Mort_Problems
-    from .LiteMORT import LiteMORT    
+    from .LiteMORT import LiteMORT
+    from .LiteMORT_preprocess import Mort_Preprocess
 except ImportError:
     pass
 '''
@@ -26,6 +27,6 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 if os.path.isfile(os.path.join(dir_path, 'VERSION.txt')):
     __version__ = open(os.path.join(dir_path, 'VERSION.txt')).read().strip()
 
-__all__ = ['LiteMORT']
+__all__ = ['LiteMORT','Mort_Preprocess']
 
 

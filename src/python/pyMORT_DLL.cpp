@@ -122,8 +122,17 @@ void OnUserParams(LiteBOM_Config&config, PY_ITEM* params, int nParam, int flag =
 		if (strcmp(params[i].Keys, "objective") == 0) {
 			config.objective = params[i].text;
 		}
-		if (strcmp(params[i].Keys, "metric") == 0) {
-			config.eval_metric = params[i].text;
+		//ºÊ»›Metric Parameters in lightgbm.pdf
+		if (strcmp(params[i].Keys, "metric") == 0 || strcmp(params[i].Keys, "binary") == 0) {
+			if (strcmp(params[i].text,"binary_logloss")==0)
+				config.eval_metric = "logloss";
+			else {
+				config.eval_metric = params[i].text;
+				if (config.eval_metric!="auc" && config.eval_metric!="auc") {
+					throw "!!!This version does not support the following eval_metric!!!";
+				}
+
+			}
 		}
 	}
 	config.OnObjective();
