@@ -53,6 +53,12 @@ class LiteMORT_params(object):
             self.early_stopping_rounds = dict_param['early_stop']
         if 'num_boost_round' in dict_param:
             self.n_estimators = dict_param['num_boost_round']
+        if 'n_estimators' in dict_param:
+            self.n_estimators = dict_param['n_estimators']
+        if 'num_iteration' in dict_param:
+            self.n_estimators = dict_param['num_iteration']
+        if 'num_iterations' in dict_param:
+            self.n_estimators = dict_param['num_iterations']
 
 
     def __init__(self,objective,fold=5,lr=0.1,round=50,early_stop=50,subsample=1,feature_sample=1,leaves=31,
@@ -151,17 +157,6 @@ class LiteMORT(object):
             self.hLIB = None
         except AttributeError:
             pass
-
-    #  注意 Y_t与y_train不一样
-    def Y_t(self, y_train, np_type):
-        # print(type(y_train))
-        if type(y_train) is pd.Series:
-            np_target = y_train.values.astype(np_type)
-        elif isinstance(y_train, pd.DataFrame):
-            np_target = y_train.values.astype(np_type)
-        else:
-            np_target = y_train.astype(np_type)
-        return np_target
 
     def X_t(self, X_train_0, target_type):
         # mort_fit需要feature优先
@@ -274,14 +269,15 @@ class LiteMORT(object):
             X_test, y_test=eval_set[0]
 
         print("====== LiteMORT_fit X_train_0={} y_train={}......".format(X_train_0.shape, y_train.shape))
-        train_y = self.Y_t(y_train, np.float64)
+        train_y = self.problem.OnY(y_train, np.float64)
+        #train_y = self.Y_t(y_train, np.float64)
         train_X = self.X_t(X_train_0, np.float32)
         self.preprocess.train_X = train_X.ctypes.data_as(POINTER(c_float))
         self.preprocess.train_y = train_y.ctypes.data_as(POINTER(c_double))
         nTrain, nFeat, nTest = train_X.shape[0], train_X.shape[1], 0
         eval_X,eval_y=None,None
         if  eval_set is not None:
-            eval_y0 = self.Y_t(y_test, np.float64)
+            eval_y0 = self.problem.OnY(y_test, np.float64)
             eval_X0 = self.X_t(X_test, np.float32)
             nTest = eval_X0.shape[0]
             self.preprocess.eval_X,self.preprocess.eval_y = eval_X0.ctypes.data_as(POINTER(c_float)), eval_y0.ctypes.data_as(POINTER(c_double))

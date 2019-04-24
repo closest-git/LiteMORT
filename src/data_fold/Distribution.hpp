@@ -381,23 +381,21 @@ namespace Grusoft {
 			histo->a0 = a0;		histo->a1 = a1;
 			if (a0 == a1) { return; }/**/
 			Tx step = (a1 - a0) / nMostBin, v1_last = a0;
-			CheckUnique(config, nSamp_, val, idx, vUnique, nMostBin);
 			if (BIT_TEST(type, Distribution::CATEGORY)) {
-				assert(config.feat_quanti > 1);
-				histo->bins.resize(vUnique.size());
-				HistoOnUnique(config, val, idx, vUnique);
-				return;		//必须保持一致
+				CheckUnique(config, nSamp_, val, idx, vUnique, nMostBin*10);
+				if (vUnique.size() > 0) {
+					assert(config.feat_quanti > 1);
+					histo->bins.resize(vUnique.size());
+					HistoOnUnique(config, val, idx, vUnique);
+					return;		//必须保持一致
+				}
 			}
 
 			//int histo_alg = config.histo_algorithm;
 			histo->bins.resize(nMostBin + 3);
 			switch (config.histo_bin_map) {
 			case LiteBOM_Config::HISTO_BINS_MAP::onUNIQUE:
-				/*for (i = 0; i < vUnique.size() - 1; i++) {
-					v0 = vUnique[i];		v1 = vUnique[i + 1];
-					vThrsh.push_back((v0 + v1) / 2);
-				}
-				vThrsh.push_back(a1 + step / 10);*/
+				
 				break;
 			case LiteBOM_Config::HISTO_BINS_MAP::on_FREQ_and_Y:
 			case LiteBOM_Config::HISTO_BINS_MAP::on_FREQ:
