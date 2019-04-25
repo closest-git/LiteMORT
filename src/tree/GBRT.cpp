@@ -239,7 +239,6 @@ int GBRT::Train(string sTitle, int x, int flag) {
 	bool isEvalTrain=true;
 	DForest curF;
 	for (t = 0; t<rounds; t++) {
-		GST_TIC(t1);
 		skdu.noT = t;
 		if (isEvalTrain) {
 			err_0 = this->Predict(hTrainData,false,true, true);		//可以继续优化
@@ -254,7 +253,6 @@ int GBRT::Train(string sTitle, int x, int flag) {
 			if (hEvalData == nullptr)
 				stopping.Add(err_0);
 		}
-		//FeatsOnFold::stat.tX += GST_TOC(t1);
 		if (hEvalData != nullptr) {
 			if (t > 0) {
 				hMTNode hRoot = (dynamic_cast<ManifoldTree*>(forest[t-1]))->hRoot();		//im1 = hRoot->impuri;
@@ -293,8 +291,8 @@ int GBRT::Train(string sTitle, int x, int flag) {
 	forest.resize(stopping.best_no + 1);
 	hTrainData->AfterTrain();
 	string sEval = hEvalData == nullptr ? (isEvalTrain ? hTrainData->nam : "None") : hEvalData->nam;
-	printf("\n********* GBRT::Train nTree=%d err@%s=%.8g thread=%d train=%g sec\r\n", 
-		forest.size(), sEval.c_str(), stopping.e_best,nThread, GST_TOC(tick));
+	printf("\n********* GBRT::Train nTree=%d nNode=%d err@%s=%.8g thread=%d train=%g sec\r\n", 
+		forest.size(), nzNode, sEval.c_str(), stopping.e_best,nThread, GST_TOC(tick));
 
 	if (nOOB>0)
 		TestOOB(hTrainData);

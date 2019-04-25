@@ -18,9 +18,9 @@ import sys
 from litemort import *
 import lightgbm as lgb
 from sklearn import metrics
-from sklearn.ensemble import gradient_boosting
-clf = gradient_boosting(n_estimators=100, max_depth=2,random_state=0)
+
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
+#isMORT = True
 
 def auc2(m, train, test,y_train,y_test):
     return (metrics.roc_auc_score(y_train,m.predict(train)),
@@ -48,7 +48,7 @@ def test_fly_( ):
 
     cols = ["AIRLINE", "FLIGHT_NUMBER", "DESTINATION_AIRPORT", "ORIGIN_AIRPORT"]
     for item in cols:
-        data[item] = data[item].astype("category").cat.codes + 1
+       data[item] = data[item].astype("category").cat.codes + 1
     train, test, y_train, y_test = train_test_split(data.drop(["ARRIVAL_DELAY"], axis=1), data["ARRIVAL_DELAY"], random_state=10, test_size=0.25)
 
     if False:
@@ -61,7 +61,7 @@ def test_fly_( ):
         grid_search = GridSearchCV(lg, n_jobs=-1, param_grid=param_dist, cv = 3, scoring="roc_auc", verbose=5)
         grid_search.fit(train,y_train)
         grid_search.best_estimator_
-    params = {  "objective": "binary",'subsample': 0.1,
+    params = {  "objective": "binary",'subsample': 1,
                 "metric": "binary_logloss",#""binary_logloss",
               "max_depth": 50, "learning_rate": 0.1, "num_leaves": 900, "n_estimators": 300}
     cate_features_name = ["MONTH", "DAY", "DAY_OF_WEEK", "AIRLINE", "DESTINATION_AIRPORT","ORIGIN_AIRPORT"]

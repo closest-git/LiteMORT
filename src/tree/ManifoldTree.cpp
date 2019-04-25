@@ -292,7 +292,8 @@ ManifoldTree::ManifoldTree(BoostingForest *hF, string nam_, int flag) {
 	//hData->samp_set.Shuffle(rnd_seed);
 	MT_BiSplit *root = new MT_BiSplit(hData, 0, rnd_seed);
 	nodes.push_back(root);
-	leafs.push_back(root);
+	//leafs.push_back(root);
+	//leafs.push(root);
 
 	size_t i, nSamp = hData->nSample();
 	/*samp_folds.resize(nSamp);
@@ -301,6 +302,19 @@ ManifoldTree::ManifoldTree(BoostingForest *hF, string nam_, int flag) {
 	}*/
 }
 
+void ManifoldTree::AddNewLeaf(hMTNode hNode, FeatsOnFold *hData_, const vector<int> &pick_feats, int flag) {
+	hNode->gain = 0;
+	if (hForest->isPass(hNode)) {
+		;
+	}
+	else {		
+		assert(hNode->feat_id == -1);
+		if( hNode->impuri>0)
+			hNode->CheckGain(hData_, pick_feats, 0);
+	}
+	leafs.push(hNode);
+
+}
 
 
 /*
@@ -317,16 +331,19 @@ void ManifoldTree::GrowLeaf(hMTNode hBlit, const char*info, int flag) {
 	//MT_BiSplit *hBlit = dynamic_cast<MT_BiSplit *>(node);		assert(hBlit != nullptr);
 	hBlit->left = new MT_BiSplit(hBlit), hBlit->right = new MT_BiSplit(hBlit);
 
-	leafs.erase(std::remove(leafs.begin(), leafs.end(), hBlit), leafs.end());
+	//leafs.erase(std::remove(leafs.begin(), leafs.end(), hBlit), leafs.end());
 	hBlit->left->id = nodes.size( );		
-	nodes.push_back(hBlit->left);			leafs.push_back(hBlit->left);
+	nodes.push_back(hBlit->left);			//leafs.push_back(hBlit->left);
 	hBlit->right->id = nodes.size();		
-	nodes.push_back(hBlit->right);			leafs.push_back(hBlit->right);
+	nodes.push_back(hBlit->right);			//leafs.push_back(hBlit->right);
 	
 	//FeatVector *Feat = hData->Feat(hBlit->feat_id);
 	hData->SplitOn(hBlit);
+	GST_TIC(t1);
 	hData->AtLeaf(hBlit->left);		
 	hData->AtLeaf(hBlit->right);
+
+	//FeatsOnFold::stat.tX += GST_TOC(t1);
 	size_t nLeft= hBlit->left->nSample(), nRight = hBlit->right->nSample();
 	double imp = hBlit->right->impuri+ hBlit->left->impuri;
 	//node->Dump(info, 0x0);
@@ -348,7 +365,6 @@ void ManifoldTree::GrowLeaf(hMTNode hBlit, const char*info, int flag) {
 			//throw "ManifoldTree::GrowLeaf !!!isMatch!!!";
 		}
 	}
-
 }
 
 /*
@@ -386,6 +402,9 @@ void ManifoldTree::BeforeEachBatch(size_t nMost, size_t rng_seed, int flag) {
 /*
 	注意：不管X,Y怎么变化，ManifoldTree的目标函数是negative_gradient!!!	
 	其数据类型始终是tpDOWN
+
+	v0.2	cys	
+		4/25/2019
 */
 void ManifoldTree::Train(int flag) {	
 	int nTree=hForest->forest.size( ),iter=0;
@@ -410,8 +429,8 @@ void ManifoldTree::Train(int flag) {
 			printf("\tpick_feats={%d,%d,...,%d}\t",
 				pick_feats[0], pick_feats[pick_feats.size()/2], pick_feats[pick_feats.size()-1]);
 		}
-
 	}
+	AddNewLeaf(root, hData_, pick_feats);
 	while (true) {		//参见GBRT::GetBlit
 		if(leafs.size()>=hData_->config.num_leaves )
 			break;
@@ -420,34 +439,32 @@ void ManifoldTree::Train(int flag) {
 			//Update root sample and update Functional at each nodes
 			BeforeEachBatch(hData_->config.batch*nSamp,42+ leafs.size());
 		}
-		for (auto hNode : leafs) {
-		//for each(hMTNode hNode in leafs){
+		hMTNode hBest = leafs.top();
+		if (hBest->gain > 0)		{
+			gain = hBest->gain;			leafs.pop();
+		}		else {
+			hBest = nullptr;
+		}
+		/*for (auto hNode : leafs) {
 			nz++;
 			assert( hNode->isLeaf());
 			if(hForest->isPass(hNode))
-				continue;
-			/*if (hNode->fruit != nullptr) {		//主要用于测试，彻底重算
-				assert(hNode->feat_id != -1);
-				delete hNode->fruit;		 hNode->fruit = nullptr;
-				hNode->feat_id = -1;		hNode->gain = 0;
-			}*/
-			if( hNode->feat_id==-1 &&/**/ hNode->impuri>0 )	{//have checked before
+				continue;			
+			if( hNode->feat_id==-1 && hNode->impuri>0 )	{//have checked before
 				hNode->gain=0;
 				hNode->CheckGain(hData_, pick_feats, 0);
-				//hNode->CheckGain(hData_, 0);
 			}	else {
 				if (hNode->impuri==0) {
 					//hNode->OptimalAtSamp(hData_);		assert(hNode->impuri==0);
 				}
 				nPass++;
 			}
-
 			if (hNode->gain > gain) {
-				sprintf(info,"leaf_%d(%d@%d) gain=%8g(%8g)", hNode->id,nz,leafs.size(), hNode->gain,gain);
 				hBest = hNode;		gain = hBest->gain;	
+				//sprintf(info,"leaf_%d(%d@%d) gain=%8g(%8g)", hNode->id,nz,leafs.size(), hNode->gain,gain);
 				//hNode->Dump(info,0x0);
 			}			
-		}
+		}*/
 		iter++;
 		if (hBest != nullptr) {
 			sprintf(info, "Grow@Leaf_%d gain=%8g", hBest->id, hBest->gain);
@@ -457,6 +474,12 @@ void ManifoldTree::Train(int flag) {
 		}	else {
 			break;
 		}
+		//GST_TIC(t1);
+		//FeatsOnFold::stat.tX += GST_TOC(t1);
+		if(hBest->left!=nullptr)
+			AddNewLeaf(hBest->left,hData_, pick_feats);
+		if (hBest->right != nullptr)
+			AddNewLeaf(hBest->right, hData_, pick_feats);
 	}
 
 	//GetLeaf(vLeaf);

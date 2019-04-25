@@ -184,7 +184,7 @@ namespace Grusoft {
 
 		template<typename Tx>
 		void SplitOn(FeatsOnFold *hData_, const std::vector<Tx>&vals, bool isQuanti, int flag = 0x0) {
-			GST_TIC(t1);
+			//GST_TIC(t1);
 			SAMP_SET& lSet = left->samp_set,& rSet = right->samp_set;
 			lSet = this->samp_set;		rSet = this->samp_set;
 			lSet.isRef = true;			rSet.isRef = true;
@@ -194,7 +194,6 @@ namespace Grusoft {
 			double thrsh = fruit->Thrshold(isQuanti);
 			//clock_t t1 = clock();
 			int num_threads = OMP_FOR_STATIC_1(nSamp, step);
-			//tpSAMP_ID *tmp = new tpSAMP_ID[nSamp];
 			G_INT_64 *pL = new G_INT_64[num_threads](), *pR = new G_INT_64[num_threads](),nLeft=0,nRigt=0;
 #pragma omp parallel for schedule(static,1)
 			for (int th_ = 0; th_ < num_threads; th_++) {
@@ -217,7 +216,6 @@ namespace Grusoft {
 				memcpy(samps + nLeft+ nRigt, rigt + start, sizeof(tpSAMP_ID)*pR[th_]);
 				nRigt += pR[th_];
 			}
-			//delete[] tmp;
 			//nLeft++;							nRigt++;
 			//memcpy(samps, samp_set.left, sizeof(tpSAMP_ID)*nLeft);
 
@@ -227,7 +225,7 @@ namespace Grusoft {
 			//std::sort(lSet.samps, lSet.samps + lSet.nSamp);
 			rSet.samps = samps + nLeft;		rSet.nSamp = nRigt;
 			//std::sort(rSet.samps, rSet.samps + rSet.nSamp);
-			FeatsOnFold::stat.tX += GST_TOC(t1);
+			//FeatsOnFold::stat.tX += GST_TOC(t1);
 		}
 	};
 	typedef MT_BiSplit *hMTNode;

@@ -336,7 +336,6 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 			delete histo;		arrFruit[i]->histo = nullptr;
 		}
 	}
-	//FeatsOnFold::stat.tX += GST_TOC(t1);
 
 
 	/*for (int i = 0; i < 10; i++) {		//2d feat vector
@@ -388,6 +387,7 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 			}
 		}
 	}
+	FeatsOnFold::stat.tX += GST_TOC(t1);
 	return gain;
 }
 
