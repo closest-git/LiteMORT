@@ -472,7 +472,9 @@ PYMORT_DLL_API void LiteMORT_fit(void *mort_0, float *train_data, tpY *train_tar
 	if (isDelEDA) {
 		delete hEDA;			hEDA = nullptr;
 	}
-	printf("\n********* LiteMORT_api fit @%p(hEDA=%p,hGBRT=%p) time=%.3g(%.3g)......OK\n\n",mort,mort->hEDA,mort->hGBRT, GST_TOC(tick), hFold->stat.tX+ DCRIMI_2::tX );
+
+	//@%p(hEDA=%p,hGBRT=%p)	mort,mort->hEDA,mort->hGBRT,
+	printf("\n********* LiteMORT_api fit  time=%.3g(%.3g)......OK\n\n", GST_TOC(tick), FeatsOnFold::stat.tX+ DCRIMI_2::tX );
 
 	}
 	catch (char * sInfo) {

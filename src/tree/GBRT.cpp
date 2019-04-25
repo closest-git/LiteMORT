@@ -239,6 +239,7 @@ int GBRT::Train(string sTitle, int x, int flag) {
 	bool isEvalTrain=true;
 	DForest curF;
 	for (t = 0; t<rounds; t++) {
+		GST_TIC(t1);
 		skdu.noT = t;
 		if (isEvalTrain) {
 			err_0 = this->Predict(hTrainData,false,true, true);		//可以继续优化
@@ -253,6 +254,7 @@ int GBRT::Train(string sTitle, int x, int flag) {
 			if (hEvalData == nullptr)
 				stopping.Add(err_0);
 		}
+		//FeatsOnFold::stat.tX += GST_TOC(t1);
 		if (hEvalData != nullptr) {
 			if (t > 0) {
 				hMTNode hRoot = (dynamic_cast<ManifoldTree*>(forest[t-1]))->hRoot();		//im1 = hRoot->impuri;
@@ -269,6 +271,7 @@ int GBRT::Train(string sTitle, int x, int flag) {
 				stopping.best_no, stopping.e_best, skdu.noT, err_0, err - err_0);
 			break;
 		}
+
 		this->BeforeTrain(hTrainData);
 		//gradients = self.loss.negative_gradient(preds, y)
 		ManifoldTree *hTree = new ManifoldTree(this, to_string(666) + "_" + to_string(t));

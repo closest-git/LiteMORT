@@ -105,8 +105,32 @@ namespace Grusoft {
 		virtual void Init_BFold(FeatsOnFold *hData_,int flag=0x0);
 
 		template<typename Tx>
-		void SplitOn(FeatsOnFold *hData_, const std::vector<Tx>&vals, bool isQuanti, int flag = 0x0) {
-			//GST_TIC(t1);
+		inline void  _core_1_(bool isQuanti, const tpSAMP_ID samp, const Tx&a, const double thrsh, tpSAMP_ID*left, G_INT_64&nLeft, tpSAMP_ID*rigt,G_INT_64&nRigt, int flag) {
+			bool isNana = (isQuanti && a == -1) || (!isQuanti && IS_NAN_INF(a));
+			if (isNana) {
+				if (fruit->isNanaLeft) {
+					left[nLeft++] = samp;	
+					//samps[ATOM_INC_64(nLeft)] = samp;	continue;
+				}
+				else {
+					rigt[nRigt++] = samp;	
+					//rigt[ATOM_INC_64(nRigt)] = samp;	continue;
+				}
+			}	else {
+				if (a < thrsh) {
+					left[nLeft++] = samp;
+					//samps[ATOM_INC_64(nLeft)] = samp;
+				}
+				else {
+					rigt[nRigt++] = samp;
+					//rigt[ATOM_INC_64(nRigt)] = samp;
+				}
+			}
+		}
+
+		template<typename Tx>
+		void SplitOn_0(FeatsOnFold *hData_, const std::vector<Tx>&vals, bool isQuanti, int flag = 0x0) {
+			GST_TIC(t1);
 			SAMP_SET& lSet = left->samp_set;
 			SAMP_SET& rSet = right->samp_set;
 			lSet = this->samp_set;		rSet = this->samp_set;
@@ -123,7 +147,8 @@ namespace Grusoft {
 			
 			for (i = 0; i < nSamp; i++) {
 				samp = samps[i];
-				//教训啊，排序能有效提升速度		3/27/2019
+				_core_1_(isQuanti,samp, vals[samp], thrsh, samps, nLeft, rigt, nRigt, flag);
+				/*//教训啊，排序能有效提升速度		3/27/2019
 				//if (i > 1)		assert(samps[i]>=samps[i-1]);
 				bool isNana = (isQuanti && vals[samp] == -1) || (!isQuanti && IS_NAN_INF(vals[samp]));
 				if (isNana) {
@@ -142,7 +167,7 @@ namespace Grusoft {
 						rigt[nRigt++] = samp;
 						//rigt[ATOM_INC_64(nRigt)] = samp;
 					}
-				}
+				}*/
 			}
 			//nLeft++;							nRigt++;
 			//memcpy(samps, samp_set.left, sizeof(tpSAMP_ID)*nLeft);
@@ -154,7 +179,55 @@ namespace Grusoft {
 			//std::sort(lSet.samps, lSet.samps + lSet.nSamp);
 			rSet.samps = samps + nLeft;		rSet.nSamp = nRigt;
 			//std::sort(rSet.samps, rSet.samps + rSet.nSamp);
-			//FeatsOnFold::stat.tX += GST_TOC(t1);
+			FeatsOnFold::stat.tX += GST_TOC(t1);
+		}
+
+		template<typename Tx>
+		void SplitOn(FeatsOnFold *hData_, const std::vector<Tx>&vals, bool isQuanti, int flag = 0x0) {
+			GST_TIC(t1);
+			SAMP_SET& lSet = left->samp_set,& rSet = right->samp_set;
+			lSet = this->samp_set;		rSet = this->samp_set;
+			lSet.isRef = true;			rSet.isRef = true;
+			size_t i, nSamp = samp_set.nSamp, step;
+			tpSAMP_ID *samps = samp_set.samps, *rigt = samp_set.rigt, *left = samp_set.left;
+			//double thrsh = isQuanti ? fruit->T_quanti : fruit->thrshold;
+			double thrsh = fruit->Thrshold(isQuanti);
+			//clock_t t1 = clock();
+			int num_threads = OMP_FOR_STATIC_1(nSamp, step);
+			//tpSAMP_ID *tmp = new tpSAMP_ID[nSamp];
+			G_INT_64 *pL = new G_INT_64[num_threads](), *pR = new G_INT_64[num_threads](),nLeft=0,nRigt=0;
+#pragma omp parallel for schedule(static,1)
+			for (int th_ = 0; th_ < num_threads; th_++) {
+				size_t start = th_*step, end = min(start + step, nSamp),i;
+				G_INT_64	nL=0,nR=0;
+				for (i = start; i < end; i++) {
+					tpSAMP_ID samp = samps[i];
+					_core_1_(isQuanti, samp, vals[samp], thrsh, samps+start, nL, rigt+start, nR, flag);
+				}
+				pL[th_] = nL;	 pR[th_] = nR;
+				assert(pL[th_]+ pR[th_]== end-start);
+			}
+			for (int th_ = 0; th_ < num_threads; th_++) {
+				size_t start = th_*step, end = min(start + step, nSamp);
+				memcpy(samps + nLeft, samps+start, sizeof(tpSAMP_ID)*pL[th_]);
+				nLeft += pL[th_];
+			}
+			for (int th_ = 0; th_ < num_threads; th_++) {
+				size_t start = th_*step, end = min(start + step, nSamp);
+				memcpy(samps + nLeft+ nRigt, rigt + start, sizeof(tpSAMP_ID)*pR[th_]);
+				nRigt += pR[th_];
+			}
+			//delete[] tmp;
+			//nLeft++;							nRigt++;
+			//memcpy(samps, samp_set.left, sizeof(tpSAMP_ID)*nLeft);
+
+			samp_set.nLeft = nLeft;				samp_set.nRigt = nRigt;
+			//tX += ((clock() - (t1))*1.0f / CLOCKS_PER_SEC);
+			lSet.samps = samps;				lSet.nSamp = nLeft;
+			//std::sort(lSet.samps, lSet.samps + lSet.nSamp);
+			rSet.samps = samps + nLeft;		rSet.nSamp = nRigt;
+			//std::sort(rSet.samps, rSet.samps + rSet.nSamp);
+			FeatsOnFold::stat.tX += GST_TOC(t1);
 		}
 	};
 	typedef MT_BiSplit *hMTNode;

@@ -7,6 +7,7 @@ from .LiteMORT_preprocess import *
 from .LiteMORT_problems import *
 from sklearn import preprocessing
 import os
+import warnings
 
 class MORT_exception(Exception):
     """Error throwed by LiteMORT"""
@@ -25,6 +26,16 @@ def _check_call(ret,normal_value=0x0):
 '''
 
 class LiteMORT_params(object):
+    def alias_param(self,key,default_value,dict_param,alia_list):
+        for alias in alia_list:
+            if alias not in dict_param:
+                continue
+            if alias!=key:
+                warnings.warn("Found `{}`(alias of {}) in params. Will use it instead of argument".format(alias,key))
+            value = (type(default_value))(dict_param[alias])
+            return value
+        return default_value
+
     def OnArgs(self,dict_param):
         self.isOK = False
         if 'metric' in dict_param:
@@ -37,10 +48,12 @@ class LiteMORT_params(object):
             self.learning_rate = dict_param['learning_rate']
         if 'bagging_fraction' in dict_param:
             self.subsample = dict_param['bagging_fraction']
-        if 'subsample' in dict_param:
-            self.subsample = dict_param['subsample']
-        if 'feature_fraction' in dict_param:
-            self.feature_sample = dict_param['feature_fraction']
+        #if 'subsample' in dict_param:
+        #    self.subsample = dict_param['subsample']
+        self.subsample = self.alias_param('subsample',1.0,dict_param,['subsample','bagging_fraction','sub_row'])
+        #if 'feature_fraction' in dict_param:
+        #    self.feature_sample = dict_param['feature_fraction']
+        self.feature_sample = self.alias_param('sub_feature', 1.0, dict_param, ['feature_sample', 'feature_fraction', 'sub_feature', 'colsample_bytree'])
         if 'max_bin' in dict_param:
             self.feature_quanti = dict_param['max_bin']
         if 'min_data_in_leaf' in dict_param:
@@ -49,16 +62,11 @@ class LiteMORT_params(object):
             self.boost_from_average = dict_param['boost_from_average']
         if 'verbosity' in dict_param:
             self.verbose = dict_param['verbosity']
-        if 'early_stop' in dict_param:
-            self.early_stopping_rounds = dict_param['early_stop']
-        if 'num_boost_round' in dict_param:
-            self.n_estimators = dict_param['num_boost_round']
-        if 'n_estimators' in dict_param:
-            self.n_estimators = dict_param['n_estimators']
-        if 'num_iteration' in dict_param:
-            self.n_estimators = dict_param['num_iteration']
-        if 'num_iterations' in dict_param:
-            self.n_estimators = dict_param['num_iterations']
+        #if 'early_stop' in dict_param:
+        #    self.early_stopping_rounds = dict_param['early_stop']
+        self.early_stopping_rounds = self.alias_param('early_stop',50,dict_param,['early_stop',"early_stopping_round", "early_stopping_rounds", "early_stopping"])
+        self.n_estimators = self.alias_param('num_trees',self.n_estimators,dict_param,
+            ["num_boost_round", "num_iterations", "num_iteration", "num_tree", "num_trees", "num_round", "num_rounds", "n_estimators"] )
 
 
     def __init__(self,objective,fold=5,lr=0.1,round=50,early_stop=50,subsample=1,feature_sample=1,leaves=31,
@@ -260,6 +268,17 @@ class LiteMORT(object):
                 feat_dict   cys@1/10/2019
     '''
     def fit(self,X_train_0, y_train,eval_set=None,  feat_dict=None,categorical_feature=None, params=None,flag=0x0):
+        '''
+
+        :param X_train_0:
+        :param y_train:
+        :param eval_set: 参见lightgbm之valid_sets
+        :param feat_dict:
+        :param categorical_feature:
+        :param params:
+        :param flag:
+        :return:
+        '''
         gc.collect()
         #self.preprocess.fit(X_train_0, y_train)
         #self.preprocess.transform(eval_set)
@@ -296,19 +315,57 @@ class LiteMORT(object):
 
         return self
 
+
     def predict(self, X_,pred_leaf=False, pred_contrib=False,raw_score=False, flag=0x0):
+        """Predict class or regression target for X.
+
+        Parameters
+        ----------
+        X : {array-like, sparse matrix}, shape (n_samples, n_features)
+            The input samples. Internally, it will be converted to
+            ``dtype=np.float32`` and if a sparse matrix is provided
+            to a sparse ``csr_matrix``.
+
+        Returns
+        -------
+        y : array, shape (n_samples,)
+            The predicted values.
+        """
         # print("====== LiteMORT_predict X_={} ......".format(X_.shape))
-        dim, nFeat = X_.shape[0], X_.shape[1];
-        Y_ = np.zeros(dim, dtype=np.float64)
-        tY = Y_ #self.Y_t(Y_, np.float64)
-        tX = self.X_t(X_, np.float32)
-        self.mort_predcit(self.hLIB,tX.ctypes.data_as(POINTER(c_float)), tY.ctypes.data_as(POINTER(c_double)), nFeat, dim, 0)
-        if not(tX is X_):
-            del tX;     gc.collect()
+        Y_ = self.predict_raw(X_,pred_leaf, pred_contrib,raw_score, flag)
         Y_ = self.problem.OnResult(Y_,pred_leaf,pred_contrib,raw_score)
         return Y_
 
+    def predict_raw(self, X_,pred_leaf=False, pred_contrib=False,raw_score=False,flag=0x0):
+        """Predict class probabilities for X.
 
+        Parameters
+        ----------
+        X : {array-like, sparse matrix}, shape (n_samples, n_features)
+            The input samples. Internally, it will be converted to
+            ``dtype=np.float32`` and if a sparse matrix is provided
+            to a sparse ``csr_matrix``.
+
+        Raises
+        ------
+        AttributeError
+            If the ``loss`` does not support probabilities.
+
+        Returns
+        -------
+        p : array, shape (n_samples, n_classes)
+            The class probabilities of the input samples. The order of the
+            classes corresponds to that in the attribute `classes_`.
+        """
+        dim, nFeat = X_.shape[0], X_.shape[1];
+        Y_ = np.zeros(dim, dtype=np.float64)
+        tY = Y_  # self.Y_t(Y_, np.float64)
+        tX = self.X_t(X_, np.float32)
+        self.mort_predcit(self.hLIB, tX.ctypes.data_as(POINTER(c_float)), tY.ctypes.data_as(POINTER(c_double)), nFeat,dim, 0)
+        if not (tX is X_):
+            del tX;
+        gc.collect()
+        return Y_
 
     #奇怪的教训，会影响其它列,需要重写，暂时这样！！！
     def Imputer(self, params,X_, Y_,np_float, flag=0x0):

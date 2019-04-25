@@ -257,7 +257,6 @@ int MT_BiSplit::PickOnGain(FeatsOnFold *hData_,const vector<FRUIT *>& arrFruit, 
 */
 double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats, int x, int flag) {
 	GST_TIC(t1)
-		GST_TIC(tick);
 	if (bsfold != nullptr) {
 		bsfold->GreedySplit(hData_, flag);
 		//fruit = new FRUIT(bsfold);
@@ -337,6 +336,7 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 			delete histo;		arrFruit[i]->histo = nullptr;
 		}
 	}
+	//FeatsOnFold::stat.tX += GST_TOC(t1);
 
 
 	/*for (int i = 0; i < 10; i++) {		//2d feat vector
@@ -388,7 +388,6 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 			}
 		}
 	}
-	//FeatsOnFold::stat.tX += GST_TOC(t1);
 	return gain;
 }
 

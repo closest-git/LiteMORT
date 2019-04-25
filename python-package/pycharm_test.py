@@ -14,10 +14,13 @@ from sklearn.metrics import log_loss, mean_squared_error
 import matplotlib.pyplot as plt
 from sklearn.model_selection import GridSearchCV, train_test_split
 import shap
-from LiteMORT import *
+import sys
+from litemort import *
 import lightgbm as lgb
 from sklearn import metrics
-isMORT=True
+from sklearn.ensemble import gradient_boosting
+clf = gradient_boosting(n_estimators=100, max_depth=2,random_state=0)
+isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 
 def auc2(m, train, test,y_train,y_test):
     return (metrics.roc_auc_score(y_train,m.predict(train)),
@@ -58,33 +61,40 @@ def test_fly_( ):
         grid_search = GridSearchCV(lg, n_jobs=-1, param_grid=param_dist, cv = 3, scoring="roc_auc", verbose=5)
         grid_search.fit(train,y_train)
         grid_search.best_estimator_
-    params = {  "objective": "binary",
+    params = {  "objective": "binary",'subsample': 0.1,
                 "metric": "binary_logloss",#""binary_logloss",
               "max_depth": 50, "learning_rate": 0.1, "num_leaves": 900, "n_estimators": 300}
     cate_features_name = ["MONTH", "DAY", "DAY_OF_WEEK", "AIRLINE", "DESTINATION_AIRPORT","ORIGIN_AIRPORT"]
     t0=time.time()
+    a1,a2=0,0
     if isMORT:
         model2 = LiteMORT(params).fit(train, y_train)
-        y_predict = model2.predict(test,raw_score=True)[:,1]
-        a1 = metrics.roc_auc_score(y_test,model2.predict(test,raw_score=True)[:,1])
-        print("------ No categorical auc={}".format(a1))
-        model2 = LiteMORT(params).fit(train, y_train, categorical_feature = cate_features_name)
-        a2 = metrics.roc_auc_score(y_test,model2.predict(test,raw_score=True)[:,1])
-        print("------ With Categorical auc={}".format(a2))
+        if False:
+            y_predict = model2.predict(test,raw_score=True)[:,1]
+            a1 = metrics.roc_auc_score(y_test,model2.predict(test,raw_score=True)[:,1])
+            print("------ No categorical auc={}".format(a1))
+            #model2 = LiteMORT(params).fit(train, y_train, categorical_feature = cate_features_name)
+            #a2 = metrics.roc_auc_score(y_test,model2.predict(test,raw_score=True)[:,1])
+            print("------ With Categorical auc={}".format(a2))
+    elif True:
+        model2 = lgb.LGBMClassifier( **params )
+        model2.fit(train, y_train, eval_set=[(train, y_train)], verbose=True)
+        result = model2.predict_proba(test)
     else:
         d_train = lgb.Dataset(train, label=y_train,free_raw_data=False)
         # Without Categorical Features
-        model2 = lgb.train(params, d_train)
+        model2 = lgb.train(params, d_train,valid_sets=[d_train])
+        model2.save_model('gbm_test_fly_.model')
         a1=auc2(model2, train, test,y_train,y_test)
         print("------ No categorical auc2={}".format(a1))
 
         #With Catgeorical Features
-        model2 = lgb.train(params, d_train, categorical_feature = cate_features_name)
-        a2=auc2(model2, train, test,y_train,y_test)
+        #model2 = lgb.train(params, d_train, categorical_feature = cate_features_name)
+        #a2=auc2(model2, train, test,y_train,y_test)
         print("------ With categorical auc2={}".format(a2))
         del d_train
         gc.collect()
-    input("loss@test_fly_ is {} time={} model={}...".format(a2,time.time()-t0,model2))
+    input("loss@test_fly_ is {} time={} model={}...".format(a1,time.time()-t0,model2))
     os._exit(-98)
 
 def test_shap_adult_():

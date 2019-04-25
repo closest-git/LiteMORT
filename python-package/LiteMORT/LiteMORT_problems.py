@@ -41,6 +41,9 @@ class Mort_Problems(_MortModelBase):
         return result_
 
 class Mort_BinaryClass(Mort_Problems):
+    '''
+        or LogisticRegression
+    '''
     def __init__(self,  **kwargs):
         super(Mort_BinaryClass, self).__init__()
         self._labelOfY=None
