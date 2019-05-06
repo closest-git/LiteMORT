@@ -288,3 +288,8 @@ ModelManifest.xml
 *.code
 /tests/python_package_test/.pytest_cache/v/cache
 /tests/python_package_test/categorical.model
+/python-package/geo_test.py
+*.csv
+/python-package/.pytest_cache/v/cache/lastfailed
+/python-package/.pytest_cache/v/cache/nodeids
+/python-package/case_qq2019.py

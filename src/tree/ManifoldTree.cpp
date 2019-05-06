@@ -308,8 +308,9 @@ void ManifoldTree::AddNewLeaf(hMTNode hNode, FeatsOnFold *hData_, const vector<i
 		;
 	}
 	else {		
+		std::string leaf_optimal = hData_->config.leaf_optimal;
 		assert(hNode->feat_id == -1);
-		if( hNode->impuri>0)
+		//if( hNode->impuri>0)		//optimal == "lambda_0"Ê±,impuri²»¶Ô
 			hNode->CheckGain(hData_, pick_feats, 0);
 	}
 	leafs.push(hNode);
@@ -426,7 +427,7 @@ void ManifoldTree::Train(int flag) {
 		size_t nSamp = root->samp_set.nSamp;
 		printf("\t\tsamps={%d,%d,...,%d}",samps[0], samps[nSamp / 2], samps[nSamp - 1]);
 		if (pick_feats.size() > 1) {
-			printf("\tpick_feats={%d,%d,...,%d}\t",
+			printf("\tpick_feats={%d...%d...%d}\t",
 				pick_feats[0], pick_feats[pick_feats.size()/2], pick_feats[pick_feats.size()-1]);
 		}
 	}

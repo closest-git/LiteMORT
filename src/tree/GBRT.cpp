@@ -166,11 +166,12 @@ double GBRT::Predict(FeatsOnFold *hData_, bool isX,bool checkLossy, bool resumeL
 		}
 		else {
 		}
-		err = hData_->lossy->err_rmse;
-
 		//on the eval_metric
 		if (hData_->config.eval_metric == "mse") {
+			err = hData_->lossy->err_rmse;
 			err = err*err;
+		}	else if (hData_->config.eval_metric == "mae") {
+			err = hData_->lossy->err_mae;
 		}	else if (hData_->config.eval_metric == "logloss") {
 			err = hData_->lossy->err_logloss;
 		}	else if (hData_->config.eval_metric == "auc") {
@@ -179,8 +180,8 @@ double GBRT::Predict(FeatsOnFold *hData_, bool isX,bool checkLossy, bool resumeL
 
 		if (BIT_TEST(hData_->dType, FeatsOnFold::DF_EVAL)) {
 			if ((skdu.noT < 100 && skdu.noT % 5 == 0) || skdu.noT % 500 == 0) {
-				printf("%s_%d=%-8.5g_t=%.3g ", hData_->nam.c_str(),skdu.noT,  err, GST_TOC(tick));
-				if(skdu.noT > 100)	printf("tX=%.3g ", FeatsOnFold::stat.tX + DCRIMI_2::tX);
+				printf("%s_%d=%-8.5g ", hData_->nam.c_str(),skdu.noT,  err);
+				if(skdu.noT > 100)	printf("tX=%.3g ", FeatsOnFold::stat.tX);
 			}
 
 		}

@@ -233,7 +233,7 @@ class LiteMORT(object):
         ca_list = []
         for feat in self.preprocess.features:
             ca = M_argument()
-            ca.Keys = feat.encode('utf8')
+            ca.Keys = str(feat).encode('utf8')
             ca.Values = (c_float)(0)
             # if feat=='hist_merchant_id_nunique':
             if (categorical_feature is not None) and (feat in categorical_feature or no in categorical_feature):

@@ -179,7 +179,7 @@ namespace Grusoft {
 			//std::sort(lSet.samps, lSet.samps + lSet.nSamp);
 			rSet.samps = samps + nLeft;		rSet.nSamp = nRigt;
 			//std::sort(rSet.samps, rSet.samps + rSet.nSamp);
-			FeatsOnFold::stat.tX += GST_TOC(t1);
+			//FeatsOnFold::stat.tX += GST_TOC(t1);
 		}
 
 		template<typename Tx>

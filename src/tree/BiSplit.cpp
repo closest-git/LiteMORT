@@ -147,6 +147,10 @@ void MT_BiSplit::Observation_AtLocalSamp(FeatsOnFold *hData_, int flag) {
 		assert(impuri >= 0);
 		devia = sqrt(impuri / dim);		
 	}
+	if (G_sum == 0 && a2 != 0.0) {		//非常奇怪的现象
+		//G_sum = 0;
+	}
+
 //REF:	"XGBoost: A Scalable Tree Boosting System" 对于mse-loss 基本等价
 	/*if (optimal == "taylor_2") {	
 		H_sum = 2*dim;		G_sum=-2*mean*dim;
@@ -163,8 +167,8 @@ void MT_BiSplit::Observation_AtLocalSamp(FeatsOnFold *hData_, int flag) {
 		}
 		impuri = G_sum*G_sum / H_sum;		//已略去常数
 		down_step = -G_sum / H_sum;
-		sprintf(temp, "impuri(%g/%g %d)", G_sum, H_sum, dim);
-		sX = temp;
+		//sprintf(temp, "impuri(%g/%g %d)", G_sum, H_sum, dim);
+		//sX = temp;
 	}else	{
 		down_step = mean;
 		//down_step = sqrt(a2/dim);		 为啥这样不行，有意思
@@ -256,7 +260,6 @@ int MT_BiSplit::PickOnGain(FeatsOnFold *hData_,const vector<FRUIT *>& arrFruit, 
 	v0.2	并行
 */
 double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats, int x, int flag) {
-	GST_TIC(t1)
 	if (bsfold != nullptr) {
 		bsfold->GreedySplit(hData_, flag);
 		//fruit = new FRUIT(bsfold);
@@ -294,7 +297,6 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 		BinFold bf(hData_,picks, samp_set);
 		//bf.GreedySplit(hData_, picks ,0x0 );
 	}
-
 	size_t start = 0, end = picks.size();
 #pragma omp parallel for num_threads(nThread) schedule(dynamic)
 	for (int i = start; i < end; i++) {
@@ -387,7 +389,6 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 			}
 		}
 	}
-	FeatsOnFold::stat.tX += GST_TOC(t1);
 	return gain;
 }
 

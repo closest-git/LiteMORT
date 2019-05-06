@@ -122,6 +122,9 @@ namespace Grusoft {
 		//pDown=target-predict
 		tpDOWN *GetDownDirection()	const;
 		tpDOWN *GetHessian() const;
+		tpDOWN *GetSampleDown()	const;
+		tpDOWN *GetSampleHessian() const;		
+		
 		bool isTrain() {
 			return config.task == LiteBOM_Config::kTrain;
 		}

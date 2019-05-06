@@ -257,7 +257,7 @@ namespace Grusoft {
 			tpDOWN *vHess = VECTOR2ARR(hessian);
 			size_t dim = resi.size(), nSamp=hData_->nSample(),step=dim,start,end;
 			G_INT_64 i;
-			double sum = 0;
+			//double sum = 0;
 			//以后要集成各种loss function
 
 			if (objective == "binary") {	//binary `log loss
@@ -267,11 +267,12 @@ namespace Grusoft {
 			}	else if (objective == "multiclass") {	//MSE loss
 				throw "Loss::multiclass is ...";
 			}	else if (objective == "regression" || objective == "outlier") {
-				sum = 0.0;
+				
+				err_rmse = 0.0;		err_mae = 0;
 				for (i = 0; i < dim; i++) {
 					vResi[i] = y1[i] - y0[i];
-					sum += vResi[i] * vResi[i];
-					//pDown[i] = -vResi[i];	//y0[i] - y1[i];
+					err_rmse += vResi[i] * vResi[i];
+					err_mae += fabs(vResi[i]);
 				}
 				if (pDown != nullptr) {
 					if (isOutlier) {		//Average Precision
@@ -279,15 +280,23 @@ namespace Grusoft {
 						Lambda_0<Tx>();
 						//Lambda_1<Tx>();
 					}	else {	//MSE loss
-						for (i = 0; i < dim; i++) {
-							pDown[i] = -vResi[i];
+						if (metric == "mse") {
+							for (i = 0; i < dim; i++) {
+								pDown[i] = -vResi[i];
+							}
+						}
+						if (metric == "mae") {
+							for (i = 0; i < dim; i++) {
+								pDown[i] = vResi[i]>0 ? -1 : 1;
+							}
 						}
 					}					
 				}
 				//sum = NRM2(dim, vResi);
 				//参见loss = PointWiseLossCalculator::AverageLoss(sum_loss, sum_weights_)及L2Metric设计
-				err_rmse = sqrt(sum / dim);
-				err_l2 = sum / dim;
+				err_l2 = err_rmse / dim;
+				err_rmse = sqrt(err_rmse / dim);	
+				err_mae = err_mae / dim;
 			}
 			else {
 				throw "objective";
@@ -295,7 +304,7 @@ namespace Grusoft {
 			return;
 		}
 	public:
-		std::vector<tpDOWN> down, resi, hessian;		//negative_gradient,是否下降由LOSS判定		
+		std::vector<tpDOWN> down, resi, hessian,sample_down,sample_hessian;		//negative_gradient,是否下降由LOSS判定		
 
 		//https://medium.com/human-in-a-machine-world/mae-and-rmse-which-metric-is-better-e60ac3bde13d
 		double err_rmse = DBL_MAX, err_mae = DBL_MAX, err_l2 = DBL_MAX,err_logloss= DBL_MAX, err_auc= DBL_MAX;
@@ -303,6 +312,9 @@ namespace Grusoft {
 		//pDown=target-predict
 		tpDOWN *GetDownDirection() {
 			return VECTOR2ARR(down);
+		}
+		tpDOWN *GetSampleDown() {
+			return VECTOR2ARR(sample_down);
 		}
 		int *Tag() {//仅适用于分类问题
 			CLASS_VEC *cls_vec = dynamic_cast<CLASS_VEC*>(y);			assert(cls_vec != nullptr);

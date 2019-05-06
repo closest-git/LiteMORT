@@ -6,7 +6,7 @@
       <sourceFolder url="file://$MODULE_DIR$/tests/python_package_test" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/python-package/litemort" isTestSource="false" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="Python 3.6" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="R User Library" level="project" />
     <orderEntry type="library" name="R Skeletons" level="application" />
@@ -15,7 +15,7 @@
     <option name="renderExternalDocumentation" value="true" />
   </component>
   <component name="TestRunnerService">
-    <option name="projectConfiguration" value="py.test" />
+    <option name="projectConfiguration" value="pytest" />
     <option name="PROJECT_TEST_RUNNER" value="py.test" />
   </component>
 </module>

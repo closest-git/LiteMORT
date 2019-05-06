@@ -257,6 +257,7 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 		pBin->H_sum += hessian == nullptr ? 1 : hessian[samp]; //pBin->H_sum += hessian==nullptr? 1 : hessian[samp];
 		pBin->nz++;
 	}	
+
 #ifdef _DEBUG
 	if (true /* && !isRandomDrop*/) {
 		double G_sum = histo->binNA.G_sum;
@@ -490,6 +491,18 @@ tpDOWN *FeatsOnFold::GetHessian() const {
 		return nullptr;
 	else
 		return VECTOR2ARR(lossy->hessian);
+}
+
+tpDOWN *FeatsOnFold::GetSampleDown() const {
+	assert(lossy != nullptr);
+	return lossy->GetSampleDown();
+}
+tpDOWN *FeatsOnFold::GetSampleHessian() const {
+	assert(lossy != nullptr);
+	if (lossy->hessian.size() == 0)
+		return nullptr;
+	else
+		return VECTOR2ARR(lossy->sample_hessian);
 }
 
 int *FeatsOnFold::Tag() { return lossy->Tag(); }

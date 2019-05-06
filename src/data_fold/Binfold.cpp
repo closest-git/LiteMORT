@@ -44,7 +44,7 @@ BinFold::BinFold(const FeatsOnFold *hData_, const vector<int> &pick_feats, const
 		curGrad = bGrad + t*ldQ;		curHess = bHess + t*ldQ;
 		for (i = 0; i<nSamp; i++) {
 			samp = samps[i];		
-			g = down[samp],hess=hessian[samp];
+			g = down[samp],hess= hessian==nullptr ? 1 : hessian[samp];
 			bin = feat[samp];
 			//pos = t*ldQ + bin;
 			/*if (quanti[samp]<0)	//Nan
