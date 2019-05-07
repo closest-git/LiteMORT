@@ -276,6 +276,8 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 	}*/
 	int nThread = hData_->config.num_threads,pick_id=-1,node_task= hData_->config.node_task;
 	size_t nSamp = samp_set.nSamp,i,step= pick_feats.size();
+	if(nSamp < hData_->nSample())
+		hData_->PickSample_GH(this);
 	string optimal = hData_->config.leaf_optimal;
 	assert(impuri>0);
 	assert(nSamp >= hData_->config.min_data_in_leaf);
@@ -301,8 +303,8 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 #pragma omp parallel for num_threads(nThread) schedule(dynamic)
 	for (int i = start; i < end; i++) {
 		int pick = picks[i];
-		if (i == 24 && this->id == 7) {	//仅用于测试
-			//i = 24;
+		if (i == 3 && this->id == 0) {	//仅用于测试
+			//i = 3;
 		}
 		FeatVector *hFeat = hData_->Feat(pick);
 		//HistoGRAM *histo = optimal=="grad_variance" ? new HistoGRAM(nSamp) : new Histo_CTQ(nSamp);

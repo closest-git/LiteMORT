@@ -304,6 +304,7 @@ namespace Grusoft {
 		virtual void BeforePredict(int flag = 0x0);
 		virtual void BeforeTrain(BoostingForest *hGBRT, int flag = 0x0);
 		virtual void AfterTrain(int flag = 0x0);
+		virtual void PickSample_GH(MT_BiSplit*hBlit, int flag=0x0);
 
 		/*virtual void At(size_t k, void **X_, void **Y_, void**p_) const { throw ("FeatsOnFold::At is ...!!!"); }
 		virtual bool ImportFile(size_t no, const wchar_t *sPath, int tg, int flag = 0x0) { throw ("FeatsOnFold::ImportFile unimplemented!!!"); }
@@ -744,9 +745,15 @@ namespace Grusoft {
 						v1 = histo->bins[noBin+1].split_F;
 					}
 				}
-
+				int noNA = distri.histo->bins.size()-1;				
+				HISTO_BIN* hNA=distri.histo->hBinNA();
+				for (i = 0; i < nSamp_; i++) {
+					if (quanti[i] == -1)
+					{	quanti[i] = noNA;		hNA->nz++;		}
+				}
+				hNA->split_F = DBL_MAX;
+				return;
 			}
-			return;
 		}
 
 		/*

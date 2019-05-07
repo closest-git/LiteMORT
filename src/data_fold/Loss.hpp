@@ -338,17 +338,19 @@ namespace Grusoft {
 			y = new FeatVec_T<Ty>(_len, 0, "loss");			predict = new FeatVec_T<Ty>(_len, 0, "predict");
 			//predict.resize(_len, 0);
 			if (isTrain) {
-				down.resize(_len, 0);		resi.clear();		hessian.clear();
+				down.resize(_len, 0);		sample_down.resize(_len, 0);
+				resi.clear();				
+				hessian.clear();			sample_hessian.clear();
 			}
 			resi.resize(_len, 0);
 			if (hData_->config.objective == "binary") {
-				hessian.resize(_len, 0);
+				hessian.resize(_len, 0);	sample_hessian.resize(_len, 0);
 			}else	if (hData_->config.objective == "outlier") {
 				if (isTrain) {
-					hessian.resize(_len, 0);
+					hessian.resize(_len, 0);		sample_hessian.resize(_len, 0);
 					HT_lambda_.Init(10000,-1, 1, 10000);
 				}	else {
-					hessian.clear();
+					hessian.clear();		sample_hessian.clear();
 				}
 			}
 		}
@@ -357,9 +359,9 @@ namespace Grusoft {
 		FeatVec_LOSS() {
 		}
 		virtual ~FeatVec_LOSS() {
-			down.clear();
+			down.clear();				sample_down.clear();
 			resi.clear();
-			hessian.clear();
+			hessian.clear();			sample_hessian.clear();
 			//if (lossy != nullptr)			delete lossy;
 		}
 

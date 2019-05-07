@@ -433,6 +433,8 @@ namespace Grusoft {
 				vThrsh.push_back(a1 + step / 10);*/
 				break;
 			}
+			int nBin = histo->bins.size();		//always last bin for NA
+			histo->bins.resize(nBin + 1);
 			/*if (vUnique.size() > 0) {	//дя╣юспBUG???
 			}	else {
 

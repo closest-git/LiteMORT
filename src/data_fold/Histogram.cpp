@@ -94,6 +94,7 @@ void HistoGRAM_2D::GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp
 	double sum = samp_set.Y_sum_1, a = a0, errL = 0, g, gL = 0, g1 = 0, lft, rgt;
 	//size_t nLeft = 0, nRight = nSamp,minSet=0;
 	nRight = nSamp;		assert(nRight >= 0);
+	HISTO_BIN*binNA = this->hBinNA();
 	for (auto item : bins) {
 	//for each(HISTO_BIN item in bins) {
 		double errR = sum - errL;
@@ -116,7 +117,7 @@ void HistoGRAM_2D::GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp
 			fruit->isNanaLeft = false;
 			if (gL > g) {
 				fruit->isNanaLeft = true;
-				fruit->nLeft += binNA.nz;		fruit->nRight -= binNA.nz;
+				fruit->nLeft += binNA->nz;		fruit->nRight -= binNA->nz;
 			}
 			//fruit->lft_impuri = nLeft*lft*lft;		fruit->rgt_impuri = nRight*rgt*rgt;
 		}
@@ -156,7 +157,8 @@ void HistoGRAM::GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp_se
 	//double sum = samp_set.Y_sum_1, a = a0, errL = 0, g, gL = 0, g1 = 0, lft, rgt;
 	double gL = 0, gR0, hL = 0, hR = 0, a = a0, g, g1 = 0;
 	nLeft = 0;				nRight = nSamp;		assert(nRight >= 0);
-	double gSum = binNA.G_sum, hSum = binNA.H_sum;
+	HISTO_BIN*binNA = this->hBinNA();
+	double gSum = 0, hSum = 0;	// binNA->G_sum, hSum = binNA->H_sum;
 	double gainL = 0;		//对应于isNanaLeft
 	for (auto item : bins) {
 	//for each(HISTO_BIN item in bins) {
@@ -188,9 +190,9 @@ void HistoGRAM::GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp_se
 		//g = errL*errL / nLeft + errR*errR / nRight;
 		g = gL*gL / hL + gR*gR / hR;
 		if (false) {	//似乎并没有使结果更好 难以理解	 10/29/2018
-			if (binNA.nz > 0 && nRight - binNA.nz >= minSet) {
-				double eL = gL + binNA.G_sum, eR = gR - binNA.G_sum;
-				gainL = eL*eL / (hL + binNA.H_sum) + eR*eR / (hR - binNA.H_sum);
+			if (binNA->nz > 0 && nRight - binNA->nz >= minSet) {
+				double eL = gL + binNA->G_sum, eR = gR - binNA->G_sum;
+				gainL = eL*eL / (hL + binNA->H_sum) + eR*eR / (hR - binNA->H_sum);
 			}
 			else
 				gainL = 0;
@@ -207,7 +209,7 @@ void HistoGRAM::GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp_se
 			fruit->isNanaLeft = false;
 			if (gainL > g) {
 				fruit->isNanaLeft = true;
-				fruit->nLeft += binNA.nz;		fruit->nRight -= binNA.nz;
+				fruit->nLeft += binNA->nz;		fruit->nRight -= binNA->nz;
 				assert(bins[(int)(item.tic) - 1].nz>0);
 
 			}
@@ -234,6 +236,7 @@ void HistoGRAM::GreedySplit_Y(const FeatsOnFold *hData_, const SAMP_SET& samp_se
 	//FeatBlit flitX=flit;
 	char temp[2000];
 	FRUIT fruitX;
+	HISTO_BIN*binNA = this->hBinNA();
 	if (tryX) {
 		GreedySplit_X(hData_, samp_set, flag);
 		fruitX = *fruit;
@@ -246,7 +249,7 @@ void HistoGRAM::GreedySplit_Y(const FeatsOnFold *hData_, const SAMP_SET& samp_se
 	//double sum = -samp_set.Y_sum_1, errL = 0, g, g1 = 0, a;
 	double gL = 0, gR0, hL = 0, hR = 0, a = a0, g, g1 = 0;
 	nLeft = 0;	nRight = nSamp;
-	double gSum = binNA.G_sum, hSum = binNA.H_sum;
+	double gSum = binNA->G_sum, hSum = binNA->H_sum;
 	double gainL = 0;		//对应于isNanaLeft
 	for (auto item : bins) {
 	//for each(HISTO_BIN item in bins) {

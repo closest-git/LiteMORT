@@ -2,19 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1f20a82c-2842-4728-bc01-7f01847a5972" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/LiteMORT.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/LiteMORT.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/python-package/LiteMORT/LiteMORT.py" beforeDir="false" afterPath="$PROJECT_DIR$/python-package/LiteMORT/LiteMORT.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/data_fold/Binfold.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/Binfold.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/data_fold/EDA.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/EDA.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_fold/Distribution.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/Distribution.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_fold/Histogram.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/Histogram.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_fold/Histogram.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/Histogram.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/data_fold/Loss.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/Loss.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/python/pyMORT_DLL.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/python/pyMORT_DLL.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/tree/BiSplit.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/BiSplit.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tree/BiSplit.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/BiSplit.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tree/GBRT.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/GBRT.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tree/ManifoldTree.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/ManifoldTree.cpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -51,11 +46,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/python-package/case_qq2019.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="310">
-              <caret line="19" column="18" selection-start-line="19" selection-start-column="18" selection-end-line="19" selection-end-column="18" />
-              <folding>
-                <element signature="e#9#31#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="209">
+              <caret line="11" column="13" lean-forward="true" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
             </state>
           </provider>
         </entry>
@@ -75,7 +67,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/python-package/pycharm_test.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="210">
+            <state relative-caret-position="1292">
               <caret line="83" column="66" selection-start-line="83" selection-start-column="66" selection-end-line="83" selection-end-column="66" />
               <folding>
                 <element signature="e#146#155#0" expanded="true" />
@@ -178,10 +170,10 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="7">
-    <option name="x" value="188" />
-    <option name="y" value="137" />
-    <option name="width" value="2420" />
-    <option name="height" value="1103" />
+    <option name="x" value="-9" />
+    <option name="y" value="-9" />
+    <option name="width" value="1802" />
+    <option name="height" value="1098" />
   </component>
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="1" id="Add" />
@@ -235,7 +227,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.pycharm_test">
+  <component name="RunManager" selected="Python.case_qq2019">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="LiteMORT" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -371,9 +363,9 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.case_qq2019" />
         <item itemvalue="Python.pycharm_test" />
         <item itemvalue="Python.geo_test" />
-        <item itemvalue="Python.case_qq2019" />
         <item itemvalue="Python.case_higgs" />
         <item itemvalue="Python tests.py.test in test_large.py" />
       </list>
@@ -390,7 +382,8 @@
       <option name="presentableId" value="Default" />
       <updated>1555215165733</updated>
       <workItem from="1557042316797" duration="3965000" />
-      <workItem from="1557050569239" duration="350000" />
+      <workItem from="1557050569239" duration="2883000" />
+      <workItem from="1557192503006" duration="7772000" />
     </task>
     <task id="LOCAL-00001" summary="README">
       <created>1556249780941</created>
@@ -435,19 +428,19 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="4315000" />
+    <option name="totallyTimeSpent" value="14620000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="-7" width="1458" height="878" extended-state="6" />
+    <frame x="-7" y="-7" width="1441" height="878" extended-state="7" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.80563" visible="true" weight="0.205" />
-      <window_info id="Structure" order="1" sideWeight="0.19436997" side_tool="true" visible="true" weight="0.205" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.8027842" visible="true" weight="0.20968908" />
+      <window_info id="Structure" order="1" sideWeight="0.19721578" side_tool="true" visible="true" weight="0.20968908" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.35863873" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.5097614" />
+      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.422252" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -604,6 +597,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/LiteMORT$pycharm_test.coverage" NAME="pycharm_test Coverage Results" MODIFIED="1557050214018" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
+    <SUITE FILE_PATH="coverage/LiteMORT$case_qq2019.coverage" NAME="case_qq2019 Coverage Results" MODIFIED="1557206316603" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
     <SUITE FILE_PATH="coverage/LiteMORT$geo_test.coverage" NAME="geo_test Coverage Results" MODIFIED="1557050049571" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
   </component>
   <component name="editorHistoryManager">
@@ -882,6 +876,16 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/python-package/pycharm_test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1292">
+          <caret line="83" column="66" selection-start-line="83" selection-start-column="66" selection-end-line="83" selection-end-column="66" />
+          <folding>
+            <element signature="e#146#155#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/python-package/litemort/LiteMORT.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="4294">
@@ -892,23 +896,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/pycharm_test.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="83" column="66" selection-start-line="83" selection-start-column="66" selection-end-line="83" selection-end-column="66" />
-          <folding>
-            <element signature="e#146#155#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/python-package/case_qq2019.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="310">
-          <caret line="19" column="18" selection-start-line="19" selection-start-column="18" selection-end-line="19" selection-end-column="18" />
-          <folding>
-            <element signature="e#9#31#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="209">
+          <caret line="11" column="13" lean-forward="true" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
         </state>
       </provider>
     </entry>

@@ -145,7 +145,6 @@ namespace Grusoft {
 		
 	};
 	
-
 	/*
 		与特定FeatVector对应的HistoGRAM
 	*/
@@ -161,7 +160,8 @@ namespace Grusoft {
 		//double y_mean = 0;
 		vector<HISTO_BIN> bins;
 		//NA value---样本的某featrue确实missing value ,但总体上还是有down direction
-		HISTO_BIN binNA;		
+		HISTO_BIN* hBinNA( )		
+		{	return &(bins[bins.size()-1]);	 }		//总是放在最后
 		std::string sX;		//用于调试信息
 
 		HistoGRAM(FeatVector*hFeat_,size_t nMost, int flag = 0x0) : hFeat(hFeat_){
