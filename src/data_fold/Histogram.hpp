@@ -93,10 +93,10 @@ namespace Grusoft {
 		//tpQUANTI split_Q = -1;	//量化之后
 		double G_sum = 0, H_sum = 0;		//Second-order approximation from Tianqi Chen's formula
 
-		static bool isTicSmall(const HISTO_BIN &l, const HISTO_BIN &r)
+		/*static bool isTicSmall(const HISTO_BIN &l, const HISTO_BIN &r)
 		{
 			return l.tic<r.tic;
-		}/**/
+		}*/
 
 		
 	};
@@ -127,6 +127,7 @@ namespace Grusoft {
 		size_t nLeft = 0, nRight = 0;
 		double tic_left = 0;
 		double mxmxN = -1;		//mean*mean*N
+		std::string sX;		//用于调试信息
 
 		//char buf[256] = { 0 };		//https://stackoverflow.com/questions/4523497/typedef-fixed-length-array	Arrays can't be passed as function parameters by value in C.
 		//double lft_impuri,rgt_impuri;		//为了调试
@@ -151,22 +152,19 @@ namespace Grusoft {
 	class HistoGRAM {
 	protected:
 		size_t nSamp, nLeft = 0, nRight=0;
-		FeatVector*	hFeat = nullptr;
+		//FeatVector*	hFeat = nullptr;
 	public:
-		//FeatBlit flit;
 		FRUIT *fruit=nullptr;		//仅仅指向
 		tpQUANTI *quanti=nullptr;	//指向qHisto->quanti(参见FeatVec_Q::UpdateHisto)，不用删除
-		double a0 = 0, a1 = 0,split;
-		//double y_mean = 0;
+		//double a0 = 0, a1 = 0,split;
 		vector<HISTO_BIN> bins;
 		//NA value---样本的某featrue确实missing value ,但总体上还是有down direction
 		HISTO_BIN* hBinNA( )		
 		{	return &(bins[bins.size()-1]);	 }		//总是放在最后
-		std::string sX;		//用于调试信息
 
-		HistoGRAM(FeatVector*hFeat_,size_t nMost, int flag = 0x0) : hFeat(hFeat_){
+		HistoGRAM(FeatVector*hFeat_,size_t nMost, int flag = 0x0) /*: hFeat(hFeat_)*/{
 			nSamp = nMost;
-			a1 = -DBL_MAX, a0 = DBL_MAX;	
+			//a1 = -DBL_MAX, a0 = DBL_MAX;	
 		}
 		virtual ~HistoGRAM();		
 
@@ -221,7 +219,7 @@ namespace Grusoft {
 			}
 			assert(nMost >=2 );
 			bins.resize(nMost);
-			a1 = a1_,		a0 = a0_;
+			//a1 = a1_,		a0 = a0_;
 		}
 
 		/*仅在Samp2Histo_qsort中调用，应删除*/
@@ -229,7 +227,7 @@ namespace Grusoft {
 			nSamp = nMost;
 			bins.clear();
 			bins.resize(nMost);
-			a1 = -DBL_MAX, a0 = DBL_MAX;
+			//a1 = -DBL_MAX, a0 = DBL_MAX;
 		}
 
 		virtual void GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp_set, int flag = 0x0);
@@ -245,7 +243,7 @@ namespace Grusoft {
 				//item.Y_sum = 0;		
 				item.H_sum = 0;		item.G_sum = 0;
 			}
-			a1 = -DBL_MAX, a0 = DBL_MAX;
+			//a1 = -DBL_MAX, a0 = DBL_MAX;
 		}
 	};
 

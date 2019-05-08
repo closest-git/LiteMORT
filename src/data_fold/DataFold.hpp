@@ -772,7 +772,7 @@ namespace Grusoft {
 			Tx a0 = val[idx[0]], a1 = val[idx[nA - 1]], v0 = a0, v1;
 			assert(a0 <= a1);
 
-			qHisto->a0 = a0;		qHisto->a1 = a1;
+			//qHisto->a0 = a0;		qHisto->a1 = a1;
 			if (a0 == a1) {
 				//printf(" %s is const(%g)!!!", desc.c_str(), a0);
 				return;

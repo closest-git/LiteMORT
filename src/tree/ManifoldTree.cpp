@@ -360,7 +360,7 @@ void ManifoldTree::GrowLeaf(hMTNode hBlit, const char*info, int flag) {
 			assert(imp >= hBlit->impuri);
 		}
 		if(!isMatch){
-			string sX = hBlit->fruit->histo->sX;
+			string sX = hBlit->fruit->sX;
 			printf("\t!!!<%d:dad-child=%g gain=%g>!!!\t\n%s\t%s\t%s", hBlit->id,hBlit->impuri - imp, hBlit->gain,sX.c_str(),
 				hBlit->left->sX.c_str(), hBlit->right->sX.c_str());
 			//throw "ManifoldTree::GrowLeaf !!!isMatch!!!";

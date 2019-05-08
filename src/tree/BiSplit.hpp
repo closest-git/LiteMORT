@@ -56,7 +56,8 @@ namespace Grusoft {
 		int id;				//为了节省内存，很难想象fold会超过65536
 		//float *distri = nullptr;
 		SAMP_SET samp_set;
-		MT_BiSplit	*left = nullptr, *right = nullptr;
+		MT_BiSplit	*left = nullptr,	*right = nullptr;
+		MT_BiSplit	*parent = nullptr,	*brother = nullptr;
 		//size_t nzSamp = 0;
 		int feat_id = -1, feat_regress = -1, depth = -1;
 		double gain = 0, confi = 0, devia = 0;

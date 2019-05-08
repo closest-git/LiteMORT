@@ -253,10 +253,15 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 	uint64_t timeSeed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
 	std::seed_seq ss{ uint32_t(timeSeed & 0xffffffff), uint32_t(timeSeed >> 32) };
 	rng.seed(ss);
-	double T_Drop = 0.01;*/
+	double T_Drop = 0.01;
+	if (isRandomDrop) {
+			double current = unif(rng);
+			if (current < T_Drop)
+				continue;
+		}*/
 	string optimal = hData_->config.leaf_optimal;
 	bool isLambda = optimal == "lambda_0";
-	size_t nSamp = samp_set.nSamp, i;
+	size_t nSamp = samp_set.nSamp, i, nSamp4 = 0;// 4 * (int)(nSamp / 4);
 	if (nSamp == hData_->nSample()) {
 		hessian = hData_->GetHessian();
 		down = hData_->GetDownDirection();
@@ -269,27 +274,38 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 	int nBin = histo->bins.size();
 	HISTO_BIN *pBins = histo->bins.data(),*pBin;	//https://stackoverflow.com/questions/7377773/how-can-i-get-a-pointer-to-the-first-element-in-an-stdvector
 	GST_TIC(t1);
-	for (i = 0; i<nSamp; i++) {
-		//samp = samps[i];
+	/*for (i=0; i < nSamp4; i += 4) {
+		tpQUANTI pos0 = quanti[samps[i]];
+		tpQUANTI pos1 = quanti[samps[i+1]];
+		tpQUANTI pos2 = quanti[samps[i+2]];
+		tpQUANTI pos3 = quanti[samps[i+3]];
+		tpDOWN a0 = down[i], a1 = down[i+1], a2 = down[i+2], a3 = down[i+3];
+		pBins[pos0].G_sum -= a0;
+		pBins[pos1].G_sum -= a1;
+		pBins[pos2].G_sum -= a2;
+		pBins[pos3].G_sum -= a3;
+		//pBins[pos0].H_sum += 1;
+		//pBins[pos1].H_sum += 1;
+		//pBins[pos2].H_sum += 1;
+		//pBins[pos3].H_sum += 1;
+		pBins[pos0].nz++;	pBins[pos1].nz++;	pBins[pos2].nz++;	pBins[pos3].nz++;
+	}*/
+
+	for (i = nSamp4; i<nSamp; i++) {
 		tpQUANTI pos = quanti[samps[i]];
 		assert(pos >= 0 && pos < nBin);
-		/*if (isRandomDrop) {
-			double current = unif(rng);
-			if (current < T_Drop)
-				continue;
-		}*/
+		
 		//a = down[samp];
 		a = down[i];
-		/*if(pos<0)	//Nan
-			pBin=&(histo->binNA);
-		else*/
-			pBin= pBins+ pos;	//HISTO_BIN& bin = histo->bins[no];
-
+		pBin= pBins+ pos;	//HISTO_BIN& bin = histo->bins[no];
 		pBin->G_sum += -a;		
 		pBin->H_sum += hessian == nullptr ? 1 : hessian[i];
 		//pBin->H_sum += hessian == nullptr ? 1 : hessian[samp];
 		pBin->nz++;
-	}	
+	}/*	
+	for (i = 0; i < nBin;i++) {
+		pBins[i].H_sum= pBins[i].nz;
+	}*/
 	FeatsOnFold::stat.tX += GST_TOC(t1);
 #ifdef _DEBUG
 	if (true /* && !isRandomDrop*/) {
@@ -359,7 +375,7 @@ void FeatVec_Q::UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst,
 			nValid++;
 	}
 	if (nValid == 0) {
-		printf("\n FeatVec_Q(%s) nBin=%d a0=%g a1=%g", desc.c_str(), qHisto->bins.size(), qHisto->a0, qHisto->a1);
+		printf("\n FeatVec_Q(%s) nBin=%d a0=%g a1=%g", desc.c_str(), qHisto->bins.size(), 0, -1);
 		BIT_SET(this->type, Distribution::DISTRI_OUTSIDE);
 	}
 

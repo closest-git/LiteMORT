@@ -91,7 +91,7 @@ void HistoGRAM_2D::GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp
 		throw "HistoGRAM_2D::GreedySplit_X fruit is 0!!!";
 
 	size_t minSet = hData_->config.min_data_in_leaf;
-	double sum = samp_set.Y_sum_1, a = a0, errL = 0, g, gL = 0, g1 = 0, lft, rgt;
+	double sum = samp_set.Y_sum_1, a = -DBL_MAX, errL = 0, g, gL = 0, g1 = 0, lft, rgt;
 	//size_t nLeft = 0, nRight = nSamp,minSet=0;
 	nRight = nSamp;		assert(nRight >= 0);
 	HISTO_BIN*binNA = this->hBinNA();
@@ -155,7 +155,7 @@ void HistoGRAM::GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp_se
 	size_t minSet = hData_->config.min_data_in_leaf,nBin=bins.size(),i;
 	string optimal = hData_->config.leaf_optimal, obj = hData_->config.objective;
 	//double sum = samp_set.Y_sum_1, a = a0, errL = 0, g, gL = 0, g1 = 0, lft, rgt;
-	double gL = 0, gR0, hL = 0, hR = 0, a = a0, g, g1 = 0;
+	double gL = 0, gR0, hL = 0, hR = 0, a = -DBL_MAX, g, g1 = 0;
 	nLeft = 0;				nRight = nSamp;		assert(nRight >= 0);
 	HISTO_BIN*binNA = this->hBinNA();
 	double gSum = 0, hSum = 0;	// binNA->G_sum, hSum = binNA->H_sum;
@@ -247,7 +247,7 @@ void HistoGRAM::GreedySplit_Y(const FeatsOnFold *hData_, const SAMP_SET& samp_se
 	//return;
 	size_t minSet = hData_->config.min_data_in_leaf;
 	//double sum = -samp_set.Y_sum_1, errL = 0, g, g1 = 0, a;
-	double gL = 0, gR0, hL = 0, hR = 0, a = a0, g, g1 = 0;
+	double gL = 0, gR0, hL = 0, hR = 0, a = -DBL_MAX, g, g1 = 0;
 	nLeft = 0;	nRight = nSamp;
 	double gSum = binNA->G_sum, hSum = binNA->H_sum;
 	double gainL = 0;		//¶ÔÓ¦ÓÚisNanaLeft
@@ -294,7 +294,7 @@ void HistoGRAM::GreedySplit_Y(const FeatsOnFold *hData_, const SAMP_SET& samp_se
 			//fruit->thrshold = Y_means[idx[i]];
 			fruit->adaptive_thrsh = Y_means[idx[i]];
 			sprintf(temp, "L(%g/%g %d) R(%g/%g %d)", gL, hL, nLeft, gR, hR, nRight );
-			this->sX = temp;
+			fruit->sX = temp;
 		}
 	LOOP:
 		//errL += item.G_sum;		a = item.tic;

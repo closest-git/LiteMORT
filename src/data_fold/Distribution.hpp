@@ -378,7 +378,7 @@ namespace Grusoft {
 				q1 = q2 = q3 = a0;
 			}
 			assert(a0 <= a1 && a0 == vMin && a1 == vMax);
-			histo->a0 = a0;		histo->a1 = a1;
+			//histo->a0 = a0;		histo->a1 = a1;
 			if (a0 == a1) { return; }/**/
 			Tx step = (a1 - a0) / nMostBin, v1_last = a0;
 			if (BIT_TEST(type, Distribution::CATEGORY)) {
