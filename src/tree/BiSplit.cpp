@@ -14,8 +14,8 @@ FRUIT::FRUIT(HistoGRAM *his_, int flag) : histo(his_) {
 }
 
 FRUIT::~FRUIT() {
-	if (histo != nullptr)
-		delete histo;
+	//if (histo != nullptr)
+	//	delete histo;
 	//if (bsfold != nullptr)
 	//	delete bsfold;
 }
@@ -256,6 +256,33 @@ int MT_BiSplit::PickOnGain(FeatsOnFold *hData_,const vector<FRUIT *>& arrFruit, 
 	return pick_id;
 }
 
+HistoGRAM *MT_BiSplit::GetHistogram(FeatsOnFold *hData_, int pick, bool isInsert, int flag) {
+	size_t nSamp = samp_set.nSamp, i;
+	if (mapHISTO.find(pick) == mapHISTO.end()) {
+		if (!isInsert)
+			return nullptr;
+		FeatVector *hFeat = hData_->Feat(pick);
+		HistoGRAM *histo = new HistoGRAM(hFeat, nSamp);
+		HistoGRAM *hP = parent==nullptr ? nullptr : parent->GetHistogram(hData_,pick,false);
+		HistoGRAM *hB = brother==nullptr ? nullptr : brother->GetHistogram(hData_,pick, false);
+		if (hP != nullptr && hB != nullptr) {
+			histo->FromDiff(hP,hB);
+		}
+		else {
+			hFeat->Samp2Histo(hData_, samp_set, histo, hData_->config.feat_quanti);
+		}
+#pragma omp critical
+{
+		mapHISTO.insert(pair<int, HistoGRAM *>(pick, histo));
+}
+		return histo;
+	}	else {
+		HistoGRAM *histo = mapHISTO.at(pick);
+		return histo;
+	}
+	return nullptr;
+}
+
 /*
 	v0.2	并行
 */
@@ -303,21 +330,23 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 #pragma omp parallel for num_threads(nThread) schedule(dynamic)
 	for (int i = start; i < end; i++) {
 		int pick = picks[i];
-		if (i == 3 && this->id == 0) {	//仅用于测试
-			//i = 3;
+		if (i == 0 && this->id == 1) {	//仅用于测试
+			//i = 0;
 		}
 		FeatVector *hFeat = hData_->Feat(pick);
 		//HistoGRAM *histo = optimal=="grad_variance" ? new HistoGRAM(nSamp) : new Histo_CTQ(nSamp);
-		HistoGRAM *histo = new HistoGRAM(hFeat, nSamp);
+		HistoGRAM *histo = GetHistogram(hData_,pick,true);
+		//HistoGRAM *histo = new HistoGRAM(hFeat, nSamp);
 		arrFruit[i] = new FRUIT(histo);
 		if (nSamp == 400 && pick == 9)
 			pick = 9;
 
 		if (BIT_TEST(hFeat->type, FeatVector::AGGREGATE)) {
-			AGG_CheckGain(hData_, hFeat, flag);
+			throw "AGG_CheckGain is ...";		//需要重新设计
+			//AGG_CheckGain(hData_, hFeat, flag);
 		}
 		else {
-			hFeat->Samp2Histo(hData_, samp_set, histo, hData_->config.feat_quanti);		//Histo Normalize
+			//hFeat->Samp2Histo(hData_, samp_set, histo, hData_->config.feat_quanti);		//Histo Normalize
 			if (histo->bins.size() == 0)
 				continue;
 			if (hFeat->isCategory()) {
@@ -337,7 +366,7 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 		}
 		//节省histo所占的空间,	如有需要，可重新调用Samp2Histo
 		if (!arrFruit[i]->isY) {
-			delete histo;		arrFruit[i]->histo = nullptr;
+			//delete histo;		arrFruit[i]->histo = nullptr;
 		}
 	}
 

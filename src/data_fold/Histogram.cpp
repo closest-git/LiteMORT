@@ -132,6 +132,30 @@ HistoGRAM::~HistoGRAM() {
 	bins.clear();
 }
 
+
+HistoGRAM* HistoGRAM::FromDiff(const HistoGRAM*hP, const HistoGRAM*hB, int flag) {
+	assert(hP->bins.size() == hB->bins.size());
+	CopyBins(*hP,false,0x0);
+	int i = 0,nBin=bins.size();
+	double G_sum = 0,G_0=0,G_1=0;
+	for (i = 0; i < nBin;i++) {
+		HISTO_BIN& cur = bins[i];
+		const HISTO_BIN& off = hB->bins[i];
+		assert(cur.nz >= off.nz);
+		cur.nz -= off.nz;
+		G_0 += cur.G_sum;		G_1 += off.G_sum;
+		cur.G_sum -= off.G_sum;
+		cur.H_sum -= off.H_sum;
+		if (cur.nz == 0) {
+			cur.G_sum = 0;	cur.H_sum = 0;
+		}		else {
+			//assert();
+		}
+		G_sum += cur.G_sum;
+	}
+	return this;
+}
+
 void HistoGRAM::CompressBins(int flag) {
 	vector<HISTO_BIN>::iterator iter = bins.begin();
 	while (iter != bins.end()) {

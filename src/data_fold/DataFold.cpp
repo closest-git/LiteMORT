@@ -270,7 +270,7 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 	tpSAMP_ID samp;
 	tpDOWN a;
 	tpQUANTI *quanti = arr(),no;
-	histo->CopyBins(*qHisto);
+	histo->CopyBins(*qHisto, true, 0x0);
 	int nBin = histo->bins.size();
 	HISTO_BIN *pBins = histo->bins.data(),*pBin;	//https://stackoverflow.com/questions/7377773/how-can-i-get-a-pointer-to-the-first-element-in-an-stdvector
 	GST_TIC(t1);
@@ -361,7 +361,7 @@ void FeatVec_Q::UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst,
 		}
 
 		if(distri.histo!=nullptr)
-			qHisto->CopyBins(*(distri.histo));
+			qHisto->CopyBins(*(distri.histo), true, 0x0);
 		hFeat->QuantiAtEDA(edaX, qHisto->quanti, nMostBin);
 	}	else{
 		//hFeat->Split2Quanti(hData_->config,edaX, vThrsh, qHisto, yDown, nMostBin);
@@ -452,7 +452,7 @@ void FeatVec_Bundle::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_s
 	tpSAMP_ID samp;
 	tpDOWN a;
 	tpQUANTI *quanti = arr(), no;
-	histo->CopyBins(*qHisto);
+	histo->CopyBins(*qHisto, true,0x0);
 	//histo->nSamp = nSamp;
 	HISTO_BIN *pBins = histo->bins.data(), *pBin;	//https://stackoverflow.com/questions/7377773/how-can-i-get-a-pointer-to-the-first-element-in-an-stdvector
 	for (i = 0; i<nSamp; i++) {

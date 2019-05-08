@@ -73,6 +73,7 @@ namespace Grusoft {
 			depth = hDad->depth + 1;
 			assert(hDad->feat_id != -1);
 			feat_regress = hDad->feat_id;
+			parent = hDad;
 		}
 		virtual ~MT_BiSplit() {
 			if (regression != nullptr)
@@ -87,6 +88,8 @@ namespace Grusoft {
 		bool isLeaf() const {
 			return left == nullptr && right == nullptr;
 		}
+		MAP_HistoGRAM mapHISTO;
+		HistoGRAM *GetHistogram(FeatsOnFold *hData_, int pick,bool isInsert, int flag = 0x0);
 
 		//样本只是某个泛函的观测值!!!
 		virtual void Observation_AtLocalSamp(FeatsOnFold *hData_, int flag = 0x0);

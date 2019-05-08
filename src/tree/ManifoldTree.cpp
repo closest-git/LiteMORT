@@ -330,7 +330,8 @@ void ManifoldTree::GrowLeaf(hMTNode hBlit, const char*info, int flag) {
 	assert(hBlit->isLeaf());
 	size_t nSamp= hBlit->nSample();
 	//MT_BiSplit *hBlit = dynamic_cast<MT_BiSplit *>(node);		assert(hBlit != nullptr);
-	hBlit->left = new MT_BiSplit(hBlit), hBlit->right = new MT_BiSplit(hBlit);
+	hBlit->left = new MT_BiSplit(hBlit),			hBlit->right = new MT_BiSplit(hBlit);
+	hBlit->left->brother = hBlit->right;			hBlit->right->brother = hBlit->left;
 
 	//leafs.erase(std::remove(leafs.begin(), leafs.end(), hBlit), leafs.end());
 	hBlit->left->id = nodes.size( );		
@@ -467,20 +468,29 @@ void ManifoldTree::Train(int flag) {
 			}			
 		}*/
 		iter++;
+		MT_Nodes new_leafs;
 		if (hBest != nullptr) {
 			sprintf(info, "Grow@Leaf_%d gain=%8g", hBest->id, hBest->gain);
 			GrowLeaf(hBest, info);
 			//hBest->Dump(info, 0x0);
 			assert( hBest->left->nSample()==hBest->fruit->nLeft && hBest->right->nSample()==hBest->fruit->nRight);
+			if (hBest->left->nSample() < hBest->right->nSample()) {
+				new_leafs.push_back(hBest->left);		new_leafs.push_back(hBest->right);
+			}	else {
+				new_leafs.push_back(hBest->right);		new_leafs.push_back(hBest->left);
+			}			
 		}	else {
 			break;
 		}
 		//GST_TIC(t1);
 		//FeatsOnFold::stat.tX += GST_TOC(t1);
-		if(hBest->left!=nullptr)
-			AddNewLeaf(hBest->left,hData_, pick_feats);
-		if (hBest->right != nullptr)
-			AddNewLeaf(hBest->right, hData_, pick_feats);
+		for (auto leaf : new_leafs)		{
+			AddNewLeaf(leaf, hData_, pick_feats);
+		}
+		//if(hBest->left!=nullptr)
+		//	AddNewLeaf(hBest->left,hData_, pick_feats);
+		//if (hBest->right != nullptr)
+		//	AddNewLeaf(hBest->right, hData_, pick_feats);
 	}
 
 	//GetLeaf(vLeaf);
@@ -517,6 +527,14 @@ void ManifoldTree::Train(int flag) {
 		;//printf("    ---- node=%d gain=%g(%g->%g)\n", nodes.size(), gain, imp_0, a);
 	//Dump( );
 	ClearSampSet( );		//优化，还需predict
+	for (auto node : nodes) {
+		for (auto pa : node->mapHISTO) {
+			HistoGRAM* histo = pa.second;
+			if(histo!=nullptr)
+				delete histo;
+		}
+		node->mapHISTO.clear();
+	}
 
 	//printf( "\n%d...OK",hForest->skdu.noT );
 }

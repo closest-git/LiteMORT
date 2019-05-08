@@ -104,7 +104,7 @@ namespace Grusoft {
 	class FRUIT{
 	public:
 		FRUIT(HistoGRAM *his_ = nullptr,int flag=0x0) ;
-		HistoGRAM *histo = nullptr;
+		HistoGRAM *histo = nullptr;		//仅指向，不再删除
 		HISTO_BIN bin_S0, bin_S1;						//有变化，比较危险诶
 		double adaptive_thrsh;					//可指向binSplit中间，所以保留		splitonY也需要这个值
 		double Thrshold(bool isQuanti) {
@@ -170,6 +170,8 @@ namespace Grusoft {
 
 		virtual void CompressBins(int flag=0x0);
 
+		HistoGRAM* FromDiff(const HistoGRAM*hP, const HistoGRAM*hB, int flag = 0x0);
+
 		template<typename Tx,typename Tf>
 		bool At(Tx x, Tf&f,int flag = 0x0) {
 			double rigt=DBL_MAX;
@@ -234,18 +236,21 @@ namespace Grusoft {
 		virtual void GreedySplit_Y(const FeatsOnFold *hData_, const SAMP_SET& samp_set,bool tryX, int flag = 0x0);
 		virtual void Regress(const FeatsOnFold *hData_, const SAMP_SET& samp_set,  int flag = 0x0);
 
-		virtual void CopyBins(const HistoGRAM &src,int flag=0x0) {
+		virtual void CopyBins(const HistoGRAM &src,bool isReset,int flag) {
 			//nSamp = src.nSamp;
 			bins = src.bins;
-			for (int i=0;i<bins.size();i++){
-				HISTO_BIN &item = bins[i];
-				item.nz=0;
-				//item.Y_sum = 0;		
-				item.H_sum = 0;		item.G_sum = 0;
+			if (isReset) {
+				for (int i=0;i<bins.size();i++){
+					HISTO_BIN &item = bins[i];
+					item.nz=0;
+					//item.Y_sum = 0;		
+					item.H_sum = 0;		item.G_sum = 0;
+				}
 			}
 			//a1 = -DBL_MAX, a0 = DBL_MAX;
 		}
 	};
+	typedef map<int, HistoGRAM*> MAP_HistoGRAM;
 
 	/*
 		from Tianqi Chen's formula

@@ -304,6 +304,7 @@ namespace Grusoft {
 		virtual void BeforePredict(int flag = 0x0);
 		virtual void BeforeTrain(BoostingForest *hGBRT, int flag = 0x0);
 		virtual void AfterTrain(int flag = 0x0);
+		//sample_gradient,sample_hessian
 		virtual void PickSample_GH(MT_BiSplit*hBlit, int flag=0x0);
 
 		/*virtual void At(size_t k, void **X_, void **Y_, void**p_) const { throw ("FeatsOnFold::At is ...!!!"); }
