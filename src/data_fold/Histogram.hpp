@@ -151,9 +151,9 @@ namespace Grusoft {
 	*/
 	class HistoGRAM {
 	protected:
-		size_t nSamp, nLeft = 0, nRight=0;
 		//FeatVector*	hFeat = nullptr;
 	public:
+		size_t nSamp, nLeft = 0, nRight=0;
 		FRUIT *fruit=nullptr;		//仅仅指向
 		tpQUANTI *quanti=nullptr;	//指向qHisto->quanti(参见FeatVec_Q::UpdateHisto)，不用删除
 		//double a0 = 0, a1 = 0,split;

@@ -168,6 +168,7 @@ void HistoGRAM::CompressBins(int flag) {
 	}
 }
 
+
 /*
 	v0.2	cys
 		1/28/2019
@@ -204,6 +205,8 @@ void HistoGRAM::GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp_se
 		if (nLeft<minSet || nRight<minSet) {
 			goto LOOP;
 		}
+		if (nLeft == 62433)		//仅用于测试
+			nLeft = 62433;
 		//4/9/2019	cys	注销item.nz == 0 这样可以使split thrshold更紧凑
 		if (item.tic == a /*|| item.nz == 0*/) {
 			goto LOOP;

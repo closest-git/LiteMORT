@@ -216,6 +216,7 @@ bool EARLY_STOPPING::isOK() {
 	}
 	return false;
 }
+
 int GBRT::Train(string sTitle, int x, int flag) {
 	GST_TIC(tick);
 	eOOB = 1.0;
@@ -292,8 +293,8 @@ int GBRT::Train(string sTitle, int x, int flag) {
 	forest.resize(stopping.best_no + 1);
 	hTrainData->AfterTrain();
 	string sEval = hEvalData == nullptr ? (isEvalTrain ? hTrainData->nam : "None") : hEvalData->nam;
-	printf("\n********* GBRT::Train nTree=%d nNode=%d err@%s=%.8g thread=%d train=%g sec\r\n", 
-		forest.size(), nzNode, sEval.c_str(), stopping.e_best,nThread, GST_TOC(tick));
+	printf("\n********* GBRT::Train nTree=%d aNode=%.6g ERR@train=%-8.5g err@%s=%.8g thread=%d train=%g sec\r\n", 
+		forest.size(), nzNode*1.0/forest.size(), err_0, sEval.c_str(), stopping.e_best,nThread, GST_TOC(tick));
 
 	if (nOOB>0)
 		TestOOB(hTrainData);

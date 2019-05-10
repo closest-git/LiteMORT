@@ -302,6 +302,7 @@ ManifoldTree::ManifoldTree(BoostingForest *hF, string nam_, int flag) {
 	}*/
 }
 
+
 void ManifoldTree::AddNewLeaf(hMTNode hNode, FeatsOnFold *hData_, const vector<int> &pick_feats, int flag) {
 	hNode->gain = 0;
 	if (hForest->isPass(hNode)) {
@@ -309,7 +310,7 @@ void ManifoldTree::AddNewLeaf(hMTNode hNode, FeatsOnFold *hData_, const vector<i
 	}
 	else {		
 		std::string leaf_optimal = hData_->config.leaf_optimal;
-		assert(hNode->feat_id == -1);
+		assert(hNode->feat_id == -1 && hNode->nSample()>hData_->config.min_data_in_leaf * 2);
 		//if( hNode->impuri>0)		//optimal == "lambda_0"Ê±,impuri²»¶Ô
 			hNode->CheckGain(hData_, pick_feats, 0);
 	}

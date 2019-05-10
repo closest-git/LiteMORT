@@ -261,7 +261,7 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 		}*/
 	string optimal = hData_->config.leaf_optimal;
 	bool isLambda = optimal == "lambda_0";
-	size_t nSamp = samp_set.nSamp, i, nSamp4 = 0;// 4 * (int)(nSamp / 4);
+	size_t nSamp = samp_set.nSamp, i, nSamp4 = 0;
 	if (nSamp == hData_->nSample()) {
 		hessian = hData_->GetHessian();
 		down = hData_->GetDownDirection();
@@ -274,23 +274,25 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 	int nBin = histo->bins.size();
 	HISTO_BIN *pBins = histo->bins.data(),*pBin;	//https://stackoverflow.com/questions/7377773/how-can-i-get-a-pointer-to-the-first-element-in-an-stdvector
 	GST_TIC(t1);
-	/*for (i=0; i < nSamp4; i += 4) {
-		tpQUANTI pos0 = quanti[samps[i]];
-		tpQUANTI pos1 = quanti[samps[i+1]];
-		tpQUANTI pos2 = quanti[samps[i+2]];
-		tpQUANTI pos3 = quanti[samps[i+3]];
+	/*nSamp4 =  4 * (int)(nSamp / 4);
+	for (i=0; i < nSamp4; i += 4) {
+		HISTO_BIN *pB0 = pBins+quanti[samps[i]];
+		HISTO_BIN *pB1 = pBins + quanti[samps[i+1]];
+		HISTO_BIN *pB2 = pBins + quanti[samps[i+2]];
+		HISTO_BIN *pB3 = pBins + quanti[samps[i+3]];
 		tpDOWN a0 = down[i], a1 = down[i+1], a2 = down[i+2], a3 = down[i+3];
-		pBins[pos0].G_sum -= a0;
-		pBins[pos1].G_sum -= a1;
-		pBins[pos2].G_sum -= a2;
-		pBins[pos3].G_sum -= a3;
-		//pBins[pos0].H_sum += 1;
-		//pBins[pos1].H_sum += 1;
-		//pBins[pos2].H_sum += 1;
-		//pBins[pos3].H_sum += 1;
-		pBins[pos0].nz++;	pBins[pos1].nz++;	pBins[pos2].nz++;	pBins[pos3].nz++;
+		pB0->G_sum -= a0;
+		pB1->G_sum -= a1;
+		pB2->G_sum -= a2;
+		pB3->G_sum -= a3;
+		pB0->H_sum += 1;
+		pB1->H_sum += 1;
+		pB2->H_sum += 1;
+		pB3->H_sum += 1;
+		pB0->nz++;	pB1->nz++;	pB2->nz++;	pB3->nz++;
 	}*/
-
+	//if(nSamp<10000)
+		FeatsOnFold::stat.tX += GST_TOC(t1);
 	for (i = nSamp4; i<nSamp; i++) {
 		tpQUANTI pos = quanti[samps[i]];
 		assert(pos >= 0 && pos < nBin);
@@ -306,7 +308,7 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 	for (i = 0; i < nBin;i++) {
 		pBins[i].H_sum= pBins[i].nz;
 	}*/
-	FeatsOnFold::stat.tX += GST_TOC(t1);
+
 #ifdef _DEBUG
 	if (true /* && !isRandomDrop*/) {
 		double G_sum = 0;	// histo->hBinNA()->G_sum;

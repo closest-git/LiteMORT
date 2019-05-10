@@ -48,3 +48,60 @@ void Distribution::Dump(int feat, bool isQuanti, int flag) {
 			H_q0, H_q1, H_q2, H_q3, H_q4, tmp);
 	}
 }
+
+void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<_BIN_>& vUnique,size_t nA0, size_t nMostBin, int flag) {
+	assert(histo != nullptr);
+	size_t nA = 0, T_avg = nA0*1.0 / nMostBin,SMALL_na=0, BIG_bins=0,nUnique= vUnique.size(),nz;
+	for (int i = 0; i < nUnique;i++) {
+		nA += vUnique[i].nz;
+		if (vUnique[i].nz <= T_avg) {
+			SMALL_na += vUnique[i].nz;
+		}	else {
+			vUnique[i].type = _BIN_::LARGE;	 BIG_bins++;
+		}
+	}
+
+	size_t i_0 = -1,  noBin = 0, pos;
+	double a0 = vUnique[0].val, a1 = vUnique[vUnique.size()-1].val, v0;
+	double T_min_decrimi = 0, crimi = 0;
+	bool isDcrimi = corr.dcrimi != nullptr;
+	if (isDcrimi) {
+		T_avg = max(1, T_avg / 2);  T_min_decrimi = corr.D_sum / nMostBin;
+	}
+	while (++i_0 < nUnique) {
+		v0 = vUnique[i_0].val;	nz = 0;
+		HISTO_BIN& bin = histo->bins[noBin];
+		bin.tic = noBin;	//tic split_F必须一致
+		bin.split_F = i_0 > 0 ? (v0 + vUnique[i_0 - 1].val) / 2 : v0;
+		T_avg = nMostBin - noBin > BIG_bins ? max(1, SMALL_na / (nMostBin- noBin- BIG_bins)) : 1;
+		if (isDcrimi) {
+			crimi = corr.dcrimi[i_0];
+		}
+		do	{
+			if (vUnique[i_0].type == _BIN_::LARGE) {
+				BIG_bins--;		break;
+			}			
+			SMALL_na -= vUnique[i_0].nz;
+			nz += vUnique[i_0].nz;
+			if (isDcrimi) {
+				if (nz >= T_avg && crimi > T_min_decrimi) {
+					break;
+				}
+				crimi += corr.dcrimi[i_0];
+			}
+			else	if (nz >= T_avg)
+				break;
+		} while (++i_0 < nUnique);
+		
+		//assert(i_1 == nUnique );
+		bin.nz = nz;		
+		noBin = noBin + 1;
+	}
+	assert(SMALL_na>=0 && BIG_bins==0);
+	histo->bins.resize(noBin + 1);
+	assert(i_0 == nUnique+1 || i_0 == nUnique);
+	double delta = double(fabs(a1 - a0)) / nMostBin / 100.0;
+	histo->bins[noBin].split_F = a1 + delta;		//上界,为了QuantiAtEDA等
+													//assert(histo->bins[histo->bins.size()-1].split_F>a1);
+													//vThrsh.push_back(a1 + delta);
+}

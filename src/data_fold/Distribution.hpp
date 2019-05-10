@@ -83,10 +83,21 @@ namespace Grusoft {
 			V_ZERO_DEVIA = 0x10000,	//常值，一般可忽略
 			DISTRI_OUTSIDE = 0x40000,
 		};
+		struct _BIN_{
+			enum {
+				BASIC,LARGE=0x10,
+			};
+			_BIN_(double v_,size_t n_) : val(v_),nz(n_)	{
+			}
+			double val=-1; 
+			size_t nz=0;
+			int type = BASIC;
+		};
 
 		string nam,desc;
 		vector<tpSAMP_ID> sortedA;		//排序后的有意义数据(NA-无意义数据)
-		vector<double>  vUnique;		//vThrsh
+		//vector<double>  vUnique;		
+		vector<_BIN_>  vUnique;		//vThrsh
 		MAP_CATEGORY mapCategory;
 		HistoGRAM *histo = nullptr;
 		size_t nSamp, nZERO = 0, nNA = 0;
@@ -208,23 +219,29 @@ namespace Grusoft {
 		}
 
 		template<typename Tx>
-		void CheckUnique(LiteBOM_Config config, size_t nSamp_, Tx *val, const vector<tpSAMP_ID>& idx, vector<double>& vUnique, int nMostUnique, int flag = 0x0) {
+		void CheckUnique(LiteBOM_Config config, size_t nSamp_, Tx *val, const vector<tpSAMP_ID>& idx, vector<_BIN_>& vUnique, /*int nMostUnique,*/ int flag = 0x0) {
 			size_t nA = idx.size(), i;
 			Tx a0 = val[idx[0]], a1 = val[idx[nA - 1]], pre = a0;
-			vUnique.push_back((double)a0);
+			size_t nz=1;
+			//vUnique.push_back((double)a0);
 			for (i = 1; i < nA; i++) {
 				if (val[idx[i]] == pre)
-					continue;
+				{		nz++;	 continue;		}
 				assert(val[idx[i]] > pre);
+				vUnique.push_back(_BIN_(pre, nz));		nz = 1;
 				pre = val[idx[i]];
-				if (vUnique.size() >= nMostUnique - 1) {
+				/*if (vUnique.size() >= nMostUnique - 1) {
 					vUnique.clear();	return;
-				}
-				vUnique.push_back((double)pre);
+				}*/
+				//vUnique.push_back((double)pre);
 			}
+			vUnique.push_back(_BIN_(pre, nz));
+			nz = 0;
+			for (auto b : vUnique)	nz += b.nz;
+			assert(nz == nA);
 		}
 
-		
+		void HistoOnFrequncy_1(const LiteBOM_Config&config, vector<_BIN_>& vUnique, size_t nA0, size_t nMostBin, int flag = 0x0);
 
 		/*	
 			v0.2	cys
@@ -288,7 +305,7 @@ namespace Grusoft {
 			v0.1
 		*/
 		template<typename Tx>
-		void HistoOnUnique(const LiteBOM_Config&config, Tx *val, const vector<tpSAMP_ID>& sort_ids, vector<double>&uniques, int flag = 0x0) {
+		void HistoOnUnique(const LiteBOM_Config&config, Tx *val, const vector<tpSAMP_ID>& sort_ids, vector<_BIN_>&uniques, int flag = 0x0) {
 			size_t nMostBin = uniques.size();
 			assert(histo != nullptr);
 			size_t i, i_0 = 0, i_1, noBin = -1, pos, nA = sort_ids.size(), T_min = int(nA / nMostBin) + 1;
@@ -314,8 +331,8 @@ namespace Grusoft {
 			assert(i_0 == nA);
 			assert(noBin== nMostBin-1);
 			size_t n1 = ceil(noBin / 4.0), n2 = ceil(noBin / 2.0), n3 = ceil(noBin *3.0 / 4);
-			H_q0 = uniques[0], H_q4 = uniques[noBin];
-			H_q1 = q1 = uniques[n1], H_q2 = q2 = uniques[n2];		H_q3 = q3 = uniques[n3];/**/
+			H_q0 = uniques[0].val,			H_q4 = uniques[noBin].val;
+			H_q1 = q1 = uniques[n1].val,	H_q2 = q2 = uniques[n2].val;		H_q3 = q3 = uniques[n3].val;/**/
 		}
 
 		/*可以减少histo的bin数，但对准确率似乎没啥影响
@@ -381,12 +398,13 @@ namespace Grusoft {
 			//histo->a0 = a0;		histo->a1 = a1;
 			if (a0 == a1) { return; }/**/
 			Tx step = (a1 - a0) / nMostBin, v1_last = a0;
+			CheckUnique(config, nSamp_, val, idx, vUnique, nMostBin*10);
 			if (BIT_TEST(type, Distribution::CATEGORY)) {
-				CheckUnique(config, nSamp_, val, idx, vUnique, nMostBin*10);
 				if (vUnique.size() > 0) {
 					assert(config.feat_quanti > 1);
 					histo->bins.resize(vUnique.size());
 					HistoOnUnique(config, val, idx, vUnique);
+					vUnique.clear();
 					return;		//必须保持一致
 				}
 			}
@@ -401,7 +419,8 @@ namespace Grusoft {
 			case LiteBOM_Config::HISTO_BINS_MAP::on_FREQ:
 				if( y!=nullptr && config.histo_bin_map== LiteBOM_Config::HISTO_BINS_MAP::on_FREQ_and_Y)
 					corr.DCRIMI_2(config, val,y, idx,flag );
-				HistoOnFrequncy(config, val, idx, nMostBin);
+				HistoOnFrequncy_1(config, vUnique, nA, nMostBin);
+				//HistoOnFrequncy(config, val, idx, nMostBin);
 				corr.Clear();
 				break;
 				
@@ -433,6 +452,7 @@ namespace Grusoft {
 				vThrsh.push_back(a1 + step / 10);*/
 				break;
 			}
+			vUnique.clear();
 			int nBin = histo->bins.size();		//always last bin for NA
 			histo->bins.resize(nBin + 1);
 			/*if (vUnique.size() > 0) {	//难道有BUG???

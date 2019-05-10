@@ -7,8 +7,6 @@
 	3 leaf_optimal = "taylor_2" 收敛太慢
 	4 drop out无效，真奇怪
 
-	10_21_2018	http://mlexplained.com/2018/01/05/lightgbm-and-xgboost-explained/
-
 	数据预处理流程
 	1 data imputation		---	修改数据
 		eda_NA=-1	则跳过（保留数据中的NA 似乎能提高准确率）

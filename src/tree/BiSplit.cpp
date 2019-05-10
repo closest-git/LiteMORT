@@ -256,6 +256,7 @@ int MT_BiSplit::PickOnGain(FeatsOnFold *hData_,const vector<FRUIT *>& arrFruit, 
 	return pick_id;
 }
 
+
 HistoGRAM *MT_BiSplit::GetHistogram(FeatsOnFold *hData_, int pick, bool isInsert, int flag) {
 	size_t nSamp = samp_set.nSamp, i;
 	if (mapHISTO.find(pick) == mapHISTO.end()) {
@@ -266,11 +267,13 @@ HistoGRAM *MT_BiSplit::GetHistogram(FeatsOnFold *hData_, int pick, bool isInsert
 		HistoGRAM *hP = parent==nullptr ? nullptr : parent->GetHistogram(hData_,pick,false);
 		HistoGRAM *hB = brother==nullptr ? nullptr : brother->GetHistogram(hData_,pick, false);
 		if (hP != nullptr && hB != nullptr) {
+			//printf("%d@(%d %d) ", nSamp,hP->nSamp, hB->nSamp);
 			histo->FromDiff(hP,hB);
 		}
 		else {
 			hFeat->Samp2Histo(hData_, samp_set, histo, hData_->config.feat_quanti);
 		}
+		//mapHISTO[pick] = histo;
 #pragma omp critical
 {
 		mapHISTO.insert(pair<int, HistoGRAM *>(pick, histo));
@@ -320,7 +323,7 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 	arrFruit.resize(picks.size());
 	//fBlits.resize(picks.size());
 	tpDOWN *yDown = hData_->GetDownDirection();
-	//picks.clear();		picks.push_back(24);		//仅用于调试
+	//picks.clear();		picks.push_back(7);		//仅用于调试
 	int num_threads = OMP_FOR_STATIC_1(picks.size(), step);
 	if (false) {
 		BinFold bf(hData_,picks, samp_set);

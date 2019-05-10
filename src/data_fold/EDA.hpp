@@ -69,8 +69,8 @@ namespace Grusoft {
 			double sparse=0, nana=0;
 			vector<double> arrD;
 			for (feat = 0; feat < ldX_; feat++) {
-				if(feat==5)
-				{	feat= 5;	}
+				if(feat==1)
+				{	feat = 1;	}
 				Distribution &distri = arrDistri[feat];
 				distri.desc = "distri_" + std::to_string(feat);
 				Tx *x=X_ + feat*nSamp_,a2,sum,x_0,x_1;
@@ -83,7 +83,7 @@ namespace Grusoft {
 				if(ZERO_DEVIA(distri.vMin, distri.vMax) )
 				{	nConstFeat++;	}				
 				distri.X2Histo_(config,nSamp_, x, Y_);
-				//distri.Dump(feat,false,flag);
+				distri.Dump(feat,false,flag);
 				arrD.push_back(distri.corr.D_sum);
 			}
 			if (nFeat > 9) {	//
