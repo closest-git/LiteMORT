@@ -341,8 +341,9 @@ void ManifoldTree::GrowLeaf(hMTNode hBlit, const char*info, int flag) {
 	nodes.push_back(hBlit->right);			//leafs.push_back(hBlit->right);
 	
 	//FeatVector *Feat = hData->Feat(hBlit->feat_id);
-	hData->SplitOn(hBlit);
 	GST_TIC(t1);
+	hData->SplitOn(hBlit);
+	//FeatsOnFold::stat.tX += GST_TOC(t1);
 	hData->AtLeaf(hBlit->left);		
 	hData->AtLeaf(hBlit->right);
 
@@ -368,6 +369,7 @@ void ManifoldTree::GrowLeaf(hMTNode hBlit, const char*info, int flag) {
 			//throw "ManifoldTree::GrowLeaf !!!isMatch!!!";
 		}
 	}
+
 }
 
 /*
@@ -500,6 +502,7 @@ void ManifoldTree::Train(int flag) {
 	for (auto node : nodes) {
 	//for each(hMTNode node in nodes) {
 		if (node->isLeaf()) {
+			//node->Observation_AtLocalSamp(hData_);
 			nLeaf++;
 			size_t nSamp= node->nSample();
 			a += node->impuri;		nz += node->nSample();
@@ -529,12 +532,12 @@ void ManifoldTree::Train(int flag) {
 	//Dump( );
 	ClearSampSet( );		//优化，还需predict
 	for (auto node : nodes) {
-		for (auto pa : node->mapHISTO) {
-			HistoGRAM* histo = pa.second;
+		for (auto pa : node->H_HISTO) {
+			HistoGRAM* histo = pa;
 			if(histo!=nullptr)
 				delete histo;
 		}
-		node->mapHISTO.clear();
+		node->H_HISTO.clear();
 	}
 
 	//printf( "\n%d...OK",hForest->skdu.noT );

@@ -88,7 +88,7 @@ namespace Grusoft {
 		bool isLeaf() const {
 			return left == nullptr && right == nullptr;
 		}
-		MAP_HistoGRAM mapHISTO;
+		H_HistoGRAM H_HISTO;
 		HistoGRAM *GetHistogram(FeatsOnFold *hData_, int pick,bool isInsert, int flag = 0x0);
 
 		//样本只是某个泛函的观测值!!!
@@ -188,7 +188,7 @@ namespace Grusoft {
 
 		template<typename Tx>
 		void SplitOn(FeatsOnFold *hData_, const std::vector<Tx>&vals, bool isQuanti, int flag = 0x0) {
-			//GST_TIC(t1);
+			GST_TIC(t1);
 			SAMP_SET& lSet = left->samp_set,& rSet = right->samp_set;
 			lSet = this->samp_set;		rSet = this->samp_set;
 			lSet.isRef = true;			rSet.isRef = true;
@@ -229,6 +229,7 @@ namespace Grusoft {
 			//std::sort(lSet.samps, lSet.samps + lSet.nSamp);
 			rSet.samps = samps + nLeft;		rSet.nSamp = nRigt;
 			//std::sort(rSet.samps, rSet.samps + rSet.nSamp);
+			delete[] pL;		delete[] pR;
 			//FeatsOnFold::stat.tX += GST_TOC(t1);
 		}
 	};

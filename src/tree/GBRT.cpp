@@ -238,6 +238,7 @@ int GBRT::Train(string sTitle, int x, int flag) {
 	//hTrainData->lossy.InitScore_(hTrainData->config);
 	hTrainData->init_score.Init(hTrainData);
 
+
 	bool isEvalTrain=true;
 	DForest curF;
 	for (t = 0; t<rounds; t++) {
@@ -293,8 +294,8 @@ int GBRT::Train(string sTitle, int x, int flag) {
 	forest.resize(stopping.best_no + 1);
 	hTrainData->AfterTrain();
 	string sEval = hEvalData == nullptr ? (isEvalTrain ? hTrainData->nam : "None") : hEvalData->nam;
-	printf("\n********* GBRT::Train nTree=%d aNode=%.6g ERR@train=%-8.5g err@%s=%.8g thread=%d train=%g sec\r\n", 
-		forest.size(), nzNode*1.0/forest.size(), err_0, sEval.c_str(), stopping.e_best,nThread, GST_TOC(tick));
+	printf("\n********* GBRT::Train nTree=%d aNode=%.6g ERR@train=%-8.5g err@%s=%.8g thread=%d train=%g(tX=%g) sec\r\n", 
+		forest.size(), nzNode*1.0/forest.size(), err_0, sEval.c_str(), stopping.e_best,nThread, GST_TOC(tick), FeatsOnFold::stat.tX);
 
 	if (nOOB>0)
 		TestOOB(hTrainData);
@@ -309,8 +310,10 @@ int GBRT::Train(string sTitle, int x, int flag) {
 	//confi.Train( sTitle,cas,flag );
 	AfterTrain(hTrainData, 0, nTree);
 	//printf("********* GBRT::Train ...... OK\n");
+	
 	return 0x0;
 }
+
 
 void GBRT::AfterTrain(FeatsOnFold *hData, int cas, int nMulti, int flag) {
 	if (model != REGRESSION) {

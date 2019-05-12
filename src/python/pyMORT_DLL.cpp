@@ -193,7 +193,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	}
 	//bool isQuanti = config.feat_quanti >0 && BIT_TEST(flag, FeatsOnFold::DF_TRAIN);	// BIT_TEST(flag, FAST_QUANTI);
 	double sparse = 0, nana=0;
-	size_t feat, nTrain = nSamp_, nMostQ = config.feat_quanti, nConstFeat = 0,nLocalConst=0, nQuant = 0;
+	size_t nTrain = nSamp_, nMostQ = config.feat_quanti, nConstFeat = 0,nLocalConst=0, nQuant = 0;
 	FeatsOnFold *hFold = new FeatsOnFold(config, edaX, nam_, flag);
 	srand(time(0));
 	//x = rand();
@@ -210,7 +210,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 		hFold->hMove->Init_T<Tx, Ty>(nSamp_);
 	hFold->importance = new Feat_Importance(hFold);
 
-	int rnd_seed = 0;
+	int rnd_seed = 0,nThread = config.num_threads;
 	hFold->lossy->Init_T<Ty>(hFold,nSamp_,  0x0, rnd_seed, flag);
 
 	bool isPredict = BIT_TEST(flag, FeatsOnFold::DF_PREDIC);
@@ -223,15 +223,15 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	}
 	hFold->lossy->EDA(hFold, nullptr, flag);
 
-
-	FeatVec_Q *hFQ=nullptr;
-	//for (feat = 0; feat < ldX_; feat++) {
-	for (feat = 0; feat < ldX_; feat++) {
+	GST_TIC(t1);
+//#pragma omp parallel for num_threads(nThread) schedule(dynamic) reduction(+ : sparse,nana,nConstFeat,nLocalConst,nQuant) 
+	for (int feat = 0; feat < ldX_; feat++) {
+		FeatVec_Q *hFQ=nullptr;
 		FeatVector *hFeat = hFold->Feat(feat);
-		if(feat==116)
-			feat = 116;
+		//if(feat==116)
+		//	feat = 116;
 		
-		printf("\r\tfeat=%d\t......",feat);
+		//printf("\r\tfeat=%d\t......",feat);
 		hFeat->Set(nSamp_, (void*)(X_ + feat*nSamp_));
 		hFeat->EDA(config,hFold->edaX,0x0);		//EDA基于全局分析，而这里的是局部分析。分布确实会不一样
 		sparse += hFeat->hDistri->rSparse*nSamp_;
@@ -249,6 +249,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 			}
 		}
 	}
+	//FeatsOnFold::stat.tX += GST_TOC(t1);
 	if (hFold->isQuanti) {
 		hFold->Feature_Bundling();
 	}

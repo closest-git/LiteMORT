@@ -277,7 +277,7 @@ namespace Grusoft {
 			assert(hBlit->isLeaf());
 			if (isTrain()) {
 				hBlit->Observation_AtLocalSamp(this);
-				hBlit->Init_BFold(this);
+				//hBlit->Init_BFold(this);
 			}
 			else {
 				FeatVector *predict = GetPrecict();
@@ -879,6 +879,7 @@ namespace Grusoft {
 		virtual void UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst, int flag = 0x0);
 		//根据样本集，修正每个格子的内容(Y_sum,nz...)
 		virtual void Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag = 0x0);
+		virtual void Samp2Histo_null_hessian(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag = 0x0);
 
 		virtual void UpdateFruit(const FeatsOnFold *hData_, MT_BiSplit *hBlit, int flag = 0x0) {
 			//double split = hBlit->fruit->thrshold;

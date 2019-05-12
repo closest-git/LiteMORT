@@ -250,7 +250,8 @@ namespace Grusoft {
 			//a1 = -DBL_MAX, a0 = DBL_MAX;
 		}
 	};
-	typedef map<int, HistoGRAM*> MAP_HistoGRAM;
+	//typedef map<int, HistoGRAM*> MAP_HistoGRAM;
+	typedef vector<HistoGRAM*> H_HistoGRAM;
 
 	/*
 		from Tianqi Chen's formula

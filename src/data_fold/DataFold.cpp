@@ -236,6 +236,50 @@ void FeatsOnFold::AfterTrain(int flag) {
 	//lossy.predict->BinaryOperate(lossy.y, FeatVector::COPY_MEAN, 0x0);
 }
 
+void FeatVec_Q::Samp2Histo_null_hessian(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag0) {
+	tpDOWN *down = hData_->GetSampleDown();	
+	string optimal = hData_->config.leaf_optimal;
+	bool isLambda = optimal == "lambda_0";
+	size_t nSamp = samp_set.nSamp, i, nSamp4 = 0;
+	if (nSamp == hData_->nSample()) {
+		down = hData_->GetDownDirection();
+	}
+	const tpSAMP_ID *samps = samp_set.samps;
+	tpSAMP_ID samp;
+	tpDOWN a;
+	tpQUANTI *quanti = arr(), no;
+	histo->CopyBins(*qHisto, true, 0x0);
+	int nBin = histo->bins.size();
+	HISTO_BIN *pBins = histo->bins.data(), *pBin;	//https://stackoverflow.com/questions/7377773/how-can-i-get-a-pointer-to-the-first-element-in-an-stdvector
+
+	nSamp4 = 4 * (int)(nSamp / 4);
+	for (i = 0; i < nSamp4; i += 4) {
+		HISTO_BIN *pB0 = pBins + quanti[samps[i]];
+		HISTO_BIN *pB1 = pBins + quanti[samps[i + 1]];
+		HISTO_BIN *pB2 = pBins + quanti[samps[i + 2]];
+		HISTO_BIN *pB3 = pBins + quanti[samps[i + 3]];
+		tpDOWN a0 = down[i], a1 = down[i + 1], a2 = down[i + 2], a3 = down[i + 3];
+		pB0->G_sum -= a0;
+		pB1->G_sum -= a1;
+		pB2->G_sum -= a2;
+		pB3->G_sum -= a3;
+		pB0->nz++;	pB1->nz++;	pB2->nz++;	pB3->nz++;
+	}/**/
+	 //if(nSamp<10000)
+	for (i = nSamp4; i<nSamp; i++) {
+		tpQUANTI pos = quanti[samps[i]];
+		assert(pos >= 0 && pos < nBin);
+		a = down[i];
+		pBin = pBins + pos;	//HISTO_BIN& bin = histo->bins[no];
+		pBin->G_sum += -a;
+		pBin->nz++;
+	}
+	//FeatsOnFold::stat.tX += GST_TOC(t1);
+
+	for (i = 0; i < nBin; i++) {
+		pBins[i].H_sum = pBins[i].nz;
+	}
+}
 /*
 	v0.2
 */
@@ -246,70 +290,68 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 	}
 	//tpDOWN *hessian = hData_->GetHessian(); 
 	//tpDOWN *down = hData_->GetDownDirection();	
+	/*bool isRandomDrop = true;
+		std::uniform_real_distribution<double> unif(0, 1);
+		std::mt19937_64 rng;
+		uint64_t timeSeed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+		std::seed_seq ss{ uint32_t(timeSeed & 0xffffffff), uint32_t(timeSeed >> 32) };
+		rng.seed(ss);
+		double T_Drop = 0.01;
+		if (isRandomDrop) {
+				double current = unif(rng);
+				if (current < T_Drop)
+					continue;
+	}*/
 	tpDOWN *hessian = hData_->GetSampleHessian();
-	tpDOWN *down = hData_->GetSampleDown();	/*bool isRandomDrop = true;
-	std::uniform_real_distribution<double> unif(0, 1);
-	std::mt19937_64 rng;
-	uint64_t timeSeed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-	std::seed_seq ss{ uint32_t(timeSeed & 0xffffffff), uint32_t(timeSeed >> 32) };
-	rng.seed(ss);
-	double T_Drop = 0.01;
-	if (isRandomDrop) {
-			double current = unif(rng);
-			if (current < T_Drop)
-				continue;
-		}*/
-	string optimal = hData_->config.leaf_optimal;
-	bool isLambda = optimal == "lambda_0";
-	size_t nSamp = samp_set.nSamp, i, nSamp4 = 0;
-	if (nSamp == hData_->nSample()) {
-		hessian = hData_->GetHessian();
-		down = hData_->GetDownDirection();
+	if (hessian == nullptr) {
+		Samp2Histo_null_hessian(hData_, samp_set, histo, nMostBin, flag0);
 	}
-	const tpSAMP_ID *samps = samp_set.samps;
-	tpSAMP_ID samp;
-	tpDOWN a;
-	tpQUANTI *quanti = arr(),no;
-	histo->CopyBins(*qHisto, true, 0x0);
-	int nBin = histo->bins.size();
-	HISTO_BIN *pBins = histo->bins.data(),*pBin;	//https://stackoverflow.com/questions/7377773/how-can-i-get-a-pointer-to-the-first-element-in-an-stdvector
-	GST_TIC(t1);
-	/*nSamp4 =  4 * (int)(nSamp / 4);
-	for (i=0; i < nSamp4; i += 4) {
-		HISTO_BIN *pB0 = pBins+quanti[samps[i]];
-		HISTO_BIN *pB1 = pBins + quanti[samps[i+1]];
-		HISTO_BIN *pB2 = pBins + quanti[samps[i+2]];
-		HISTO_BIN *pB3 = pBins + quanti[samps[i+3]];
-		tpDOWN a0 = down[i], a1 = down[i+1], a2 = down[i+2], a3 = down[i+3];
-		pB0->G_sum -= a0;
-		pB1->G_sum -= a1;
-		pB2->G_sum -= a2;
-		pB3->G_sum -= a3;
-		pB0->H_sum += 1;
-		pB1->H_sum += 1;
-		pB2->H_sum += 1;
-		pB3->H_sum += 1;
-		pB0->nz++;	pB1->nz++;	pB2->nz++;	pB3->nz++;
-	}*/
-	//if(nSamp<10000)
-		FeatsOnFold::stat.tX += GST_TOC(t1);
-	for (i = nSamp4; i<nSamp; i++) {
-		tpQUANTI pos = quanti[samps[i]];
-		assert(pos >= 0 && pos < nBin);
-		
-		//a = down[samp];
-		a = down[i];
-		pBin= pBins+ pos;	//HISTO_BIN& bin = histo->bins[no];
-		pBin->G_sum += -a;		
-		pBin->H_sum += hessian == nullptr ? 1 : hessian[i];
-		//pBin->H_sum += hessian == nullptr ? 1 : hessian[samp];
-		pBin->nz++;
-	}/*	
-	for (i = 0; i < nBin;i++) {
-		pBins[i].H_sum= pBins[i].nz;
-	}*/
+	else {
+		tpDOWN *down = hData_->GetSampleDown();	
+		string optimal = hData_->config.leaf_optimal;
+		bool isLambda = optimal == "lambda_0";
+		size_t nSamp = samp_set.nSamp, i, nSamp4 = 0;
+		if (nSamp == hData_->nSample()) {
+			hessian = hData_->GetHessian();
+			down = hData_->GetDownDirection();
+		}
+		const tpSAMP_ID *samps = samp_set.samps;
+		tpSAMP_ID samp;
+		tpDOWN a;
+		tpQUANTI *quanti = arr(),no;
+		histo->CopyBins(*qHisto, true, 0x0);
+		int nBin = histo->bins.size();
+		HISTO_BIN *pBins = histo->bins.data(),*pBin;	//https://stackoverflow.com/questions/7377773/how-can-i-get-a-pointer-to-the-first-element-in-an-stdvector
 
-#ifdef _DEBUG
+		nSamp4 =  4 * (int)(nSamp / 4);
+		for (i=0; i < nSamp4; i += 4) {
+			HISTO_BIN *pB0 = pBins+quanti[samps[i]];
+			HISTO_BIN *pB1 = pBins + quanti[samps[i+1]];
+			HISTO_BIN *pB2 = pBins + quanti[samps[i+2]];
+			HISTO_BIN *pB3 = pBins + quanti[samps[i+3]];
+			tpDOWN a0 = down[i], a1 = down[i+1], a2 = down[i+2], a3 = down[i+3];
+			pB0->G_sum -= a0;			pB1->G_sum -= a1;			pB2->G_sum -= a2;			pB3->G_sum -= a3;
+			pB0->H_sum += hessian[i];			pB1->H_sum += hessian[i+1];
+			pB2->H_sum += hessian[i+2];			pB3->H_sum += hessian[i+3];
+			pB0->nz++;	pB1->nz++;	pB2->nz++;	pB3->nz++;
+		}/**/
+		//if(nSamp<10000)
+		for (i = nSamp4; i<nSamp; i++) {
+			tpQUANTI pos = quanti[samps[i]];
+			assert(pos >= 0 && pos < nBin);
+		
+			//a = down[samp];
+			a = down[i];
+			pBin= pBins+ pos;	//HISTO_BIN& bin = histo->bins[no];
+			pBin->G_sum += -a;		
+			pBin->H_sum += hessian[i];
+			//pBin->H_sum += hessian == nullptr ? 1 : hessian[samp];
+			pBin->nz++;
+		}		
+	}
+	
+	//FeatsOnFold::stat.tX += GST_TOC(t1);
+	#ifdef _DEBUG
 	if (true /* && !isRandomDrop*/) {
 		double G_sum = 0;	// histo->hBinNA()->G_sum;
 		for (auto item : histo->bins) {
