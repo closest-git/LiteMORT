@@ -1,13 +1,48 @@
 import pandas as pd
 import numpy as np
 import gc
+from ctypes import *
+from pandas.api.types import is_string_dtype
+from pandas.api.types import is_numeric_dtype
+
+class M_COLUMN(Structure):
+    _fields_ = [    ('name',c_char_p),
+                    ('data',c_void_p),
+                    ('dtype', c_char_p),
+               ]
 
 class Mort_Preprocess(object):
-    nFeature,nSample=0,0
-    features = []
-    categorical_feature=[]
-    train_X,    train_y=None,None
-    eval_X,     eval_y = None, None
+    #nFeature,nSample=0,0
+    #features = []
+    #categorical_feature=[]
+    #train_X,    train_y=None,None
+    #eval_X,     eval_y = None, None
+    def column_info(self,feat,X):
+        col = M_COLUMN()
+        col.name = str(feat).encode('utf8')
+        col.data = None
+        col.dtype = None
+        x_info = ''
+        if isinstance(X, pd.DataFrame):
+            narr = None
+            if X[feat].dtype.name == 'category':
+                x_info = 'category'
+                narr = X[feat].cat.codes.values
+            elif is_numeric_dtype(X[feat]):
+                narr = X[feat].values
+            else:
+                pass
+        elif isinstance(X, pd.Series):
+            x_info = 'Series'
+            narr = X.values
+            pass
+        else:
+            pass
+        if narr is not None:
+            col.data = narr.ctypes.data_as(c_void_p)
+            col.dtype = str(narr.dtype).encode('utf8')
+            print("\"{}\":\t{}\ttype={},data={},name={}".format(feat, x_info, col.dtype, col.data, col.name))
+        return col
 
     def __init__(self,X,y,features=None,categorical_feature=None,  **kwargs):
         '''
@@ -23,6 +58,7 @@ class Mort_Preprocess(object):
 
         self.nSample,self.nFeature = X.shape[0],X.shape[1]
         self.categorical_feature=categorical_feature
+        self.col_X=[]
         if features is None:
             if isinstance(X, pd.DataFrame):
                 self.features = X.columns
@@ -30,6 +66,17 @@ class Mort_Preprocess(object):
                 pass
         else:
             self.features = features
+        if False:       #v0.2
+            for feat in self.features:
+                col = self.column_info(feat,X)
+                if col.data is not None:
+                    self.col_X.append(col)
+            col=self.column_info('target',y)
+            if col.data is None:
+                raise( "Mort_Preprocess: col_Y is NONE!!! " )
+            self.col_Y=[col]
+            self.cX = (M_COLUMN * len(self.col_X))(*self.col_X)
+            self.cY = (M_COLUMN * len(self.col_Y))(*self.col_Y)
         return    #please implement this
 
     def OrdinalEncode_(X,X_test,features=None):

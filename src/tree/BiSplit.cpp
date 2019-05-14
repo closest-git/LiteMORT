@@ -178,7 +178,7 @@ void MT_BiSplit::Observation_AtLocalSamp(FeatsOnFold *hData_, int flag) {
 	double shrink = hData_->config.learning_rate;
 	//double init_score=hData_->lossy.init_score;
 	down_step = down_step*shrink;
-	FeatsOnFold::stat.tX += GST_TOC(t1);
+	//FeatsOnFold::stat.tX += GST_TOC(t1);
 
 	return;
 }
@@ -337,9 +337,11 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 
 
 	size_t start = 0, end = picks.size();
-	//auto t0 = std::chrono::steady_clock::now();
+	//GST_TIC(t1);
 #pragma omp parallel for schedule(static)
 	for (int i = start; i < end; i++) {		GetHistogram(hData_, picks[i], true);	}
+	//FeatsOnFold::stat.tX += GST_TOC(t1);	
+	//auto t0 = std::chrono::steady_clock::now();
 	//std::chrono::duration<double, std::milli> ht = std::chrono::steady_clock::now() - t0;
 	//printf("%d-%d(%.3g) ", this->id,nSamp, ht*1.0e-3);
 
@@ -435,7 +437,7 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 			}
 		}
 	}
-	//FeatsOnFold::stat.tX += GST_TOC(t1);
+	FeatsOnFold::stat.tX += GST_TOC(t1);
 	return gain;
 }
 

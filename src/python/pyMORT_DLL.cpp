@@ -362,7 +362,7 @@ PYMORT_DLL_API void LiteMORT_Imputer_d(double *X, tpY *y, size_t nFeat, size_t n
 */
 //PYMORT_DLL_API void LiteMORT_EDA(const float *X, const tpY *y, size_t nFeat_0, size_t nSamp, size_t flag) {
 
-PYMORT_DLL_API	PYMORT_DLL_API void LiteMORT_EDA(void *mort_0, const float *dataX, const tpY *dataY, const size_t nFeat_0, const size_t nSamp_,
+PYMORT_DLL_API void LiteMORT_EDA(void *mort_0, const float *dataX, const tpY *dataY, const size_t nFeat_0, const size_t nSamp_,
 	const size_t nValid, PY_ITEM* descs, int nParam, const size_t flag)		{
 	MORT *mort = MORT::From(mort_0);
 	assert(nValid>=0 && nValid <= nSamp_);
@@ -394,6 +394,42 @@ PYMORT_DLL_API	PYMORT_DLL_API void LiteMORT_EDA(void *mort_0, const float *dataX
 	}
 	//g_hEDA->InitBundle(config, (float *)dataX, nSamp_, nFeat_0, flag);
 	return ;
+}
+
+void LiteMORT_EDA(void *mort_0, const PY_COLUMN *dataX, const PY_COLUMN *dataY, const size_t nFeat_0, const size_t nSamp_,
+	const size_t nValid, PY_ITEM* descs, int nParam, const size_t flag) {
+	MORT *mort = MORT::From(mort_0);
+	assert(nValid >= 0 && nValid <= nSamp_);
+	LiteBOM_Config& config = mort->config;
+	//if (g_hEDA == nullptr)
+	//	g_hEDA = new ExploreDA(config, nFeat_0, flag);
+	mort->hEDA = new ExploreDA(config, nFeat_0, flag);
+	int nDistr = mort->hEDA->arrDistri.size(), i;
+	if (nParam > 0) {
+		assert(nParam == nDistr);
+		for (i = 0; i < nDistr; i++) {
+			PY_ITEM* desc = descs + i;
+			Distribution &distri = mort->hEDA->arrDistri[i];
+			distri.nam = desc->Keys;
+			//int type = (int)(desc->Values);
+			//distri.type = type == 1 ? FeatVector::CATEGORY : 0x0;
+			char *type = desc->text;
+			if (type == 0x0) {
+				distri.type = 0x0;
+			}
+			else
+				distri.type = strcmp(type, "category") == 0 ? Distribution::CATEGORY : 0x0;
+		}
+	}
+	if (dataX != nullptr && dataY != nullptr) {
+		mort->hEDA->Analysis_COL(config, dataX, dataY, nSamp_, nFeat_0, 1, flag);
+		mort->hEDA->CheckDuplicate(config, flag);
+	}
+	else {
+
+	}
+	//g_hEDA->InitBundle(config, (float *)dataX, nSamp_, nFeat_0, flag);
+	return;
 }
 
 /*	增量式EDA很难设计
@@ -490,3 +526,69 @@ PYMORT_DLL_API void LiteMORT_fit(void *mort_0, float *train_data, tpY *train_tar
 	return ;
 }
 
+/*
+v0.2
+*/
+PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_COLUMN *train_data, PY_COLUMN *train_target, size_t nFeat_0, size_t nSamp, PY_COLUMN *eval_data, PY_COLUMN *eval_target, size_t nEval, size_t flag) {
+	try {
+		GST_TIC(tick);
+		MORT *mort = MORT::From(mort_0);
+		LiteBOM_Config& config = mort->config;
+		//if(hGBRT!=nullptr)
+		//	LiteMORT_clear();
+		bool isDelEDA = false;
+		ExploreDA *hEDA = (ExploreDA *)(mort->hEDA);
+		if (hEDA == nullptr) {
+			printf("\n********* g_hEDA on train_data ********* \n");
+			LiteMORT_EDA(mort, train_data, train_target, nFeat_0, nSamp, 0, nullptr, 0x0, flag);
+			hEDA = mort->hEDA;		//isDelEDA = true;
+		}
+		size_t nFeat = nFeat_0, i, feat, nTrain = nSamp;
+		printf("\n********* LiteMORT_fit nSamp=%d,nFeat=%d hEDA=%p********* \n\n", nSamp, nFeat, hEDA);
+		Distribution disY;
+		//disY.STA_at(nSamp, train_target, true, 0x0);
+		if (disY.nNA > 0) {
+			printf("********* LiteMORT_fit Y has nans(%lld)!!! Please check the value of Y!!!\n", disY.nNA);
+			return;
+		}
+		if (true) {	//需要输出 Y的分布
+			//disY.X2Histo_<tpY, tpY>(config, nSamp, train_target, nullptr);
+			disY.Dump(-1, false, flag);
+		}
+
+		size_t f1 = FeatsOnFold::DF_TRAIN;
+		vector<FeatsOnFold*> folds;
+		FeatsOnFold *hFold = nullptr;// FeatsOnFold_InitInstance<float, tpY>(config, hEDA, "train", train_data, train_target, nSamp, nFeat_0, 1, flag | f1),
+		FeatsOnFold *hEval = nullptr;
+		folds.push_back(hFold);
+		//hFold->nam = "train";
+
+		//int nTree = 501;		//出现过拟合
+		int nTree = hFold->config.num_trees;
+		if (nEval > 0) {
+			ExploreDA *edaX_ = isDelEDA ? nullptr : hEDA;
+			hEval = nullptr;// FeatsOnFold_InitInstance<float, tpY>(config, edaX_, "eval", eval_data, eval_target, nEval, nFeat_0, 1, flag | FeatsOnFold::DF_EVAL);
+			//hEval->nam = "eval";
+			folds.push_back(hEval);
+		}
+		mort->hGBRT = new GBRT(hFold, hEval, 0, flag == 0 ? BoostingForest::REGRESSION : BoostingForest::CLASIFY, nTree);
+
+		mort->hGBRT->Train("", 50, 0x0);
+		//delete mort;		//仅用于测试 
+		if (isDelEDA) {
+			delete hEDA;			hEDA = nullptr;
+		}
+
+		//@%p(hEDA=%p,hGBRT=%p)	mort,mort->hEDA,mort->hGBRT,
+		printf("\n********* LiteMORT_api fit  time=%.3g(%.3g)......OK\n\n", GST_TOC(tick), FeatsOnFold::stat.tX + DCRIMI_2::tX);
+
+	}
+	catch (char * sInfo) {
+		printf("\n!!!!!! EXCEPTION@LiteMORT_fit \n!!!!!!\"%s\"\n\n", sInfo);
+		throw sInfo;
+	}
+	catch (...) {
+		printf("\n!!!!!! EXCEPTION@LiteMORT_fit %s!!!!!!\n\n", "...");
+	}
+	return;
+}

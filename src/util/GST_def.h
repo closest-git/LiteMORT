@@ -40,6 +40,11 @@ typedef int (*ON_TRAVEL_wpath_)(void* user_data,const wchar_t *sPath,int flag);
 	//#define G_INT_64  long long 
 #endif
 
+struct PY_COLUMN {
+	char *name;
+	void *data;
+	char *dtype;
+};
 
 
 //似乎比std::min std::max更适合比较不同的数据类型		7/11/2015	cys

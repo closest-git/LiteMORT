@@ -130,6 +130,11 @@ namespace Grusoft {
 
 		void Merge(const Distribution& next) {
 		}
+
+		void STA_at(size_t N, const PY_COLUMN *col, bool isSparse, int flag) {
+			STA_at(N, (float*)col->data, isSparse, flag);
+		}
+
 		/*
 			不支持增量操作，多个数据应MERGE
 		*/

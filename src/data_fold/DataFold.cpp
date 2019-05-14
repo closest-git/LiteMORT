@@ -236,11 +236,24 @@ void FeatsOnFold::AfterTrain(int flag) {
 	//lossy.predict->BinaryOperate(lossy.y, FeatVector::COPY_MEAN, 0x0);
 }
 
+/* https://www.codeproject.com/Articles/75423/Loop-Unrolling-over-Template-Arguments  LOOP_unroll might get slower (program code doesn't fit into the L1 cache).
+template <int DIM>
+struct LOOP_unroll {
+	template<typename Operation>
+	inline void operator(Operation& op) { op(); ToHisto_unroll<N - 1>(op); }
+};
+template <>
+struct LOOP_unroll<0> {
+	template<typename Operation>
+	inline void operator(Operation& op) { op();  }
+};*/
+
+#define TO_BIN_0(pBins,quanti,samps,down,i)	{	HISTO_BIN *pB0 = pBins + (quanti[samps[i]]);	pB0->G_sum -= down[i];	pB0->nz++;	}
 void FeatVec_Q::Samp2Histo_null_hessian(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag0) {
 	tpDOWN *down = hData_->GetSampleDown();	
 	string optimal = hData_->config.leaf_optimal;
 	bool isLambda = optimal == "lambda_0";
-	size_t nSamp = samp_set.nSamp, i, nSamp4 = 0;
+	size_t nSamp = samp_set.nSamp, i, nSamp_LD= 0,LD=4;
 	if (nSamp == hData_->nSample()) {
 		down = hData_->GetDownDirection();
 	}
@@ -252,27 +265,30 @@ void FeatVec_Q::Samp2Histo_null_hessian(const FeatsOnFold *hData_, const SAMP_SE
 	int nBin = histo->bins.size();
 	HISTO_BIN *pBins = histo->bins.data(), *pBin;	//https://stackoverflow.com/questions/7377773/how-can-i-get-a-pointer-to-the-first-element-in-an-stdvector
 
-	nSamp4 = 4 * (int)(nSamp / 4);
-	for (i = 0; i < nSamp4; i += 4) {
-		HISTO_BIN *pB0 = pBins + quanti[samps[i]];
-		HISTO_BIN *pB1 = pBins + quanti[samps[i + 1]];
-		HISTO_BIN *pB2 = pBins + quanti[samps[i + 2]];
-		HISTO_BIN *pB3 = pBins + quanti[samps[i + 3]];
-		tpDOWN a0 = down[i], a1 = down[i + 1], a2 = down[i + 2], a3 = down[i + 3];
-		pB0->G_sum -= a0;
-		pB1->G_sum -= a1;
-		pB2->G_sum -= a2;
-		pB3->G_sum -= a3;
-		pB0->nz++;	pB1->nz++;	pB2->nz++;	pB3->nz++;
-	}/**/
+	nSamp_LD = LD==0 ? 0 : LD * (int)(nSamp / LD);
+	for (i = 0; i < nSamp_LD; i += LD) {
+		TO_BIN_0(pBins, quanti,samps, down,i);
+		TO_BIN_0(pBins, quanti, samps, down, i+1);
+		TO_BIN_0(pBins, quanti, samps, down, i+2);
+		TO_BIN_0(pBins, quanti, samps, down, i+3);
+		/*TO_BIN_0(pBins, quanti, samps, down, i+4);
+		TO_BIN_0(pBins, quanti, samps, down, i + 5);
+		TO_BIN_0(pBins, quanti, samps, down, i + 6);
+		TO_BIN_0(pBins, quanti, samps, down, i + 7);
+		TO_BIN_0(pBins, quanti, samps, down, i + 8);
+		TO_BIN_0(pBins, quanti, samps, down, i + 9);
+		TO_BIN_0(pBins, quanti, samps, down, i + 10);
+		TO_BIN_0(pBins, quanti, samps, down, i + 11);*/
+	}
 	 //if(nSamp<10000)
-	for (i = nSamp4; i<nSamp; i++) {
-		tpQUANTI pos = quanti[samps[i]];
+	for (i = nSamp_LD; i<nSamp; i++) {
+		TO_BIN_0(pBins, quanti, samps, down, i);
+		/*tpQUANTI pos = quanti[samps[i]];
 		assert(pos >= 0 && pos < nBin);
 		a = down[i];
 		pBin = pBins + pos;	//HISTO_BIN& bin = histo->bins[no];
 		pBin->G_sum += -a;
-		pBin->nz++;
+		pBin->nz++;*/
 	}
 	//FeatsOnFold::stat.tX += GST_TOC(t1);
 
@@ -280,6 +296,40 @@ void FeatVec_Q::Samp2Histo_null_hessian(const FeatsOnFold *hData_, const SAMP_SE
 		pBins[i].H_sum = pBins[i].nz;
 	}
 }
+
+void FeatVec_Q::Samp2Histo_null_hessian_sparse(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag0) {
+	tpDOWN *down = hData_->GetSampleDown();
+	string optimal = hData_->config.leaf_optimal;
+	bool isLambda = optimal == "lambda_0";
+	size_t nSamp = samp_set.nSamp, i,nz=0;
+	if (nSamp == hData_->nSample()) {
+		down = hData_->GetDownDirection();
+	}
+	const tpSAMP_ID *samps = samp_set.samps;
+	tpSAMP_ID samp;
+	tpDOWN a=0;
+	tpQUANTI *quanti = arr(), no,cur=0,next=-1;
+	histo->CopyBins(*qHisto, true, 0x0);
+	int nBin = histo->bins.size();
+	HISTO_BIN *pBins = histo->bins.data(), *pBin;	//https://stackoverflow.com/questions/7377773/how-can-i-get-a-pointer-to-the-first-element-in-an-stdvector
+	i = 0;		next = quanti[samps[0]];
+	while (i<nSamp) {
+		cur = next;
+		a = down[i];			nz = 1;
+		while (++i<nSamp && (next = quanti[samps[i]])==cur) {
+			a += down[i];		nz++;
+		}
+		//assert(pos >= 0 && pos < nBin);
+		pBin = pBins + cur;	//HISTO_BIN& bin = histo->bins[no];
+		pBin->G_sum += -a;				pBin->nz += nz;			
+	}
+	//FeatsOnFold::stat.tX += GST_TOC(t1);
+
+	for (i = 0; i < nBin; i++) {
+		pBins[i].H_sum = pBins[i].nz;
+	}
+}
+
 /*
 	v0.2
 */
@@ -302,9 +352,11 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 				if (current < T_Drop)
 					continue;
 	}*/
+
 	tpDOWN *hessian = hData_->GetSampleHessian();
 	if (hessian == nullptr) {
 		Samp2Histo_null_hessian(hData_, samp_set, histo, nMostBin, flag0);
+		//Samp2Histo_null_hessian_sparse(hData_, samp_set, histo, nMostBin, flag0);
 	}
 	else {
 		tpDOWN *down = hData_->GetSampleDown();	
@@ -349,8 +401,6 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 			pBin->nz++;
 		}		
 	}
-	
-	//FeatsOnFold::stat.tX += GST_TOC(t1);
 	#ifdef _DEBUG
 	if (true /* && !isRandomDrop*/) {
 		double G_sum = 0;	// histo->hBinNA()->G_sum;
@@ -359,7 +409,7 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 		}
 		assert(fabs(G_sum + samp_set.Y_sum_1)<1.e-7*fabs(G_sum) || fabs(samp_set.Y_sum_1)<0.001);
 	}
-#endif
+	#endif
 }
 
 /*

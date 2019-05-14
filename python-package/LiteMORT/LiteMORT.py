@@ -102,6 +102,7 @@ class M_argument(Structure):
                     ('text', c_char_p),
                ]
 
+
 class LiteMORT(object):
     #problem = None
     #preprocess = None
@@ -127,6 +128,11 @@ class LiteMORT(object):
         self.mort_fit.argtypes = [c_void_p,POINTER(c_float), POINTER(c_double), c_size_t, c_size_t,
                                   POINTER(c_float), POINTER(c_double), c_size_t, c_size_t]
         self.mort_fit.restype = None
+
+        self.mort_fit_1 = self.dll.LiteMORT_fit_1
+        self.mort_fit_1.argtypes = [c_void_p, POINTER(M_COLUMN), POINTER(M_COLUMN), c_size_t,c_size_t,
+                                  POINTER(M_COLUMN), POINTER(M_COLUMN), c_size_t, c_size_t]
+        self.mort_fit_1.restype = None
 
         self.mort_predcit = self.dll.LiteMORT_predict
         self.mort_predcit.argtypes = [c_void_p,POINTER(c_float), POINTER(c_double), c_size_t, c_size_t, c_size_t]
@@ -166,6 +172,8 @@ class LiteMORT(object):
         except AttributeError:
             pass
 
+    # For DataFrames of mixed type calling .values converts multiple blocks (for each dtype) into one numpy array of a all-encompassing dtype.
+    # This conversion can be slow for large frames!!!
     def X_t(self, X_train_0, target_type):
         # mort_fit需要feature优先
         if isinstance(X_train_0, pd.DataFrame):
@@ -227,92 +235,97 @@ class LiteMORT(object):
         :param flag:
         :return:
         '''
-
+        return
         nFeat,nSamp,no=self.preprocess.nFeature,self.preprocess.nSample,0
+        X, y = self.preprocess.train_X, self.preprocess.train_y
         categorical_feature = self.preprocess.categorical_feature
         ca_list = []
         for feat in self.preprocess.features:
-            ca = M_argument()
-            ca.Keys = str(feat).encode('utf8')
-            ca.Values = (c_float)(0)
-            # if feat=='hist_merchant_id_nunique':
+            ca = M_COLUMN()
+            ca.name = str(feat).encode('utf8')
+            ca.values = (c_float)(0)
             if (categorical_feature is not None) and (feat in categorical_feature or no in categorical_feature):
                 # ca.Values = (c_float)(1)
                 ca.text = 'category'.encode('utf8')
             ca_list.append(ca)
             no=no+1
-        ca_array = (M_argument * len(ca_list))(*ca_list)
+        self.column_array = (M_COLUMN * len(ca_list))(*ca_list)
         #self.EDA_000(self.mort_params, all_data, None, user_test.shape[0], ca_list)
-        X,y=self.preprocess.train_X,self.preprocess.train_y
-        self.mort_eda(self.hLIB,X,y, nFeat, nSamp,0,ca_array, len(ca_list), 0)
+        if False:
+            self.mort_eda(self.hLIB,X,y, nFeat, nSamp,0,self.column_array, len(ca_list), 0)
 
-    def EDA_000(self, params,dataX_, dataY_,nValid,desc_list, flag=0x0):
-        # print("====== LiteMORT_EDA X_={} ......".format(X_.shape))
-        nSamp, nFeat = dataX_.shape[0], dataX_.shape[1];
-        ca_array,nFeat_desc = None,len(desc_list)
-        if nFeat_desc>0:
-            assert(nFeat_desc==nFeat)
-            ca_array = (M_argument * len(desc_list))(*desc_list)
-        #nValid, nFeat = validX_.shape[0], trainX_.shape[1];
-        if dataY_ is None:
-            dataY_ = np.zeros(nSamp, dtype=np.float64)
-        dataX = self.X_t(dataX_, np.float32)
-        #validX = self.X_t(validX_, np.float32)
-        self.mort_eda(dataX.ctypes.data_as(POINTER(c_float)),dataY_.ctypes.data_as(POINTER(c_double)) ,nFeat, nSamp,nValid,
-                      ca_array,nFeat_desc,  0)
-        return
+    def fit_index(self, X, y,train_index, eval_set=None, feat_dict=None, categorical_feature=None, params=None, flag=0x0):
+        gc.collect()
+        self.preprocess = Mort_Preprocess(X, y, categorical_feature=categorical_feature)
 
+        if (eval_set is not None and len(eval_set) > 0):
+            eval_index = eval_set[0]
+        pass
+        print("====== LiteMORT_fit_index X_={} y_={}......".format(X.shape, y.shape))
+
+        self.EDA(flag)
+
+        self.mort_fit_index(self.hLIB, self.preprocess.train_X, self.preprocess.train_y, nFeat, nTrain,
+                      self.preprocess.eval_X, self.preprocess.eval_y, nTest, 0)  # 1 : classification
+        return self
+
+    def fit(self, X_train_0, y_train, eval_set=None, feat_dict=None, categorical_feature=None, params=None, flag=0x0):
+        gc.collect()
+        # self.preprocess.fit(X_train_0, y_train)
+        # self.preprocess.transform(eval_set)
+        self.preprocess = Mort_Preprocess(X_train_0, y_train, categorical_feature=categorical_feature)
+
+        if (eval_set is not None and len(eval_set) > 0):
+            X_test, y_test = eval_set[0]
+
+        print("====== LiteMORT_fit X_train_0={} y_train={}......".format(X_train_0.shape, y_train.shape))
+        train_y = self.problem.OnY(y_train, np.float64)
+        # train_y = self.Y_t(y_train, np.float64)
+        train_X = self.X_t(X_train_0, np.float32)
+        self.preprocess.train_X = train_X.ctypes.data_as(POINTER(c_float))
+        self.preprocess.train_y = train_y.ctypes.data_as(POINTER(c_double))
+        nTrain, nFeat, nTest = train_X.shape[0], train_X.shape[1], 0
+        eval_X, eval_y = None, None
+        if eval_set is not None:
+            eval_y0 = self.problem.OnY(y_test, np.float64)
+            eval_X0 = self.X_t(X_test, np.float32)
+            nTest = eval_X0.shape[0]
+            self.preprocess.eval_X, self.preprocess.eval_y = eval_X0.ctypes.data_as(
+                POINTER(c_float)), eval_y0.ctypes.data_as(POINTER(c_double))
+        self.EDA(flag)
+
+        self.mort_fit(self.hLIB, self.preprocess.train_X, self.preprocess.train_y, nFeat, nTrain,
+                      self.preprocess.eval_X, self.preprocess.eval_y, nTest, 0)  # 1 : classification
+        if not (train_X is X_train_0):
+            del train_X;
+            gc.collect()
+        if not (train_y is y_train):
+            del train_y;
+            gc.collect()
+        if eval_X is not None and not (eval_X is X_test):
+            del eval_X;
+            gc.collect()
+        if eval_y is not None and not (eval_y is y_test):
+            del eval_y;
+            gc.collect()
+
+        return self
     '''
             # v0.2
             # v0.3
                 feat_dict   cys@1/10/2019
     '''
-    def fit(self,X_train_0, y_train,eval_set=None,  feat_dict=None,categorical_feature=None, params=None,flag=0x0):
-        '''
-
-        :param X_train_0:
-        :param y_train:
-        :param eval_set: 参见lightgbm之valid_sets
-        :param feat_dict:
-        :param categorical_feature:
-        :param params:
-        :param flag:
-        :return:
-        '''
+    def fit_1(self,X_train_0, y_train,eval_set=None,  feat_dict=None,categorical_feature=None, params=None,flag=0x0):
+        print("====== LiteMORT_fit X_train_0={} y_train={}......".format(X_train_0.shape, y_train.shape))
         gc.collect()
-        #self.preprocess.fit(X_train_0, y_train)
-        #self.preprocess.transform(eval_set)
-        self.preprocess = Mort_Preprocess( X_train_0,y_train,categorical_feature=categorical_feature)
-
+        self.train_set = Mort_Preprocess( X_train_0,y_train,categorical_feature=categorical_feature)
         if(eval_set is not None and len(eval_set)>0):
             X_test, y_test=eval_set[0]
-
-        print("====== LiteMORT_fit X_train_0={} y_train={}......".format(X_train_0.shape, y_train.shape))
-        train_y = self.problem.OnY(y_train, np.float64)
-        #train_y = self.Y_t(y_train, np.float64)
-        train_X = self.X_t(X_train_0, np.float32)
-        self.preprocess.train_X = train_X.ctypes.data_as(POINTER(c_float))
-        self.preprocess.train_y = train_y.ctypes.data_as(POINTER(c_double))
-        nTrain, nFeat, nTest = train_X.shape[0], train_X.shape[1], 0
-        eval_X,eval_y=None,None
-        if  eval_set is not None:
-            eval_y0 = self.problem.OnY(y_test, np.float64)
-            eval_X0 = self.X_t(X_test, np.float32)
-            nTest = eval_X0.shape[0]
-            self.preprocess.eval_X,self.preprocess.eval_y = eval_X0.ctypes.data_as(POINTER(c_float)), eval_y0.ctypes.data_as(POINTER(c_double))
-        self.EDA(flag)
-
-        self.mort_fit(self.hLIB,self.preprocess.train_X,self.preprocess.train_y, nFeat, nTrain,
-                      self.preprocess.eval_X, self.preprocess.eval_y, nTest,0)  # 1 : classification
-        if not(train_X is X_train_0):
-            del train_X;     gc.collect()
-        if not(train_y is y_train):
-            del train_y;     gc.collect()
-        if eval_X is not None and not(eval_X is X_test):
-            del eval_X;     gc.collect()
-        if eval_y is not None and not(eval_y is y_test):
-            del eval_y;     gc.collect()
-
+            self.eval_set = Mort_Preprocess(X_test, y_test, categorical_feature=categorical_feature)
+        #self.EDA(flag)
+        nTrain, nFeat, nTest = self.train_set.nSample,self.train_set.nFeature, self.eval_set.nSample
+        #self.mort_fit(self.hLIB,self.preprocess.train_X,self.preprocess.train_y, nFeat, nTrain,self.preprocess.eval_X, self.preprocess.eval_y, nTest,0)  # 1 : classification
+        self.mort_fit_1(self.hLIB,self.train_set.cX,self.train_set.cY, nFeat,nTrain,self.eval_set.cX, self.eval_set.cY, nTest,0)  # 1 : classification
         return self
 
 
