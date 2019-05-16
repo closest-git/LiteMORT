@@ -187,7 +187,8 @@ namespace Grusoft {
 		}
 
 		template<typename Tx>
-		void SplitOn(FeatsOnFold *hData_, const std::vector<Tx>&vals, bool isQuanti, int flag = 0x0) {
+		//void SplitOn(FeatsOnFold *hData_, const std::vector<Tx>&vals, bool isQuanti, int flag = 0x0) {
+		void SplitOn(FeatsOnFold *hData_,size_t nSamp_, const Tx* vals, bool isQuanti, int flag = 0x0) {
 			GST_TIC(t1);
 			SAMP_SET& lSet = left->samp_set,& rSet = right->samp_set;
 			lSet = this->samp_set;		rSet = this->samp_set;

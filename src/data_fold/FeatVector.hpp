@@ -42,13 +42,13 @@ namespace Grusoft {
 		enum {
 			//CATEGORY = 0x100,
 			AGGREGATE = 0x200,
-
+			VAL_REFER = 0x1000,
 			//V_ZERO_DEVIA = 0x10000,	//常值，一般可忽略
 			IS_BUNDLE = 0x20000,	//in Feature Bundle	参见FeatsOnFold::nPick4Split
 		};
 		size_t type = 0x0;
-		bool isCategory() { return BIT_TEST(type, Distribution::CATEGORY); }
-
+		bool isCategory()	{ return	BIT_TEST(type, Distribution::CATEGORY); }
+		bool isReferVal()	{ return	BIT_TEST(type, VAL_REFER); }
 		typedef enum {
 			COPY_MEAN,
 		}BINARY_OPERATE;

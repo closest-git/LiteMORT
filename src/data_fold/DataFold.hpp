@@ -322,32 +322,51 @@ namespace Grusoft {
 	template<typename Tx>
 	class FeatVec_T : public FeatVector {
 	protected:
-		std::vector<Tx> val;
+		//std::vector<Tx> val;
+		size_t nSamp_=0;
+		Tx *val=nullptr;
 		//map<hMTNode,Tx> BLIT_thrsh,BLIT_mean;
 	public:
 		FeatVec_T() { 	}
 		FeatVec_T(size_t _len, int id_, const string&des_, int flag = 0x0) {
 			id = id_;
-			desc = des_;	assert(_len > 0);		val.resize(_len);
+			nSamp_ = _len;
+			desc = des_;	assert(_len > 0);	
+			type = flag;
+			if (isReferVal()) {
+
+			}	else
+				val = new Tx[_len];	// val.resize(_len);
 			//hDistri = new Distribution();
 		}
 
 		virtual ~FeatVec_T() {
-			val.clear();
+			if (isReferVal()) {
+				printf("");
+			}	else if (val != nullptr)
+				delete[] val;
+			//val.clear();
 		}
-
 
 		//{	assert(_len>0);	val.resize(_len,(Tx)0);	 }
 
-		Tx* arr() { return VECTOR2ARR(val); }
+		//Tx* arr() { return VECTOR2ARR(val); }
+		Tx* arr()			{ return val;		}
+		size_t size()		{ return nSamp_;	}
 
 		virtual void Set(size_t len, void* src, int flag = 0x0) {
-			assert(len == val.size());
+			//assert(len == val.size());
+			if (len != nSamp_)
+				throw "FeatVec_T::Set len mismatch!!!";
 			void* dst = arr();
-			memcpy(dst, src, sizeof(Tx)*len);			
+			if (isReferVal()) {
+				val = (Tx*)src;
+			}
+			else
+				memcpy(dst, src, sizeof(Tx)*len);			
 		}
 		virtual void Set(double a, int flag = 0x0) {
-			size_t len = val.size(), i;
+			size_t len = nSamp_, i;
 			Tx *x_ = arr();
 			for (i = 0; i < len; i++)
 				x_[i] = a;
@@ -355,11 +374,12 @@ namespace Grusoft {
 		virtual void Set(size_t pos, double a, int flag = 0x0) {
 			val[pos] = (Tx)a;
 		}
-		virtual void Clear(int flag = 0x0) {
+		/*virtual void Clear(int flag = 0x0) {
 			val.clear();
-		}
+		}*/
 		virtual void Empty(int flag = 0x0) {
-			memset(arr(), 0, val.size() * sizeof(Tx));
+			//memset(arr(), 0, val.size() * sizeof(Tx));
+			memset(val, 0, nSamp_ * sizeof(Tx));
 		}
 
 		//参见MT_BiSplit::Observation_AtSamp(FeatsOnFold *hData_, int flag) 
@@ -379,8 +399,8 @@ namespace Grusoft {
 
 		virtual void loc(vector<tpSAMP_ID>&poss,double target,int flag=0x0) {
 			poss.clear();
-			size_t i,dim = val.size();
-			for (i = 0; i < dim; i++) {
+			size_t i;
+			for (i = 0; i < nSamp_; i++) {
 				if (val[i] == target)
 					poss.push_back(i);
 			}
@@ -423,7 +443,7 @@ namespace Grusoft {
 				double err, min_err=DBL_MAX,a, eta_bst=1.0;
 				FeatVector* hY0=hData_->GetY();
 				FeatVec_T<Tx> *hY = dynamic_cast<FeatVec_T<Tx>*>(hY0);		assert(hY!=nullptr);
-				const Tx* target = VECTOR2ARR(hY->val);
+				const Tx* target = (hY->val);
 				size_t i,loop, nLoop = sizeof(s) / sizeof(double), nSamp= hBlit->nSample();
 				tpSAMP_ID *samps=hBlit->samp_set.samps, samp;
 				for (loop = 0; loop < nLoop; loop++) {
@@ -535,7 +555,7 @@ namespace Grusoft {
 				//hBlit->samp_set.SplitOn(ys, thrsh, left->samp_set, rigt->samp_set,1);
 			}
 			else/**/ {
-				hBlit->SplitOn(hData_,val, hData_->isQuanti);
+				hBlit->SplitOn(hData_,nSamp_,val, hData_->isQuanti);
 
 			}
 			//放这里不合适，应该在ManifoldTree::Train GrowLeaf之后
@@ -662,10 +682,10 @@ namespace Grusoft {
 			和edaX有区别（数据集有差别），这些区别应该有价值
 		*/
 		virtual void EDA(const LiteBOM_Config&config, ExploreDA *edaX, int flag) {
-			size_t nSamp_ = val.size(), i;
+			size_t i;
 			assert(hDistri == nullptr);
 			hDistri = new Distribution();		hDistri->nam = nam;
-			hDistri->STA_at(val, true, 0x0);
+			hDistri->STA_at(nSamp_,val, true, 0x0);
 			if (ZERO_DEVIA(hDistri->vMin, hDistri->vMax))
 				BIT_SET(this->type, Distribution::V_ZERO_DEVIA);
 			else if (config.eda_Normal != LiteBOM_Config::NORMAL_off) {
@@ -675,7 +695,7 @@ namespace Grusoft {
 				for (i = 0; i < nSamp_; i++) {
 					val_c[i] = (val_c[i] - mean)*s;
 				}
-				hDistri->STA_at(val, true, 0x0);/**/
+				hDistri->STA_at(nSamp_, val, true, 0x0);/**/
 			}
 			if (edaX != nullptr) {		/*复制信息*/
 				Distribution& distri = edaX->arrDistri[id];
@@ -705,7 +725,7 @@ namespace Grusoft {
 		*/
 		virtual void QuantiAtEDA(const ExploreDA *edaX, tpQUANTI *quanti, int nMostBin, int flag = 0x0) {
 			assert(quanti != nullptr && edaX != nullptr);
-			size_t nSamp_ = val.size(), i, i_0 = 0, i_1, noBin = 0, pos;
+			size_t nSamp_ = size(), i, i_0 = 0, i_1, noBin = 0, pos;
 			vector<tpSAMP_ID> idx;
 			if (hDistri->sortedA.size() > 0) {
 				idx = hDistri->sortedA;
@@ -713,7 +733,7 @@ namespace Grusoft {
 					quanti[i] = -1;
 			}
 			else
-				sort_indexes(val, idx);
+				sort_indexes(nSamp_,val, idx);
 			//sort_indexes(val, idx);
 			size_t nA = idx.size();
 			Tx a0 = val[idx[0]], a1 = val[idx[nA - 1]];
@@ -767,79 +787,6 @@ namespace Grusoft {
 				return;
 			}
 		}
-
-		/*
-			v0.2	 考虑有NAN的情况，参见QuantiAtEDA
-		*/
-		virtual void Split2Quanti_000(const LiteBOM_Config&config, const ExploreDA *eda, vector<double>& vThrsh, HistoGRAM *qHisto, tpDOWN *yDown, int nMostBin, int flag = 0x0) {
-			assert(qHisto->quanti != nullptr);
-			tpQUANTI *quanti = qHisto->quanti;
-			size_t nSamp_ = val.size(), i, i_0 = 0, i_1, noBin = 0, min_step = MAX(nSamp_ / nMostBin, 50), nExSplit = 0;
-			vector<tpSAMP_ID> idx;
-			if (hDistri->sortedA.size() > 0)
-				idx = hDistri->sortedA;
-			else
-				sort_indexes(val, idx);
-			size_t nA = idx.size();
-			Tx a0 = val[idx[0]], a1 = val[idx[nA - 1]], v0 = a0, v1;
-			assert(a0 <= a1);
-
-			//qHisto->a0 = a0;		qHisto->a1 = a1;
-			if (a0 == a1) {
-				//printf(" %s is const(%g)!!!", desc.c_str(), a0);
-				return;
-			}
-			if (this->id == 16)
-				id = 16;
-			Tx step = (a1 - a0) / nMostBin, v1_last = a0;
-			qHisto->bins.resize(nMostBin * 2 + 3);
-			int histo_alg = 2;
-			switch (histo_alg) {
-			case 1:
-				assert(0);	//HistoOnFrequncy(config, VECTOR2ARR(val), idx, vThrsh, nMostBin);
-				break;
-			case 2:
-				while (i_0 < nA) {
-					v0 = val[idx[i_0]];		v1 = v0 + step;	i_1 = i_0;
-					noBin = vThrsh.size();
-					HISTO_BIN& bin = qHisto->bins[noBin];
-					bin.tic = noBin;
-					//vThrsh.push_back((v0 + v1_last) / 2);
-					vThrsh.push_back(v0);
-					//while (i_1 < nA - 1 && val[idx[++i_1]] < v1){
-					while (i_1 < nA && val[idx[i_1]] < v1) {
-						assert(yDown == nullptr);
-						/*if (yDown != nullptr) {		//how dividing the bins on the gradient statistics
-							double Y1= yDown[idx[i_1]],Y2= Y1*Y1, impuri;
-							tpDOWN y= yDown[idx[i_1 - 1]];
-							Y2 +=y*y;		Y1+=y;
-							impuri= Y2-	Y1*Y1/(i_1- i_0);
-							if(impuri>Y2 && i_1 - i_0>min_step)	{
-								v2 = val[idx[i_1-1]];
-								if( v2>v0 )		//否则无法设置split
-								{	nExSplit++;	break;		}
-							}
-						}*/
-						i_1++;
-					}
-					v1_last = val[idx[i_1 - 1]];
-					assert(i_1 == nA || v1_last < v1);
-					for (i = i_0; i < i_1; i++)	quanti[idx[i]] = noBin;
-					bin.nz = i_1 - i_0;
-					i_0 = i_1;
-				}
-				assert(i_0 == nA);
-				//assert(vThrsh.size() < nMostBin);
-				if (vThrsh.size() > nMostBin) {
-					printf("\n!!!FEAT_%d nBin=%ld > nMostBin!!!\n", id, vThrsh.size());
-				}
-				if (nExSplit > 0)	printf("\tnExSplit=%ld", nExSplit);
-				qHisto->bins.resize(vThrsh.size());
-				vThrsh.push_back(a1 + step / 10);
-				break;
-			}
-		}
-
 
 		//manifold node对应的一些statics		
 		virtual void BinaryOperate(FeatVector *hY_, BINARY_OPERATE opt, int flag = 0x0) {

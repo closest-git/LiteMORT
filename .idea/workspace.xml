@@ -2,19 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1f20a82c-2842-4728-bc01-7f01847a5972" name="Default" comment="README">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/python-package/lgb_kim.py" beforeDir="false" afterPath="$PROJECT_DIR$/python-package/lgb_kim.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/data_fold/Distribution.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/Distribution.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/data_fold/EDA.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/EDA.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/data_fold/EDA.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/EDA.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_fold/FeatVector.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/FeatVector.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/data_fold/Histogram.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/Histogram.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/data_fold/Loss.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/Loss.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/learn/DCRIMI_.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/learn/DCRIMI_.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/python/pyMORT_DLL.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/python/pyMORT_DLL.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tree/BiSplit.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/BiSplit.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tree/ManifoldTree.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/ManifoldTree.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/util/GST_def.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/GST_def.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tree/BiSplit.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/BiSplit.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/util/samp_set.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/samp_set.hpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -39,8 +33,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/python-package/case_qq2019.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1444">
-              <caret line="76" column="58" selection-start-line="76" selection-start-column="58" selection-end-line="76" selection-end-column="58" />
+            <state relative-caret-position="342">
+              <caret line="18" column="1" selection-start-line="18" selection-start-column="1" selection-end-line="18" selection-end-column="1" />
               <folding>
                 <element signature="e#9#31#0" expanded="true" />
               </folding>
@@ -74,7 +68,7 @@
         <entry file="file://$PROJECT_DIR$/python-package/lgb_kim.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="2220">
-              <caret line="122" column="64" lean-forward="true" selection-start-line="122" selection-start-column="64" selection-end-line="122" selection-end-column="64" />
+              <caret line="122" column="64" selection-start-line="122" selection-start-column="64" selection-end-line="122" selection-end-column="64" />
               <folding>
                 <element signature="e#71#89#0" expanded="true" />
               </folding>
@@ -201,8 +195,8 @@
         <option value="$PROJECT_DIR$/python-package/geo_test.py" />
         <option value="$PROJECT_DIR$/python-package/litemort/LiteMORT.py" />
         <option value="$PROJECT_DIR$/python-package/litemort/LiteMORT_preprocess.py" />
-        <option value="$PROJECT_DIR$/python-package/case_qq2019.py" />
         <option value="$PROJECT_DIR$/python-package/lgb_kim.py" />
+        <option value="$PROJECT_DIR$/python-package/case_qq2019.py" />
       </list>
     </option>
   </component>
@@ -418,7 +412,7 @@
       <workItem from="1557813755885" duration="18000" />
       <workItem from="1557813904230" duration="9311000" />
       <workItem from="1557882903665" duration="17000" />
-      <workItem from="1557891923454" duration="10568000" />
+      <workItem from="1557891923454" duration="12358000" />
     </task>
     <task id="LOCAL-00001" summary="README">
       <created>1556249780941</created>
@@ -463,7 +457,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="66129000" />
+    <option name="totallyTimeSpent" value="67919000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1441" height="878" extended-state="6" />
@@ -946,7 +940,7 @@
     <entry file="file://$PROJECT_DIR$/python-package/lgb_kim.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2220">
-          <caret line="122" column="64" lean-forward="true" selection-start-line="122" selection-start-column="64" selection-end-line="122" selection-end-column="64" />
+          <caret line="122" column="64" selection-start-line="122" selection-start-column="64" selection-end-line="122" selection-end-column="64" />
           <folding>
             <element signature="e#71#89#0" expanded="true" />
           </folding>
@@ -955,8 +949,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/python-package/case_qq2019.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1444">
-          <caret line="76" column="58" selection-start-line="76" selection-start-column="58" selection-end-line="76" selection-end-column="58" />
+        <state relative-caret-position="342">
+          <caret line="18" column="1" selection-start-line="18" selection-start-column="1" selection-end-line="18" selection-end-column="1" />
           <folding>
             <element signature="e#9#31#0" expanded="true" />
           </folding>

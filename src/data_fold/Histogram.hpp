@@ -45,6 +45,7 @@ void sort_indexes_NA(int nSamp, const T*v, vector<size_t>& idx, int flag = 0x0) 
 	delete[] vGood;			delete[] map;
 	return;
 }
+
 template <typename T>
 void sort_indexes(int nSamp,const T*v, vector<tpSAMP_ID>& idx, int flag = 0x0) {
 	if (false) {
@@ -62,7 +63,6 @@ void sort_indexes(int nSamp,const T*v, vector<tpSAMP_ID>& idx, int flag = 0x0) {
 	}
 	return;
 }
-
 
 template <typename T>
 void sort_indexes(const vector<T> &v, vector<tpSAMP_ID>& idx, int flag = 0x0) {

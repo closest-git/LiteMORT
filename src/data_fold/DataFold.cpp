@@ -437,8 +437,9 @@ void FeatVec_Q::UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst,
 		}	
 		yDown = ((FeatsOnFold *)hData_)->GetDownDirection();
 	}/**/
-	
-	val.resize(nSamp);
+	assert(val == nullptr);
+	val = new tpQUANTI[nSamp];
+	//val.resize(nSamp);
 	tpQUANTI *quanti = arr(), no;
 	qHisto->quanti = quanti;
 	for( i=0;i<nSamp;i++ )	quanti[i]=-111;		//-1 for NAN
@@ -489,8 +490,8 @@ FeatVec_Bundle::FeatVec_Bundle(FeatsOnFold *hData_,int id_, const vector<int>&bu
 	//qHisto = optimal == "grad_variance" ? new HistoGRAM(nSamp) : new Histo_CTQ(nSamp);
 	qHisto = new HistoGRAM(this,nSamp);
 	vector<HISTO_BIN>& bins = qHisto->bins;
-
-	val.resize(nSamp);
+	assert(val == nullptr);
+	//val.resize(nSamp);
 	tpQUANTI *quanti = arr(), no,*quanti_0=nullptr;
 	for (i = 0; i < nSamp; i++) {	quanti[i]=-1;	}
 	for (auto no : bun) {

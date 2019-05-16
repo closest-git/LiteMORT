@@ -179,6 +179,7 @@ PYMORT_DLL_API void LiteMORT_set_feat(PY_ITEM* params, int nParam, int flag = 0x
 	}
 }
 
+
 FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, string nam_, PY_COLUMN *cX_, PY_COLUMN *cY_, size_t nSamp_, size_t ldX_, size_t ldY_, int flag) {
 	clock_t t0 = clock();
 	assert(BIT_IS(flag, FeatsOnFold::DF_FLAG));
@@ -197,24 +198,24 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 
 	//hFold->Init_T<Tx, Ty>(nSamp_, ldX_, 0x0, flag);
 	hFold->nMost = nSamp_;
-	int rnd_seed = 0, nThread = config.num_threads;
+	int rnd_seed = 0, nThread = config.num_threads, flagF= flag|FeatVector::VAL_REFER;
 	for (size_t i = 0; i < ldX_; i++) {
 		string desc = "feat_";
 		PY_COLUMN *col = cX_ + i;//唯一的dtype处理
 		if (i == 9)
 			i = 9;
 		if (col->isFloat()) {
-			hFold->feats.push_back(new FeatVec_T<float>(nSamp_, i, desc + std::to_string(i)));		
+			hFold->feats.push_back(new FeatVec_T<float>(nSamp_, i, desc + std::to_string(i),flagF));		
 		}	else if (col->isInt()) {
-			hFold->feats.push_back(new FeatVec_T<int32_t>(nSamp_, i, desc + std::to_string(i)));
+			hFold->feats.push_back(new FeatVec_T<int32_t>(nSamp_, i, desc + std::to_string(i), flagF));
 		}	else if (col->isInt16()) {
-			hFold->feats.push_back(new FeatVec_T<int16_t>(nSamp_, i, desc + std::to_string(i)));
+			hFold->feats.push_back(new FeatVec_T<int16_t>(nSamp_, i, desc + std::to_string(i), flagF));
 		}	else if (col->isChar()) {
-			hFold->feats.push_back(new FeatVec_T<int8_t>(nSamp_, i, desc + std::to_string(i)));
+			hFold->feats.push_back(new FeatVec_T<int8_t>(nSamp_, i, desc + std::to_string(i), flagF));
 		}	else if (col->isInt64()) {
-			hFold->feats.push_back(new FeatVec_T<int64_t>(nSamp_, i, desc + std::to_string(i)));
+			hFold->feats.push_back(new FeatVec_T<int64_t>(nSamp_, i, desc + std::to_string(i), flagF));
 		}	else if (col->isDouble()) {
-			hFold->feats.push_back(new FeatVec_T<double>(nSamp_, i, desc + std::to_string(i)));
+			hFold->feats.push_back(new FeatVec_T<double>(nSamp_, i, desc + std::to_string(i), flagF));
 		}
 		else 
 			throw "FeatsOnFold_InitInstance col->dtype is XXX";

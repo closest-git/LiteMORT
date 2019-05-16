@@ -100,7 +100,8 @@ public:
 	}
 
 	template<typename Tx, typename Ts>
-	void Update(std::vector<Tx>&val, const Ts& step, int flag = 0x0) {
+	void Update(Tx*val, const Ts& step, int flag = 0x0) {
+		//void Update(std::vector<Tx>&val, const Ts& step, int flag = 0x0) {
 		tpSAMP_ID samp;
 		size_t i;
 		for (i = 0; i<nSamp; i++) {
