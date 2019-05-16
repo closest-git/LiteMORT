@@ -657,12 +657,14 @@ namespace Grusoft {
 		}
 
 		/*
+			v0.2	反向复制
+				5/16/2019		cys
 			和edaX有区别（数据集有差别），这些区别应该有价值
 		*/
 		virtual void EDA(const LiteBOM_Config&config, ExploreDA *edaX, int flag) {
 			size_t nSamp_ = val.size(), i;
 			assert(hDistri == nullptr);
-			hDistri = new Distribution();
+			hDistri = new Distribution();		hDistri->nam = nam;
 			hDistri->STA_at(val, true, 0x0);
 			if (ZERO_DEVIA(hDistri->vMin, hDistri->vMax))
 				BIT_SET(this->type, Distribution::V_ZERO_DEVIA);
@@ -675,17 +677,26 @@ namespace Grusoft {
 				}
 				hDistri->STA_at(val, true, 0x0);/**/
 			}
-			if (edaX != nullptr) {/*复制信息*/
-				const Distribution& distri = edaX->arrDistri[id];
-				if (distri.vMin != DBL_MAX) {
-					/*assert(hDistri->vMin >= distri.vMin && hDistri->vMax <= distri.vMax);
-					if (hDistri->vMin > distri.vMin)
-						hDistri->vMin = distri.vMin;
-					if (hDistri->vMax < distri.vMax)
-						hDistri->vMax = distri.vMax;*/
+			if (edaX != nullptr) {		/*复制信息*/
+				Distribution& distri = edaX->arrDistri[id];
+				if (distri.histo == nullptr) {	//参见LiteMORT_EDA->Analysis(config, (float *)dataX, (tpY *)dataY, nSamp_, nFeat_0, 1, flag);
+					distri = *hDistri;		//反向复制
+					distri.X2Histo_(config, nSamp_, arr(), (double*)nullptr);
+					distri.Dump(this->id, false, flag);
+				}	else {
+					if (distri.vMin != DBL_MAX) {
+						/*assert(hDistri->vMin >= distri.vMin && hDistri->vMax <= distri.vMax);
+						if (hDistri->vMin > distri.vMin)
+							hDistri->vMin = distri.vMin;
+						if (hDistri->vMax < distri.vMax)
+							hDistri->vMax = distri.vMax;*/
+					}
+					nam = distri.nam;
+					BIT_SET(type, distri.type);
 				}
-				nam = distri.nam;
-				BIT_SET(type, distri.type);
+				
+			}
+			else {
 			}
 		}
 

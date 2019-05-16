@@ -277,11 +277,12 @@ class LiteMORT(object):
 
         if (eval_set is not None and len(eval_set) > 0):
             X_test, y_test = eval_set[0]
-
+        #a0=X_train_0['id_trade'].min();       a1=X_train_0['id_trade'].max();
         print("====== LiteMORT_fit X_train_0={} y_train={}......".format(X_train_0.shape, y_train.shape))
         train_y = self.problem.OnY(y_train, np.float64)
         # train_y = self.Y_t(y_train, np.float64)
         train_X = self.X_t(X_train_0, np.float32)
+        #b0 = train_X[:,3].min();        b1 = train_X[:,3].max();
         self.preprocess.train_X = train_X.ctypes.data_as(POINTER(c_float))
         self.preprocess.train_y = train_y.ctypes.data_as(POINTER(c_double))
         nTrain, nFeat, nTest = train_X.shape[0], train_X.shape[1], 0
@@ -318,11 +319,12 @@ class LiteMORT(object):
     def fit_1(self,X_train_0, y_train,eval_set=None,  feat_dict=None,categorical_feature=None, params=None,flag=0x0):
         print("====== LiteMORT_fit X_train_0={} y_train={}......".format(X_train_0.shape, y_train.shape))
         gc.collect()
-        self.train_set = Mort_Preprocess( X_train_0,y_train,categorical_feature=categorical_feature)
+        self.train_set = Mort_Preprocess( X_train_0,y_train,categorical_feature=categorical_feature,cXcY=True)
         if(eval_set is not None and len(eval_set)>0):
             X_test, y_test=eval_set[0]
-            self.eval_set = Mort_Preprocess(X_test, y_test, categorical_feature=categorical_feature)
+            self.eval_set = Mort_Preprocess(X_test, y_test, categorical_feature=categorical_feature,cXcY=True)
         #self.EDA(flag)
+
         nTrain, nFeat, nTest = self.train_set.nSample,self.train_set.nFeature, self.eval_set.nSample
         #self.mort_fit(self.hLIB,self.preprocess.train_X,self.preprocess.train_y, nFeat, nTrain,self.preprocess.eval_X, self.preprocess.eval_y, nTest,0)  # 1 : classification
         self.mort_fit_1(self.hLIB,self.train_set.cX,self.train_set.cY, nFeat,nTrain,self.eval_set.cX, self.eval_set.cY, nTest,0)  # 1 : classification

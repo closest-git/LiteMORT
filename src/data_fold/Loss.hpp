@@ -334,6 +334,8 @@ namespace Grusoft {
 				tpResi = is_float;
 			else if (typeid(Ty) == typeid(double))
 				tpResi = is_double;
+			else
+				throw	"tpResi should be flow or double!!!";
 
 			y = new FeatVec_T<Ty>(_len, 0, "loss");			predict = new FeatVec_T<Ty>(_len, 0, "predict");
 			//predict.resize(_len, 0);

@@ -60,7 +60,6 @@ namespace Grusoft {
 		virtual void CheckDuplicate(LiteBOM_Config config, int flag) {
 		}
 
-		void Analysis_COL(LiteBOM_Config config, const PY_COLUMN *X_, const PY_COLUMN *Y_, size_t nSamp_, size_t ldX_, size_t ldY_, int flag);
 		template<typename Tx, typename Ty>
 		void Analysis(LiteBOM_Config config, Tx *X_, Ty *Y_, size_t nSamp_, size_t ldX_, size_t ldY_, int flag) {
 			clock_t t0=clock();

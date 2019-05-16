@@ -118,12 +118,13 @@ for fold_, (trn_idx, val_idx) in enumerate(skf.split(train_df.values, target.val
     print("fold n°{}".format(fold_))
     num_round = 10000
     features = features_0.copy()
-    X_train = train_df.iloc[trn_idx][features]
-    Y_train = target.iloc[trn_idx]
-    X_test = train_df.iloc[val_idx][features]
-    Y_test = target.iloc[val_idx]
+    X_train = train_df.iloc[trn_idx][features].astype(np.float32)
+    Y_train = target.iloc[trn_idx].astype(np.double)
+    X_test = train_df.iloc[val_idx][features].astype(np.float32)
+    Y_test = target.iloc[val_idx].astype(np.double)
     if isMORT:
-        mort = LiteMORT(param).fit(X_train, Y_train, eval_set=[(X_test, Y_test)])
+        #mort = LiteMORT(param).fit(X_train, Y_train, eval_set=[(X_test, Y_test)])
+        mort = LiteMORT(param).fit_1(X_train, Y_train, eval_set=[(X_test, Y_test)])
         oof[val_idx] = mort.predict_raw(X_test)
         fold_score = roc_auc_score(Y_test, oof[val_idx])
         #print("\nFold ", fold_, " score: ", fold_score)

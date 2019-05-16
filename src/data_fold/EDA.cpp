@@ -2,6 +2,8 @@
 
 #include "EDA.hpp"
 #include "./DataFold.hpp"
+#include <limits>
+
 using namespace Grusoft;
 
 /*
@@ -49,6 +51,7 @@ void Distribution::Dump(int feat, bool isQuanti, int flag) {
 	}
 }
 
+//always last bin for NA
 void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<_BIN_>& vUnique,size_t nA0, size_t nMostBin, int flag) {
 	assert(histo != nullptr);
 	size_t nA = 0, T_avg = nA0*1.0 / nMostBin,SMALL_na=0, BIG_bins=0,nUnique= vUnique.size(),nz;
@@ -98,10 +101,13 @@ void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<_BIN_>&
 		noBin = noBin + 1;
 	}
 	assert(SMALL_na>=0 && BIG_bins==0);
-	histo->bins.resize(noBin + 1);
+	histo->bins.resize(noBin + 1);		//always last bin for NA
 	assert(i_0 == nUnique+1 || i_0 == nUnique);
 	double delta = double(fabs(a1 - a0)) / nMostBin / 100.0;
-	histo->bins[noBin].split_F = a1 + delta;		//上界,为了QuantiAtEDA等
+	double d_max = DBL_MAX;	// std::numeric_limits<double>::max();
+	histo->bins[noBin].split_F = d_max;	
+	histo->bins[noBin].tic = noBin;
+	//histo->bins[noBin].split_F = a1 + delta;		//上界,为了QuantiAtEDA等
 													//assert(histo->bins[histo->bins.size()-1].split_F>a1);
 													//vThrsh.push_back(a1 + delta);
 }
@@ -109,50 +115,3 @@ void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<_BIN_>&
 #define IS_INT(dtype) (true)
 #define CAST_ON_STR(x, dtype)	IS_INT(dtype) ? (int*)(x):(float*)(x)
 
-void ExploreDA::Analysis_COL(LiteBOM_Config config, const PY_COLUMN *X_, const PY_COLUMN *Y_, size_t nSamp_, size_t ldX_, size_t ldY_, int flag) {
-	clock_t t0 = clock();
-	printf("********* EDA::Analysis nSamp=%lld nFeat=%d........\n", nSamp_, nFeat);
-	assert(ldX_ == nFeat);
-	size_t feat, i, nConstFeat = 0;
-	double sparse = 0, nana = 0;
-	vector<double> arrD;
-	for (feat = 0; feat < ldX_; feat++) {
-		if (feat == 1)
-		{			feat = 1;		}
-		const PY_COLUMN *COL = X_ + feat;
-		string dt = COL->dtype;
-		Distribution &distri = arrDistri[feat];
-		distri.desc = "distri_" + std::to_string(feat);
-		distri.STA_at(nSamp_, COL, true, 0x0);
-		
-		sparse += distri.rSparse*nSamp_;
-		nana += distri.rNA*nSamp_;
-		if (distri.rNA == 1.0) {
-			printf("---EDA---\t!!!Feat_%d is NAN!!!\n", feat);
-		}
-		if (ZERO_DEVIA(distri.vMin, distri.vMax))
-		{
-			nConstFeat++;
-		}
-		//distri.X2Histo_(config, nSamp_, COL, Y_);
-		distri.Dump(feat, false, flag);
-		arrD.push_back(distri.corr.D_sum);
-	}
-	if (nFeat > 9) {	//
-		vector<int> idx, feats;
-		idx.resize(ldX_);// initialize original index locations
-		std::iota(idx.begin(), idx.end(), 0);
-		// sort indexes based on comparing values in v
-		std::sort(idx.begin(), idx.end(), [&arrD](int i1, int i2) {return arrD[i1] > arrD[i2]; });
-		feats.push_back(idx[0]);	feats.push_back(idx[1]);	feats.push_back(idx[2]);
-		feats.push_back(idx[3]);	feats.push_back(idx[4]);	feats.push_back(idx[5]);
-		feats.push_back(idx[nFeat - 3]);	feats.push_back(idx[nFeat - 2]);	feats.push_back(idx[nFeat - 1]);
-		printf("DCRIMI:\t");
-		for (auto feat : feats) {
-			printf("%.4g(%d) ", arrD[feat], feat);
-		}
-	}
-	sparse /= (nSamp_*ldX_);		nana /= (nSamp_*ldX_);
-	printf("\n********* EDA::Analysis const=%lld sparse=%g NAN=%g T=%.3g........OK\n", nConstFeat, sparse, nana, (clock() - t0) / 1000.0);
-
-}

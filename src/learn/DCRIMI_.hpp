@@ -179,7 +179,7 @@ namespace Grusoft{
 					dot += dim-i;
 				}
 			}	else {
-				double step = (P_1 - P_0) / (nStep-1);
+				double step = (P_1 - P_0) / (nStep - 1);		assert(step > 0);
 				for (i = 0; i < dim; i++) {
 					a = y1[i];
 					if (a < P_0) {

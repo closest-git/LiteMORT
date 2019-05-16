@@ -87,9 +87,10 @@ namespace Grusoft {
 	//feature vector的数据类型多变，所以映射很复杂
 	struct HISTO_BIN {
 		size_t nz = 0;
-		double split_F = 0;		//量化之前
-		char fold = -1;		//每个BIN属于一个FOLD
-		int tic = 0;			//X		可能重复诶
+		//if (val[pos] < bins[noBin+1].split_F) {		quanti[pos] = noBin;		}
+		double split_F = 0;		
+		char fold = -1;			//每个BIN属于一个FOLD
+		int tic = 0;			//X		可删除
 		//tpQUANTI split_Q = -1;	//量化之后
 		double G_sum = 0, H_sum = 0;		//Second-order approximation from Tianqi Chen's formula
 

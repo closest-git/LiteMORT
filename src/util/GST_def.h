@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <math.h>
 #include <vector>
+#include <string>
 
 typedef uint8_t BIT_8;
 typedef uint64_t BIT_64;
@@ -44,6 +45,34 @@ struct PY_COLUMN {
 	char *name;
 	void *data;
 	char *dtype;
+	char *type_x;
+	double v_min;
+	double v_max;
+
+	bool isChar() {
+		std::string type = dtype;
+		return type == "char" || type == "int8";
+	}
+	bool isInt() {
+		std::string type = dtype;
+		return type == "int" || type == "int32";
+	}
+	bool isInt16() {
+		std::string type = dtype;
+		return type == "int16" ;
+	}
+	bool isInt64() {
+		std::string type = dtype;
+		return type == "int64";
+	}
+	bool isFloat() {
+		std::string type = dtype;
+		return type == "float32" ;
+	}
+	bool isDouble() {
+		std::string type = dtype;
+		return type == "float64" ;
+	}
 };
 
 

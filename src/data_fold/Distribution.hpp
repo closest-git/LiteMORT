@@ -246,6 +246,7 @@ namespace Grusoft {
 			assert(nz == nA);
 		}
 
+		//always last bin for NA
 		void HistoOnFrequncy_1(const LiteBOM_Config&config, vector<_BIN_>& vUnique, size_t nA0, size_t nMostBin, int flag = 0x0);
 
 		/*	
@@ -424,7 +425,7 @@ namespace Grusoft {
 			case LiteBOM_Config::HISTO_BINS_MAP::on_FREQ:
 				if( y!=nullptr && config.histo_bin_map== LiteBOM_Config::HISTO_BINS_MAP::on_FREQ_and_Y)
 					corr.DCRIMI_2(config, val,y, idx,flag );
-				HistoOnFrequncy_1(config, vUnique, nA, nMostBin);
+				HistoOnFrequncy_1(config, vUnique, nA, nMostBin-1);
 				//HistoOnFrequncy(config, val, idx, nMostBin);
 				corr.Clear();
 				break;
@@ -459,7 +460,7 @@ namespace Grusoft {
 			}
 			vUnique.clear();
 			int nBin = histo->bins.size();		//always last bin for NA
-			histo->bins.resize(nBin + 1);
+			//histo->bins.resize(nBin + 1);
 			/*if (vUnique.size() > 0) {	//ÄÑµÀÓÐBUG???
 			}	else {
 

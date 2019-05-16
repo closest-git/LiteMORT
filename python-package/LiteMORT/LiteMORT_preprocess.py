@@ -9,6 +9,9 @@ class M_COLUMN(Structure):
     _fields_ = [    ('name',c_char_p),
                     ('data',c_void_p),
                     ('dtype', c_char_p),
+                    ('type_x', c_char_p),
+                    ('v_min', c_double),
+                    ('v_max', c_double),
                ]
 
 class Mort_Preprocess(object):
@@ -22,29 +25,33 @@ class Mort_Preprocess(object):
         col.name = str(feat).encode('utf8')
         col.data = None
         col.dtype = None
-        x_info = ''
+        x_info,type_x = '',''
         if isinstance(X, pd.DataFrame):
             narr = None
             if X[feat].dtype.name == 'category':
                 x_info = 'category'
+                type_x = '*'
                 narr = X[feat].cat.codes.values
             elif is_numeric_dtype(X[feat]):
                 narr = X[feat].values
             else:
                 pass
         elif isinstance(X, pd.Series):
+            type_x='S'
             x_info = 'Series'
             narr = X.values
             pass
         else:
             pass
         if narr is not None:
+            col.type_x=str(type_x).encode('utf8')
+            col.v_min=narr.min();      col.v_max=narr.max()
             col.data = narr.ctypes.data_as(c_void_p)
             col.dtype = str(narr.dtype).encode('utf8')
-            print("\"{}\":\t{}\ttype={},data={},name={}".format(feat, x_info, col.dtype, col.data, col.name))
+            #print("\"{}\":\t{}\ttype={},data={},name={}".format(feat, x_info, col.dtype, col.data, col.name))
         return col
 
-    def __init__(self,X,y,features=None,categorical_feature=None,  **kwargs):
+    def __init__(self,X,y,features=None,categorical_feature=None,cXcY=False,  **kwargs):
         '''
         :param X:
         :param y:
@@ -66,7 +73,7 @@ class Mort_Preprocess(object):
                 pass
         else:
             self.features = features
-        if False:       #v0.2
+        if cXcY:       #v0.2
             for feat in self.features:
                 col = self.column_info(feat,X)
                 if col.data is not None:
