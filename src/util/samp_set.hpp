@@ -15,9 +15,9 @@ class FeatsOnFold;
 class SAMP_SET {
 	void clear() {
 		if (!isRef) {
-			if (root_set != nullptr)	delete[] root_set;
+			/*if (root_set != nullptr)	delete[] root_set;
 			if (left != nullptr)		delete[] left;
-			if (rigt != nullptr)		delete[] rigt;
+			if (rigt != nullptr)		delete[] rigt;*/
 		}
 		nSamp = 0, nLeft = 0, nRigt = 0;
 		Y_sum_1 = 0;
@@ -41,17 +41,7 @@ public:
 
 	//很重要，原则上每棵树的样本可以任意重设
 	virtual void SampleFrom(FeatsOnFold *hData_, const SAMP_SET *,size_t nMost,int rnd_seed, int flag = 0x0);
-	void Alloc(size_t nSamp_, int flag = 0x0) {
-		clear(); 
-
-		isRef = false;
-		nSamp = nSamp_;
-		root_set = new tpSAMP_ID[nSamp];
-		left = new tpSAMP_ID[nSamp];				rigt = new tpSAMP_ID[nSamp];
-		for (size_t i = 0; i<nSamp; i++)		
-			root_set[i] = i;
-		samps = root_set;
-	}
+	void Alloc(FeatsOnFold *hData_, size_t nSamp_, int flag = 0x0);
 	void ClearInfo() {
 		nSamp = 0;		nLeft = 0, nRigt = 0;
 		samps = nullptr, left = nullptr, rigt = nullptr;
@@ -114,7 +104,7 @@ public:
 	template<typename Tx>
 	void STA_at(const Tx *vec, Tx&a2_, Tx&sum_, Tx&x_0, Tx&x_1,bool hasY) {
 		size_t step;
-		Tx a2 = 0,sum = 0;
+		double a2 = 0,sum = 0;
 		x_0 = vec[samps[0]], x_1 = x_0;
 		int num_threads = OMP_FOR_STATIC_1(nSamp, step,1024);
 #pragma omp parallel for schedule(static,1) reduction(+ : a2,sum)

@@ -196,8 +196,8 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	hFold->rander_samp.Init(31415927 * rand());
 	hFold->rander_feat.Init(123456789 * rand());
 
-	//hFold->Init_T<Tx, Ty>(nSamp_, ldX_, 0x0, flag);
-	hFold->nMost = nSamp_;
+	hFold->InitMost(nSamp_);
+	//hFold->nMost = nSamp_;
 	int rnd_seed = 0, nThread = config.num_threads, flagF= flag|FeatVector::VAL_REFER;
 	for (size_t i = 0; i < ldX_; i++) {
 		string desc = "feat_";
@@ -316,8 +316,8 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	hFold->rander_samp.Init(31415927 * rand());
 	hFold->rander_feat.Init(123456789 * rand());
 
-	//hFold->Init_T<Tx, Ty>(nSamp_, ldX_, 0x0, flag);
-	hFold->nMost = nSamp_;
+	hFold->InitMost(nSamp_);
+	//hFold->nMost = nSamp_;
 	for (size_t i = 0; i < ldX_; i++) {
 		string desc = "feat_";
 		hFold->feats.push_back(new FeatVec_T<Tx>(nSamp_, i, desc + std::to_string(i)));

@@ -102,6 +102,28 @@ namespace Grusoft {
 		vector<FeatVector*> feats;				//featrue values of X
 		int nPickFeat = 0;
 
+		struct BUFFER {
+			tpSAMP_ID *samp_root_set = nullptr,*samp_left = nullptr,*samp_rigt = nullptr;
+			
+			virtual void Init(size_t nSamp, int flag = 0x0) {
+				samp_root_set = new tpSAMP_ID[nSamp];
+				samp_left = new tpSAMP_ID[nSamp];
+				samp_rigt = new tpSAMP_ID[nSamp];
+			}
+			virtual ~BUFFER() {
+				if (samp_root_set != nullptr)		delete[] samp_root_set;
+				if (samp_left != nullptr)			delete[] samp_left;
+				if (samp_rigt != nullptr)			delete[] samp_rigt;
+			}
+		};
+		BUFFER buffer;
+
+		virtual void InitMost(size_t nMost_,int flag=0x0) {
+			nMost = nMost_;
+			buffer.Init(nMost);
+		}
+
+
 		struct STAT {
 			double dY;
 			int nCheckGain = 0;

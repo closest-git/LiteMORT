@@ -20,12 +20,30 @@ FRUIT::~FRUIT() {
 	//	delete bsfold;
 }
 
+void SAMP_SET::Alloc(FeatsOnFold *hData_, size_t nSamp_, int flag) {
+	clear();
+
+	isRef = false;
+	nSamp = nSamp_;
+	if (false) {
+		root_set = new tpSAMP_ID[nSamp];
+		left = new tpSAMP_ID[nSamp];				rigt = new tpSAMP_ID[nSamp];
+	}
+	else {	//½ÚÊ¡ÄÚ´æ
+		root_set = hData_->buffer.samp_root_set;
+		left = hData_->buffer.samp_left;				rigt = hData_->buffer.samp_rigt;
+
+	}
+	for (size_t i = 0; i<nSamp; i++)
+		root_set[i] = i;
+	samps = root_set;
+}
 /*
 	v0.2		cys	
 		3/29/2019
 */
 void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const SAMP_SET *from, size_t nMost, int rnd_seed, int flag) {
-	Alloc(nMost);
+	Alloc(hData_,nMost);
 	size_t i, nFrom = hData_->nSample(),nz=0,pos;
 	if (from == nullptr) {
 	}	else {

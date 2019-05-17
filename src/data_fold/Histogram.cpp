@@ -194,8 +194,8 @@ void HistoGRAM::GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp_se
 	}	else {
 		assert(hSum == nSamp);
 	}
-	if(fabs(gSum+samp_set.Y_sum_1)>=1.e-7*fabs(gSum) && fabs(samp_set.Y_sum_1)>0.001)//不同的gSum计算确实有差异
-		throw "HistoGRAM::GreedySplit_X gSum is different!!!";
+	if(fabs(gSum+samp_set.Y_sum_1)>=1.e-6*fabs(gSum) && fabs(samp_set.Y_sum_1)>0.001)//不同的gSum计算确实有差异
+		printf( "\tHistoGRAM::gSum is mismatch(%g-%g)", gSum,samp_set.Y_sum_1);
 
 	//for (auto item : bins) {
 	for (i = 0; i < nBin;i++) {
