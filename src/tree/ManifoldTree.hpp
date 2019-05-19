@@ -152,6 +152,7 @@ namespace Grusoft{
 		virtual void GrowLeaf(hMTNode node,const char*info,int flag=0x0);
 		virtual void BeforeEachBatch(size_t no_0,size_t no_1,int flag=0x0);
 	public:
+		int iter_refine = 1;
 		MT_Nodes nodes;
 		class _leaf_compare_ {
 		public:

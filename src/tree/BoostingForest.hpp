@@ -15,12 +15,18 @@ namespace Grusoft{
 	struct EARLY_STOPPING {
 		vector<double> errors;
 		double e_best=DBL_MAX;
-		int best_no=-1;
+		int best_no=-1,best_round=-1;
 		int early_round = 10;
 		EARLY_STOPPING(){}
 		EARLY_STOPPING(int nEarly) : early_round(nEarly)
 		{	}
-		void Add(double err,int flag=0x0);
+		double curERR() {
+			if (errors.size() == 0)
+				return DBL_MAX;
+			else
+				return errors[errors.size() - 1];
+		}
+		void Add(double err, int best_round, int flag=0x0);
 		bool isOK();
 	};
 

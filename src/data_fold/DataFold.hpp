@@ -375,9 +375,10 @@ namespace Grusoft {
 		//Tx* arr() { return VECTOR2ARR(val); }
 		Tx* arr()			{ return val;		}
 		size_t size()		{ return nSamp_;	}
-
+		
 		virtual void Set(size_t len, void* src, int flag = 0x0) {
 			//assert(len == val.size());
+			size_t szT = sizeof(Tx);
 			if (len != nSamp_)
 				throw "FeatVec_T::Set len mismatch!!!";
 			void* dst = arr();
@@ -387,6 +388,7 @@ namespace Grusoft {
 			else
 				memcpy(dst, src, sizeof(Tx)*len);			
 		}
+
 		virtual void Set(double a, int flag = 0x0) {
 			size_t len = nSamp_, i;
 			Tx *x_ = arr();

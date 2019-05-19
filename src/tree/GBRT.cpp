@@ -199,13 +199,15 @@ double GBRT::Predict(FeatsOnFold *hData_, bool isX,bool checkLossy, bool resumeL
 	return err;
 }
 
-void EARLY_STOPPING::Add(double err, int flag) {
+void EARLY_STOPPING::Add(double err,int best_tree, int flag) {
 	errors.push_back(err);
 	if (err < e_best) {
-		e_best=err;		best_no=errors.size()-1;
+		e_best=err;		
+		best_no=errors.size()-1;
+		best_round = best_tree;
 	}
-
 }
+
 bool EARLY_STOPPING::isOK() {
 	if( errors.size()<early_round )
 		return false;
@@ -215,6 +217,57 @@ bool EARLY_STOPPING::isOK() {
 		return true;
 	}
 	return false;
+}
+
+int GBRT::IterTrain(int round, int flag) {
+	GST_TIC(tick);
+	ManifoldTree *hTree = forest.size() == 0 ? nullptr : 
+		dynamic_cast<ManifoldTree *>(forest[forest.size() - 1]);
+
+
+	size_t nPickSamp = 0;
+	int nIns = 0, no = 0, total, i, j, nzNode = 0, nIter = 0;
+	double err_0 = DBL_MAX, err = DBL_MAX, a;
+	bool isEvalTrain = true;
+	//vector<double> err_eval;
+	do {
+		if (isEvalTrain) {
+			FeatVector *hY1 = hTrainData->GetPrecict();
+			tpDOWN *hDown = hTrainData->GetDownDirection();
+			err_0 = this->Predict(hTrainData, false, true, true);		//可以继续优化
+			if (hTrainData->lossy->isOK(0x0, FLT_EPSILON)) {
+				eOOB = 0;	printf("\n********* ERR@Train is ZERO, Break!!! *********\n\n");	return 0x0;
+			}
+			if (skdu.noT % 500 == 0) {
+				a = forest.size() == 0 ? 0 : nzNode*1.0 / forest.size();
+				printf("\n====== %d: ERR@%s=%8.5g nNode=%g nPickFeat=%d nPickSamp=%lld time=%.3g======\n", skdu.noT, hTrainData->nam.c_str(), err_0,
+					a, hTrainData->nPickFeat, nPickSamp, GST_TOC(tick));
+			}
+			if (hEvalData == nullptr)
+				stopping.Add(err_0, round);
+		}
+		if (hEvalData != nullptr) {
+			if (round > 0) {
+				hMTNode hRoot = (dynamic_cast<ManifoldTree*>(forest[round - 1]))->hRoot();		//im1 = hRoot->impuri;
+				assert(hRoot->nSample() == 0);
+			}
+			err = this->Predict(hEvalData, true, true, true);	//经过校验，同样可以用resumeLast
+			if (nIter > 0) {
+				double err_last = stopping.curERR();
+				if (err >= err_last)
+					break;
+			}
+			stopping.Add(err, round);
+			if (hEvalData->lossy->isOK(0x0, FLT_EPSILON)) {
+				eOOB = 0;	printf("\n********* You are so LUCKY!!! *********\n\n");	return 0x0;
+			}
+		}
+		nIter = nIter + 1;
+	}	while (true);
+	if (nIter > 1) {
+		hTree->iter_refine = nIter;
+	}
+	return nIter;
 }
 
 int GBRT::Train(string sTitle, int x, int flag) {
@@ -243,33 +296,40 @@ int GBRT::Train(string sTitle, int x, int flag) {
 	DForest curF;
 	for (t = 0; t<rounds; t++) {
 		skdu.noT = t;
-		if (isEvalTrain) {
-			err_0 = this->Predict(hTrainData,false,true, true);		//可以继续优化
-			if (hTrainData->lossy->isOK(0x0,FLT_EPSILON)) {
-				eOOB = 0;	printf("\n********* ERR@Train is ZERO, Break!!! *********\n\n");	return 0x0;
+		FeatVector *hY1 = hTrainData->GetPrecict();
+		tpDOWN *hDown = hTrainData->GetDownDirection();
+		if(true)
+			IterTrain(t,flag);
+		else {
+			if (isEvalTrain) {
+				err_0 = this->Predict(hTrainData,false,true, true);		//可以继续优化
+				if (hTrainData->lossy->isOK(0x0,FLT_EPSILON)) {
+					eOOB = 0;	printf("\n********* ERR@Train is ZERO, Break!!! *********\n\n");	return 0x0;
+				}
+				if (skdu.noT % 500 == 0) {
+					a = forest.size() == 0 ? 0 : nzNode*1.0 / forest.size();
+					printf("\n====== %d: ERR@%s=%8.5g nNode=%g nPickFeat=%d nPickSamp=%lld time=%.3g======\n", skdu.noT, hTrainData->nam.c_str(), err_0, 
+						a, hTrainData->nPickFeat, nPickSamp, GST_TOC(tick));
+				}
+				if (hEvalData == nullptr)
+					stopping.Add(err_0,t);
 			}
-			if (skdu.noT % 500 == 0) {
-				a = forest.size() == 0 ? 0 : nzNode*1.0 / forest.size();
-				printf("\n====== %d: ERR@%s=%8.5g nNode=%g nPickFeat=%d nPickSamp=%lld time=%.3g======\n", skdu.noT, hTrainData->nam.c_str(), err_0, 
-					a, hTrainData->nPickFeat, nPickSamp, GST_TOC(tick));
+			if (hEvalData != nullptr) {
+				if (t > 0) {
+					hMTNode hRoot = (dynamic_cast<ManifoldTree*>(forest[t-1]))->hRoot();		//im1 = hRoot->impuri;
+					assert(hRoot->nSample() == 0);
+				}
+				err = this->Predict(hEvalData, true, true, true);	//经过校验，同样可以用resumeLast
+				stopping.Add(err,t);
+				if (hEvalData->lossy->isOK(0x0, FLT_EPSILON)) {
+					eOOB = 0;	printf("\n********* You are so LUCKY!!! *********\n\n");	return 0x0;
+				}			
 			}
-			if (hEvalData == nullptr)
-				stopping.Add(err_0);
 		}
-		if (hEvalData != nullptr) {
-			if (t > 0) {
-				hMTNode hRoot = (dynamic_cast<ManifoldTree*>(forest[t-1]))->hRoot();		//im1 = hRoot->impuri;
-				assert(hRoot->nSample() == 0);
-			}
-			err = this->Predict(hEvalData, true, true, true);	//经过校验，同样可以用resumeLast
-			stopping.Add(err);
-			if (hEvalData->lossy->isOK(0x0, FLT_EPSILON)) {
-				eOOB = 0;	printf("\n********* You are so LUCKY!!! *********\n\n");	return 0x0;
-			}			
-		}	
+		/*	*/
 		if (stopping.isOK()) {
-			printf("\n********* early_stopping@[%d]!!! bst=%g ERR@train[%d]=%-8.5g overfit=%-8.5g*********\n\n",
-				stopping.best_no, stopping.e_best, skdu.noT, err_0, err - err_0);
+			printf("\n********* early_stopping@[%d,%d]!!! bst=%g ERR@train[%d]=%-8.5g overfit=%-8.5g*********\n\n",
+				stopping.best_no, stopping.best_round, stopping.e_best, skdu.noT, err_0, err - err_0);
 			break;
 		}
 
@@ -288,10 +348,10 @@ int GBRT::Train(string sTitle, int x, int flag) {
 		}
 	}
 	//printf("\n====== %d: ERR@%s=%8.5g time=%.3g(%.3g) ======\n", skdu.noT, hTrainData->nam.c_str(), err_0,GST_TOC(tick), 0);
-	for (i = stopping.best_no + 1; i<forest.size(); i++) {
+	for (i = stopping.best_round + 1; i<forest.size(); i++) {
 		delete forest[i];
 	}
-	forest.resize(stopping.best_no + 1);
+	forest.resize(stopping.best_round + 1);
 	hTrainData->AfterTrain();
 	string sEval = hEvalData == nullptr ? (isEvalTrain ? hTrainData->nam : "None") : hEvalData->nam;
 	printf("\n********* GBRT::Train nTree=%d aNode=%.6g ERR@train=%-8.5g err@%s=%.8g thread=%d train=%g(tX=%g) sec\r\n", 

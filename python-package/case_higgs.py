@@ -6,6 +6,8 @@ The data has been produced using Monte Carlo simulations. The first 21 features 
     https://github.com/Laurae2/boosting_tree_benchmarks/tree/master/data
     https://github.com/guolinke/boosting_tree_benchmarks/tree/master/data
     https://blog.bigml.com/2017/09/28/case-study-finding-higgs-bosons-with-deepnets/
+
+    5/19/2019 需要确定是regression 或 binary classification
 '''
 import lightgbm as lgb
 import time
@@ -21,6 +23,7 @@ from litemort import *
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 #isMORT = True
 model_type = 'mort' if isMORT else 'lgb'
+#some_rows=      200000
 some_rows=      2000000
 #some_rows=      10500000
 nTotal =        11000000
@@ -54,8 +57,8 @@ def read_higgs_data(path):
 
 X,y,X_test = read_higgs_data("F:/Datasets/HIGGS_/HIGGS.csv")
 params = {
-        "objective": "binary",
-        "metric": "binary_logloss",        #"binary_logloss"
+        "objective": "regression",
+        "metric": "mae",        #"binary_logloss"
             'max_bin': 63,
           'num_leaves': 255,
           'learning_rate': 0.1,
@@ -64,7 +67,7 @@ params = {
           'is_training_metric': 'false',
           'min_data_in_leaf': 1,
           'min_sum_hessian_in_leaf': 100,
-          'bagging_fraction': 0.1,
+          'bagging_fraction': 0.2,
           'ndcg_eval_at': [1, 3, 5, 10],
           'sparse_threshold': 1.0,
             'n_estimators':500,
@@ -92,15 +95,14 @@ for fold_n, (train_index, valid_index) in enumerate(folds.split(X)):
         np.savetxt("D:/LightGBM-master/examples/regression/geo_test.csv", d_train, delimiter='\t')
 
     if model_type == 'mort':
-        params['objective'] = 'regression'
-        model = LiteMORT(params).fit(X_train, y_train, eval_set=[(X_valid, y_valid)])
+        model = LiteMORT(params).fit_1(X_train, y_train, eval_set=[(X_valid, y_valid)])
         y_pred_valid = model.predict(X_valid)
         #y_pred = model.predict(X_test)
 
     if model_type == 'lgb':
         model = lgb.LGBMRegressor(**params, n_jobs=-1)
         model.fit(X_train, y_train,
-                  eval_set=[(X_train, y_train), (X_valid, y_valid)], eval_metric='mse',verbose=50)
+                  eval_set=[(X_train, y_train), (X_valid, y_valid)], eval_metric='mae',verbose=50)
         model.booster_.save_model('geo_test_.model')
         y_pred_valid = model.predict(X_valid)
         #y_pred = model.predict(X_test, num_iteration=model.best_iteration_)

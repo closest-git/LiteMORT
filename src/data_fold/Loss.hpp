@@ -284,11 +284,12 @@ namespace Grusoft {
 							for (i = 0; i < dim; i++) {
 								pDown[i] = -vResi[i];
 							}
-						}
-						if (metric == "mae") {
+						}else if (metric == "mae") {
 							for (i = 0; i < dim; i++) {
 								pDown[i] = vResi[i]>0 ? -1 : 1;
 							}
+						}	else {
+							throw "UpdateResi metric is XXX for regression!!!";
 						}
 					}					
 				}

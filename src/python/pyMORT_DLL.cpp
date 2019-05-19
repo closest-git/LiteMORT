@@ -624,7 +624,7 @@ PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_COLUMN *train_data, PY_COLUM
 		}
 		size_t nFeat = nFeat_0, i, feat, nTrain = nSamp;
 		printf("\n********* LiteMORT_fit nSamp=%d,nFeat=%d hEDA=%p********* \n\n", nSamp, nFeat, hEDA);
-		Distribution disY;
+		/*Distribution disY;
 		//disY.STA_at(nSamp, train_target, true, 0x0);
 		if (disY.nNA > 0) {
 			printf("********* LiteMORT_fit Y has nans(%lld)!!! Please check the value of Y!!!\n", disY.nNA);
@@ -633,7 +633,7 @@ PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_COLUMN *train_data, PY_COLUM
 		if (true) {	//需要输出 Y的分布
 			//disY.X2Histo_<tpY, tpY>(config, nSamp, train_target, nullptr);
 			disY.Dump(-1, false, flag);
-		}
+		}*/
 
 		size_t f1 = FeatsOnFold::DF_TRAIN;
 		vector<FeatsOnFold*> folds;

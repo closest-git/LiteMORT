@@ -35,6 +35,8 @@ void FeatVec_LOSS::EDA(const FeatsOnFold *hData_,  ExploreDA *edaX, int flag) {
 
 	}	else {
 		y->EDA(config, nullptr, 0x0);
+		if(y->hDistri!=nullptr)
+			y->hDistri->Dump(-1, false, flag);
 		size_t dim = size(),i,nOutlier;
 		if (config.objective == "outlier") {
 			y->loc(outliers,1);
