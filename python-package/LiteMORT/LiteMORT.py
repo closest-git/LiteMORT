@@ -60,6 +60,8 @@ class LiteMORT_params(object):
             self.min_child_samples = dict_param['min_data_in_leaf']
         if 'boost_from_average' in dict_param:
             self.boost_from_average = dict_param['boost_from_average']
+        if 'iter_refine' in dict_param:
+            self.iter_refine = dict_param['iter_refine']
         if 'verbosity' in dict_param:
             self.verbose = dict_param['verbosity']
         #if 'early_stop' in dict_param:

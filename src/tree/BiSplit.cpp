@@ -184,12 +184,17 @@ void MT_BiSplit::Observation_AtLocalSamp(FeatsOnFold *hData_, int flag) {
 			double h2, h_0, h_1;
 			samp_set.STA_at<tpDOWN>(hess, h2, H_sum, h_0, h_1,false);
 		}
+		if (H_sum == 0) {
+			throw "Observation_AtLocalSamp:H_sum = 0!!!";
+		}
 		impuri = G_sum*G_sum / H_sum;		//已略去常数
 		down_step = -G_sum / H_sum;
+		assert(!IS_NAN_INF(down_step));
 		//sprintf(temp, "impuri(%g/%g %d)", G_sum, H_sum, dim);
 		//sX = temp;
 	}else	{
 		down_step = mean;
+		assert(!IS_NAN_INF(down_step));
 		//down_step = sqrt(a2/dim);		 为啥这样不行，有意思
 	}
 	//printf("%.4g ", down_step);

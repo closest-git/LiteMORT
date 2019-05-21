@@ -57,6 +57,7 @@ struct MORT{
 //LiteBOM_Config config;
 //ExploreDA *g_hEDA=nullptr;
 
+
 void OnUserParams(LiteBOM_Config&config, PY_ITEM* params, int nParam, int flag = 0x0) {
 	char sERR[10000];
 	int i,err=0;
@@ -119,6 +120,9 @@ void OnUserParams(LiteBOM_Config&config, PY_ITEM* params, int nParam, int flag =
 		}
 		if (strcmp(params[i].Keys, "objective") == 0) {
 			config.objective = params[i].text;
+		}
+		if (strcmp(params[i].Keys, "iter_refine") == 0) {
+			config.T_iterrefine = params[i].Values;
 		}
 		//ºÊ»›Metric Parameters in lightgbm.pdf
 		if (strcmp(params[i].Keys, "metric") == 0 || strcmp(params[i].Keys, "binary") == 0) {
@@ -597,6 +601,7 @@ PYMORT_DLL_API void LiteMORT_fit(void *mort_0, float *train_data, tpY *train_tar
 	}
 	catch (char * sInfo) {
 		printf("\n!!!!!! EXCEPTION@LiteMORT_fit \n!!!!!!\"%s\"\n\n", sInfo);
+		system("pause");
 		throw sInfo;
 	}
 	catch (...) {

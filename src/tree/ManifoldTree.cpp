@@ -652,6 +652,7 @@ void ManifoldTree::Dump( int flag ){
 
 void ManifoldTree::AddScore(INIT_SCORE *score, int flag) {
 	double bias=score->step;
+	assert(!IS_NAN_INF(bias));
 	if(bias ==0)
 		return;
 	for (auto node : nodes) {

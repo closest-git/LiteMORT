@@ -194,7 +194,7 @@ namespace Grusoft {
 			double sum = 0,*y_exp = nullptr, a_logloss = 0;
 
 			int num_threads = OMP_FOR_STATIC_1(dim, step);
-			if (metric == "logloss" || pDown != nullptr) {		//get y_exp
+			/*if (metric == "logloss" || pDown != nullptr) {		//get y_exp
 				y_exp = new double[dim];
 				//memcpy(y_exp, y1, sizeof(double)*dim);
 #pragma omp parallel for schedule(static,1)
@@ -202,7 +202,7 @@ namespace Grusoft {
 					size_t start = thread*step, end = min(start + step, dim), i;
 					for (i = start; i < end; i++) {y_exp[i] = exp(y1[i]);}
 				}
-			}
+			}*/
 			if (metric == "logloss") {
 				err_logloss = 0;		//-np.mean(true_y*np.log(pred_h) + (1 - true_y)*np.log(1 - pred_h))
 				//vEXP(dim, y_exp);
@@ -210,12 +210,14 @@ namespace Grusoft {
 				for (int thread = 0; thread < num_threads; thread++) {
 					size_t start = thread*step, end = min(start + step, dim), i;
 					for (i = start; i < end; i++) {
-						//y_exp[i] = exp(y_exp[i]);
-						a_logloss += log(1 + y_exp[i]);
+						a_logloss += y1[i]<EXP_UNDERFLOW ? 0 : y1[i]>EXP_OVERFLOW ? y1[i] : log(1 + std::exp(y1[i]));
+						//a_logloss += log(1 + y_exp[i]);
+						//assert(!IS_NAN_INF(a_logloss));
 						if (label[i] == 1)
 							a_logloss -= y1[i];
 					};
 				}
+				assert(!IS_NAN_INF(a_logloss));
 				err_logloss = a_logloss / dim;
 				
 			}	else {	//'auc'
@@ -232,7 +234,9 @@ namespace Grusoft {
 					size_t start = thread*step, end = min(start + step, dim), i;
 					for (i = start; i < end; i++) {
 						a = y1[i];
-						double sig = y_exp[i] / (1 + y_exp[i]);
+						//double sig = y_exp[i] / (1 + y_exp[i]);
+						double sig = y1[i]<EXP_UNDERFLOW ? 0 : y1[i]>EXP_OVERFLOW ? 1 : exp(y1[i]) / (1 + exp(y1[i]));
+						//assert(!IS_NAN_INF(sig));
 						pDown[i] = -(sig - label[i]);								vHess[i] = sig*(1 - sig);
 						/*if (label[i] == 0 && a > P_0) {	//很奇怪，这样就是不行
 							//pDown[i] *= 10;							
@@ -243,8 +247,8 @@ namespace Grusoft {
 					}
 				}
 			}
-			if(y_exp!=nullptr)	
-				delete[] y_exp;
+			//if(y_exp!=nullptr)	
+			//	delete[] y_exp;
 		}
 
 		//vResi=predict-target		pDown=target-predict

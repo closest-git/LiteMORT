@@ -103,6 +103,7 @@ param = {
         'boosting_type': 'gbdt',
         'verbose': 1,
         'metric': 'auc',
+        'iter_refine':1,
         #'metric': 'auc',
         'is_unbalance': True,
         'boost_from_average': False,

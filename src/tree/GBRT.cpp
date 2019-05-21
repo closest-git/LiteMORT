@@ -208,12 +208,17 @@ void EARLY_STOPPING::Add(double err,int best_tree, int flag) {
 	}
 }
 
-bool EARLY_STOPPING::isOK() {
-	if( errors.size()<early_round )
+bool EARLY_STOPPING::isOK(int cur_round) {
+	//if( errors.size()<early_round )
+	if (cur_round<early_round)
 		return false;
 	double e_last = errors[errors.size()-1];
-	if (best_no<= errors.size()- early_round) {
+	/*if (best_no<= errors.size()- early_round) {
 		assert(e_last>=e_best);
+		return true;
+	}*/
+	if (best_round <= cur_round - early_round) {
+		assert(e_last >= e_best);
 		return true;
 	}
 	return false;
@@ -327,7 +332,7 @@ int GBRT::Train(string sTitle, int x, int flag) {
 			}
 		}
 		/*	*/
-		if (stopping.isOK()) {
+		if (stopping.isOK(t)) {
 			printf("\n********* early_stopping@[%d,%d]!!! bst=%g ERR@train[%d]=%-8.5g overfit=%-8.5g*********\n\n",
 				stopping.best_no, stopping.best_round, stopping.e_best, skdu.noT, err_0, err - err_0);
 			break;

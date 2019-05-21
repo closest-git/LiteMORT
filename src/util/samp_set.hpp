@@ -97,6 +97,7 @@ public:
 		for (i = 0; i<nSamp; i++) {
 			samp = samps[i];
 			val[samp] += step;		//¶ÔÓ¦ÓÚUpdateResi
+			assert(!IS_NAN_INF(val[samp]));
 		}
 	}
 

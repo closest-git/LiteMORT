@@ -103,6 +103,7 @@ namespace Grusoft {
 
 		virtual tpDOWN GetDownStep() {
 			assert(this->isLeaf());
+			
 			return down_step*lr_eta;
 		}
 

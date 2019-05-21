@@ -27,7 +27,7 @@ namespace Grusoft{
 				return errors[errors.size() - 1];
 		}
 		void Add(double err, int best_round, int flag=0x0);
-		bool isOK();
+		bool isOK(int cur_round);
 	};
 
 	typedef bool (*isTrueObj)(void* user_data,int flag);

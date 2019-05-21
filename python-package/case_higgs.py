@@ -65,13 +65,14 @@ params = {
           'tree_learner': 'serial',
           'task': 'train',
           'is_training_metric': 'false',
-          'min_data_in_leaf': 1,
+          'min_data_in_leaf': 512,
           'min_sum_hessian_in_leaf': 100,
           'bagging_fraction': 0.2,
           'ndcg_eval_at': [1, 3, 5, 10],
           'sparse_threshold': 1.0,
             'n_estimators':500,
             'early_stopping_rounds': 20,
+            'iter_refine':1
           #'device': 'cpu'
            #'device': 'gpu',
           #'gpu_platform_id': 0,
@@ -95,7 +96,8 @@ for fold_n, (train_index, valid_index) in enumerate(folds.split(X)):
         np.savetxt("D:/LightGBM-master/examples/regression/geo_test.csv", d_train, delimiter='\t')
 
     if model_type == 'mort':
-        model = LiteMORT(params).fit(X_train, y_train, eval_set=[(X_valid, y_valid)])
+        #model = LiteMORT(params).fit(X_train, y_train, eval_set=[(X_valid, y_valid)])
+        model = LiteMORT(params).fit_1(X_train, y_train, eval_set=[(X_valid, y_valid)])
         y_pred_valid = model.predict(X_valid)
         #y_pred = model.predict(X_test)
 
