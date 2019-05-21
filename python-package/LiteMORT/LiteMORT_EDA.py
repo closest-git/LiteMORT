@@ -3,6 +3,33 @@ import matplotlib.gridspec as gridspec
 import numpy as np
 import seaborn as sns; sns.set()
 import math
+import time
+from pandas.api.types import is_string_dtype
+from pandas.api.types import is_numeric_dtype
+
+def all_element_values(user_data,col,tMost=60*10):
+    t0=time.time()
+    nz,nDump=0,100000
+    nAllRow = user_data.shape[0]
+    # df = user_data[col].str.split(',')
+    if is_numeric_dtype(user_data[col]):
+        elements=user_data[col].unique()
+    else:
+        elements=set()
+        for row in user_data[col]:
+            tokens = row.strip().split(',')
+            elements = elements | set(tokens)
+            nz = nz+1
+            if nz>nDump and nz%nDump==0:
+                print("\r{}({:.3g})\t time={:.3g}...".format(nz,nz*1.0/nAllRow,time.time()-t0),end="")
+            if time.time()-t0>tMost:    #难以想象要超过10分钟
+                print("\n{}({:.3g})\t time={:.3g}...BREAK!!!\n".format(nz,nz*1.0/nAllRow,time.time()-t0),end="")
+                break
+    elements = list(elements)
+    nz = min(1000,len(elements))
+    print("{} elements@\'{}\' type={} time={:.3g}\n elements={} :\n".format(len(elements),col, type(elements[1]),
+                                                                            time.time()-t0,elements[0:nz]))
+    return elements
 
 #only for bianry classification
 def see_all_2(train, test,features,target,bins,dump_root="../see_all/"):

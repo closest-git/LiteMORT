@@ -57,8 +57,8 @@ def read_higgs_data(path):
 
 X,y,X_test = read_higgs_data("F:/Datasets/HIGGS_/HIGGS.csv")
 params = {
-        "objective": "regression",
-        "metric": "mae",        #"binary_logloss"
+        "objective": "binary",
+        "metric": "binary_logloss",        #"binary_logloss"
             'max_bin': 63,
           'num_leaves': 255,
           'learning_rate': 0.1,
@@ -95,14 +95,14 @@ for fold_n, (train_index, valid_index) in enumerate(folds.split(X)):
         np.savetxt("D:/LightGBM-master/examples/regression/geo_test.csv", d_train, delimiter='\t')
 
     if model_type == 'mort':
-        model = LiteMORT(params).fit_1(X_train, y_train, eval_set=[(X_valid, y_valid)])
+        model = LiteMORT(params).fit(X_train, y_train, eval_set=[(X_valid, y_valid)])
         y_pred_valid = model.predict(X_valid)
         #y_pred = model.predict(X_test)
 
     if model_type == 'lgb':
         model = lgb.LGBMRegressor(**params, n_jobs=-1)
         model.fit(X_train, y_train,
-                  eval_set=[(X_train, y_train), (X_valid, y_valid)], eval_metric='mae',verbose=50)
+                  eval_set=[(X_train, y_train), (X_valid, y_valid)], eval_metric='binary_logloss',verbose=50)
         model.booster_.save_model('geo_test_.model')
         y_pred_valid = model.predict(X_valid)
         #y_pred = model.predict(X_test, num_iteration=model.best_iteration_)

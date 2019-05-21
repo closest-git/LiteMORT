@@ -298,7 +298,7 @@ int GBRT::Train(string sTitle, int x, int flag) {
 		skdu.noT = t;
 		FeatVector *hY1 = hTrainData->GetPrecict();
 		tpDOWN *hDown = hTrainData->GetDownDirection();
-		if(true)
+		if(hTrainData->config.T_iterrefine>0)
 			IterTrain(t,flag);
 		else {
 			if (isEvalTrain) {

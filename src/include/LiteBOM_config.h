@@ -296,6 +296,7 @@ namespace Grusoft {
 
 		// default = 256,	some people said "Fewer than 256 bins in a histogram is enough to achieve good accuracy"
 		int feat_quanti = 0;
+		double T_iterrefine = 1;
 
 		typedef enum {
 			split_X = 0,
