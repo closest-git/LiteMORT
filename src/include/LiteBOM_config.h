@@ -158,14 +158,14 @@ namespace Grusoft {
 			printf("\n\tlr=%g sample=[%g,%g] min@leaf=%d stop=%d drop=%g num_leaves=%d "
 				"\n\tOBJECTIVE=\"%s\"\teval_metric=\"%s\"\tleaf_optimal=\"%s\" \n\t init=%s"
 				"\n\tImputation=%s\tNormal=%s"
-				"\n\tRefine_split=%d"
+				"\n\tIter_refine=%g \tRefine_split=%d"
 				"\n\tnode_task=%s"
 				"\n\thisto_bin_::map=%s",
 				learning_rate, subsample, feature_fraction, min_data_in_leaf, early_stopping_round, drop_out, num_leaves,
 				objective.c_str(), eval_metric.c_str(), leaf_optimal.c_str(),
 				init_scor.c_str(),
 				eda_NA == -1 ? "OFF" : eda_NA == 0 ? "0" : "Other",
-				eda_Normal == 0 ? "OFF" : "Gaussian", split_refine,
+				eda_Normal == 0 ? "OFF" : "Gaussian", T_iterrefine,split_refine,
 				node_task==0 ? "split_X" : node_task == 1 ? "split_Y" : "REGRESS_X",
 				histo_alg.c_str()
 				);

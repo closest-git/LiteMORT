@@ -83,23 +83,26 @@ namespace Grusoft {
 			V_ZERO_DEVIA = 0x10000,	//常值，一般可忽略
 			DISTRI_OUTSIDE = 0x40000,
 		};
-		struct _BIN_{
+
+		struct vDISTINCT{
 			enum {
 				BASIC,LARGE=0x10,
 			};
-			_BIN_(double v_,size_t n_) : val(v_),nz(n_)	{
+			vDISTINCT(double v_,size_t n_) : val(v_),nz(n_)	{
 			}
 			double val=-1; 
 			size_t nz=0;
 			int type = BASIC;
-		};
+		};			
 
 		string nam,desc;
 		vector<tpSAMP_ID> sortedA;		//排序后的有意义数据(NA-无意义数据)
 		//vector<double>  vUnique;		
-		vector<_BIN_>  vUnique;		//vThrsh
+		vector<vDISTINCT>  vUnique;		//vThrsh
 		MAP_CATEGORY mapCategory;
 		HistoGRAM *histo = nullptr;
+		vector<BIN_FEATA> binFeatas;
+
 		size_t nSamp, nZERO = 0, nNA = 0;
 		size_t type = 0x0;
 		double vMin = DBL_MAX, vMax = -DBL_MAX,q1=-DBL_MAX,q2 = -DBL_MAX,q3 = -DBL_MAX;
@@ -224,7 +227,7 @@ namespace Grusoft {
 		}
 
 		template<typename Tx>
-		void CheckUnique(LiteBOM_Config config, size_t nSamp_, Tx *val, const vector<tpSAMP_ID>& idx, vector<_BIN_>& vUnique, /*int nMostUnique,*/ int flag = 0x0) {
+		void CheckUnique(LiteBOM_Config config, size_t nSamp_, Tx *val, const vector<tpSAMP_ID>& idx, vector<vDISTINCT>& vUnique, /*int nMostUnique,*/ int flag = 0x0) {
 			size_t nA = idx.size(), i;
 			Tx a0 = val[idx[0]], a1 = val[idx[nA - 1]], pre = a0;
 			size_t nz=1;
@@ -233,21 +236,21 @@ namespace Grusoft {
 				if (val[idx[i]] == pre)
 				{		nz++;	 continue;		}
 				assert(val[idx[i]] > pre);
-				vUnique.push_back(_BIN_(pre, nz));		nz = 1;
+				vUnique.push_back(vDISTINCT(pre, nz));		nz = 1;
 				pre = val[idx[i]];
 				/*if (vUnique.size() >= nMostUnique - 1) {
 					vUnique.clear();	return;
 				}*/
 				//vUnique.push_back((double)pre);
 			}
-			vUnique.push_back(_BIN_(pre, nz));
+			vUnique.push_back(vDISTINCT(pre, nz));
 			nz = 0;
 			for (auto b : vUnique)	nz += b.nz;
 			assert(nz == nA);
 		}
 
 		//always last bin for NA
-		void HistoOnFrequncy_1(const LiteBOM_Config&config, vector<_BIN_>& vUnique, size_t nA0, size_t nMostBin, int flag = 0x0);
+		void HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTINCT>& vUnique, size_t nA0, size_t nMostBin, int flag = 0x0);
 
 		/*	
 			v0.2	cys
@@ -311,7 +314,7 @@ namespace Grusoft {
 			v0.1
 		*/
 		template<typename Tx>
-		void HistoOnUnique(const LiteBOM_Config&config, Tx *val, const vector<tpSAMP_ID>& sort_ids, vector<_BIN_>&uniques, int flag = 0x0) {
+		void HistoOnUnique(const LiteBOM_Config&config, Tx *val, const vector<tpSAMP_ID>& sort_ids, vector<vDISTINCT>&uniques, int flag = 0x0) {
 			size_t nMostBin = uniques.size();
 			assert(histo != nullptr);
 			size_t i, i_0 = 0, i_1, noBin = -1, pos, nA = sort_ids.size(), T_min = int(nA / nMostBin) + 1;
@@ -417,6 +420,7 @@ namespace Grusoft {
 
 			//int histo_alg = config.histo_algorithm;
 			histo->bins.resize(nMostBin + 3);
+			binFeatas.resize(nMostBin + 3);
 			switch (config.histo_bin_map) {
 			case LiteBOM_Config::HISTO_BINS_MAP::onUNIQUE:
 				
@@ -431,35 +435,13 @@ namespace Grusoft {
 				break;
 				
 			default:		//on_QUANTILE
-				throw "!!!HISTO_BINS_MAP::on_QUANTILE is ...!!!";
-				/*while (i_0 < nA - 1) {
-					v1 = v0 + step;	i_1 = i_0;
-					noBin = vThrsh.size();
-					HISTO_BIN& bin = histo->bins[noBin];
-					bin.tic = noBin;
-					//vThrsh.push_back(v1_last);
-					//vThrsh.push_back((v0 + v1_last) / 2);
-					vThrsh.push_back(v0);
-					//while (i_1 < nSamp - 1 && val[idx[++i_1]] < v1) {
-					while (++i_1 < nA - 1) {
-						pos = idx[i_1];
-						assert(!IS_NAN_INF(val[pos]));
-						if (val[pos] >= v1)
-							break;
-					}
-					assert(i_1 == nA - 1 || val[idx[i_1 - 1]] < v1);
-					v2 = val[idx[i_1]];		v1_last = v1;		v1 = v2;
-
-					//for (i = i_0; i < i_1; i++)	quanti[idx[i]] = noBin;
-					bin.nz = i_1 - i_0;
-					v0 = v1;		i_0 = i_1;
-				}
-				assert(i_0 == nA - 1);
-				vThrsh.push_back(a1 + step / 10);*/
+				throw "!!!HISTO_BINS_MAP::on_QUANTILE is ...!!!";			
 				break;
 			}
 			vUnique.clear();
 			int nBin = histo->bins.size();		//always last bin for NA
+			assert(binFeatas.size()>=nBin);
+			binFeatas.resize(nBin);
 			//histo->bins.resize(nBin + 1);
 			/*if (vUnique.size() > 0) {	//难道有BUG???
 			}	else {

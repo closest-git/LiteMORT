@@ -168,6 +168,23 @@ void HistoGRAM::CompressBins(int flag) {
 	}
 }
 
+void HistoGRAM::MoreHisto(const FeatsOnFold *hData_, vector<HistoGRAM*>&more,  int flag) {
+	return;
+	assert(hFeat != nullptr);
+	size_t minSet = hData_->config.min_data_in_leaf, nBin = bins.size(), i;
+	HistoGRAM *H_1 = new HistoGRAM(hFeat, nSamp);
+	H_1->bins = bins;
+	for (i = 0; i < nBin; i++) {
+		//const HISTO_BIN &item = bins[i];
+		BIN_FEATA feata;// = hFeat->GetBIN_FEATA();
+		HISTO_BIN& bin_1 = H_1->bins[i];
+		bin_1.split_F = feata.density;
+	}
+	sort(H_1->bins.begin(), H_1->bins.end(), HISTO_BIN::isSplitSmall);
+	//sort_by_splitF;
+	more.push_back(H_1);
+	H_1->split = HistoGRAM::SPLIT_BY_DENSITY;
+}
 
 /*
 	v0.2	cys

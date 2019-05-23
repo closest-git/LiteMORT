@@ -34,7 +34,6 @@ namespace Grusoft {
 	class FeatsOnFold;
 	class Distribution;
 
-
 	class FeatVector {
 	protected:
 	public:

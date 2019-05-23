@@ -441,7 +441,7 @@ void FeatVec_Q::UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst,
 	val = new tpQUANTI[nSamp];
 	//val.resize(nSamp);
 	tpQUANTI *quanti = arr(), no;
-	qHisto->quanti = quanti;
+	//qHisto->quanti = quanti;
 	for( i=0;i<nSamp;i++ )	quanti[i]=-111;		//-1 for NAN
 	
 	ExploreDA *edaX = hData_->edaX;
@@ -457,7 +457,7 @@ void FeatVec_Q::UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst,
 
 		if(distri.histo!=nullptr)
 			qHisto->CopyBins(*(distri.histo), true, 0x0);
-		hFeat->QuantiAtEDA(edaX, qHisto->quanti, nMostBin);
+		hFeat->QuantiAtEDA(edaX, quanti, nMostBin);
 	}	else{
 		//hFeat->Split2Quanti(hData_->config,edaX, vThrsh, qHisto, yDown, nMostBin);
 		printf( "\n!!! FeatVec_Q::Update_Histo edaX=nullptr !!!\n" );		

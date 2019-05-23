@@ -21,11 +21,11 @@ import pickle
 from litemort import *
 
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
-#isMORT = True
+isMORT = True
 model_type = 'mort' if isMORT else 'lgb'
 #some_rows=      200000
-some_rows=      2000000
-#some_rows=      10500000
+#some_rows=      2000000
+some_rows=      10500000
 nTotal =        11000000
 nLastForTest =    500000       #The last 500,000 examples are used as a test set.
 

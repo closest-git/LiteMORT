@@ -403,6 +403,10 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 				else
 					throw "MT_BiSplit::CheckGain task is !!!";
 			}
+			vector<HistoGRAM *> moreHisto; 
+			histo->MoreHisto(hData_,moreHisto);
+			for( auto histo : moreHisto)
+				histo->GreedySplit_X(hData_, samp_set);
 		}
 		//节省histo所占的空间,	如有需要，可重新调用Samp2Histo
 		if (!arrFruit[i]->isY) {

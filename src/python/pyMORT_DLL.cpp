@@ -57,7 +57,6 @@ struct MORT{
 //LiteBOM_Config config;
 //ExploreDA *g_hEDA=nullptr;
 
-
 void OnUserParams(LiteBOM_Config&config, PY_ITEM* params, int nParam, int flag = 0x0) {
 	char sERR[10000];
 	int i,err=0;

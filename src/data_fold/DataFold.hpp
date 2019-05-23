@@ -642,6 +642,7 @@ namespace Grusoft {
 			return ;
 		}
 		
+		/*
 		virtual void Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag = 0x0) {
 			throw "FeatVec_T<Tx>::Samp2Histo is deprecated!!!";
 			size_t nSamp = samp_set.nSamp, i;			
@@ -682,10 +683,7 @@ namespace Grusoft {
 				//no = MIN((int)(r), nBin - 1);				assert(no < nBin);
 				no = (int)r;				assert(no < nBin);
 				HISTO_BIN& bin = histo->bins[no];
-				/*if (isTaylor2) {
-					//http://bazyd.com/machine-learning-understanding-the-principles-of-gbdt-20171001/
-					bin.H_sum += 2;		bin.G_sum += -2 * err[samp];
-				}				else*/ {
+				{
 					bin.G_sum += -err[samp];			bin.H_sum += 1;
 				}
 				bin.nz++;
@@ -698,7 +696,7 @@ namespace Grusoft {
 					histo->quanti[i] = no;
 				}
 			}
-		}
+		}*/
 
 		/*
 			v0.2	·´Ïò¸´ÖÆ

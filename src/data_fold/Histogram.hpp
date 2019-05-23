@@ -94,12 +94,20 @@ namespace Grusoft {
 		//tpQUANTI split_Q = -1;	//量化之后
 		double G_sum = 0, H_sum = 0;		//Second-order approximation from Tianqi Chen's formula
 
-		/*static bool isTicSmall(const HISTO_BIN &l, const HISTO_BIN &r)
+		static bool isSplitSmall(const HISTO_BIN &l, const HISTO_BIN &r)
 		{
-			return l.tic<r.tic;
-		}*/
+			return l.split_F<r.split_F;
+		}
 
 		
+	};
+
+	//HISTO_BIN仅记录基本信息 feat analysis is here...
+	struct BIN_FEATA {
+		double split_F = 0;
+		char fold = -1;			//每个BIN属于一个FOLD
+		int tic = 0;			//X		可删除
+		double density, bandwidth;		//The bandwidth of the kernel is a free parameter which exhibits a strong influence on the resulting estimate
 	};
 
 	class FRUIT{
@@ -146,6 +154,7 @@ namespace Grusoft {
 		}*/
 		
 	};
+
 	
 	/*
 		与特定FeatVector对应的HistoGRAM
@@ -154,16 +163,22 @@ namespace Grusoft {
 	protected:
 		//FeatVector*	hFeat = nullptr;
 	public:
+		typedef enum {
+			SPLIT_BY_VALUE=0x0,SPLIT_BY_DENSITY
+		}SPLIT_FEAT;
+		SPLIT_FEAT split= SPLIT_BY_VALUE;
+
 		size_t nSamp, nLeft = 0, nRight=0;
-		FRUIT *fruit=nullptr;		//仅仅指向
-		tpQUANTI *quanti=nullptr;	//指向qHisto->quanti(参见FeatVec_Q::UpdateHisto)，不用删除
+		FRUIT *fruit=nullptr;			//仅仅指向
+		FeatVector *hFeat = nullptr;	//仅仅指向
+		//tpQUANTI *quanti=nullptr;	//指向qHisto->quanti(参见FeatVec_Q::UpdateHisto)，不用删除
 		//double a0 = 0, a1 = 0,split;
 		vector<HISTO_BIN> bins;
 		//NA value---样本的某featrue确实missing value ,但总体上还是有down direction
 		HISTO_BIN* hBinNA( )		
 		{	return &(bins[bins.size()-1]);	 }		//总是放在最后
 
-		HistoGRAM(FeatVector*hFeat_,size_t nMost, int flag = 0x0) /*: hFeat(hFeat_)*/{
+		HistoGRAM(FeatVector*hFeat_,size_t nMost, int flag = 0x0) : hFeat(hFeat_){
 			nSamp = nMost;
 			//a1 = -DBL_MAX, a0 = DBL_MAX;	
 		}
@@ -233,7 +248,9 @@ namespace Grusoft {
 			//a1 = -DBL_MAX, a0 = DBL_MAX;
 		}
 
+		virtual void MoreHisto(const FeatsOnFold *hData_, vector<HistoGRAM*>&more, int flag = 0x0);
 		virtual void GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp_set, int flag = 0x0);
+		//virtual void GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp_set, int flag = 0x0);
 		virtual void GreedySplit_Y(const FeatsOnFold *hData_, const SAMP_SET& samp_set,bool tryX, int flag = 0x0);
 		virtual void Regress(const FeatsOnFold *hData_, const SAMP_SET& samp_set,  int flag = 0x0);
 

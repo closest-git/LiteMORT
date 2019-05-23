@@ -209,17 +209,23 @@ void EARLY_STOPPING::Add(double err,int best_tree, int flag) {
 }
 
 bool EARLY_STOPPING::isOK(int cur_round) {
-	//if( errors.size()<early_round )
-	if (cur_round<early_round)
-		return false;
-	double e_last = errors[errors.size()-1];
-	/*if (best_no<= errors.size()- early_round) {
-		assert(e_last>=e_best);
-		return true;
-	}*/
-	if (best_round <= cur_round - early_round) {
-		assert(e_last >= e_best);
-		return true;
+	double e_last = errors[errors.size() - 1];
+	if (true) {
+		if( errors.size()<early_round )
+			return false;
+		if (best_no<= errors.size()- early_round) {
+			assert(e_last>=e_best);
+			return true;
+		}
+	}else {
+		if (cur_round<early_round)
+			return false;
+		//double e_last = errors[errors.size()-1];
+		if (best_round <= cur_round - early_round) {
+			assert(e_last >= e_best);
+			return true;
+		}
+
 	}
 	return false;
 }
@@ -261,6 +267,8 @@ int GBRT::IterTrain(int round, int flag) {
 				double err_last = stopping.curERR();
 				if (err >= err_last)
 					break;
+				if (fabs(err_last - err) < err_last / 1000)
+					break;
 			}
 			stopping.Add(err, round);
 			if (hEvalData->lossy->isOK(0x0, FLT_EPSILON)) {
@@ -274,6 +282,7 @@ int GBRT::IterTrain(int round, int flag) {
 	}
 	return nIter;
 }
+
 
 int GBRT::Train(string sTitle, int x, int flag) {
 	GST_TIC(tick);
