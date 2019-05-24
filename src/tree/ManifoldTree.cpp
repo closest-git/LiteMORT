@@ -310,7 +310,7 @@ void ManifoldTree::AddNewLeaf(hMTNode hNode, FeatsOnFold *hData_, const vector<i
 	}
 	else {		
 		std::string leaf_optimal = hData_->config.leaf_optimal;
-		assert(hNode->feat_id == -1 && hNode->nSample()>hData_->config.min_data_in_leaf * 2);
+		assert(hNode->feat_id == -1 && hNode->nSample()>=hData_->config.min_data_in_leaf * 2);
 		//if( hNode->impuri>0)		//optimal == "lambda_0"时,impuri不对
 			hNode->CheckGain(hData_, pick_feats, 0);
 	}
@@ -413,8 +413,6 @@ void ManifoldTree::BeforeEachBatch(size_t nMost, size_t rng_seed, int flag) {
 */
 void ManifoldTree::Train(int flag) {	
 	int nTree=hForest->forest.size( ),iter=0;
-	if (nTree == 24)
-		nTree = 24;		//仅用于调试
 	FeatsOnFold *hData_ = hForest->GurrentData();
 	bool isBatch = hData_->config.batch < 0.9;
 	tpDOWN *yDown = hData_->GetDownDirection();
@@ -445,6 +443,8 @@ void ManifoldTree::Train(int flag) {
 			BeforeEachBatch(hData_->config.batch*nSamp,42+ leafs.size());
 		}
 		hMTNode hBest = leafs.top();
+		if (hBest->id == 2)
+			hBest->id = 2;		//仅用于调试
 		if (hBest->gain > 0)		{
 			gain = hBest->gain;			leafs.pop();
 		}		else {

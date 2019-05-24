@@ -39,7 +39,12 @@ class LiteMORT_params(object):
     def OnArgs(self,dict_param):
         self.isOK = False
         if 'metric' in dict_param:
-            self.metric = dict_param['metric']
+            if(dict_param['metric'] in ['regression_l2','mean_squared_error', 'mse', 'l2','l2_root','root_mean_squared_error', 'rmse'] ):
+                self.metric = 'mse'
+            elif (dict_param['metric'] in ['regression_l1','mean_absolute_error', 'mae', 'l1']):
+                self.metric = 'mae'
+            else:
+                self.metric = dict_param['metric']
         if 'num_leaves' in dict_param:
             self.num_leaves = dict_param['num_leaves']
         if 'max_depth' in dict_param:

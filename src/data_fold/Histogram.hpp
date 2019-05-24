@@ -82,6 +82,10 @@ namespace Grusoft {
 
 	};
 
+	typedef enum {
+		BY_VALUE = 0x0, BY_DENSITY
+	}SPLIT_HISTOGRAM;
+
 	class HistoGRAM;
 
 	//feature vector的数据类型多变，所以映射很复杂
@@ -112,10 +116,15 @@ namespace Grusoft {
 
 	class FRUIT{
 	public:
-		FRUIT(HistoGRAM *his_ = nullptr,int flag=0x0) ;
+		//FRUIT(HistoGRAM *his_ = nullptr,int flag=0x0) ;
+		FRUIT(int flag = 0x0) {
+
+		}
+		int best_feat_id=-1;
 		HistoGRAM *histo = nullptr;		//仅指向，不再删除
 		HISTO_BIN bin_S0, bin_S1;						//有变化，比较危险诶
 		double adaptive_thrsh;					//可指向binSplit中间，所以保留		splitonY也需要这个值
+		SPLIT_HISTOGRAM split_by = BY_VALUE;
 		double Thrshold(bool isQuanti) {
 			//assert(binSplit.split_Q >= 0);
 			if (isQuanti) {
@@ -163,10 +172,8 @@ namespace Grusoft {
 	protected:
 		//FeatVector*	hFeat = nullptr;
 	public:
-		typedef enum {
-			SPLIT_BY_VALUE=0x0,SPLIT_BY_DENSITY
-		}SPLIT_FEAT;
-		SPLIT_FEAT split= SPLIT_BY_VALUE;
+		
+		SPLIT_HISTOGRAM split_by = BY_VALUE;
 
 		size_t nSamp, nLeft = 0, nRight=0;
 		FRUIT *fruit=nullptr;			//仅仅指向

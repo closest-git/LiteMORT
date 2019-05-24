@@ -180,7 +180,7 @@ double GBRT::Predict(FeatsOnFold *hData_, bool isX,bool checkLossy, bool resumeL
 
 		if (BIT_TEST(hData_->dType, FeatsOnFold::DF_EVAL)) {
 			if ((skdu.noT < 100 && skdu.noT % 5 == 0) || skdu.noT % 500 == 0) {
-				printf("%s_%d=%-8.5g ", hData_->nam.c_str(),skdu.noT,  err);
+				printf("%s_%d=%-8.5g ", hData_->nam.c_str(),skdu.noT,  err);		//eval_
 				if(skdu.noT > 100)	printf("tX=%.3g ", FeatsOnFold::stat.tX);
 			}
 

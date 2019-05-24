@@ -170,20 +170,26 @@ void HistoGRAM::CompressBins(int flag) {
 
 void HistoGRAM::MoreHisto(const FeatsOnFold *hData_, vector<HistoGRAM*>&more,  int flag) {
 	return;
+
 	assert(hFeat != nullptr);
 	size_t minSet = hData_->config.min_data_in_leaf, nBin = bins.size(), i;
 	HistoGRAM *H_1 = new HistoGRAM(hFeat, nSamp);
 	H_1->bins = bins;
+	vector<BIN_FEATA>& featas=hFeat->hDistri->binFeatas;
+	assert( featas.size()==nBin );
 	for (i = 0; i < nBin; i++) {
 		//const HISTO_BIN &item = bins[i];
-		BIN_FEATA feata;// = hFeat->GetBIN_FEATA();
+		const BIN_FEATA& feata = hFeat->hDistri->binFeatas[i];
 		HISTO_BIN& bin_1 = H_1->bins[i];
 		bin_1.split_F = feata.density;
 	}
 	sort(H_1->bins.begin(), H_1->bins.end(), HISTO_BIN::isSplitSmall);
+	for (i = 0; i < nBin; i++) {
+		H_1->bins[i].tic = i;
+	}
 	//sort_by_splitF;
 	more.push_back(H_1);
-	H_1->split = HistoGRAM::SPLIT_BY_DENSITY;
+	H_1->split_by = SPLIT_HISTOGRAM::BY_DENSITY;
 }
 
 /*
@@ -197,7 +203,7 @@ void HistoGRAM::GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp_se
 	size_t minSet = hData_->config.min_data_in_leaf,nBin=bins.size(),i;
 	string optimal = hData_->config.leaf_optimal, obj = hData_->config.objective;
 	//double sum = samp_set.Y_sum_1, a = a0, errL = 0, g, gL = 0, g1 = 0, lft, rgt;
-	double gL = 0, gR0, hL = 0, hR = 0, a = -DBL_MAX, g, g1 = 0;
+	double gL = 0, gR0, hL = 0, hR = 0, a = -DBL_MAX, g, g1 = fruit->mxmxN, split_0= -DBL_MAX;
 	nLeft = 0;				nRight = nSamp;		assert(nRight >= 0);
 	HISTO_BIN*binNA = this->hBinNA();
 	double gSum = 0, hSum = 0;	// binNA->G_sum, hSum = binNA->H_sum;
@@ -229,6 +235,9 @@ void HistoGRAM::GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp_se
 			goto LOOP;
 		}
 		assert(item.tic>a);
+		if (item.split_F == split_0 /*|| item.nz == 0*/) {
+			goto LOOP;
+		}
 		//double errR = sum - errL;
 		//Regression trees in CART have a constant numerical value in the leaves and use the variance as a measure of impurity
 		//g = errL*errL / nLeft + errR*errR / nRight;
@@ -243,8 +252,10 @@ void HistoGRAM::GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp_se
 		}
 
 		if (g>g1 || gainL>g1) {
+			fruit->best_feat_id = hFeat->id;
+			fruit->split_by = this->split_by;
 			fruit->bin_S0 = bins[i-1];		fruit->bin_S1 = item;
-			assert(fruit->bin_S0.nz>0);
+			//assert(fruit->bin_S0.nz>0);
 			g1 = MAX(g, gainL);
 			fruit->mxmxN = g1;			fruit->tic_left = item.tic;
 			fruit->nLeft = nLeft;		fruit->nRight = nRight;
@@ -262,7 +273,7 @@ void HistoGRAM::GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp_se
 	LOOP:
 		//errL += item.Y_sum;		
 		gL += item.G_sum;		hL += item.H_sum;
-		a = item.tic;
+		a = item.tic;			split_0 = item.split_F;
 		assert(nRight >= item.nz);
 		nLeft += item.nz;			nRight -= item.nz;
 	}

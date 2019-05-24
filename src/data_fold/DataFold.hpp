@@ -736,7 +736,7 @@ namespace Grusoft {
 					nam = distri.nam;
 					BIT_SET(type, distri.type);
 				}
-				
+				hDistri->binFeatas = distri.binFeatas;
 			}
 			else {
 			}

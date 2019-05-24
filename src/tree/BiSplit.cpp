@@ -8,10 +8,11 @@ using namespace Grusoft;
 
 double MT_BiSplit::tX = 0;
 
+/*
 FRUIT::FRUIT(HistoGRAM *his_, int flag) : histo(his_) {
 	if( histo!=nullptr)
 		histo->fruit=this;
-}
+}*/
 
 FRUIT::~FRUIT() {
 	//if (histo != nullptr)
@@ -245,7 +246,6 @@ double MT_BiSplit::AGG_CheckGain(FeatsOnFold *hData_, FeatVector *hFeat, int fla
 */
 int MT_BiSplit::PickOnGain(FeatsOnFold *hData_,const vector<FRUIT *>& arrFruit, int flag) {
 	double mxmxN = 0;
-	fruit = nullptr;
 	vector<double> cands;
 	int pick_id=-1, nFruit = arrFruit.size(),i;
 	bool isRanomPick = false;	//hData_->config.random_feat_on_gain
@@ -347,9 +347,10 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 	//if (task == "split_X" || task == "split_Y")
 	if (node_task == LiteBOM_Config::split_X || node_task == LiteBOM_Config::histo_X_split_G)
 		assert(gain == 0);
+	bool isEachFruit = false;		//each Fruit for each feature 
 	vector<FRUIT *> arrFruit;
-	arrFruit.resize(picks.size());
-	//fBlits.resize(picks.size());
+	if(isEachFruit)
+		arrFruit.resize(picks.size());
 	tpDOWN *yDown = hData_->GetDownDirection();
 	//picks.clear();		picks.push_back(7);		//仅用于调试
 	int num_threads = OMP_FOR_STATIC_1(picks.size(), step);
@@ -367,7 +368,8 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 	//auto t0 = std::chrono::steady_clock::now();
 	//std::chrono::duration<double, std::milli> ht = std::chrono::steady_clock::now() - t0;
 	//printf("%d-%d(%.3g) ", this->id,nSamp, ht*1.0e-3);
-
+	fruit = new FRUIT();
+	arrFruit.push_back(fruit);
 	for (int i = start; i < end; i++) {
 		int pick = picks[i];
 		if (i == 0 && this->id == 1) {	//仅用于测试
@@ -376,8 +378,8 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 		FeatVector *hFeat = hData_->Feat(pick);
 		//HistoGRAM *histo = optimal=="grad_variance" ? new HistoGRAM(nSamp) : new Histo_CTQ(nSamp);
 		HistoGRAM *histo = GetHistogram(hData_,pick,true);
-		//HistoGRAM *histo = new HistoGRAM(hFeat, nSamp);
-		arrFruit[i] = new FRUIT(histo);
+		histo->fruit = fruit;
+		//arrFruit[i] = new FRUIT(histo);
 		if (nSamp == 400 && pick == 9)
 			pick = 9;
 
@@ -405,13 +407,17 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 			}
 			vector<HistoGRAM *> moreHisto; 
 			histo->MoreHisto(hData_,moreHisto);
-			for( auto histo : moreHisto)
-				histo->GreedySplit_X(hData_, samp_set);
+			for (size_t i = 0; i < moreHisto.size();i++) {
+				moreHisto[i]->fruit = fruit;	// arrFruit[i];
+				moreHisto[i]->GreedySplit_X(hData_, samp_set);
+				delete moreHisto[i];
+			}
+			moreHisto.clear();
 		}
 		//节省histo所占的空间,	如有需要，可重新调用Samp2Histo
-		if (!arrFruit[i]->isY) {
+		/*if (!arrFruit[i]->isY) {
 			//delete histo;		arrFruit[i]->histo = nullptr;
-		}
+		}*/
 	}
 
 
@@ -422,12 +428,21 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 		histo->GreedySplit_X(hData_, samp_set, minSet);
 	}*/
 	double mxmxN = 0;
-	pick_id = PickOnGain(hData_, arrFruit, flag);	
-	if (pick_id >= 0) {
-		feat_id = picks[pick_id];		feat_regress = -1;
-		fruit = arrFruit[pick_id];
+	if (isEachFruit) {
+		pick_id = PickOnGain(hData_, arrFruit, flag);
+		if (pick_id >= 0) {
+			feat_id = picks[pick_id];
+			//fruit = arrFruit[pick_id];
+		}
+	}
+	else {
+		feat_id = fruit->best_feat_id;
+	}
+	if (feat_id >= 0) {
+		//feat_id = picks[pick_id];		
+		feat_regress = -1;
 		mxmxN = fruit->mxmxN;
-		FeatVector *hFeat = hData_->Feat(picks[pick_id]);	
+		FeatVector *hFeat = hData_->Feat(feat_id);
 		hFeat->UpdateFruit(hData_,this);
 		if (hFeat->hDistri != nullptr && hFeat->hDistri->rNA > 0) {			
 			//fruit->isNanaLeft = hFeat->hDistri;
@@ -436,15 +451,21 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 	else {	//确实有可能,很多情况可以进一步优化，需要积累一些算例来分析
 		//printf("\n\t!!! Failed split at %d nSamp=%d nPick=%d !!!\n", id, nSample(), picks.size());
 	}
-	for (int i = 0; i<picks.size(); i++) {		//为了并行
-		if( fruit == arrFruit[i])
-		{	continue;		}
-		else
-			delete arrFruit[i];
+	if (isEachFruit) {
+		for (int i = 0; i < arrFruit.size(); i++) {		//为了并行
+			if (fruit == arrFruit[i])		{
+				continue;
+			}
+			else
+				delete arrFruit[i];
+		}
 	}
 	arrFruit.clear( );
 	hData_->stat.nCheckGain++;
 	if (fruit != nullptr) {
+		if (fruit->split_by == SPLIT_HISTOGRAM::BY_DENSITY) {
+			int i = 0;
+		}
 		if (optimal == "lambda_0") {
 			gain = FLOAT_ZERO(mxmxN-impuri, mxmxN);
 			if (gain < 0) {
