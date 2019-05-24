@@ -404,7 +404,7 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 					histo->Regress(hData_, samp_set);
 				else
 					throw "MT_BiSplit::CheckGain task is !!!";
-			}
+			}/**/
 			vector<HistoGRAM *> moreHisto; 
 			histo->MoreHisto(hData_,moreHisto);
 			for (size_t i = 0; i < moreHisto.size();i++) {

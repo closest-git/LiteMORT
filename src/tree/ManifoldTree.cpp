@@ -450,6 +450,7 @@ void ManifoldTree::Train(int flag) {
 		}		else {
 			hBest = nullptr;
 		}
+
 		/*for (auto hNode : leafs) {
 			nz++;
 			assert( hNode->isLeaf());

@@ -21,8 +21,8 @@ from litemort import *
 
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 isMORT = True
-#some_rows=10000
-some_rows=None
+some_rows=10000
+#some_rows=None
 pick_samples=None
 #pick_samples=1500
 early_stop=50      #0.898->0.899
@@ -31,7 +31,7 @@ lr=0.02             #0.02   0.01提升一点点   0.89826-》0.89842
 nFold,nLeaves = 5,10
 n_round=35000
 min_child=32         #11(0.89830)-> 32(0.89882)
-x_feat,x_sub=1,0.15
+#x_feat,x_sub=1,0.15
 x_feat,x_sub=0.15,0.3
 #x_feat,x_sub=1,1;       nLeaves=2;n_round=5       #仅用于测试
 

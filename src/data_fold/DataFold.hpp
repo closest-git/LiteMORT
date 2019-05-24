@@ -204,7 +204,7 @@ namespace Grusoft {
 		virtual void Empty(int flag) {
 
 		}
-
+		virtual void ExpandFeat(int flag = 0x0);
 		virtual void Feature_Bundling(int flag = 0x0);
 		virtual void Reshape(int flag = 0x0) {
 			throw "FeatsOnFold::Reshape is ...";
@@ -359,7 +359,6 @@ namespace Grusoft {
 
 			}	else
 				val = new Tx[_len];	// val.resize(_len);
-			//hDistri = new Distribution();
 		}
 
 		virtual ~FeatVec_T() {
@@ -549,6 +548,7 @@ namespace Grusoft {
 				还是有问题	12/19/2018	cys
 				1/11/2019	发现train的histo->AtBin_不适用于test
 			*/
+			double T_0 = hBlit->fruit->bin_S0.split_F, T_1 = hBlit->fruit->bin_S1.split_F;
 			if (hBlit->fruit->isY) {
 				SAMP_SET &lSet = left->samp_set, &rSet = rigt->samp_set;
 				tpSAMP_ID *samps = hBlit->samp_set.samps, *left = hBlit->samp_set.left, *rigt = hBlit->samp_set.rigt;
@@ -564,7 +564,7 @@ namespace Grusoft {
 					else if (isCategory()) {	
 						pos = hBlit->fruit->mapCategory[(int)(val[samp])];
 					}else{		//predict,test对应的数据集并没有格子化!!!
-						pos = histo->AtBin_(val[samp]);		//有BUG!!!
+						pos = histo->AtBin_(val[samp]);		
 					}
 					int fold = pos < 0 ? 0 : histo->bins[pos].fold;
 					if (fold <= 0)
@@ -577,6 +577,32 @@ namespace Grusoft {
 				lSet.samps = samps;				lSet.nSamp = nLeft;
 				rSet.samps = samps + nLeft;		rSet.nSamp = nRigt;
 				//hBlit->samp_set.SplitOn(ys, thrsh, left->samp_set, rigt->samp_set,1);
+			}
+			else if (hBlit->fruit->split_by==BY_DENSITY) {
+				SAMP_SET &lSet = left->samp_set, &rSet = rigt->samp_set;
+				tpSAMP_ID *samps = hBlit->samp_set.samps, *left = hBlit->samp_set.left, *rigt = hBlit->samp_set.rigt;
+				lSet = hBlit->samp_set;		rSet = hBlit->samp_set;	//直接复制父节点的一些数据
+				lSet.isRef = true;			rSet.isRef = true;
+				HistoGRAM *histo = hDistri->histo;
+				for (i = 0; i < nSamp; i++) {
+					samp = hBlit->samp_set.samps[i];
+					if (isQuanti) {	//训练数据格子化
+						pos = val[samp];
+					}	else if (isCategory()) {
+						pos = hBlit->fruit->mapCategory[(int)(val[samp])];
+					}	else {		//predict,test对应的数据集并没有格子化!!!
+						pos = histo->AtBin_(val[samp]);		
+					}
+					const BIN_FEATA& feata = hDistri->binFeatas[pos];
+					if(feata.density<T_1)
+						left[nLeft++] = samp;
+					else
+						rigt[nRigt++] = samp;
+				}
+				memcpy(samps, left, sizeof(tpSAMP_ID)*nLeft);
+				memcpy(samps + nLeft, rigt, sizeof(tpSAMP_ID)*nRigt);
+				lSet.samps = samps;				lSet.nSamp = nLeft;
+				rSet.samps = samps + nLeft;		rSet.nSamp = nRigt;
 			}
 			else/**/ {
 				hBlit->SplitOn(hData_,nSamp_,val, hData_->isQuanti);
@@ -643,66 +669,41 @@ namespace Grusoft {
 		}
 		
 		/*
-		virtual void Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag = 0x0) {
-			throw "FeatVec_T<Tx>::Samp2Histo is deprecated!!!";
-			size_t nSamp = samp_set.nSamp, i;			
-			tpDOWN *err = nullptr;
-			string optimal = hData_->config.leaf_optimal;
-			bool isLambda = optimal == "lambda_0";
-			double a1 = -DBL_MAX, a0 = DBL_MAX;
-			const tpSAMP_ID *samps = samp_set.samps;
-			tpSAMP_ID samp;
-			double a, sum = 0;
-			Tx *val_c = arr();
-			for (i = 0; i < nSamp; i++) {
-				samp = samps[i];
-				a = val_c[samp];
-				if (a0 > a) {
-					a0 = a;		//ox.pos_0 = samp;
-				}
-				if (a1 < a) {
-					a1 = a;		//box.pos_1 = samp;
-				}
-			}
-			histo->OptimalBins(nMostBin, nSamp, a0, a1);
+			v0.3 no edaX 
+		*/
+		virtual void EDA(const LiteBOM_Config&config,bool genHisto, int flag) {
+			size_t i;
+			if (hDistri == nullptr) {	//only for Y
+				hDistri = new Distribution();		
+			}	else {
 
-			int no = 0, nBin = histo->bins.size();
-			if (nBin == 0)
-				return;
-			assert(nBin >= 2);
-			double step = (a1 - a0) / (nBin - 1), r;
-			for (i = 0; i < nBin; i++) {
-				HISTO_BIN& bin = histo->bins[i];
-				//histo->bins[i].tic = a0+(i+0.5)*step;		//每个bin的平均位置，取中间值
-				histo->bins[i].tic = a0 + i*step;		//每个bin的最左边位置
 			}
-
-			for (i = 0; i < nSamp; i++) {
-				samp = samps[i];
-				r = (val_c[samp] - a0) / step;
-				//no = MIN((int)(r), nBin - 1);				assert(no < nBin);
-				no = (int)r;				assert(no < nBin);
-				HISTO_BIN& bin = histo->bins[no];
-				{
-					bin.G_sum += -err[samp];			bin.H_sum += 1;
+			hDistri->nam = nam;
+			hDistri->STA_at(nSamp_, val, true, 0x0);
+			if (ZERO_DEVIA(hDistri->vMin, hDistri->vMax))
+				BIT_SET(this->type, Distribution::V_ZERO_DEVIA);
+			else if (config.eda_Normal != LiteBOM_Config::NORMAL_off) {
+				Tx *val_c = arr();
+				double mean = hDistri->mean, s = 1.0 / hDistri->devia;
+				//for each(tpSAMP_ID samp in hDistri->sortedA
+				for (i = 0; i < nSamp_; i++) {
+					val_c[i] = (val_c[i] - mean)*s;
 				}
-				bin.nz++;
+				hDistri->STA_at(nSamp_, val, true, 0x0);/**/
 			}
-			if (histo->quanti != nullptr) {
-				for (i = 0; i < nSamp; i++) {
-					samp = samps[i];
-					r = (val_c[samp] - a0) / step;
-					no = MIN((int)(r), nBin - 1);				assert(no < nBin);
-					histo->quanti[i] = no;
-				}
+			if (genHisto) {
+				if (hDistri->histo == nullptr) {	//参见LiteMORT_EDA->Analysis(config, (float *)dataX, (tpY *)dataY, nSamp_, nFeat_0, 1, flag);
+					hDistri->X2Histo_(config, nSamp_, arr(), (double*)nullptr);
+					hDistri->Dump(this->id, false, flag);
+				}			
 			}
-		}*/
+		}
 
 		/*
 			v0.2	反向复制
 				5/16/2019		cys
 			和edaX有区别（数据集有差别），这些区别应该有价值
-		*/
+		
 		virtual void EDA(const LiteBOM_Config&config, ExploreDA *edaX, int flag) {
 			size_t i;
 			assert(hDistri == nullptr);
@@ -717,9 +718,9 @@ namespace Grusoft {
 				for (i = 0; i < nSamp_; i++) {
 					val_c[i] = (val_c[i] - mean)*s;
 				}
-				hDistri->STA_at(nSamp_, val, true, 0x0);/**/
+				hDistri->STA_at(nSamp_, val, true, 0x0);
 			}
-			if (edaX != nullptr) {		/*复制信息*/
+			if (edaX != nullptr) {		//复制信息
 				Distribution& distri = edaX->arrDistri[id];
 				if (distri.histo == nullptr) {	//参见LiteMORT_EDA->Analysis(config, (float *)dataX, (tpY *)dataY, nSamp_, nFeat_0, 1, flag);
 					distri = *hDistri;		//反向复制
@@ -727,11 +728,6 @@ namespace Grusoft {
 					distri.Dump(this->id, false, flag);
 				}	else {
 					if (distri.vMin != DBL_MAX) {
-						/*assert(hDistri->vMin >= distri.vMin && hDistri->vMax <= distri.vMax);
-						if (hDistri->vMin > distri.vMin)
-							hDistri->vMin = distri.vMin;
-						if (hDistri->vMax < distri.vMax)
-							hDistri->vMax = distri.vMax;*/
 					}
 					nam = distri.nam;
 					BIT_SET(type, distri.type);
@@ -740,7 +736,7 @@ namespace Grusoft {
 			}
 			else {
 			}
-		}
+		}*/
 
 		/*
 			参见ExploreDA::
@@ -854,6 +850,9 @@ namespace Grusoft {
 			hFeatSource->Observation_AtSamp(config, samp, distri,flag);
 		}
 
+		virtual tpQUANTI *GetQuantiBins(int flag = 0x0) { 
+			return val; 
+		}
 
 		//static bin mapping	生成基于EDA的格子	参见Samp2Histo
 		virtual void UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst, int flag = 0x0);

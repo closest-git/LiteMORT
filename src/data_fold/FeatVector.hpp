@@ -37,7 +37,7 @@ namespace Grusoft {
 	class FeatVector {
 	protected:
 	public:
-		Distribution *hDistri = nullptr;
+		Distribution *hDistri = nullptr;		//仅指向
 		enum {
 			//CATEGORY = 0x100,
 			AGGREGATE = 0x200,
@@ -57,13 +57,15 @@ namespace Grusoft {
 		string nam = "", desc = "";
 		//virtual void Clear(int flag = 0x0) {		}
 		virtual ~FeatVector() {
-			if (hDistri != nullptr)
-				delete hDistri;
+			//if (hDistri != nullptr)
+			//	delete hDistri;
 		}
 		virtual void Empty(int flag = 0x0) {		}
 		virtual void Set(size_t len, void* p, int flag = 0x0) { throw"FeatVector::SetY is ..."; }
 		virtual void Set(size_t pos, double a, int flag = 0x0) { throw"FeatVector::SetY is ..."; }
+
 		virtual void loc(vector<tpSAMP_ID>&poss, double target, int flag = 0x0) { throw"FeatVector::loc is ..."; }
+		virtual tpQUANTI *GetQuantiBins(int flag=0x0) { throw"FeatVector::GetQuantiBins is ..."; }
 		virtual void SplitOn(FeatsOnFold *hData_, MT_BiSplit *hBest, int flag = 0x0) { throw"FeatVector::Split is ..."; }
 		//根据MT_BLIT的模型，来预测
 		virtual void Update_step(FeatsOnFold *hData_, MT_BiSplit *hBlit, int flag = 0x0) { throw"FeatVector::UpdatePredict is ..."; }
@@ -81,7 +83,8 @@ namespace Grusoft {
 		virtual void UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst, int flag = 0x0) { throw "FeatVector::UpdateHisto is ..."; }
 		//virtual MT_BiSplit*OnPredict(const MT_BiSplit *cur_, const size_t no, int flag = 0x0)	 { throw"FeatVector::OnPredict is ..."; }
 		virtual void Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag = 0x0) { throw "FeatVector::Samp2Histo is ..."; }
-		virtual void EDA(const LiteBOM_Config&config, ExploreDA *edaX, int flag) { throw "FeatVector::EDA is ..."; }
+		virtual void EDA(const LiteBOM_Config&config,bool genHisto, int flag) { throw "FeatVector::EDA is ..."; }
+		//virtual void EDA(const LiteBOM_Config&config, ExploreDA *edaX, int flag) { throw "FeatVector::EDA is ..."; }
 		virtual void QuantiAtEDA(const ExploreDA *eda, tpQUANTI *quanti, int nMostBin, int flag = 0x0) { ; }
 		//virtual void Split2Quanti(const LiteBOM_Config&config, const ExploreDA *eda, vector<double>& vThrsh, HistoGRAM *qHisto, tpDOWN *yDown, int nMostBin, int flag = 0x0) { throw "FeatVector::SplitSort is ..."; }
 		virtual void UpdateFruit(const FeatsOnFold*,MT_BiSplit *hBlit, int flag = 0x0) {}

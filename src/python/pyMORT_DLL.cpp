@@ -182,6 +182,36 @@ PYMORT_DLL_API void LiteMORT_set_feat(PY_ITEM* params, int nParam, int flag = 0x
 	}
 }
 
+void FeatsOnFold::ExpandFeat(int flag) {
+	bool isTrain = BIT_TEST(dType,  FeatsOnFold::DF_TRAIN);
+	bool isPredict = BIT_TEST(dType,  FeatsOnFold::DF_PREDIC);
+	size_t nFeat_0 = feats.size(),i,nSamp_=nSample(),feat;
+	int flagF = flag, nQuant=0, nMostQ = config.feat_quanti;
+	for (feat = 0; feat < 10; feat++) {
+		FeatVector *hBase = feats[feat];
+		tpQUANTI pos,*quanti = hBase->GetQuantiBins();
+		if (quanti != nullptr) {
+			//edaX->arrDistri.resize(feats.size()+1);
+			vector<BIN_FEATA>& featas = hBase->hDistri->binFeatas;
+			FeatVec_T<float> *hExp = new FeatVec_T<float>(nSamp_, feats.size(), "exp" + std::to_string(feat), flagF);
+			hExp->hDistri = &(edaX->arrDistri[feats.size()]);
+			float *val = hExp->arr();
+			for (i = 0; i < nSamp_; i++) {
+				pos = quanti[i];
+				val[i] = featas[pos].density;
+			}
+			if (isTrain)
+				hExp->EDA(config, true, 0x0);
+			if (isQuanti) {
+				FeatVec_Q *hFQ = new FeatVec_Q(this, hExp, nMostQ);
+				hFQ->UpdateHisto(this, false, true);
+				feats.push_back(hFQ);
+				nQuant++;	//delete hFeat;
+			}else
+				feats.push_back(hExp);
+		}
+	}
+}
 
 FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, string nam_, PY_COLUMN *cX_, PY_COLUMN *cY_, size_t nSamp_, size_t ldX_, size_t ldY_, int flag) {
 	clock_t t0 = clock();
@@ -224,6 +254,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 			throw "FeatsOnFold_InitInstance col->dtype is XXX";
 		FeatVector *hFeat = hFold->feats[hFold->feats.size() - 1];
 		hFeat->nam = col->type_x;		hFeat->nam += col->name;
+		hFeat->hDistri = &(hFold->edaX->arrDistri[i]);
 	}
 	//if (hFold->hMove != nullptr)
 	//	hFold->hMove->Init_T<Tx, Ty>(nSamp_);
@@ -244,6 +275,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	}	else
 		throw "FeatsOnFold_InitInstance col->dtype is XXX";
 
+	bool isTrain = BIT_TEST(flag, FeatsOnFold::DF_TRAIN);
 	bool isPredict = BIT_TEST(flag, FeatsOnFold::DF_PREDIC);
 	if (isPredict) {
 
@@ -265,7 +297,8 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 		PY_COLUMN *col = cX_ + feat;
 		//printf("\r\tfeat=%d\t......",feat);
 		hFeat->Set(nSamp_, col->data);
-		hFeat->EDA(config, hFold->edaX, 0x0);		//EDA基于全局分析，而这里的是局部分析。分布确实会不一样
+		if(isTrain)
+			hFeat->EDA(config,true, 0x0);		//EDA基于全局分析，而这里的是局部分析。分布确实会不一样
 		sparse += hFeat->hDistri->rSparse*nSamp_;
 		nana += hFeat->hDistri->rNA*nSamp_;
 		//if (BIT_TEST(hFeat->type, FeatVector::V_ZERO_DEVIA)) {
@@ -324,6 +357,8 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	for (size_t i = 0; i < ldX_; i++) {
 		string desc = "feat_";
 		hFold->feats.push_back(new FeatVec_T<Tx>(nSamp_, i, desc + std::to_string(i)));
+		FeatVector *hFeat = hFold->feats[hFold->feats.size() - 1];
+		hFeat->hDistri = &(hFold->edaX->arrDistri[i]);
 	}
 	if (hFold->hMove != nullptr)
 		hFold->hMove->Init_T<Tx, Ty>(nSamp_);
@@ -333,6 +368,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	hFold->lossy->Init_T<Ty>(hFold,nSamp_,  0x0, rnd_seed, flag);
 
 	bool isPredict = BIT_TEST(flag, FeatsOnFold::DF_PREDIC);
+	bool isTrain = BIT_TEST(flag, FeatsOnFold::DF_TRAIN);
 	if (isPredict) {
 
 	}	else {
@@ -352,7 +388,8 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 		
 		//printf("\r\tfeat=%d\t......",feat);
 		hFeat->Set(nSamp_, (void*)(X_ + feat*nSamp_));
-		hFeat->EDA(config,hFold->edaX,0x0);		//EDA基于全局分析，而这里的是局部分析。分布确实会不一样
+		if(isTrain)
+			hFeat->EDA(config,true,0x0);		//EDA基于全局分析，而这里的是局部分析。分布确实会不一样
 		sparse += hFeat->hDistri->rSparse*nSamp_;
 		nana += hFeat->hDistri->rNA*nSamp_;
 		//if (BIT_TEST(hFeat->type, FeatVector::V_ZERO_DEVIA)) {
@@ -623,7 +660,7 @@ PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_COLUMN *train_data, PY_COLUM
 		ExploreDA *hEDA = (ExploreDA *)(mort->hEDA);
 		if (hEDA == nullptr) {
 			printf("\n********* g_hEDA on train_data ********* \n");
-			LiteMORT_EDA(mort, nullptr, nullptr, nFeat_0, nSamp, 0, nullptr, 0x0, flag);
+			LiteMORT_EDA(mort, nullptr, nullptr, nFeat_0*4, nSamp, 0, nullptr, 0x0, flag);
 			hEDA = mort->hEDA;		//isDelEDA = true;
 		}
 		size_t nFeat = nFeat_0, i, feat, nTrain = nSamp;
@@ -644,14 +681,14 @@ PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_COLUMN *train_data, PY_COLUM
 		FeatsOnFold *hFold = FeatsOnFold_InitInstance(config, hEDA, "train", train_data, train_target, nSamp, nFeat_0, 1, flag | f1);
 		FeatsOnFold *hEval = nullptr;
 		folds.push_back(hFold);
-		//hFold->nam = "train";
+		//hFold->ExpandFeat();
 
 		//int nTree = 501;		//出现过拟合
 		int nTree = hFold->config.num_trees;
 		if (nEval > 0) {
 			ExploreDA *edaX_ = isDelEDA ? nullptr : hEDA;
 			hEval = FeatsOnFold_InitInstance(config, edaX_, "eval", eval_data, eval_target, nEval, nFeat_0, 1, flag | FeatsOnFold::DF_EVAL);
-			//hEval->nam = "eval";
+			//hEval->ExpandFeat();
 			folds.push_back(hEval);
 		}
 		mort->hGBRT = new GBRT(hFold, hEval, 0, flag == 0 ? BoostingForest::REGRESSION : BoostingForest::CLASIFY, nTree);
