@@ -147,6 +147,7 @@ namespace Grusoft{
 
 	class ManifoldTree : public DecisionTree {
 	protected:
+		ManifoldTree *hEvalTree = nullptr;
 		//vector<int> samp_folds;		//fold越少越好
 		virtual void AddNewLeaf(hMTNode node, FeatsOnFold *hData_, const vector<int> &pick_feats, int flag = 0x0);
 		virtual void GrowLeaf(hMTNode node,const char*info,int flag=0x0);
@@ -157,7 +158,7 @@ namespace Grusoft{
 		class _leaf_compare_ {
 		public:
 			bool operator()(hMTNode n0, hMTNode n1) const			{
-				return n0->gain<n1->gain;
+				return n0->gain_train<n1->gain_train;
 			}
 		};
 		std::priority_queue<hMTNode, std::vector<hMTNode>, _leaf_compare_> leafs;		//需要节省内存

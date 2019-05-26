@@ -38,6 +38,7 @@ namespace Grusoft {
 	protected:
 	public:
 		Distribution *hDistri = nullptr;		//仅指向
+		Distribution *hDistriTrain = nullptr;	//仅指向
 		enum {
 			//CATEGORY = 0x100,
 			AGGREGATE = 0x200,

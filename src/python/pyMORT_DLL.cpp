@@ -183,16 +183,19 @@ PYMORT_DLL_API void LiteMORT_set_feat(PY_ITEM* params, int nParam, int flag = 0x
 }
 
 void FeatsOnFold::ExpandFeat(int flag) {
+	return;
 	bool isTrain = BIT_TEST(dType,  FeatsOnFold::DF_TRAIN);
 	bool isPredict = BIT_TEST(dType,  FeatsOnFold::DF_PREDIC);
 	size_t nFeat_0 = feats.size(),i,nSamp_=nSample(),feat;
 	int flagF = flag, nQuant=0, nMostQ = config.feat_quanti;
-	for (feat = 0; feat < 10; feat++) {
+	for (feat = 0; feat < 2; feat++) {
 		FeatVector *hBase = feats[feat];
 		tpQUANTI pos,*quanti = hBase->GetQuantiBins();
 		if (quanti != nullptr) {
 			//edaX->arrDistri.resize(feats.size()+1);
 			vector<BIN_FEATA>& featas = hBase->hDistri->binFeatas;
+			if (!hBase->hDistri->isValidFeatas() )
+				continue;
 			FeatVec_T<float> *hExp = new FeatVec_T<float>(nSamp_, feats.size(), "exp" + std::to_string(feat), flagF);
 			hExp->hDistri = &(edaX->arrDistri[feats.size()]);
 			float *val = hExp->arr();
@@ -681,14 +684,14 @@ PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_COLUMN *train_data, PY_COLUM
 		FeatsOnFold *hFold = FeatsOnFold_InitInstance(config, hEDA, "train", train_data, train_target, nSamp, nFeat_0, 1, flag | f1);
 		FeatsOnFold *hEval = nullptr;
 		folds.push_back(hFold);
-		//hFold->ExpandFeat();
+		hFold->ExpandFeat();
 
 		//int nTree = 501;		//出现过拟合
 		int nTree = hFold->config.num_trees;
 		if (nEval > 0) {
 			ExploreDA *edaX_ = isDelEDA ? nullptr : hEDA;
 			hEval = FeatsOnFold_InitInstance(config, edaX_, "eval", eval_data, eval_target, nEval, nFeat_0, 1, flag | FeatsOnFold::DF_EVAL);
-			//hEval->ExpandFeat();
+			hEval->ExpandFeat();
 			folds.push_back(hEval);
 		}
 		mort->hGBRT = new GBRT(hFold, hEval, 0, flag == 0 ? BoostingForest::REGRESSION : BoostingForest::CLASIFY, nTree);

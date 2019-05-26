@@ -6,6 +6,31 @@ import math
 import time
 from pandas.api.types import is_string_dtype
 from pandas.api.types import is_numeric_dtype
+import pandas as pd
+
+def Unique_Expand(df):
+    unique_samples = []
+    unique_count = np.zeros_like(df)
+    if True:
+        ndf=df.values
+        #for feature in tqdm(range(df.shape[1])):
+        for feature in (range(ndf.shape[1])):
+            _,index_, count_ = np.unique(ndf[:, feature], return_counts=True, return_index=True)
+            unique_count[index_[count_ == 1], feature] += 1
+        real_samples_indexes = np.argwhere(np.sum(unique_count, axis=1) 2)[:, 0]
+        synthetic_samples_indexes = np.argwhere(np.sum(unique_count, axis=1) == 0)[:, 0]
+        df['unique']=0
+        df['unique'].iloc[real_samples_indexes]=1
+    else:
+        for f in df.columns:
+            new_feat = []
+            v = dict(pd.value_counts(df[f]))
+            for el in df[f].values:
+                new_feat.append(v[el])
+            df["{}_counts".format(f)] = new_feat
+            print("Unique_Expand::{}_counts...".format(f))
+
+    return df
 
 def all_element_values(user_data,col,tMost=60*10):
     t0=time.time()

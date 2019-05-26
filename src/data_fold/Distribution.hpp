@@ -103,6 +103,8 @@ namespace Grusoft {
 		HistoGRAM *histo = nullptr;
 		vector<BIN_FEATA> binFeatas;
 
+		bool isValidFeatas();
+
 		size_t nSamp, nZERO = 0, nNA = 0;
 		size_t type = 0x0;
 		double vMin = DBL_MAX, vMax = -DBL_MAX,q1=-DBL_MAX,q2 = -DBL_MAX,q3 = -DBL_MAX;

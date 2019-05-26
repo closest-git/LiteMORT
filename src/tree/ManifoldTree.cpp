@@ -304,7 +304,7 @@ ManifoldTree::ManifoldTree(BoostingForest *hF, string nam_, int flag) {
 
 
 void ManifoldTree::AddNewLeaf(hMTNode hNode, FeatsOnFold *hData_, const vector<int> &pick_feats, int flag) {
-	hNode->gain = 0;
+	hNode->gain_ = 0;			
 	if (hForest->isPass(hNode)) {
 		;
 	}
@@ -312,7 +312,11 @@ void ManifoldTree::AddNewLeaf(hMTNode hNode, FeatsOnFold *hData_, const vector<i
 		std::string leaf_optimal = hData_->config.leaf_optimal;
 		assert(hNode->feat_id == -1 && hNode->nSample()>=hData_->config.min_data_in_leaf * 2);
 		//if( hNode->impuri>0)		//optimal == "lambda_0"时,impuri不对
-			hNode->CheckGain(hData_, pick_feats, 0);
+			hNode->CheckGain(hData_,pick_feats, 0);
+			if (hEvalTree != nullptr) {
+				//hEvalNode->CheckGain(hNode->fruit);
+				hNode->gain_ = 0;
+			}
 	}
 	leafs.push(hNode);
 
@@ -353,18 +357,18 @@ void ManifoldTree::GrowLeaf(hMTNode hBlit, const char*info, int flag) {
 	//node->Dump(info, 0x0);
 	double thrsh = 1.0e-5;
 	std::string leaf_optimal = hData->config.leaf_optimal;
-	if(hBlit->gain>thrsh)	{//impuri match校验。当gain太小，可忽略
+	if(hBlit->gain_train>thrsh)	{//impuri match校验。当gain太小，可忽略
 		bool isMatch = false;
 		if (leaf_optimal == "grad_variance") {
-				isMatch = fabs(hBlit->impuri-imp- hBlit->gain)<= imp*thrsh;
+				isMatch = fabs(hBlit->impuri-imp- hBlit->gain_train)<= imp*thrsh;
 			assert( imp<= hBlit->impuri);
 		}	else if(leaf_optimal == "lambda_0") {	//"taylor_2";	
-			isMatch = fabs(hBlit->impuri - imp + hBlit->gain) <= imp*thrsh;
+			isMatch = fabs(hBlit->impuri - imp + hBlit->gain_train) <= imp*thrsh;
 			assert(imp >= hBlit->impuri);
 		}
 		if(!isMatch){
 			string sX = hBlit->fruit->sX;
-			printf("\t!!!<%d:dad-child=%g gain=%g>!!!\t\n%s\t%s\t%s", hBlit->id,hBlit->impuri - imp, hBlit->gain,sX.c_str(),
+			printf("\t!!!<%d:dad-child=%g gain=%g>!!!\t\n%s\t%s\t%s", hBlit->id,hBlit->impuri - imp, hBlit->gain_train,sX.c_str(),
 				hBlit->left->sX.c_str(), hBlit->right->sX.c_str());
 			//throw "ManifoldTree::GrowLeaf !!!isMatch!!!";
 		}
@@ -390,7 +394,7 @@ void ManifoldTree::BeforeEachBatch(size_t nMost, size_t rng_seed, int flag) {
 		SAMP_SET &set = node->samp_set;
 		if( node->isLeaf() ){	//和FeatsOnFold:;AtLeaf一致
 			node->Observation_AtLocalSamp(hData_);
-			node->feat_id=-1;			node->gain = 0;
+			node->feat_id=-1;			node->gain_train = 0;
 			if (node->fruit != nullptr) {
 				delete node->fruit;		 node->fruit = nullptr;
 			}
@@ -434,6 +438,7 @@ void ManifoldTree::Train(int flag) {
 		}
 	}
 	AddNewLeaf(root, hData_, pick_feats);
+	gain = 0;
 	while (true) {		//参见GBRT::GetBlit
 		if(leafs.size()>=hData_->config.num_leaves )
 			break;
@@ -445,37 +450,21 @@ void ManifoldTree::Train(int flag) {
 		hMTNode hBest = leafs.top();
 		if (hBest->id == 2)
 			hBest->id = 2;		//仅用于调试
-		if (hBest->gain > 0)		{
-			gain = hBest->gain;			leafs.pop();
+		if (hBest->gain_train > 0)		{
+			gain = hBest->gain_train;			leafs.pop();
 		}		else {
 			hBest = nullptr;
 		}
 
-		/*for (auto hNode : leafs) {
-			nz++;
-			assert( hNode->isLeaf());
-			if(hForest->isPass(hNode))
-				continue;			
-			if( hNode->feat_id==-1 && hNode->impuri>0 )	{//have checked before
-				hNode->gain=0;
-				hNode->CheckGain(hData_, pick_feats, 0);
-			}	else {
-				if (hNode->impuri==0) {
-					//hNode->OptimalAtSamp(hData_);		assert(hNode->impuri==0);
-				}
-				nPass++;
-			}
-			if (hNode->gain > gain) {
-				hBest = hNode;		gain = hBest->gain;	
-				//sprintf(info,"leaf_%d(%d@%d) gain=%8g(%8g)", hNode->id,nz,leafs.size(), hNode->gain,gain);
-				//hNode->Dump(info,0x0);
-			}			
-		}*/
+		
 		iter++;
 		MT_Nodes new_leafs;
 		if (hBest != nullptr) {
-			sprintf(info, "Grow@Leaf_%d gain=%8g", hBest->id, hBest->gain);
+			sprintf(info, "Grow@Leaf_%d gain=%8g", hBest->id, hBest->gain_train);
 			GrowLeaf(hBest, info);
+			if (hEvalTree != nullptr) {
+				hEvalTree->GrowLeaf(hBest, info);
+			}
 			//hBest->Dump(info, 0x0);
 			assert( hBest->left->nSample()==hBest->fruit->nLeft && hBest->right->nSample()==hBest->fruit->nRight);
 			if (hBest->left->nSample() < hBest->right->nSample()) {
@@ -625,7 +614,7 @@ void ManifoldTree::Dump( int flag ){
 	for (auto node : nodes) {
 	//for each(hMTNode node in nodes) {
 		if (node->isLeaf()) continue;
-		printf("%.7g ", node->gain);
+		printf("%.7g ", node->gain_train);
 	}
 	printf("\n\tthreshold=");
 	for (auto node : nodes) {

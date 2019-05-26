@@ -27,6 +27,20 @@ Distribution::~Distribution() {
 		delete histo;
 }
 
+bool Distribution::isValidFeatas() {
+	if (histo == nullptr)
+		return false;
+	if (binFeatas.size() != histo->bins.size())
+		return false;
+
+	for (auto feata : binFeatas) {
+		if (IS_NAN_INF(feata.density))
+			return false;
+	}
+	return true;
+}
+
+
 void Distribution::Dump(int feat, bool isQuanti, int flag) {
 	char tmp[2000] = "";
 	if (rSparse>0 || rNA>0) {

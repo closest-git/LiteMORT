@@ -29,6 +29,7 @@ namespace Grusoft {
 	class FeatVector;
 	class FeatsOnFold;
 	class BoostingForest;		//BoostingForest需要改名为BOModel
+	class ManifoldTree;
 
 	/*
 		训练时写入，train,eval,predict都会读取该值，而且该值有不同的表示
@@ -60,7 +61,8 @@ namespace Grusoft {
 		MT_BiSplit	*parent = nullptr,	*brother = nullptr;
 		//size_t nzSamp = 0;
 		int feat_id = -1, feat_regress = -1, depth = -1;
-		double gain = 0, confi = 0, devia = 0;
+		double gain_train = 0,  gain_=0;	//gain_train并不准确	gain_
+		double confi = 0, devia = 0;
 		union {
 			double impuri = DBL_MAX;
 			double score ;
@@ -68,7 +70,7 @@ namespace Grusoft {
 		double Y_sum = 0, Y2_sum = 0, G_sum = 0, H_sum = 0;
 
 		MT_BiSplit(FeatsOnFold *hData_, int d, int rnd_seed, int flag = 0x0);
-		MT_BiSplit() : feat_id(-1), gain(0) { ; }
+		MT_BiSplit() : feat_id(-1) { ; }
 		MT_BiSplit(MT_BiSplit *hDad, int flag = 0x0) {
 			depth = hDad->depth + 1;
 			assert(hDad->feat_id != -1);

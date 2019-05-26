@@ -21,8 +21,8 @@ from litemort import *
 
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 isMORT = True
-some_rows=10000
-#some_rows=None
+#some_rows=10000
+some_rows=None
 pick_samples=None
 #pick_samples=1500
 early_stop=50      #0.898->0.899

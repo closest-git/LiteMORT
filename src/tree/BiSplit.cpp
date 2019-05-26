@@ -318,11 +318,10 @@ HistoGRAM *MT_BiSplit::GetHistogram(FeatsOnFold *hData_, int pick, bool isInsert
 double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats, int x, int flag) {
 	GST_TIC(t1);
 	H_HISTO.resize(hData_->feats.size());	//pick_feats.size()
-	if (bsfold != nullptr) {
+	/*if (bsfold != nullptr) {
 		bsfold->GreedySplit(hData_, flag);
-		//fruit = new FRUIT(bsfold);
-		return gain;
-	}
+		return 0;
+	}*/
 	if (this->id == 13) {
 		int i = 0;		//仅用于调试
 	}
@@ -346,7 +345,7 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 //	picks.resize(1);		//仅用于测试
 	//if (task == "split_X" || task == "split_Y")
 	if (node_task == LiteBOM_Config::split_X || node_task == LiteBOM_Config::histo_X_split_G)
-		assert(gain == 0);
+		assert(gain_train == 0);
 	bool isEachFruit = false;		//each Fruit for each feature 
 	vector<FRUIT *> arrFruit;
 	if(isEachFruit)
@@ -462,6 +461,7 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 	}
 	arrFruit.clear( );
 	hData_->stat.nCheckGain++;
+	double gain = 0;
 	if (fruit != nullptr) {
 		if (fruit->split_by == SPLIT_HISTOGRAM::BY_DENSITY) {
 			int i = 0;
@@ -486,7 +486,9 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 		}
 	}
 	FeatsOnFold::stat.tX += GST_TOC(t1);
-	return gain;
+	gain_train = gain;
+	gain_ = gain_train;
+	return gain_;
 }
 
 void MT_BiSplit::Init_BFold(FeatsOnFold *hData_, int flag) {
