@@ -146,11 +146,11 @@ namespace Grusoft {
 		tpDOWN *GetHessian() const;
 		tpDOWN *GetSampleDown()	const;
 		tpDOWN *GetSampleHessian() const;		
-		
-		bool isTrain() {
+		/**/
+		bool atTrainTask() {
 			return config.task == LiteBOM_Config::kTrain;
 		}
-		bool isPredict() {
+		bool atPredictTask() {
 			return config.task == LiteBOM_Config::kPredict;
 		}
 		enum {
@@ -234,7 +234,7 @@ namespace Grusoft {
 		virtual void SplitOn(MT_BiSplit *hBlit, int flag = 0x0) {
 			FeatVector *hF_ = Feat(hBlit->feat_id);
 			hF_->SplitOn(this, hBlit);
-			if (isTrain())
+			if (atTrainTask())
 				;// hBlit->Split_BsFold(this);
 
 		}
@@ -297,7 +297,7 @@ namespace Grusoft {
 		virtual void AtLeaf(MT_BiSplit *hBlit, int flag = 0x0) {
 			//FeatVector *hF_ = Feat(hBlit->feat_id);
 			assert(hBlit->isLeaf());
-			if (isTrain()) {
+			if (atTrainTask()) {
 				hBlit->Observation_AtLocalSamp(this);
 				//hBlit->Init_BFold(this);
 			}
@@ -456,7 +456,7 @@ namespace Grusoft {
 			bool isTrain = BIT_TEST(hData_->dType, FeatsOnFold::DF_TRAIN);
 			bool isEval = BIT_TEST(hData_->dType, FeatsOnFold::DF_EVAL);
 			bool isAdaptive = hData_->config.lr_adptive_leaf;
-			assert(hData_->isPredict());
+			assert(hData_->atPredictTask());
 			double sDrop = hData_->config.drop_out;
 			//double shrink = hData_->config.learning_rate;
 			tpDOWN step_base = hBlit->GetDownStep();
@@ -499,7 +499,7 @@ namespace Grusoft {
 		}
 
 		virtual void Update_regression(FeatsOnFold *hData_, MT_BiSplit *hBlit, tpY* target, int flag = 0x0) {
-			assert(hData_->isPredict());
+			assert(hData_->atPredictTask());
 			double sDrop = hData_->config.drop_out, f = 0;
 			double shrink = 1;//hData_->config.learning_rate;
 			tpDOWN step = hBlit->GetDownStep()*shrink;
@@ -539,7 +539,7 @@ namespace Grusoft {
 			MT_BiSplit *left = hBlit->left, *rigt = hBlit->right, *child = nullptr;
 			int pos;
 			size_t nSamp = hBlit->nSample(), i, nLeft = 0, nRigt = 0;
-			if (hData_->isTrain())
+			if (hData_->atTrainTask())
 				assert(left != nullptr && rigt != nullptr);
 			else
 				assert(left != nullptr && rigt != nullptr);

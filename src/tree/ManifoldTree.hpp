@@ -108,9 +108,9 @@ namespace Grusoft{
 
 	typedef std::vector<WeakLearner*>WeakLearners;
 	class DecisionTree{
-		FeatsOnFold *hData = nullptr;
 	protected:
 		void *user_data=nullptr;
+		FeatsOnFold *hData_ = nullptr;
 		BoostingForest *hForest = nullptr;
 		WeakLearner* root = nullptr;
 		int nLeaf;
@@ -128,7 +128,7 @@ namespace Grusoft{
 		DecisionTree(BoostingForest *hF, FeatsOnFold *hD,int flag=0x0);
 		virtual ~DecisionTree( );
 		WeakLearner* hRoot( )	{	return root;	}
-		FeatsOnFold *GetDat( )		{	return hData;	}
+		FeatsOnFold *GetDat( )		{	return hData_;	}
 		void GetNodes( WeakLearners&vNodes,int flag=0x0 );
 		void GetLeaf( WeakLearners&vLeaf,int flag=0x0 );
 		bool isTrained(  int flag=0x0 ){
@@ -147,7 +147,7 @@ namespace Grusoft{
 
 	class ManifoldTree : public DecisionTree {
 	protected:
-		ManifoldTree *hEvalTree = nullptr;
+		ManifoldTree *hGuideTree = nullptr;
 		//vector<int> samp_folds;		//fold越少越好
 		virtual void AddNewLeaf(hMTNode node, FeatsOnFold *hData_, const vector<int> &pick_feats, int flag = 0x0);
 		virtual void GrowLeaf(hMTNode node,const char*info,int flag=0x0);
@@ -162,7 +162,7 @@ namespace Grusoft{
 			}
 		};
 		std::priority_queue<hMTNode, std::vector<hMTNode>, _leaf_compare_> leafs;		//需要节省内存
-		ManifoldTree(BoostingForest *hF, string nam_, int flag = 0x0);
+		ManifoldTree(BoostingForest *hF, FeatsOnFold *hData, string nam_, int flag = 0x0);
 		//切记	必须删除
 		virtual void ClearSampSet( );			
 		virtual ~ManifoldTree( )	{
@@ -179,6 +179,8 @@ namespace Grusoft{
 
 		virtual bool To_ARR_Tree(FeatsOnFold *hData_, ARR_TREE &arrTree, int flag = 0x0);
 		//virtual void Predict(int flag = 0x0);
+
+		virtual void SetGuideTree(ManifoldTree*hET, int flag = 0x0) {	hGuideTree = hET;	 }
 	};
 	
 }

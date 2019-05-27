@@ -173,11 +173,11 @@ bool WeakLearner::Split( int flag ){
 
 
 
-DecisionTree::DecisionTree( BoostingForest *hF,FeatsOnFold *hD,int flag ):hForest(hF),hData(hD),root(nullptr)	{
+DecisionTree::DecisionTree( BoostingForest *hF,FeatsOnFold *hD,int flag ):hForest(hF), hData_(hD),root(nullptr)	{
 	arrPFNO boot;
-	assert( hData->nSample()>0 );
+	assert( hData_->nSample()>0 );
 	//BootSample( boot,oob,hData );
-	hF->BootSample( this,boot,oob,hData );
+	hF->BootSample( this,boot,oob, hData_);
 	//hTrainData = hD;		
 	root=nullptr;
 	switch( hF->model ){
@@ -275,7 +275,7 @@ void DecisionTree::Train(  int flag ){
 		{	hWL->nLastSamp=hWL->samps.size();		hWL->ClearSamps( );	}
 		hForest->skdu.noLeaf++;
 	}
-	assert( nz+oob.size()<=hData->nSample() );
+	assert( nz+oob.size()<=hData_->nSample() );
 	nLeaf = vLeaf.size( );
 	impurity = a;
 	if( nLeaf==1 )
@@ -285,9 +285,10 @@ void DecisionTree::Train(  int flag ){
 }
 
 
-ManifoldTree::ManifoldTree(BoostingForest *hF, string nam_, int flag) {
+ManifoldTree::ManifoldTree(BoostingForest *hF, FeatsOnFold *hData, string nam_, int flag)	{
 	hForest = hF, name = nam_;
-	FeatsOnFold *hData = hF->GurrentData();
+	hData_ = hData;
+	//FeatsOnFold *hData = hF->GurrentData();
 	int rnd_seed=hF->skdu.noT;
 	//hData->samp_set.Shuffle(rnd_seed);
 	MT_BiSplit *root = new MT_BiSplit(hData, 0, rnd_seed);
@@ -313,9 +314,9 @@ void ManifoldTree::AddNewLeaf(hMTNode hNode, FeatsOnFold *hData_, const vector<i
 		assert(hNode->feat_id == -1 && hNode->nSample()>=hData_->config.min_data_in_leaf * 2);
 		//if( hNode->impuri>0)		//optimal == "lambda_0"时,impuri不对
 			hNode->CheckGain(hData_,pick_feats, 0);
-			if (hEvalTree != nullptr) {
+			if (hGuideTree != nullptr) {
 				//hEvalNode->CheckGain(hNode->fruit);
-				hNode->gain_ = 0;
+				//hNode->gain_ = 0;
 			}
 	}
 	leafs.push(hNode);
@@ -330,8 +331,8 @@ void ManifoldTree::AddNewLeaf(hMTNode hNode, FeatsOnFold *hData_, const vector<i
 void ManifoldTree::GrowLeaf(hMTNode hBlit, const char*info, int flag) {
 	//if( hBlit->id==15 && hForest->forest.size()==19)
 	//	hBlit->id = 15;
-	FeatsOnFold *hData = hForest->GurrentData();
-	assert(hData->isTrain());
+	//FeatsOnFold *hData = hForest->GurrentData();
+	assert(hData_->atTrainTask());
 	assert(hBlit->isLeaf());
 	size_t nSamp= hBlit->nSample();
 	//MT_BiSplit *hBlit = dynamic_cast<MT_BiSplit *>(node);		assert(hBlit != nullptr);
@@ -346,17 +347,17 @@ void ManifoldTree::GrowLeaf(hMTNode hBlit, const char*info, int flag) {
 	
 	//FeatVector *Feat = hData->Feat(hBlit->feat_id);
 	GST_TIC(t1);
-	hData->SplitOn(hBlit);
+	hData_->SplitOn(hBlit);
 	//FeatsOnFold::stat.tX += GST_TOC(t1);
-	hData->AtLeaf(hBlit->left);		
-	hData->AtLeaf(hBlit->right);
+	hData_->AtLeaf(hBlit->left);
+	hData_->AtLeaf(hBlit->right);
 
 	//FeatsOnFold::stat.tX += GST_TOC(t1);
 	size_t nLeft= hBlit->left->nSample(), nRight = hBlit->right->nSample();
 	double imp = hBlit->right->impuri+ hBlit->left->impuri;
 	//node->Dump(info, 0x0);
 	double thrsh = 1.0e-5;
-	std::string leaf_optimal = hData->config.leaf_optimal;
+	std::string leaf_optimal = hData_->config.leaf_optimal;
 	if(hBlit->gain_train>thrsh)	{//impuri match校验。当gain太小，可忽略
 		bool isMatch = false;
 		if (leaf_optimal == "grad_variance") {
@@ -384,7 +385,7 @@ void ManifoldTree::GrowLeaf(hMTNode hBlit, const char*info, int flag) {
 void ManifoldTree::BeforeEachBatch(size_t nMost, size_t rng_seed, int flag) {
 	//this->ClearSampSet();
 	int nTree = hForest->forest.size(), iter = 0;
-	FeatsOnFold *hData_ = hForest->GurrentData();
+	//FeatsOnFold *hData_ = hForest->GurrentData();
 	hMTNode root = hRoot();
 	size_t nLeft = root->samp_set.nLeft, nRigt = root->samp_set.nRigt,nSamp= root->samp_set.nSamp;
 	root->samp_set.SampleFrom(hData_,nullptr, nMost, rng_seed, 0);
@@ -417,7 +418,7 @@ void ManifoldTree::BeforeEachBatch(size_t nMost, size_t rng_seed, int flag) {
 */
 void ManifoldTree::Train(int flag) {	
 	int nTree=hForest->forest.size( ),iter=0;
-	FeatsOnFold *hData_ = hForest->GurrentData();
+	//FeatsOnFold *hData_ = hForest->GurrentData();
 	bool isBatch = hData_->config.batch < 0.9;
 	tpDOWN *yDown = hData_->GetDownDirection();
 	char info[2000];
@@ -462,8 +463,8 @@ void ManifoldTree::Train(int flag) {
 		if (hBest != nullptr) {
 			sprintf(info, "Grow@Leaf_%d gain=%8g", hBest->id, hBest->gain_train);
 			GrowLeaf(hBest, info);
-			if (hEvalTree != nullptr) {
-				hEvalTree->GrowLeaf(hBest, info);
+			if (hGuideTree != nullptr) {
+				//hGuideTree->GrowLeaf(hBest, info);
 			}
 			//hBest->Dump(info, 0x0);
 			assert( hBest->left->nSample()==hBest->fruit->nLeft && hBest->right->nSample()==hBest->fruit->nRight);
@@ -577,7 +578,7 @@ bool ManifoldTree::To_ARR_Tree(FeatsOnFold *hData_, ARR_TREE &arrTree, int flag)
 }
 
 void ManifoldTree::Dump( int flag ){
-	FeatsOnFold *hData_ = hForest->GurrentData();
+	//FeatsOnFold *hData_ = hForest->GurrentData();
 	if(hData_->config.verbose<=0)
 		return;
 	bool isDistri = false;
@@ -658,7 +659,7 @@ void DecisionTree::Clasify( FeatsOnFold *hSamp,arrPFNO &points,float *distri,int
 	int nSamp=points.size( ),sum=0,nz,no,nClass=hSamp->nCls,j;
 	float *model,*dtr=nullptr;
 	WeakLearners vLeaf;
-	hData=hSamp;			
+	hData_ =hSamp;
 	hRoot()->samps=points;		
 	if( hForest->skdu.step==53 ){
 		//name+="0";

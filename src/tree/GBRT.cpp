@@ -87,7 +87,6 @@ void GBRT::BeforeTrain(FeatsOnFold *hData_, int flag ) {
 */
 double GBRT::Predict(FeatsOnFold *hData_, bool isX,bool checkLossy, bool resumeLast, int flag) {
 	GST_TIC(tick);
-	//FeatsOnFold *hTrain = GurrentData( );
 	size_t nSamp = hData_->nSample(), t;
 	hData_->BeforePredict( );
 	ManifoldTree *lastTree = nullptr;
@@ -349,7 +348,9 @@ int GBRT::Train(string sTitle, int x, int flag) {
 
 		this->BeforeTrain(hTrainData);
 		//gradients = self.loss.negative_gradient(preds, y)
-		ManifoldTree *hTree = new ManifoldTree(this, to_string(666) + "_" + to_string(t));
+		ManifoldTree *hTree = new ManifoldTree(this, hTrainData, "666_" + to_string(t));
+		if (hEvalData != nullptr)
+			hTree->SetGuideTree(new ManifoldTree(this, hEvalData, "777_" + to_string(t)));
 		nPickSamp = hTree->hRoot()->nSample();
 		forest.push_back(hTree);
 		hTree->Train(flag);				//

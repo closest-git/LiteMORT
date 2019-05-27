@@ -41,7 +41,7 @@ void BoostingForest::TestOOB( FeatsOnFold *hData,int flag ){
 			nzLeaf+=hTree->nLeaf;
 			if( hTree->nLeaf==1 )
 			{	printf( "\n>>>>>>RF_%s only 1 Leaf,Please check reason!!!",hTree->name.c_str() );	}
-			assert( hTree->hData==hData );
+			assert( hTree->hData_==hData );
 			if( hTree->oob.size( )==0 )	continue;
 			sOOb+=hTree->oob.size( );
 			hTree->Regress( hTree->oob );
@@ -58,7 +58,7 @@ void BoostingForest::TestOOB( FeatsOnFold *hData,int flag ){
 			nzLeaf+=hTree->nLeaf;
 			if( hTree->nLeaf==1 )
 			{	printf( "\n>>>>>>RF_%s only 1 Leaf,Please check reason!!!",hTree->name.c_str() );	}
-			assert( hTree->hData==hData );
+			assert( hTree->hData_ ==hData );
 			sOOb+=hTree->oob.size( );
 			hTree->Clasify( hData,hTree->oob,distri );
 		}
@@ -88,7 +88,7 @@ void BoostingForest::Train( FeatsOnFold *hData,int flag ){
 	for ( i=0;i<nTree;i++ )	{
 		DecisionTree* hTree = forest[i];
 		skdu.noT=no++;			//printf( "\nTree_%d...",no );
-		if( hTree->isTrained(flag) ||hTree->hData!=hData )
+		if( hTree->isTrained(flag) ||hTree->hData_ !=hData )
 			continue;
 		hTree->Train( flag );
 //		curF.push_back( hTree );

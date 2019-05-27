@@ -123,9 +123,11 @@ MT_BiSplit::MT_BiSplit(FeatsOnFold *hData_, int d, int rnd_seed, int flag) : dep
 		//samp_set = hData_->samp_set;
 		//samp_set.isRef = true;
 	}
-	Observation_AtLocalSamp(hData_);
-	Init_BFold(hData_);
-	hData_->stat.dY = samp_set.Y_1- samp_set.Y_0;
+	//Init_BFold(hData_);
+	if (hData_->atTrainTask()) {
+		Observation_AtLocalSamp(hData_);
+		hData_->stat.dY = samp_set.Y_1- samp_set.Y_0;
+	}
 }
 
 /*

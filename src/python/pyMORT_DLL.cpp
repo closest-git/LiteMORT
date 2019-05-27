@@ -650,7 +650,7 @@ PYMORT_DLL_API void LiteMORT_fit(void *mort_0, float *train_data, tpY *train_tar
 }
 
 /*
-v0.2
+	v0.2
 */
 PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_COLUMN *train_data, PY_COLUMN *train_target, size_t nFeat_0, size_t nSamp, PY_COLUMN *eval_data, PY_COLUMN *eval_target, size_t nEval, size_t flag) {
 	try {

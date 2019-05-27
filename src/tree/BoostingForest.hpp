@@ -152,7 +152,7 @@ namespace Grusoft{
 		//hRANDER InitRander( unsigned seed );
 		virtual void Clear( );
 		virtual void ClearData( );
-		FeatsOnFold *GurrentData() { FeatsOnFold *hData = hTrainData;		assert(hData != nullptr);		return hData; }
+		//FeatsOnFold *GurrentData() { FeatsOnFold *hData = hTrainData;		assert(hData != nullptr);		return hData; }
 
 		virtual bool isPass(hMTNode hNode, int flag = 0x0) { GST_THROW("BoostingForest::isPass is ..."); }
 		//尽量基于(InX,OutY)进行训练
