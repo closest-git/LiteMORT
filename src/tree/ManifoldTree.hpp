@@ -150,7 +150,7 @@ namespace Grusoft{
 		ManifoldTree *hGuideTree = nullptr;
 		//vector<int> samp_folds;		//fold越少越好
 		virtual void AddNewLeaf(hMTNode node, FeatsOnFold *hData_, const vector<int> &pick_feats, int flag = 0x0);
-		virtual void GrowLeaf(hMTNode node,const char*info,int flag=0x0);
+		virtual void GrowLeaf(hMTNode node,const char*info,bool isAtLeaf,int flag=0x0);
 		virtual void BeforeEachBatch(size_t no_0,size_t no_1,int flag=0x0);
 	public:
 		int iter_refine = 1;
@@ -158,7 +158,8 @@ namespace Grusoft{
 		class _leaf_compare_ {
 		public:
 			bool operator()(hMTNode n0, hMTNode n1) const			{
-				return n0->gain_train<n1->gain_train;
+				//return n0->gain_train<n1->gain_train;
+				return n0->gain_<n1->gain_;
 			}
 		};
 		std::priority_queue<hMTNode, std::vector<hMTNode>, _leaf_compare_> leafs;		//需要节省内存
@@ -170,13 +171,15 @@ namespace Grusoft{
 			for (auto node : nodes)
 				delete node;
 			nodes.clear( );		//samp_folds.clear( );
+			if (hGuideTree != nullptr)
+				delete hGuideTree;
 		}		
 		hMTNode hRoot() {	assert(nodes.size()>0);	return nodes[0]; }
 
 		virtual void Train(int flag = 0x0);
 		virtual void AddScore(INIT_SCORE *score,int flag=0x0);
 		virtual void Dump(int flag = 0x0);
-
+		virtual void DelChild(hMTNode hNode,int flag=0x0);
 		virtual bool To_ARR_Tree(FeatsOnFold *hData_, ARR_TREE &arrTree, int flag = 0x0);
 		//virtual void Predict(int flag = 0x0);
 

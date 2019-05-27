@@ -292,7 +292,7 @@ ManifoldTree::ManifoldTree(BoostingForest *hF, FeatsOnFold *hData, string nam_, 
 	int rnd_seed=hF->skdu.noT;
 	//hData->samp_set.Shuffle(rnd_seed);
 	MT_BiSplit *root = new MT_BiSplit(hData, 0, rnd_seed);
-	nodes.push_back(root);
+	root->id = nodes.size();		 nodes.push_back(root);
 	//leafs.push_back(root);
 	//leafs.push(root);
 
@@ -315,24 +315,45 @@ void ManifoldTree::AddNewLeaf(hMTNode hNode, FeatsOnFold *hData_, const vector<i
 		//if( hNode->impuri>0)		//optimal == "lambda_0"时,impuri不对
 			hNode->CheckGain(hData_,pick_feats, 0);
 			if (hGuideTree != nullptr) {
-				//hEvalNode->CheckGain(hNode->fruit);
-				//hNode->gain_ = 0;
+				FeatsOnFold *hGuideData = hGuideTree->hData_;
+				hMTNode hBlit = hGuideTree->nodes[hNode->id];
+				hBlit->Observation_AtLocalSamp(hGuideData);
+				hBlit->feat_id = hNode->feat_id;	 hBlit->fruit = hNode->fruit;
+				hGuideTree->GrowLeaf(hBlit, "guide_gain", false);
+				//hGuide->lossy->Update(hData_, 0, 0x0);
+				//double a = 1 - hGuide->lossy->err_auc;
+				hBlit->left->Observation_AtLocalSamp(hGuideData);		hBlit->right->Observation_AtLocalSamp(hGuideData);
+				double imp = hBlit->right->impuri + hBlit->left->impuri;
+				double gain = imp - hBlit->impuri ;		
+				hNode->gain_ = gain;			assert(gain >= 0);
+				hGuideTree->DelChild(hBlit);
+				hBlit->fruit = nullptr;/**/
 			}
 	}
 	leafs.push(hNode);
 
 }
 
-
+void ManifoldTree::DelChild(hMTNode hNode, int flag) {
+	vector<hMTNode> cands;
+	if (hNode->left != nullptr) {
+		cands.push_back(hNode->left);		hNode->left = nullptr;
+	}
+	if (hNode->right != nullptr) {
+		cands.push_back(hNode->right);		hNode->right = nullptr;
+	}
+	for (auto hNode : cands) {
+		nodes.erase(std::remove(nodes.begin(), nodes.end(), hNode), nodes.end());
+		delete hNode;
+	}
+	cands.clear();
+}
 /*
 	v0.1	cys
 		8/2/2018
 */
-void ManifoldTree::GrowLeaf(hMTNode hBlit, const char*info, int flag) {
-	//if( hBlit->id==15 && hForest->forest.size()==19)
-	//	hBlit->id = 15;
-	//FeatsOnFold *hData = hForest->GurrentData();
-	assert(hData_->atTrainTask());
+void ManifoldTree::GrowLeaf(hMTNode hBlit, const char*info, bool isAtLeaf, int flag) {
+	//assert(hData_->atTrainTask());
 	assert(hBlit->isLeaf());
 	size_t nSamp= hBlit->nSample();
 	//MT_BiSplit *hBlit = dynamic_cast<MT_BiSplit *>(node);		assert(hBlit != nullptr);
@@ -349,8 +370,10 @@ void ManifoldTree::GrowLeaf(hMTNode hBlit, const char*info, int flag) {
 	GST_TIC(t1);
 	hData_->SplitOn(hBlit);
 	//FeatsOnFold::stat.tX += GST_TOC(t1);
-	hData_->AtLeaf(hBlit->left);
-	hData_->AtLeaf(hBlit->right);
+	if (isAtLeaf) {
+		hData_->AtLeaf(hBlit->left);
+		hData_->AtLeaf(hBlit->right);
+	}
 
 	//FeatsOnFold::stat.tX += GST_TOC(t1);
 	size_t nLeft= hBlit->left->nSample(), nRight = hBlit->right->nSample();
@@ -371,7 +394,7 @@ void ManifoldTree::GrowLeaf(hMTNode hBlit, const char*info, int flag) {
 			string sX = hBlit->fruit->sX;
 			printf("\t!!!<%d:dad-child=%g gain=%g>!!!\t\n%s\t%s\t%s", hBlit->id,hBlit->impuri - imp, hBlit->gain_train,sX.c_str(),
 				hBlit->left->sX.c_str(), hBlit->right->sX.c_str());
-			//throw "ManifoldTree::GrowLeaf !!!isMatch!!!";
+			//throw "ManifoldTree::Grow Leaf !!!isMatch!!!";
 		}
 	}
 
@@ -462,9 +485,12 @@ void ManifoldTree::Train(int flag) {
 		MT_Nodes new_leafs;
 		if (hBest != nullptr) {
 			sprintf(info, "Grow@Leaf_%d gain=%8g", hBest->id, hBest->gain_train);
-			GrowLeaf(hBest, info);
+			GrowLeaf(hBest,info,true);
 			if (hGuideTree != nullptr) {
-				//hGuideTree->GrowLeaf(hBest, info);
+				hMTNode hSplit = hGuideTree->nodes[hBest->id];
+				hSplit->feat_id = hBest->feat_id;	 hSplit->fruit = hBest->fruit;
+				hGuideTree->GrowLeaf(hSplit, info,false);
+				hSplit->fruit = nullptr;/**/
 			}
 			//hBest->Dump(info, 0x0);
 			assert( hBest->left->nSample()==hBest->fruit->nLeft && hBest->right->nSample()==hBest->fruit->nRight);
@@ -504,7 +530,7 @@ void ManifoldTree::Train(int flag) {
 				node->regression= hF_->InitRegression(hData_, node,0x0);
 			}
 			else if(hData_->config.leaf_regression == "histo_mean" && nSamp>2) {
-				//注意 在GrowLeaf时，每个节点的impuri,fruit已被初始化
+				//注意 在Grow Leaf时，每个节点的impuri,fruit已被初始化
 				if( node->impuri>0 )
 					node->CheckGain(hData_, pick_feats, 0);
 			}

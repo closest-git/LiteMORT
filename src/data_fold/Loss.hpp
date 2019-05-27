@@ -344,7 +344,7 @@ namespace Grusoft {
 
 			y = new FeatVec_T<Ty>(_len, 0, "loss");			predict = new FeatVec_T<Ty>(_len, 0, "predict");
 			//predict.resize(_len, 0);
-			if (isTrain) {
+			if (isTrain || isEval ) {
 				down.resize(_len, 0);		sample_down.resize(_len, 0);
 				resi.clear();				
 				hessian.clear();			sample_hessian.clear();

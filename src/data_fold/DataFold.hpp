@@ -153,6 +153,10 @@ namespace Grusoft {
 		bool atPredictTask() {
 			return config.task == LiteBOM_Config::kPredict;
 		}
+		bool isTrain() {
+			return BIT_TEST(dType, FeatsOnFold::DF_TRAIN);
+		}
+
 		enum {
 			TAG_ZERO = 0x10000,
 			DF_FLAG = 0xF00000, DF_TRAIN = 0x100000, DF_EVAL = 0x200000, DF_PREDIC = 0x400000,
@@ -234,8 +238,6 @@ namespace Grusoft {
 		virtual void SplitOn(MT_BiSplit *hBlit, int flag = 0x0) {
 			FeatVector *hF_ = Feat(hBlit->feat_id);
 			hF_->SplitOn(this, hBlit);
-			if (atTrainTask())
-				;// hBlit->Split_BsFold(this);
 
 		}
 
@@ -292,7 +294,7 @@ namespace Grusoft {
 		}
 
 		/*
-		Train(Observation_AtSamp) predict(Update_step)
+			Train(Observation_AtSamp) predict(Update_step)
 		*/
 		virtual void AtLeaf(MT_BiSplit *hBlit, int flag = 0x0) {
 			//FeatVector *hF_ = Feat(hBlit->feat_id);

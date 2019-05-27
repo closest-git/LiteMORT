@@ -54,7 +54,7 @@ namespace Grusoft {
 		FRUIT *fruit = nullptr;		//only ONE!!!		thrsh at fork, Y value at leaf
 		std::string sX;
 
-		int id;				//为了节省内存，很难想象fold会超过65536
+		int id=-1;				//为了节省内存，很难想象fold会超过65536
 		//float *distri = nullptr;
 		SAMP_SET samp_set;
 		MT_BiSplit	*left = nullptr,	*right = nullptr;

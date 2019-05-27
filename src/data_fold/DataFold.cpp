@@ -39,10 +39,10 @@ FeatsOnFold::FeatsOnFold(LiteBOM_Config confi_, ExploreDA *eda_, string nam_, in
 	std::seed_seq ss{ uint32_t(timeSeed & 0xffffffff), uint32_t(timeSeed >> 32) };
 	rng.seed(ss);*/
 	lossy = new FeatVec_LOSS();
-	if (atTrainTask()) {
+	if (isTrain()) {
 
 	}	else {
-		//config.subsample = 1;	config.feature_fraction = 1;
+		config.subsample = 1;	config.feature_fraction = 1;
 
 	}
 
