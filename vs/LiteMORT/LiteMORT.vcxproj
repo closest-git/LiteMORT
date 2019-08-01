@@ -111,8 +111,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(OutDir)$(TargetName)$(TargetExt) F:\Project\LiteMORT\
-copy $(OutDir)$(TargetName)$(TargetExt) F:\Project\LiteMORT\python-package\LiteMORT
+      <Command>copy $(OutDir)$(TargetName)$(TargetExt) E:\LiteMORT\
+copy $(OutDir)$(TargetName)$(TargetExt) E:\LiteMORT\python-package\LiteMORT
 copy $(OutDir)$(TargetName)$(TargetExt) D:\Anaconda3\Lib\site-packages\litemort</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -156,8 +156,8 @@ copy $(OutDir)$(TargetName)$(TargetExt) D:\Anaconda3\Lib\site-packages\litemort<
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(OutDir)$(TargetName)$(TargetExt) F:\Project\LiteMORT\
-copy $(OutDir)$(TargetName)$(TargetExt) F:\Project\LiteMORT\python-package\LiteMORT\
+      <Command>copy $(OutDir)$(TargetName)$(TargetExt) E:\LiteMORT\
+copy $(OutDir)$(TargetName)$(TargetExt) E:\LiteMORT\python-package\LiteMORT\
 copy $(OutDir)$(TargetName)$(TargetExt) D:\Anaconda3\Lib\site-packages\litemort</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -169,6 +169,7 @@ copy $(OutDir)$(TargetName)$(TargetExt) D:\Anaconda3\Lib\site-packages\litemort<
     <ClCompile Include="..\..\src\data_fold\DataFold.cpp" />
     <ClCompile Include="..\..\src\data_fold\EDA.cpp" />
     <ClCompile Include="..\..\src\data_fold\Histogram.cpp" />
+    <ClCompile Include="..\..\src\EDA\SA_salp.cpp" />
     <ClCompile Include="..\..\src\learn\DCRIMI_.cpp" />
     <ClCompile Include="..\..\src\learn\LOSS.cpp" />
     <ClCompile Include="..\..\src\LiteMORT.cpp" />
@@ -190,6 +191,7 @@ copy $(OutDir)$(TargetName)$(TargetExt) D:\Anaconda3\Lib\site-packages\litemort<
     <ClInclude Include="..\..\src\data_fold\Imputer.hpp" />
     <ClInclude Include="..\..\src\data_fold\Loss.hpp" />
     <ClInclude Include="..\..\src\data_fold\Move.hpp" />
+    <ClInclude Include="..\..\src\EDA\SA_salp.hpp" />
     <ClInclude Include="..\..\src\include\LiteBOM_config.h" />
     <ClInclude Include="..\..\src\learn\DCRIMI_.hpp" />
     <ClInclude Include="..\..\src\python\pyMORT_DLL.h" />

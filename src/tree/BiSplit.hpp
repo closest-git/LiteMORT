@@ -21,6 +21,9 @@ using namespace std;
 #else
 #endif
 
+//由于浮点误差的原因，很小的负数也是0
+double FLOAT_ZERO(double a, double ruler);
+
 /*
 	WeakLearner理解有误，实为BiSplit
 */

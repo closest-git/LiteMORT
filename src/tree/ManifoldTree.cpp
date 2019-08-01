@@ -8,6 +8,7 @@
 #include <stack>
 #include "../data_fold/Loss.hpp"
 #include "../util/Object.hpp"
+#include "BiSplit.hpp"
 
 //double WeakLearner::minSet=0.01;
 //double WeakLearner::minGain=0.01;
@@ -324,7 +325,7 @@ void ManifoldTree::AddNewLeaf(hMTNode hNode, FeatsOnFold *hData_, const vector<i
 				//double a = 1 - hGuide->lossy->err_auc;
 				hBlit->left->Observation_AtLocalSamp(hGuideData);		hBlit->right->Observation_AtLocalSamp(hGuideData);
 				double imp = hBlit->right->impuri + hBlit->left->impuri;
-				double gain = imp - hBlit->impuri ;		
+				double gain = FLOAT_ZERO(imp - hBlit->impuri,imp) ;
 				hNode->gain_ = gain;			assert(gain >= 0);
 				hGuideTree->DelChild(hBlit);
 				hBlit->fruit = nullptr;/**/

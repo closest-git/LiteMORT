@@ -6,7 +6,7 @@
       <sourceFolder url="file://$MODULE_DIR$/tests/python_package_test" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/python-package/litemort" isTestSource="false" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.6" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.7" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="R User Library" level="project" />
     <orderEntry type="library" name="R Skeletons" level="application" />
