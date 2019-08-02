@@ -8,6 +8,7 @@
 #include <stack>
 #include "../data_fold/Loss.hpp"
 #include "../util/Object.hpp"
+#include "../EDA/SA_salp.hpp"
 #include "BiSplit.hpp"
 
 //double WeakLearner::minSet=0.01;
@@ -452,7 +453,7 @@ void ManifoldTree::Train(int flag) {
 	double imp_0 = root->impuri, gain = 0,a;
 	//printf("\n-----TREE(nodes=%d,leaf=%d),imp_0=%g,", nodes.size(), leafs.size(), imp_0 );
 	vector<int> pick_feats;
-	hData_->nPick4Split(pick_feats, hData_->rander_feat, -1);
+	hData_->nPick4Split(pick_feats, hData_->rander_feat, hForest,-1 );
 	if (this->hForest->skdu.noT % 500 == 0) {
 		tpSAMP_ID *samps = root->samp_set.samps;
 		size_t nSamp = root->samp_set.nSamp;
@@ -462,6 +463,7 @@ void ManifoldTree::Train(int flag) {
 				pick_feats[0], pick_feats[pick_feats.size()/2], pick_feats[pick_feats.size()-1]);
 		}
 	}
+	
 	AddNewLeaf(root, hData_, pick_feats);
 	gain = 0;
 	while (true) {		//²Î¼ûGBRT::GetBlit

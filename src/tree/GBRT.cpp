@@ -2,6 +2,7 @@
 #include "GBRT.hpp"
 #include "../data_fold/Loss.hpp"
 #include "../util/Object.hpp"
+#include "../EDA/SA_salp.hpp"
 
 
 GBRT::GBRT(FeatsOnFold *hTrain, FeatsOnFold *hEval, double sOOB, MODEL mod_, int nTre_, int flag) : BoostingForest() {
@@ -207,6 +208,9 @@ void EARLY_STOPPING::Add(double err,int best_tree, int flag) {
 	}
 }
 
+void  EARLY_STOPPING::CheckBrae(int flag) {
+
+}
 bool EARLY_STOPPING::isOK(int cur_round) {
 	double e_last = errors[errors.size() - 1];
 	if (true) {
@@ -336,7 +340,10 @@ int GBRT::Train(string sTitle, int x, int flag) {
 				stopping.Add(err,t);
 				if (hEvalData->lossy->isOK(0x0, FLT_EPSILON)) {
 					eOOB = 0;	printf("\n********* You are so LUCKY!!! *********\n\n");	return 0x0;
-				}			
+				}		
+				if (hTrainData->feats_swarm != nullptr && t>0) {
+					hTrainData->feats_swarm->SetCost(err);
+				}
 			}
 		}
 		/*	*/

@@ -11,20 +11,21 @@ namespace Grusoft {
 	class FeatsOnFold;
 	class FRUIT;
 
-	struct Salp {
+	struct BinSalp {
 		double cost;
 		vector<double> position;
 
-		Salp(int dim, int flag = 0x0) {
-			position.resize(dim);
-		}
-		virtual void Copy(const Salp*src,int flag=0x0) {
+		BinSalp(int dim, int flag = 0x0);
+		BinSalp(int dim, const vector<int>&picks, int flag = 0x0);
+		BinSalp(const vector<bool>&pick_mask, int flag = 0x0);		//类似于boost中的 integer_mask
+
+		virtual void Copy(const BinSalp*src,int flag=0x0) {
 			position = src->position;
 			cost = src->cost;
 		}
 
 		//aA+b*B
-		virtual void MixPosition(double alpha, const Salp*A, double beta, const Salp*B, int flag) {
+		virtual void MixPosition(double alpha, const BinSalp*A, double beta, const BinSalp*B, int flag) {
 			int dim = position.size(), i;
 			for (i = 0; i < dim; i++) {
 				position[i] = alpha*A->position[i] + beta*B->position[i];
@@ -32,41 +33,59 @@ namespace Grusoft {
 		}
 	};
 
-	class BinarySwarm {
+	//special swarm algortim on GBDT trees
+	class BinarySwarm_GBDT {
 
 	protected:
-		Salp *bound = nullptr;		//二分类，初始化为1向量
-		Salp *food = nullptr,*leader = nullptr;
+		bool first_step = true;
+		BinSalp *bound = nullptr;		//二分类，初始化为1向量
+		BinSalp *food = nullptr,*leader = nullptr;
 		typedef enum{
 			SIGMOID
 		} TRANSFER_FUNC;
 		double *velocity=nullptr, *positon = nullptr;
-		vector<Salp*>salps;
+		vector<BinSalp*>salps;
 
 		virtual void InitBound(int dim, int flag = 0x0);
+		virtual void UpdateFood(int flag = 0x0);
 		virtual void UpdateLeader(double loss, int flag = 0x0) {}
-
+		virtual void CreateSwarms(int nSalp, int flag = 0x0);
 	public:
-		BinarySwarm(int nBird_, int flag = 0x0);
+		BinarySwarm_GBDT(int nMostBird_, int flag = 0x0);
 
-		virtual ~BinarySwarm() {
+		virtual ~BinarySwarm_GBDT() {
 			if (velocity != nullptr)		delete[] velocity;
 			if (positon != nullptr)			delete[] positon;
 		}
 
+		virtual void AddSalp(int dim, const vector<int>&picks, int flag=0x0) {			
+			BinSalp *salp = new BinSalp(dim,picks,flag);
+			salps.push_back(salp);
+		}
 		
+		virtual void SetCost(double cost, int flag = 0x0) {
+			assert(salps.size()>0);
+			BinSalp *salp = salps[salps.size() - 1];
+			salp->cost = cost;
+		}
 
-		virtual void Step(double loss, int flag = 0x0){}
+		virtual bool Step(int nSalp,int flag = 0x0){
+			return false;
+		}
+
+		virtual bool GetPicks(vector<int>&picks, int flag = 0x0) {
+			return false;
+		}
 
 	};
 
-	class BSA_salp : public BinarySwarm {
+	class BSA_salp : public BinarySwarm_GBDT {
 	protected:
 		double c_1, c_2, c_3;
 		virtual void UpdateLeader(double loss, int flag = 0x0);
 	public:		
 		BSA_salp(int nBird_,int dim,int flag = 0x0);
-		virtual void Step(double loss, int flag = 0x0);
+		virtual bool Step(int nSalp, int flag = 0x0);
 	};
 
 

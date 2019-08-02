@@ -32,6 +32,7 @@ namespace Grusoft {
 	class FeatsOnFold;
 	class ManifoldTree;
 	class FeatVec_LOSS;
+	class BinarySwarm_GBDT;
 	template<typename Tx> class FeatVec_T;
 
 	struct ARR_TREE {
@@ -95,6 +96,7 @@ namespace Grusoft {
 		vector<float> sample_weight;
 		//configuration paramters
 	public:
+		BinarySwarm_GBDT *feats_swarm = nullptr;
 		Feat_Importance *importance = nullptr;
 		Move_Accelerator *hMove = nullptr;
 		GRander rander_samp, rander_feat;
@@ -232,7 +234,7 @@ namespace Grusoft {
 			if (no < -1 || no >= nFeat())	throw "Feat no is OUT OF RANGE!!!";
 			return feats[no];
 		}
-		virtual void nPick4Split(vector<int>&picks, GRander&rander, int flag = 0x0);
+		virtual void nPick4Split(vector<int>&picks, GRander&rander, BoostingForest *hForest,int flag = 0x0);
 
 		//ºËÐÄº¯Êý 
 		virtual void SplitOn(MT_BiSplit *hBlit, int flag = 0x0) {

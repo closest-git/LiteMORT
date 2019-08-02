@@ -2,15 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1f20a82c-2842-4728-bc01-7f01847a5972" name="Default" comment="README">
-      <change beforePath="$PROJECT_DIR$/.idea/LiteMORT.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/LiteMORT.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/python-package/case_higgs.py" beforeDir="false" afterPath="$PROJECT_DIR$/python-package/case_higgs.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tree/BiSplit.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/BiSplit.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tree/BiSplit.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/BiSplit.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/EDA/SA_salp.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/EDA/SA_salp.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/EDA/SA_salp.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/EDA/SA_salp.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tree/GBRT.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/GBRT.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/tree/ManifoldTree.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/ManifoldTree.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vs/LiteMORT/LiteMORT.vcxproj" beforeDir="false" afterPath="$PROJECT_DIR$/vs/LiteMORT/LiteMORT.vcxproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vs/LiteMORT/LiteMORT.vcxproj.filters" beforeDir="false" afterPath="$PROJECT_DIR$/vs/LiteMORT/LiteMORT.vcxproj.filters" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -32,7 +29,7 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/python-package/case_higgs.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="283">
@@ -44,11 +41,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/python-package/geo_test.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="238">
-              <caret line="69" column="33" lean-forward="true" selection-start-line="69" selection-start-column="11" selection-end-line="69" selection-end-column="33" />
+              <caret line="69" column="33" selection-start-line="69" selection-start-column="11" selection-end-line="69" selection-end-column="33" />
               <folding>
                 <element signature="e#51#69#0" expanded="true" />
               </folding>
@@ -68,7 +65,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/python-package/litemort/LiteMORT_EDA.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1710">
+            <state relative-caret-position="1653">
               <caret line="90" column="52" selection-start-line="89" selection-start-column="8" selection-end-line="90" selection-end-column="52" />
               <folding>
                 <element signature="e#0#31#0" expanded="true" />
@@ -80,7 +77,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/python-package/litemort/LiteMORT.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1482">
+            <state relative-caret-position="1311">
               <caret line="78" column="22" selection-start-line="78" selection-start-column="4" selection-end-line="78" selection-end-column="22" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
@@ -195,7 +192,7 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="1">
+  <component name="ProjectFrameBounds">
     <option name="x" value="-10" />
     <option name="width" value="1775" />
     <option name="height" value="1090" />
@@ -208,7 +205,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -236,6 +232,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -452,6 +449,7 @@
       <workItem from="1564122515494" duration="284000" />
       <workItem from="1564466169447" duration="20000" />
       <workItem from="1564553422126" duration="630000" />
+      <workItem from="1564724689671" duration="1799000" />
     </task>
     <task id="LOCAL-00001" summary="README">
       <created>1556249780941</created>
@@ -496,14 +494,14 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="197966000" />
+    <option name="totallyTimeSpent" value="199765000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="0" width="1420" height="872" extended-state="1" />
+    <frame x="-8" y="0" width="1420" height="872" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.5891892" visible="true" weight="0.22834067" />
-      <window_info id="Structure" order="1" sideWeight="0.4108108" side_tool="true" visible="true" weight="0.22834067" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.5878378" visible="true" weight="0.23201175" />
+      <window_info id="Structure" order="1" sideWeight="0.41216215" side_tool="true" visible="true" weight="0.23201175" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
@@ -986,16 +984,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/case_higgs.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="283">
-          <caret line="23" selection-start-line="23" selection-end-line="23" selection-end-column="50" />
-          <folding>
-            <element signature="e#1142#1164#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/python-package/litemort/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="437">
@@ -1005,7 +993,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/python-package/litemort/LiteMORT_EDA.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1710">
+        <state relative-caret-position="1653">
           <caret line="90" column="52" selection-start-line="89" selection-start-column="8" selection-end-line="90" selection-end-column="52" />
           <folding>
             <element signature="e#0#31#0" expanded="true" />
@@ -1015,7 +1003,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/python-package/litemort/LiteMORT.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1482">
+        <state relative-caret-position="1311">
           <caret line="78" column="22" selection-start-line="78" selection-start-column="4" selection-end-line="78" selection-end-column="22" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
@@ -1040,9 +1028,19 @@
     <entry file="file://$PROJECT_DIR$/python-package/geo_test.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="238">
-          <caret line="69" column="33" lean-forward="true" selection-start-line="69" selection-start-column="11" selection-end-line="69" selection-end-column="33" />
+          <caret line="69" column="33" selection-start-line="69" selection-start-column="11" selection-end-line="69" selection-end-column="33" />
           <folding>
             <element signature="e#51#69#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python-package/case_higgs.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="283">
+          <caret line="23" selection-start-line="23" selection-end-line="23" selection-end-column="50" />
+          <folding>
+            <element signature="e#1142#1164#0" expanded="true" />
           </folding>
         </state>
       </provider>

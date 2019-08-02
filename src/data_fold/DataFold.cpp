@@ -15,7 +15,7 @@ using json = nlohmann::json;
 #include "EDA.hpp"
 #include "../tree/BoostingForest.hpp"
 #include "../include/LiteBOM_config.h"
-
+#include "../EDA/SA_salp.hpp"
 using namespace Grusoft;
 
 FeatsOnFold::STAT FeatsOnFold::stat;
@@ -103,7 +103,7 @@ void FeatsOnFold:: Distri2Tag(int *mark, int nCls, int flag) {
 /*
 	feature_fraction似乎能降低overfitting
 */
-void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, int flag) {
+void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest *hForest, int flag) {
 	int i, nFeat = feats.size(), nPick = (int)(sqrt(nFeat));
 	//picks.resize(nFeat);
 	for (i = 0; i<nFeat; i++)	{
@@ -126,22 +126,24 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, int flag) {
 	assert(picks.size()>0);
 	if (config.feature_fraction<1) {	//for random forest
 		nPick = MAX(1,picks.size()*config.feature_fraction);
-		if (true) {
+		hForest->stopping.CheckBrae();
+		bool isSwarm = feats_swarm != nullptr && hForest->stopping.nBraeStep>0;
+		if (isSwarm) {
+			if (feats_swarm->Step(hForest->stopping.nBraeStep))
+				isSwarm = feats_swarm->GetPicks(picks);
+		}
+		if(!isSwarm){
 			vector<int> no_k = rander.kSampleInN(nPick, picks.size()),pick_1;
 			for (auto x : no_k) {
 				int no = picks[x];
 				pick_1.push_back(no);
 			}
 			picks = pick_1;
-		}
-		else {
-			if (nPick < picks.size()) {
-				//srand(time(0));
-				//srand(rand_seed);		//为了调试结果一致
-				std::random_shuffle(picks.begin(), picks.end());
-				picks.resize(nPick);
+			if (feats_swarm != nullptr) {
+				feats_swarm->AddSalp(nFeat, picks);
 			}
 		}
+		
 		std::sort(picks.begin(), picks.end());
 
 	}
