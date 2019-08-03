@@ -209,6 +209,12 @@ void EARLY_STOPPING::Add(double err,int best_tree, int flag) {
 }
 
 void  EARLY_STOPPING::CheckBrae(int flag) {
+	nBraeStep = 0;
+	if (errors.size() < early_round)
+		return;
+	if (best_no < errors.size() - early_round/2) {
+		nBraeStep = errors.size()- best_no;
+	}
 
 }
 bool EARLY_STOPPING::isOK(int cur_round) {
@@ -301,6 +307,7 @@ int GBRT::Train(string sTitle, int x, int flag) {
 	//FeatsOnFold *hData=curF[0]->hData;
 	total = hTrainData->nSample();			
 	stopping.early_round = hTrainData->config.early_stopping_round;
+	hTrainData->feats_swarm = new BSA_salp(stopping.early_round, hTrainData->feats.size(), stopping.early_round*2, 0x0);
 	float *distri = hTrainData->distri, *dtr = nullptr, tag, d1, rOK = 0;
 	double err_0= DBL_MAX,err=DBL_MAX,a;
 	size_t nPickSamp=0;
@@ -356,8 +363,8 @@ int GBRT::Train(string sTitle, int x, int flag) {
 		this->BeforeTrain(hTrainData);
 		//gradients = self.loss.negative_gradient(preds, y)
 		ManifoldTree *hTree = new ManifoldTree(this, hTrainData, "666_" + to_string(t));
-		if (hEvalData != nullptr)
-			hTree->SetGuideTree(new ManifoldTree(this, hEvalData, "777_" + to_string(t)));
+		//if (hEvalData != nullptr)		//case_higgs.py实测确实有BUG
+		//	hTree->SetGuideTree(new ManifoldTree(this, hEvalData, "777_" + to_string(t)));
 		nPickSamp = hTree->hRoot()->nSample();
 		forest.push_back(hTree);
 		hTree->Train(flag);				//

@@ -1,3 +1,4 @@
+#很好的测试算例     X_train_0=(159999, 200) y_train=(159999,)......
 #https://www.kaggle.com/chocozzz/santander-lightgbm-baseline-lb-0-899
 
 import numpy as np
@@ -20,9 +21,9 @@ from sklearn import metrics
 from litemort import *
 
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
-isMORT = True
-#some_rows=10000
-some_rows=None
+#isMORT = True
+some_rows=10000
+#some_rows=None
 pick_samples=None
 #pick_samples=1500
 early_stop=50      #0.898->0.899
@@ -40,8 +41,8 @@ plt.style.use('seaborn')
 sns.set(font_scale=1)
 pd.set_option('display.max_columns', 500)
 
-train_df = pd.read_csv("G:/kaggle/Santander/input/train.csv",nrows=some_rows)
-test_df = pd.read_csv("G:/kaggle/Santander/input/test.csv",nrows=some_rows)
+train_df = pd.read_csv("E:/kaggle/Santander/input/train.csv",nrows=some_rows)
+test_df = pd.read_csv("E:/kaggle/Santander/input/test.csv",nrows=some_rows)
 
 features = [c for c in train_df.columns if c not in ['ID_code', 'target']]
 target = train_df['target']
@@ -167,6 +168,7 @@ for fold_, (trn_idx, val_idx) in enumerate(skf.split(train_df.values, target.val
         feature_importance_df = pd.concat([feature_importance_df, fold_importance_df], axis=0)
 
         predictions += clf.predict(test_df[features], num_iteration=best_iteration) / 5
+    fold_score = roc_auc_score(Y_test, oof[val_idx])
     print("fold n°{} time={} score={}".format(fold_,time.time()-t0,fold_score))
 cv_score = roc_auc_score(target, oof)
 print("CV score: {:<8.5f}".format(cv_score))

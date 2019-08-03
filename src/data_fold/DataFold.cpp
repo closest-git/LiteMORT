@@ -105,6 +105,7 @@ void FeatsOnFold:: Distri2Tag(int *mark, int nCls, int flag) {
 */
 void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest *hForest, int flag) {
 	int i, nFeat = feats.size(), nPick = (int)(sqrt(nFeat));
+	int nTree = hForest->forest.size();
 	//picks.resize(nFeat);
 	for (i = 0; i<nFeat; i++)	{
 		FeatVector *hFeat = Feat(i);
@@ -140,7 +141,7 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 			}
 			picks = pick_1;
 			if (feats_swarm != nullptr) {
-				feats_swarm->AddSalp(nFeat, picks);
+				feats_swarm->AddSalp(nFeat, picks, nTree);
 			}
 		}
 		

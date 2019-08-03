@@ -64,6 +64,13 @@ namespace Grusoft{
 			x = RandRersResrResdra();
 			return static_cast<int>(x & 0x7FFFFFFF);
 		}
+		inline double Uniform_(double a0,double a1) {
+			int cur = RandInt32();
+			double a = cur*1.0 / 0x7FFFFFFF;
+			assert(a>=-1.0 && a <=1.0);
+			double b = a0 + (a1 - a0)*(a + 1) / 2.0;
+			return b;
+		}
 
 		/*virtual size_t operator()(size_t n)	{
 			std::uniform_int_distribution<size_t> d(0, n ? n - 1 : 0);

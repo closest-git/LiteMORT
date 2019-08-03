@@ -2,12 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1f20a82c-2842-4728-bc01-7f01847a5972" name="Default" comment="README">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/python-package/lgb_kim.py" beforeDir="false" afterPath="$PROJECT_DIR$/python-package/lgb_kim.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/EDA/SA_salp.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/EDA/SA_salp.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/EDA/SA_salp.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/EDA/SA_salp.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/tree/GBRT.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/GBRT.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tree/ManifoldTree.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/ManifoldTree.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/util/GRander.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/GRander.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vs/LiteMORT/LiteMORT.vcxproj" beforeDir="false" afterPath="$PROJECT_DIR$/vs/LiteMORT/LiteMORT.vcxproj" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -29,10 +30,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/python-package/case_higgs.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="283">
+            <state relative-caret-position="266">
               <caret line="23" selection-start-line="23" selection-end-line="23" selection-end-column="50" />
               <folding>
                 <element signature="e#1142#1164#0" expanded="true" />
@@ -42,34 +43,61 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/python-package/geo_test.py">
+        <entry file="file://$PROJECT_DIR$/python-package/case_qq2019.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="238">
-              <caret line="69" column="33" selection-start-line="69" selection-start-column="11" selection-end-line="69" selection-end-column="33" />
+            <state relative-caret-position="722">
+              <caret line="51" column="39" selection-start-line="51" selection-start-column="17" selection-end-line="51" selection-end-column="39" />
               <folding>
-                <element signature="e#51#69#0" expanded="true" />
+                <element signature="e#31#53#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/python-package/litemort/__init__.py">
+        <entry file="file://$PROJECT_DIR$/python-package/case_earthquake.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="437">
-              <caret line="24" column="18" selection-start-line="24" selection-start-column="3" selection-end-line="24" selection-end-column="18" />
+            <state>
+              <caret column="54" selection-start-column="2" selection-end-column="54" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/python-package/litemort/LiteMORT_EDA.py">
+        <entry file="file://$PROJECT_DIR$/python-package/pycharm_test.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1653">
-              <caret line="90" column="52" selection-start-line="89" selection-start-column="8" selection-end-line="90" selection-end-column="52" />
+            <state relative-caret-position="2090">
+              <caret line="125" column="22" selection-start-line="125" selection-start-column="22" selection-end-line="125" selection-end-column="22" />
               <folding>
-                <element signature="e#0#31#0" expanded="true" />
+                <element signature="e#146#155#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/python-package/lgb_kim.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="190">
+              <caret line="23" column="1" selection-start-line="23" selection-start-column="1" selection-end-line="23" selection-end-column="1" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/python-package/build/lib/LiteMORT/LiteMORT.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="175">
+              <caret line="100" selection-start-line="100" selection-end-line="100" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/python-package/litemort/libpath.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="418">
+              <caret line="24" column="37" selection-start-line="24" selection-start-column="37" selection-end-line="24" selection-end-column="37" />
             </state>
           </provider>
         </entry>
@@ -115,11 +143,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>instance</find>
-      <find>binary_logloss</find>
-      <find>exp</find>
-      <find>verbose</find>
-      <find>model_type</find>
       <find>concat</find>
       <find>to_csv</find>
       <find>some_rows</find>
@@ -145,6 +168,11 @@
       <find>os.</find>
       <find>scipy</find>
       <find>np.nd</find>
+      <find>shap</find>
+      <find>fold_score</find>
+      <find>LiteMORT.dll</find>
+      <find>dll_path</find>
+      <find>param</find>
     </findStrings>
     <replaceStrings>
       <replace />
@@ -185,10 +213,10 @@
         <option value="$PROJECT_DIR$/python-package/litemort/LiteMORT_preprocess.py" />
         <option value="$PROJECT_DIR$/python-package/case_qq2019.py" />
         <option value="$PROJECT_DIR$/python-package/litemort/LiteMORT.py" />
-        <option value="$PROJECT_DIR$/python-package/lgb_kim.py" />
         <option value="$PROJECT_DIR$/python-package/case_earthquake.py" />
         <option value="$PROJECT_DIR$/python-package/litemort/LiteMORT_EDA.py" />
         <option value="$PROJECT_DIR$/python-package/case_higgs.py" />
+        <option value="$PROJECT_DIR$/python-package/lgb_kim.py" />
       </list>
     </option>
   </component>
@@ -205,6 +233,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -220,19 +249,12 @@
             <path>
               <item name="LiteMORT" type="b2602c69:ProjectViewProjectNode" />
               <item name="LiteMORT" type="462c0819:PsiDirectoryNode" />
-              <item name="python-package" type="462c0819:PsiDirectoryNode" />
-              <item name="litemort" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="LiteMORT" type="b2602c69:ProjectViewProjectNode" />
-              <item name="LiteMORT" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -255,29 +277,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.case_higgs">
-    <configuration name="LiteMORT_preprocess" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="LiteMORT" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/python-package/litemort" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/python-package/litemort/LiteMORT_preprocess.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
+  <component name="RunManager" selected="Python.lgb_kim">
     <configuration name="case_earthquake" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="LiteMORT" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -292,28 +292,6 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/python-package/case_earthquake.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="case_higgs" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="LiteMORT" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/python-package" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/python-package/case_higgs.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -344,6 +322,28 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="geo_test" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="LiteMORT" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/python-package" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/python-package/geo_test.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="lgb_kim" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="LiteMORT" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -366,20 +366,36 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="pytest in pycharm_test.py" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="LiteMORT" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/python-package" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/python-package/pycharm_test.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="Python.case_qq2019" />
-      <item itemvalue="Python.LiteMORT_preprocess" />
-      <item itemvalue="Python.lgb_kim" />
-      <item itemvalue="Python.case_higgs" />
       <item itemvalue="Python.case_earthquake" />
+      <item itemvalue="Python.geo_test" />
+      <item itemvalue="Python.lgb_kim" />
+      <item itemvalue="Python tests.pytest in pycharm_test.py" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.case_higgs" />
+        <item itemvalue="Python.lgb_kim" />
+        <item itemvalue="Python tests.pytest in pycharm_test.py" />
+        <item itemvalue="Python.geo_test" />
         <item itemvalue="Python.case_earthquake" />
         <item itemvalue="Python.case_qq2019" />
-        <item itemvalue="Python.lgb_kim" />
-        <item itemvalue="Python.LiteMORT_preprocess" />
       </list>
     </recent_temporary>
   </component>
@@ -449,7 +465,8 @@
       <workItem from="1564122515494" duration="284000" />
       <workItem from="1564466169447" duration="20000" />
       <workItem from="1564553422126" duration="630000" />
-      <workItem from="1564724689671" duration="1799000" />
+      <workItem from="1564724689671" duration="5948000" />
+      <workItem from="1564817848643" duration="965000" />
     </task>
     <task id="LOCAL-00001" summary="README">
       <created>1556249780941</created>
@@ -462,12 +479,6 @@
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="py_test_in_test_sklearn_py - 2019.04.22 at 16h 55m 01s.xml">
-      <configuration name="py.test in test_sklearn.py" configurationId="tests" />
-    </history-entry>
-    <history-entry file="py_test_in_test_sklearn_py - 2019.04.22 at 16h 56m 20s.xml">
-      <configuration name="py.test in test_sklearn.py" configurationId="tests" />
-    </history-entry>
     <history-entry file="py_test_in_test_sklearn_py - 2019.04.22 at 16h 57m 02s.xml">
       <configuration name="py.test in test_sklearn.py" configurationId="tests" />
     </history-entry>
@@ -492,21 +503,27 @@
     <history-entry file="py_test_in_test_large_py - 2019.04.30 at 14h 44m 47s.xml">
       <configuration name="py.test in test_large.py" configurationId="tests" />
     </history-entry>
+    <history-entry file="pytest_in_pycharm_test_py - 2019.08.03 at 10h 34m 48s.xml">
+      <configuration name="pytest in pycharm_test.py" configurationId="tests" />
+    </history-entry>
+    <history-entry file="pytest_in_pycharm_test_py - 2019.08.03 at 10h 38m 42s.xml">
+      <configuration name="pytest in pycharm_test.py" configurationId="tests" />
+    </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="199765000" />
+    <option name="totallyTimeSpent" value="204879000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="0" width="1420" height="872" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.5878378" visible="true" weight="0.23201175" />
-      <window_info id="Structure" order="1" sideWeight="0.41216215" side_tool="true" visible="true" weight="0.23201175" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.7905405" visible="true" weight="0.2246696" />
+      <window_info id="Structure" order="1" sideWeight="0.20945945" side_tool="true" visible="true" weight="0.2246696" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.3914209" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.55481285" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.25405404" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.21891892" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -633,28 +650,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/python-package/lgb_kim.py</url>
-          <line>142</line>
+          <line>143</line>
           <option name="timeStamp" value="299" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/python-package/lgb_kim.py</url>
-          <line>131</line>
+          <line>132</line>
           <option name="timeStamp" value="300" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/python-package/geo_test.py</url>
-          <line>89</line>
-          <option name="timeStamp" value="307" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/python-package/geo_test.py</url>
-          <line>81</line>
-          <option name="timeStamp" value="313" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/python-package/geo_test.py</url>
-          <line>166</line>
-          <option name="timeStamp" value="315" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/python-package/litemort/LiteMORT.py</url>
@@ -663,7 +665,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/python-package/lgb_kim.py</url>
-          <line>127</line>
+          <line>128</line>
           <option name="timeStamp" value="373" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -714,14 +716,14 @@
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/LiteMORT$pycharm_test.coverage" NAME="pycharm_test Coverage Results" MODIFIED="1557050214018" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
     <SUITE FILE_PATH="coverage/LiteMORT$LiteMORT_preprocess.coverage" NAME="LiteMORT_preprocess Coverage Results" MODIFIED="1557816270058" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package/litemort" />
-    <SUITE FILE_PATH="coverage/LiteMORT$lgb_kim.coverage" NAME="lgb_kim Coverage Results" MODIFIED="1557974540608" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
-    <SUITE FILE_PATH="coverage/LiteMORT$case_qq2019.coverage" NAME="case_qq2019 Coverage Results" MODIFIED="1558588838615" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
+    <SUITE FILE_PATH="coverage/LiteMORT$lgb_kim.coverage" NAME="lgb_kim Coverage Results" MODIFIED="1564801856244" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
+    <SUITE FILE_PATH="coverage/LiteMORT$pytest_in_pycharm_test_py.coverage" NAME="pytest in pycharm_test.py Coverage Results" MODIFIED="1564799919413" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
+    <SUITE FILE_PATH="coverage/LiteMORT$case_qq2019.coverage" NAME="case_qq2019 Coverage Results" MODIFIED="1564799379478" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
     <SUITE FILE_PATH="coverage/LiteMORT$case_higgs.coverage" NAME="case_higgs Coverage Results" MODIFIED="1563763409535" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
-    <SUITE FILE_PATH="coverage/LiteMORT$geo_test.coverage" NAME="geo_test Coverage Results" MODIFIED="1557050049571" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
-    <SUITE FILE_PATH="coverage/LiteMORT$case_earthquake.coverage" NAME="case_earthquake Coverage Results" MODIFIED="1562306753429" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
+    <SUITE FILE_PATH="coverage/LiteMORT$case_earthquake.coverage" NAME="case_earthquake Coverage Results" MODIFIED="1564799423302" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
+    <SUITE FILE_PATH="coverage/LiteMORT$geo_test.coverage" NAME="geo_test Coverage Results" MODIFIED="1564799540881" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$USER_HOME$/.PyCharm2018.1/system/python_stubs/-2036615904/builtins.py" />
     <entry file="file://$PROJECT_DIR$/vs_0/pyMORT/LiteMORT.py" />
     <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/_pydev_imps/_pydev_execfile.py">
       <provider selected="true" editor-type-id="text-editor">
@@ -792,13 +794,6 @@
       </provider>
     </entry>
     <entry file="file://D:/Anaconda3/Lib/site-packages/_pytest/assertion/rewrite.py" />
-    <entry file="file://$PROJECT_DIR$/python-package/litemort/libpath.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="17" column="54" selection-start-line="17" selection-start-column="54" selection-end-line="17" selection-end-column="54" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://D:/Anaconda3/Lib/site-packages/sklearn/ensemble/forest.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="294">
@@ -902,40 +897,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/pycharm_test.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1026">
-          <caret line="54" column="45" selection-start-line="54" selection-start-column="45" selection-end-line="54" selection-end-column="45" />
-          <folding>
-            <element signature="e#146#155#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/python-package/litemort/LiteMORT_ERA.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1824">
           <caret line="97" column="33" selection-start-line="97" selection-start-column="14" selection-end-line="97" selection-end-column="33" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/case_qq2019.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="722">
-          <caret line="51" column="39" selection-start-line="51" selection-start-column="17" selection-end-line="51" selection-end-column="39" />
-          <folding>
-            <element signature="e#31#53#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/lgb_kim.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1197">
-          <caret line="63" column="29" lean-forward="true" selection-start-line="63" selection-start-column="29" selection-end-line="63" selection-end-column="29" />
-          <folding>
-            <element signature="e#71#89#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -977,13 +942,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/case_earthquake.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="130">
-          <caret line="56" column="21" selection-start-line="56" selection-start-column="10" selection-end-line="56" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/python-package/litemort/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="437">
@@ -998,6 +956,58 @@
           <folding>
             <element signature="e#0#31#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python-package/geo_test.py" />
+    <entry file="file://$PROJECT_DIR$/python-package/case_higgs.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="266">
+          <caret line="23" selection-start-line="23" selection-end-line="23" selection-end-column="50" />
+          <folding>
+            <element signature="e#1142#1164#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python-package/case_qq2019.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="722">
+          <caret line="51" column="39" selection-start-line="51" selection-start-column="17" selection-end-line="51" selection-end-column="39" />
+          <folding>
+            <element signature="e#31#53#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python-package/case_earthquake.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="54" selection-start-column="2" selection-end-column="54" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python-package/pycharm_test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2090">
+          <caret line="125" column="22" selection-start-line="125" selection-start-column="22" selection-end-line="125" selection-end-column="22" />
+          <folding>
+            <element signature="e#146#155#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python-package/lgb_kim.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="190">
+          <caret line="23" column="1" selection-start-line="23" selection-start-column="1" selection-end-line="23" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python-package/litemort/libpath.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="418">
+          <caret line="24" column="37" selection-start-line="24" selection-start-column="37" selection-end-line="24" selection-end-column="37" />
         </state>
       </provider>
     </entry>
@@ -1025,23 +1035,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/geo_test.py">
+    <entry file="file://$PROJECT_DIR$/python-package/build/lib/LiteMORT/LiteMORT.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
-          <caret line="69" column="33" selection-start-line="69" selection-start-column="11" selection-end-line="69" selection-end-column="33" />
-          <folding>
-            <element signature="e#51#69#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/case_higgs.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="283">
-          <caret line="23" selection-start-line="23" selection-end-line="23" selection-end-column="50" />
-          <folding>
-            <element signature="e#1142#1164#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="175">
+          <caret line="100" selection-start-line="100" selection-end-line="100" />
         </state>
       </provider>
     </entry>

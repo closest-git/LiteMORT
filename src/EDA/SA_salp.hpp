@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cmath>
 #include "../util/samp_set.hpp"
+#include "../util/GRander.hpp"
 
 typedef double BINFOLD_FLOAT;
 
@@ -12,9 +13,10 @@ namespace Grusoft {
 	class FRUIT;
 
 	struct BinSalp {
-		double cost;
+		int x=0;
+		float cost;
 		vector<double> position;
-
+		static GRander rander_;
 		BinSalp(int dim, int flag = 0x0);
 		BinSalp(int dim, const vector<int>&picks, int flag = 0x0);
 		BinSalp(const vector<bool>&pick_mask, int flag = 0x0);		//类似于boost中的 integer_mask
@@ -22,6 +24,7 @@ namespace Grusoft {
 		virtual void Copy(const BinSalp*src,int flag=0x0) {
 			position = src->position;
 			cost = src->cost;
+			x = src->x;
 		}
 
 		//aA+b*B
@@ -37,7 +40,9 @@ namespace Grusoft {
 	class BinarySwarm_GBDT {
 
 	protected:
-		bool first_step = true;
+		int DIM,iter=0, maxIter;		// the current iteration and the maximum number of iterations
+		static GRander rander_;
+		//bool first_step = true;
 		BinSalp *bound = nullptr;		//二分类，初始化为1向量
 		BinSalp *food = nullptr,*leader = nullptr;
 		typedef enum{
@@ -45,21 +50,26 @@ namespace Grusoft {
 		} TRANSFER_FUNC;
 		double *velocity=nullptr, *positon = nullptr;
 		vector<BinSalp*>salps;
+		int nMostSalp = 0;
 
 		virtual void InitBound(int dim, int flag = 0x0);
 		virtual void UpdateFood(int flag = 0x0);
 		virtual void UpdateLeader(double loss, int flag = 0x0) {}
-		virtual void CreateSwarms(int nSalp, int flag = 0x0);
+		virtual void NormalSwarms(int nSalp, int flag = 0x0);
 	public:
-		BinarySwarm_GBDT(int nMostBird_, int flag = 0x0);
+		BinarySwarm_GBDT(int nMostSalp_,int dim_, int flag = 0x0);
+
 
 		virtual ~BinarySwarm_GBDT() {
 			if (velocity != nullptr)		delete[] velocity;
 			if (positon != nullptr)			delete[] positon;
 		}
 
-		virtual void AddSalp(int dim, const vector<int>&picks, int flag=0x0) {			
+		virtual void AddSalp(int dim, const vector<int>&picks,int x_, int flag=0x0) {		
+			if (salps.size() >= nMostSalp)
+				salps.erase(salps.begin());
 			BinSalp *salp = new BinSalp(dim,picks,flag);
+			salp->x = x_;
 			salps.push_back(salp);
 		}
 		
@@ -69,9 +79,7 @@ namespace Grusoft {
 			salp->cost = cost;
 		}
 
-		virtual bool Step(int nSalp,int flag = 0x0){
-			return false;
-		}
+		virtual bool Step(int nSalp,int flag = 0x0){	throw "!!!BinarySwarm_GBDT Step is ...!!!";		}
 
 		virtual bool GetPicks(vector<int>&picks, int flag = 0x0) {
 			return false;
@@ -83,8 +91,9 @@ namespace Grusoft {
 	protected:
 		double c_1, c_2, c_3;
 		virtual void UpdateLeader(double loss, int flag = 0x0);
+		virtual void UpdateC1(int flag=0x0);
 	public:		
-		BSA_salp(int nBird_,int dim,int flag = 0x0);
+		BSA_salp(int nBird_, int dim_, int nMaxIter_,int flag = 0x0);
 		virtual bool Step(int nSalp, int flag = 0x0);
 	};
 
