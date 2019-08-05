@@ -3,12 +3,12 @@
   <component name="ChangeListManager">
     <list default="true" id="1f20a82c-2842-4728-bc01-7f01847a5972" name="Default" comment="README">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/python-package/lgb_kim.py" beforeDir="false" afterPath="$PROJECT_DIR$/python-package/lgb_kim.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/EDA/SA_salp.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/EDA/SA_salp.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/EDA/SA_salp.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/EDA/SA_salp.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/tree/GBRT.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/GBRT.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/util/GRander.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/GRander.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/vs/LiteMORT/LiteMORT.vcxproj" beforeDir="false" afterPath="$PROJECT_DIR$/vs/LiteMORT/LiteMORT.vcxproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vs/LiteMORT/LiteMORT.vcxproj.filters" beforeDir="false" afterPath="$PROJECT_DIR$/vs/LiteMORT/LiteMORT.vcxproj.filters" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -515,7 +515,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="0" width="1420" height="872" extended-state="0" />
-    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" sideWeight="0.7905405" visible="true" weight="0.2246696" />
       <window_info id="Structure" order="1" sideWeight="0.20945945" side_tool="true" visible="true" weight="0.2246696" />

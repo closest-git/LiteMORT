@@ -128,10 +128,10 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 	if (config.feature_fraction<1) {	//for random forest
 		nPick = MAX(1,picks.size()*config.feature_fraction);
 		hForest->stopping.CheckBrae();
-		bool isSwarm = feats_swarm != nullptr && hForest->stopping.nBraeStep>0;
+		bool isSwarm = feat_salps != nullptr && hForest->stopping.nBraeStep>0;
 		if (isSwarm) {
-			if (feats_swarm->Step(hForest->stopping.nBraeStep))
-				isSwarm = feats_swarm->GetPicks(picks);
+			if (feat_salps->Step(hForest->stopping.nBraeStep))
+				isSwarm = feat_salps->GetPicks(picks);
 		}
 		if(!isSwarm){
 			vector<int> no_k = rander.kSampleInN(nPick, picks.size()),pick_1;
@@ -140,8 +140,8 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 				pick_1.push_back(no);
 			}
 			picks = pick_1;
-			if (feats_swarm != nullptr) {
-				feats_swarm->AddSalp(nFeat, picks, nTree);
+			if (feat_salps != nullptr) {
+				feat_salps->AddSalp(nFeat, picks, nTree);
 			}
 		}
 		

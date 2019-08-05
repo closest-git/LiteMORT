@@ -75,6 +75,9 @@
     <ClCompile Include="..\..\src\EDA\SA_salp.cpp">
       <Filter>源文件\EDA</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\EDA\Feat_Selection.cpp">
+      <Filter>源文件\EDA</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\data_fold\Loss.hpp">
@@ -147,6 +150,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\EDA\SA_salp.hpp">
+      <Filter>源文件\EDA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\EDA\Feat_Selection.hpp">
       <Filter>源文件\EDA</Filter>
     </ClInclude>
   </ItemGroup>

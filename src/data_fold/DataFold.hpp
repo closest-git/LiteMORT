@@ -16,6 +16,7 @@ using namespace std;
 #include "../util/GST_def.h"
 #include "../util/BLAS_t.hpp"
 #include "../util/GRander.hpp"
+#include "../EDA/Feat_Selection.hpp"
 #include "Move.hpp"
 
 //#include "../util/samp_set.hpp"
@@ -96,7 +97,7 @@ namespace Grusoft {
 		vector<float> sample_weight;
 		//configuration paramters
 	public:
-		BinarySwarm_GBDT *feats_swarm = nullptr;
+		Feature_Selection *feat_salps = nullptr;
 		Feat_Importance *importance = nullptr;
 		Move_Accelerator *hMove = nullptr;
 		GRander rander_samp, rander_feat;

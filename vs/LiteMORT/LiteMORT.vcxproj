@@ -169,6 +169,7 @@ copy $(OutDir)$(TargetName)$(TargetExt) D:\Anaconda3\Lib\site-packages\litemort<
     <ClCompile Include="..\..\src\data_fold\DataFold.cpp" />
     <ClCompile Include="..\..\src\data_fold\EDA.cpp" />
     <ClCompile Include="..\..\src\data_fold\Histogram.cpp" />
+    <ClCompile Include="..\..\src\EDA\Feat_Selection.cpp" />
     <ClCompile Include="..\..\src\EDA\SA_salp.cpp" />
     <ClCompile Include="..\..\src\learn\DCRIMI_.cpp" />
     <ClCompile Include="..\..\src\learn\LOSS.cpp" />
@@ -191,6 +192,7 @@ copy $(OutDir)$(TargetName)$(TargetExt) D:\Anaconda3\Lib\site-packages\litemort<
     <ClInclude Include="..\..\src\data_fold\Imputer.hpp" />
     <ClInclude Include="..\..\src\data_fold\Loss.hpp" />
     <ClInclude Include="..\..\src\data_fold\Move.hpp" />
+    <ClInclude Include="..\..\src\EDA\Feat_Selection.hpp" />
     <ClInclude Include="..\..\src\EDA\SA_salp.hpp" />
     <ClInclude Include="..\..\src\include\LiteBOM_config.h" />
     <ClInclude Include="..\..\src\learn\DCRIMI_.hpp" />

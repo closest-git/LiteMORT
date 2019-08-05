@@ -307,7 +307,7 @@ int GBRT::Train(string sTitle, int x, int flag) {
 	//FeatsOnFold *hData=curF[0]->hData;
 	total = hTrainData->nSample();			
 	stopping.early_round = hTrainData->config.early_stopping_round;
-	hTrainData->feats_swarm = new BSA_salp(stopping.early_round, hTrainData->feats.size(), stopping.early_round*2, 0x0);
+	hTrainData->feat_salps = new Feature_Selection(stopping.early_round, hTrainData->feats.size(), 0x0);
 	float *distri = hTrainData->distri, *dtr = nullptr, tag, d1, rOK = 0;
 	double err_0= DBL_MAX,err=DBL_MAX,a;
 	size_t nPickSamp=0;
@@ -348,8 +348,8 @@ int GBRT::Train(string sTitle, int x, int flag) {
 				if (hEvalData->lossy->isOK(0x0, FLT_EPSILON)) {
 					eOOB = 0;	printf("\n********* You are so LUCKY!!! *********\n\n");	return 0x0;
 				}		
-				if (hTrainData->feats_swarm != nullptr && t>0) {
-					hTrainData->feats_swarm->SetCost(err);
+				if (hTrainData->feat_salps != nullptr && t>0) {
+					hTrainData->feat_salps->SetCost(err);
 				}
 			}
 		}

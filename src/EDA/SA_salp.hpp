@@ -6,7 +6,6 @@
 #include "../util/samp_set.hpp"
 #include "../util/GRander.hpp"
 
-typedef double BINFOLD_FLOAT;
 
 namespace Grusoft {
 	class FeatsOnFold;
