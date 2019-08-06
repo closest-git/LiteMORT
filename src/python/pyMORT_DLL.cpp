@@ -229,8 +229,11 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	FeatsOnFold *hFold = new FeatsOnFold(config, edaX, nam_, flag);
 	srand(time(0));
 	//x = rand();
-	hFold->rander_samp.Init(31415927 * rand());
-	hFold->rander_feat.Init(123456789 * rand());
+	//hFold->rander_samp.Init(31415927 * rand());
+	//hFold->rander_feat.Init(123456789 * rand());
+	hFold->rander_samp.Init(31415927);
+	hFold->rander_feat.Init(123456789);
+
 
 	hFold->InitMost(nSamp_);
 	//hFold->nMost = nSamp_;
@@ -352,8 +355,10 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	FeatsOnFold *hFold = new FeatsOnFold(config, edaX, nam_, flag);
 	srand(time(0));
 	//x = rand();
-	hFold->rander_samp.Init(31415927 * rand());
-	hFold->rander_feat.Init(123456789 * rand());
+	//hFold->rander_samp.Init(31415927 * rand());
+	//hFold->rander_feat.Init(123456789 * rand());
+	hFold->rander_samp.Init(31415927);
+	hFold->rander_feat.Init(123456789);
 
 	hFold->InitMost(nSamp_);
 	//hFold->nMost = nSamp_;

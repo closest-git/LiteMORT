@@ -22,11 +22,11 @@ from litemort import *
 
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 #isMORT = True
-some_rows=10000
-#some_rows=None
+#some_rows=10000
+some_rows=None
 pick_samples=None
 #pick_samples=1500
-early_stop=50      #0.898->0.899
+early_stop=500      #0.898->0.899
 max_bin = 256      #119增大到1280
 lr=0.02             #0.02   0.01提升一点点   0.89826-》0.89842
 nFold,nLeaves = 5,10

@@ -2,13 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1f20a82c-2842-4728-bc01-7f01847a5972" name="Default" comment="README">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/EDA/SA_salp.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/EDA/SA_salp.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/python-package/lgb_kim.py" beforeDir="false" afterPath="$PROJECT_DIR$/python-package/lgb_kim.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/EDA/Feat_Selection.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/EDA/Feat_Selection.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/EDA/Feat_Selection.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/EDA/Feat_Selection.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/python/pyMORT_DLL.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/python/pyMORT_DLL.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/tree/GBRT.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/GBRT.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vs/LiteMORT/LiteMORT.vcxproj" beforeDir="false" afterPath="$PROJECT_DIR$/vs/LiteMORT/LiteMORT.vcxproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vs/LiteMORT/LiteMORT.vcxproj.filters" beforeDir="false" afterPath="$PROJECT_DIR$/vs/LiteMORT/LiteMORT.vcxproj.filters" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/util/GRander.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/GRander.hpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -75,20 +75,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/python-package/lgb_kim.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="190">
-              <caret line="23" column="1" selection-start-line="23" selection-start-column="1" selection-end-line="23" selection-end-column="1" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/python-package/build/lib/LiteMORT/LiteMORT.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="175">
-              <caret line="100" selection-start-line="100" selection-end-line="100" />
+            <state relative-caret-position="152">
+              <caret line="24" column="1" selection-start-line="24" selection-start-column="1" selection-end-line="24" selection-end-column="1" />
             </state>
           </provider>
         </entry>
@@ -466,7 +457,7 @@
       <workItem from="1564466169447" duration="20000" />
       <workItem from="1564553422126" duration="630000" />
       <workItem from="1564724689671" duration="5948000" />
-      <workItem from="1564817848643" duration="965000" />
+      <workItem from="1564817848643" duration="2845000" />
     </task>
     <task id="LOCAL-00001" summary="README">
       <created>1556249780941</created>
@@ -511,10 +502,11 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="204879000" />
+    <option name="totallyTimeSpent" value="206759000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="0" width="1420" height="872" extended-state="0" />
+    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" sideWeight="0.7905405" visible="true" weight="0.2246696" />
       <window_info id="Structure" order="1" sideWeight="0.20945945" side_tool="true" visible="true" weight="0.2246696" />
@@ -996,13 +988,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/lgb_kim.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="190">
-          <caret line="23" column="1" selection-start-line="23" selection-start-column="1" selection-end-line="23" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/python-package/litemort/libpath.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="418">
@@ -1036,8 +1021,15 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/python-package/build/lib/LiteMORT/LiteMORT.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="175">
+        <state relative-caret-position="1748">
           <caret line="100" selection-start-line="100" selection-end-line="100" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python-package/lgb_kim.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="152">
+          <caret line="24" column="1" selection-start-line="24" selection-start-column="1" selection-end-line="24" selection-end-column="1" />
         </state>
       </provider>
     </entry>

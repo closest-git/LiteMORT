@@ -68,7 +68,7 @@ namespace Grusoft{
 			int cur = RandInt32();
 			double a = cur*1.0 / 0x7FFFFFFF;
 			assert(a>=-1.0 && a <=1.0);
-			double b = a0 + (a1 - a0)*(a + 1) / 2.0;
+			double b = a0 + (a1 - a0)*a;	// (a + 1) / 2.0;
 			return b;
 		}
 

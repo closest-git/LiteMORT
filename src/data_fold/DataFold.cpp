@@ -130,8 +130,13 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 		hForest->stopping.CheckBrae();
 		bool isSwarm = feat_salps != nullptr && hForest->stopping.nBraeStep>0;
 		if (isSwarm) {
-			if (feat_salps->Step(hForest->stopping.nBraeStep))
-				isSwarm = feat_salps->GetPicks(picks);
+			vector<int> pick_1,pick_2;
+			isSwarm = feat_salps->PickOnStep(hForest->stopping.nBraeStep, pick_1);
+			for (auto x : pick_1) {
+				int no = picks[x];
+				pick_2.push_back(no);
+			}
+			picks = pick_2;
 		}
 		if(!isSwarm){
 			vector<int> no_k = rander.kSampleInN(nPick, picks.size()),pick_1;
