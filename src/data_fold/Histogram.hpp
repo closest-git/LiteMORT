@@ -255,6 +255,7 @@ namespace Grusoft {
 			//a1 = -DBL_MAX, a0 = DBL_MAX;
 		}
 
+		virtual void RandomCompress(int flag = 0x0);
 		virtual void MoreHisto(const FeatsOnFold *hData_, vector<HistoGRAM*>&more, int flag = 0x0);
 		virtual void GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp_set, int flag = 0x0);
 		//virtual void GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp_set, int flag = 0x0);

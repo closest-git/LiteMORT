@@ -192,6 +192,35 @@ void HistoGRAM::MoreHisto(const FeatsOnFold *hData_, vector<HistoGRAM*>&more,  i
 	H_1->split_by = SPLIT_HISTOGRAM::BY_DENSITY;
 }
 
+
+void HistoGRAM::RandomCompress(int flag) {
+	vector<HISTO_BIN> binsN;
+	int nCheck = bins.size(), i,start=0;
+	for (i = 0; i < nCheck; i++) {
+		if (i<nCheck-1 && bins[i].nz == 0) {
+			continue;
+		}	else {
+			binsN.push_back(bins[i]);
+		}
+	}
+	if (binsN.size() < bins.size())
+		bins = binsN;
+	else
+		binsN.clear();
+	
+	int nTo = max(bins.size()/2,16);
+	while (bins.size() > nTo) {
+		int no = rand() % (bins.size() - 1);		//binNA总是放在最后
+		HISTO_BIN&target = bins[no == 0 ? 1 : no - 1],&src= bins[no];
+		target.nz += src.nz;
+		target.G_sum += src.G_sum;
+		target.H_sum += src.H_sum;
+		target.split_F = max(target.split_F,src.split_F);
+
+		bins.erase(bins.begin()+no);
+	}
+
+}
 /*
 	v0.2	cys
 		1/28/2019

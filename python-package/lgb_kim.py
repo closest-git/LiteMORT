@@ -170,6 +170,7 @@ for fold_, (trn_idx, val_idx) in enumerate(skf.split(train_df.values, target.val
         predictions += clf.predict(test_df[features], num_iteration=best_iteration) / 5
     fold_score = roc_auc_score(Y_test, oof[val_idx])
     print("fold n°{} time={} score={}".format(fold_,time.time()-t0,fold_score))
+    #break
 cv_score = roc_auc_score(target, oof)
 print("CV score: {:<8.5f}".format(cv_score))
 

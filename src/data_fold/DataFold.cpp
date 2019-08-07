@@ -266,6 +266,8 @@ struct LOOP_unroll<0> {
 
 #define TO_BIN_0(pBins,quanti,samps,down,i)	{	HISTO_BIN *pB0 = pBins + (quanti[samps[i]]);	pB0->G_sum -= down[i];	pB0->nz++;	}
 void FeatVec_Q::Samp2Histo_null_hessian(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag0) {
+	HistoGRAM *qHisto = GetHisto();
+
 	tpDOWN *down = hData_->GetSampleDown();	
 	string optimal = hData_->config.leaf_optimal;
 	bool isLambda = optimal == "lambda_0";
@@ -314,6 +316,8 @@ void FeatVec_Q::Samp2Histo_null_hessian(const FeatsOnFold *hData_, const SAMP_SE
 }
 
 void FeatVec_Q::Samp2Histo_null_hessian_sparse(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag0) {
+	HistoGRAM *qHisto = GetHisto();
+
 	tpDOWN *down = hData_->GetSampleDown();
 	string optimal = hData_->config.leaf_optimal;
 	bool isLambda = optimal == "lambda_0";
@@ -350,6 +354,7 @@ void FeatVec_Q::Samp2Histo_null_hessian_sparse(const FeatsOnFold *hData_, const 
 	v0.2
 */
 void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin,  int flag0) {
+	HistoGRAM *qHisto = GetHisto();
 	if (qHisto->bins.size() == 0) {
 		histo->ReSet(0);
 		return;
@@ -417,6 +422,7 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 			pBin->nz++;
 		}		
 	}
+	//histo->RandomCompress();
 	#ifdef _DEBUG
 	if (true /* && !isRandomDrop*/) {
 		double G_sum = 0;	// histo->hBinNA()->G_sum;
@@ -435,14 +441,14 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 		10/22/2018
 */
 void FeatVec_Q::UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst, int flag) {
-	if(qHisto!=nullptr)
-		delete qHisto;
+	if(qHisto_0!=nullptr)
+		delete qHisto_0;
 	//vThrsh.clear( );
 	//const SAMP_SET&samp_set = hData_->samp_set;
 	size_t nSamp = hData_->nSample(), i, samp,nValid=0;
 	string optimal = hData_->config.leaf_optimal;
 	//qHisto = optimal == "grad_variance" ? new HistoGRAM(nSamp) : new Histo_CTQ(nSamp);
-	qHisto = new HistoGRAM(this,nSamp);
+	qHisto_0 = new HistoGRAM(this,nSamp);
 	FeatVector *hFeat = hFeatSource;
 	size_t nMostBin = hData_->config.feat_quanti;
 	//bool isOnY = hData_->config.histo_bins_onY();	//hData_->config.histo_algorithm == LiteBOM_Config::HISTO_ALGORITHM::on_Y;
@@ -472,7 +478,7 @@ void FeatVec_Q::UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst,
 		}
 
 		if(distri.histo!=nullptr)
-			qHisto->CopyBins(*(distri.histo), true, 0x0);
+			qHisto_0->CopyBins(*(distri.histo), true, 0x0);
 		hFeat->QuantiAtEDA(edaX, quanti, nMostBin);
 	}	else{
 		//hFeat->Split2Quanti(hData_->config,edaX, vThrsh, qHisto, yDown, nMostBin);
@@ -486,7 +492,7 @@ void FeatVec_Q::UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst,
 			nValid++;
 	}
 	if (nValid == 0) {
-		printf("\n FeatVec_Q(%s) nBin=%d a0=%g a1=%g", desc.c_str(), qHisto->bins.size(), 0, -1);
+		printf("\n FeatVec_Q(%s) nBin=%d a0=%g a1=%g", desc.c_str(), qHisto_0->bins.size(), 0, -1);
 		BIT_SET(this->type, Distribution::DISTRI_OUTSIDE);
 	}
 

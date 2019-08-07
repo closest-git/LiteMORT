@@ -296,7 +296,7 @@ HistoGRAM *MT_BiSplit::GetHistogram(FeatsOnFold *hData_, int pick, bool isInsert
 		HistoGRAM *histo = new HistoGRAM(hFeat, nSamp);
 		HistoGRAM *hP = parent==nullptr ? nullptr : parent->GetHistogram(hData_,pick,false);
 		HistoGRAM *hB = brother==nullptr ? nullptr : brother->GetHistogram(hData_,pick, false);
-		if (hP != nullptr && hB != nullptr) {
+		if (hP != nullptr && hB != nullptr && false ) {
 			//if(pick==0)			printf("%d@(%d %d) ", nSamp,hP->nSamp, hB->nSamp);
 			histo->FromDiff(hP,hB);
 		}

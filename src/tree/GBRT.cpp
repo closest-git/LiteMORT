@@ -308,7 +308,7 @@ int GBRT::Train(string sTitle, int x, int flag) {
 	//FeatsOnFold *hData=curF[0]->hData;
 	total = hTrainData->nSample();			
 	stopping.early_round = hTrainData->config.early_stopping_round;
-	hTrainData->feat_salps = new FS_gene_(stopping.early_round, hTrainData->feats.size(), 0x0);
+	//hTrainData->feat_salps = new FS_gene_(stopping.early_round, hTrainData->feats.size(), 0x0);
 	float *distri = hTrainData->distri, *dtr = nullptr, tag, d1, rOK = 0;
 	double err_0= DBL_MAX,err=DBL_MAX,a;
 	size_t nPickSamp=0;

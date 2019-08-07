@@ -699,7 +699,7 @@ namespace Grusoft {
 			if (genHisto) {
 				if (hDistri->histo == nullptr) {	//²Î¼ûLiteMORT_EDA->Analysis(config, (float *)dataX, (tpY *)dataY, nSamp_, nFeat_0, 1, flag);
 					hDistri->X2Histo_(config, nSamp_, arr(), (double*)nullptr);
-					hDistri->Dump(this->id, false, flag);
+					//hDistri->Dump(this->id, false, flag);
 				}			
 			}
 		}
@@ -836,7 +836,8 @@ namespace Grusoft {
 	protected:
 		FeatVector *hFeatSource = nullptr;
 		//FeatBlit box;
-		HistoGRAM *qHisto = nullptr;
+		HistoGRAM *qHisto_0 = nullptr;
+		HistoGRAM *qHisto_1 = nullptr;
 	public:
 		/*union {
 			vector<double> vThrsh;
@@ -844,13 +845,14 @@ namespace Grusoft {
 		};*/
 		FeatVec_Q(const FeatsOnFold *hData_, FeatVector *hFeat, int nMostBin, int flag = 0x0);
 		virtual ~FeatVec_Q() {
-			if (qHisto != nullptr)			delete qHisto;
+			if (qHisto_0 != nullptr)			delete qHisto_0;
+			if (qHisto_1 != nullptr)			delete qHisto_1;
 			if (hFeatSource != nullptr) {
 				delete hFeatSource;
 				hDistri = nullptr;
 			}
 		}
-		HistoGRAM *GetHisto() { return qHisto; }
+		HistoGRAM *GetHisto() { return qHisto_0; }
 		virtual void Observation_AtSamp(LiteBOM_Config config, SAMP_SET& samp, Distribution&distri, int flag = 0x0) { 
 			hFeatSource->Observation_AtSamp(config, samp, distri,flag);
 		}

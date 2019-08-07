@@ -259,7 +259,7 @@ namespace Grusoft {
 		// desc = in ``dart``, it also affects on normalization weights of dropped trees
 		double learning_rate = 0.03;
 		bool lr_adptive_leaf = false;
-
+		bool useRandomSeed = false;	// true;
 		std::string eda_nan = "zero";
 
 		//gradient variance
