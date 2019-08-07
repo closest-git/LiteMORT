@@ -852,7 +852,9 @@ namespace Grusoft {
 				hDistri = nullptr;
 			}
 		}
-		HistoGRAM *GetHisto() { return qHisto_0; }
+		HistoGRAM *GetHisto()		{	return qHisto_0;	}
+		void InitSampHisto(HistoGRAM* histo, bool isRandom, int flag = 0x0);
+
 		virtual void Observation_AtSamp(LiteBOM_Config config, SAMP_SET& samp, Distribution&distri, int flag = 0x0) { 
 			hFeatSource->Observation_AtSamp(config, samp, distri,flag);
 		}
@@ -862,6 +864,7 @@ namespace Grusoft {
 		}
 
 		//static bin mapping	生成基于EDA的格子	参见Samp2Histo
+		virtual void PerturbeHisto(const FeatsOnFold *hData_, int flag = 0x0);
 		virtual void UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst, int flag = 0x0);
 		//根据样本集，修正每个格子的内容(Y_sum,nz...)
 		virtual void Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag = 0x0);

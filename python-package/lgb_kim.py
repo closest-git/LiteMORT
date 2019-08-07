@@ -35,6 +35,7 @@ min_child=32         #11(0.89830)-> 32(0.89882)
 #x_feat,x_sub=1,0.15
 x_feat,x_sub=0.15,0.3
 #x_feat,x_sub=1,1;       nLeaves=2;n_round=5       #仅用于测试
+#n_round,nLeaves=50,2
 
 print('argv={}\nsome_rows={} pick_samples={}'.format(sys.argv,some_rows,pick_samples))
 plt.style.use('seaborn')

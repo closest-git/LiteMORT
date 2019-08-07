@@ -101,7 +101,6 @@ double GBRT::Predict(FeatsOnFold *hData_, bool isX,bool checkLossy, bool resumeL
 			isResetZero=true;
 		}
 	}
-
 	FeatVec_T<tpDOWN>* predict = dynamic_cast<FeatVec_T<tpDOWN>*>(hData_->GetPrecict());
 	assert(predict!=nullptr);
 	tpDOWN *allx = predict->arr();

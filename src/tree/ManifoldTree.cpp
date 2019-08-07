@@ -454,6 +454,11 @@ void ManifoldTree::Train(int flag) {
 	//printf("\n-----TREE(nodes=%d,leaf=%d),imp_0=%g,", nodes.size(), leafs.size(), imp_0 );
 	vector<int> pick_feats;
 	hData_->nPick4Split(pick_feats, hData_->rander_feat, hForest,-1 );
+	if(true){
+		for (auto no : pick_feats) { 
+			hData_->feats[no]->PerturbeHisto(hData_);
+		}
+	}
 	if (this->hForest->skdu.noT % 500 == 0) {
 		tpSAMP_ID *samps = root->samp_set.samps;
 		size_t nSamp = root->samp_set.nSamp;
@@ -550,6 +555,7 @@ void ManifoldTree::Train(int flag) {
 	}
 		;//printf("    ---- node=%d gain=%g(%g->%g)\n", nodes.size(), gain, imp_0, a);
 	//Dump( );
+
 	ClearSampSet( );		//优化，还需predict
 	for (auto node : nodes) {
 		for (auto pa : node->H_HISTO) {

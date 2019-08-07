@@ -82,6 +82,7 @@ namespace Grusoft {
 
 		//static bin mapping	生成基于EDA的格子	参见Samp2Histo
 		virtual void UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst, int flag = 0x0) { throw "FeatVector::UpdateHisto is ..."; }
+		virtual void PerturbeHisto(const FeatsOnFold *hData_, int flag = 0x0) { throw "FeatVector::PerturbeHisto is ..."; }
 		//virtual MT_BiSplit*OnPredict(const MT_BiSplit *cur_, const size_t no, int flag = 0x0)	 { throw"FeatVector::OnPredict is ..."; }
 		virtual void Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag = 0x0) { throw "FeatVector::Samp2Histo is ..."; }
 		virtual void EDA(const LiteBOM_Config&config,bool genHisto, int flag) { throw "FeatVector::EDA is ..."; }

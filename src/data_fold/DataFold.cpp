@@ -351,35 +351,60 @@ void FeatVec_Q::Samp2Histo_null_hessian_sparse(const FeatsOnFold *hData_, const 
 }
 
 /*
+*/
+void FeatVec_Q::PerturbeHisto(const FeatsOnFold *hData_, int flag) {
+	if (qHisto_1 != nullptr) {
+		delete qHisto_1;
+	}
+	qHisto_1 = new HistoGRAM(this, qHisto_0->nSamp);
+	qHisto_1->CopyBins(*qHisto_0, true, 0x0);
+	//qHisto_1->RandomCompress();
+	int nBin = qHisto_0->bins.size() - 1,i;
+	HISTO_BIN *cur = nullptr;
+
+	for(i=1;i<nBin;i++){
+		double T0 = qHisto_0->bins[i - 1].split_F, T1 = qHisto_0->bins[i].split_F, T2 = qHisto_0->bins[i + 1].split_F;
+		int kk=rand()%2;
+		cur = &(qHisto_1->bins[i]);
+		//测试数据也量化之后，在测试集上已无意义
+		//cur->split_F = kk == 0 ? T1 - (T1 - T0) *30 : T1 + (T2 - T1) *30;
+	}
+}
+
+void FeatVec_Q::InitSampHisto(HistoGRAM* histo, bool isRandom, int flag) {
+	if (isRandom) {
+		assert(qHisto_0->bins.size() > 0);
+		histo->CopyBins(*qHisto_1, true, 0x0);		//变化2 
+		//histo->RandomCompress();					//变化1 
+	}
+	else {
+		if (qHisto_0->bins.size() == 0) {
+			histo->ReSet(0);	return;
+		}
+		else {
+			histo->CopyBins(*qHisto_0, true, 0x0);
+		}
+	}
+}
+/*
 	v0.2
 */
 void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin,  int flag0) {
-	HistoGRAM *qHisto = GetHisto();
-	if (qHisto->bins.size() == 0) {
-		histo->ReSet(0);
-		return;
-	}
-	//tpDOWN *hessian = hData_->GetHessian(); 
-	//tpDOWN *down = hData_->GetDownDirection();	
-	/*bool isRandomDrop = true;
-		std::uniform_real_distribution<double> unif(0, 1);
-		std::mt19937_64 rng;
-		uint64_t timeSeed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-		std::seed_seq ss{ uint32_t(timeSeed & 0xffffffff), uint32_t(timeSeed >> 32) };
-		rng.seed(ss);
-		double T_Drop = 0.01;
-		if (isRandomDrop) {
-				double current = unif(rng);
-				if (current < T_Drop)
-					continue;
-	}*/
-
 	tpDOWN *hessian = hData_->GetSampleHessian();
 	if (hessian == nullptr) {
 		Samp2Histo_null_hessian(hData_, samp_set, histo, nMostBin, flag0);
 		//Samp2Histo_null_hessian_sparse(hData_, samp_set, histo, nMostBin, flag0);
 	}
 	else {
+		InitSampHisto(histo, true);
+		if (histo->bins.size() == 0) {
+			return;
+		}
+		/*HistoGRAM *qHisto = GetHisto(histo,true);
+		if (qHisto->bins.size() == 0) {
+			histo->ReSet(0);
+			return;
+		}*/
 		tpDOWN *down = hData_->GetSampleDown();	
 		string optimal = hData_->config.leaf_optimal;
 		bool isLambda = optimal == "lambda_0";
@@ -392,7 +417,7 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 		tpSAMP_ID samp;
 		tpDOWN a;
 		tpQUANTI *quanti = arr(),no;
-		histo->CopyBins(*qHisto, true, 0x0);
+		//histo->CopyBins(*qHisto, true, 0x0);
 		int nBin = histo->bins.size();
 		HISTO_BIN *pBins = histo->bins.data(),*pBin;	//https://stackoverflow.com/questions/7377773/how-can-i-get-a-pointer-to-the-first-element-in-an-stdvector
 
@@ -433,6 +458,8 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 	}
 	#endif
 }
+
+
 
 /*
 	static bin mapping

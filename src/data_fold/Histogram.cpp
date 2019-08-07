@@ -196,17 +196,19 @@ void HistoGRAM::MoreHisto(const FeatsOnFold *hData_, vector<HistoGRAM*>&more,  i
 void HistoGRAM::RandomCompress(int flag) {
 	vector<HISTO_BIN> binsN;
 	int nCheck = bins.size(), i,start=0;
-	for (i = 0; i < nCheck; i++) {
-		if (i<nCheck-1 && bins[i].nz == 0) {
-			continue;
-		}	else {
-			binsN.push_back(bins[i]);
+	if (true) {
+		for (i = 0; i < nCheck; i++) {
+			if (i<nCheck-1 && bins[i].nz == 0) {
+				continue;
+			}	else {
+				binsN.push_back(bins[i]);
+			}
 		}
+		if (binsN.size() < bins.size())
+			bins = binsN;
+		else
+			binsN.clear();
 	}
-	if (binsN.size() < bins.size())
-		bins = binsN;
-	else
-		binsN.clear();
 	
 	int nTo = max(bins.size()/2,16);
 	while (bins.size() > nTo) {
@@ -279,7 +281,12 @@ void HistoGRAM::GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp_se
 			else
 				gainL = 0;
 		}
-
+		if (false) {
+			if (rand() % 2 == 0)
+				g/=1.2;
+			else
+				g *= 1.2;
+		}
 		if (g>g1 || gainL>g1) {
 			fruit->best_feat_id = hFeat->id;
 			fruit->split_by = this->split_by;
