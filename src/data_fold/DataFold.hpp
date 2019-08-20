@@ -837,7 +837,8 @@ namespace Grusoft {
 		FeatVector *hFeatSource = nullptr;
 		//FeatBlit box;
 		HistoGRAM *qHisto_0 = nullptr;
-		HistoGRAM *qHisto_1 = nullptr;
+		//由PerturbeHisto生成，需要重新设计
+		HistoGRAM *qHisto_1 = nullptr;		
 	public:
 		/*union {
 			vector<double> vThrsh;

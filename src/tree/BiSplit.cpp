@@ -344,7 +344,7 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 	vector<int> picks= pick_feats;
 	//hData_->nPick4Split(picks, hData_->rander_feat);		//似乎效果一般，奇怪	3/7/2019		cys
 	feat_id=-1;
-//	picks.resize(1);		//仅用于测试
+	//picks.resize(1);		//仅用于测试
 	//if (task == "split_X" || task == "split_Y")
 	if (node_task == LiteBOM_Config::split_X || node_task == LiteBOM_Config::histo_X_split_G)
 		assert(gain_train == 0);
@@ -359,8 +359,7 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 		BinFold bf(hData_,picks, samp_set);
 		//bf.GreedySplit(hData_, picks ,0x0 );
 	}
-
-
+	
 	size_t start = 0, end = picks.size();
 	//GST_TIC(t1);
 #pragma omp parallel for schedule(static)
@@ -464,7 +463,8 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 	arrFruit.clear( );
 	hData_->stat.nCheckGain++;
 	double gain = 0;
-	if (fruit != nullptr) {
+	//if (fruit != nullptr) {
+	if (feat_id >= 0)		{
 		if (fruit->split_by == SPLIT_HISTOGRAM::BY_DENSITY) {
 			int i = 0;
 		}

@@ -351,6 +351,7 @@ void FeatVec_Q::Samp2Histo_null_hessian_sparse(const FeatsOnFold *hData_, const 
 }
 
 /*
+	测试数据也量化之后，在测试集上已无意义.		需要重新设计
 */
 void FeatVec_Q::PerturbeHisto(const FeatsOnFold *hData_, int flag) {
 	if (qHisto_1 != nullptr) {
@@ -396,7 +397,7 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 		//Samp2Histo_null_hessian_sparse(hData_, samp_set, histo, nMostBin, flag0);
 	}
 	else {
-		InitSampHisto(histo, true);
+		InitSampHisto(histo, false);
 		if (histo->bins.size() == 0) {
 			return;
 		}

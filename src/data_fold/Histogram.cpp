@@ -210,18 +210,24 @@ void HistoGRAM::RandomCompress(int flag) {
 			binsN.clear();
 	}
 	
-	int nTo = max(bins.size()/2,16);
-	while (bins.size() > nTo) {
-		int no = rand() % (bins.size() - 1);		//binNA总是放在最后
-		HISTO_BIN&target = bins[no == 0 ? 1 : no - 1],&src= bins[no];
+	int nTo = max(bins.size()/2,16), nMerge=0;
+	while (bins.size() > nTo && nMerge<nTo) {
+		int no = rand() % (bins.size() - 2);		//binNA总是放在最后
+		HISTO_BIN&target = bins[no + 1],&src= bins[no];
+		if (src.nz == 0)
+			continue;
 		target.nz += src.nz;
 		target.G_sum += src.G_sum;
 		target.H_sum += src.H_sum;
-		target.split_F = max(target.split_F,src.split_F);
-
-		bins.erase(bins.begin()+no);
+		if (false) {
+			target.split_F = max(target.split_F,src.split_F);
+			target.tic = max(target.tic, src.tic);
+			bins.erase(bins.begin()+no);
+		}	else {
+			nMerge = nMerge + 1;
+			src.nz = 0;			src.G_sum = 0;		src.H_sum = 0;
+		}
 	}
-
 }
 /*
 	v0.2	cys

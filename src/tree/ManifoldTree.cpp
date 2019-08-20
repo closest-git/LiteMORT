@@ -392,6 +392,7 @@ void ManifoldTree::GrowLeaf(hMTNode hBlit, const char*info, bool isAtLeaf, int f
 			isMatch = fabs(hBlit->impuri - imp + hBlit->gain_train) <= imp*thrsh;
 			assert(imp >= hBlit->impuri);
 		}
+
 		if(!isMatch){
 			string sX = hBlit->fruit->sX;
 			printf("\t!!!<%d:dad-child=%g gain=%g>!!!\t\n%s\t%s\t%s", hBlit->id,hBlit->impuri - imp, hBlit->gain_train,sX.c_str(),
@@ -454,7 +455,7 @@ void ManifoldTree::Train(int flag) {
 	//printf("\n-----TREE(nodes=%d,leaf=%d),imp_0=%g,", nodes.size(), leafs.size(), imp_0 );
 	vector<int> pick_feats;
 	hData_->nPick4Split(pick_feats, hData_->rander_feat, hForest,-1 );
-	if(true){
+	if(false){
 		for (auto no : pick_feats) { 
 			hData_->feats[no]->PerturbeHisto(hData_);
 		}
