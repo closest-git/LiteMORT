@@ -284,7 +284,6 @@ int MT_BiSplit::PickOnGain(FeatsOnFold *hData_,const vector<FRUIT *>& arrFruit, 
 	return pick_id;
 }
 
-
 HistoGRAM *MT_BiSplit::GetHistogram(FeatsOnFold *hData_, int pick, bool isInsert, int flag) {
 	size_t nSamp = samp_set.nSamp, i;
 	if (H_HISTO.size() == 0)

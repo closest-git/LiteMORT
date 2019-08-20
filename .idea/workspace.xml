@@ -2,10 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1f20a82c-2842-4728-bc01-7f01847a5972" name="Default" comment="README">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/python-package/lgb_kim.py" beforeDir="false" afterPath="$PROJECT_DIR$/python-package/lgb_kim.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/data_fold/Histogram.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/Histogram.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_fold/Histogram.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/Histogram.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/tree/BiSplit.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/BiSplit.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/tree/ManifoldTree.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/ManifoldTree.cpp" afterDir="false" />
     </list>
@@ -62,11 +63,23 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/python-package/lgb_kim.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="228">
-              <caret line="25" column="14" lean-forward="true" selection-start-line="25" selection-start-column="14" selection-end-line="25" selection-end-column="14" />
+            <state relative-caret-position="247">
+              <caret line="29" column="12" selection-start-line="29" selection-start-column="12" selection-end-line="29" selection-end-column="12" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/python-package/case_poct.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="177">
+              <caret line="27" column="19" selection-start-line="27" selection-start-column="19" selection-end-line="27" selection-end-column="19" />
+              <folding>
+                <element signature="e#0#22#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -195,13 +208,15 @@
         <option value="$PROJECT_DIR$/python-package/litemort/LiteMORT_EDA.py" />
         <option value="$PROJECT_DIR$/python-package/case_higgs.py" />
         <option value="$PROJECT_DIR$/python-package/lgb_kim.py" />
+        <option value="$PROJECT_DIR$/python-package/case_poct.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
-    <option name="x" value="-10" />
-    <option name="width" value="1764" />
-    <option name="height" value="1090" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="176" />
+    <option name="y" value="96" />
+    <option name="width" value="1765" />
+    <option name="height" value="1088" />
   </component>
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="1" id="Add" />
@@ -255,7 +270,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.lgb_kim">
+  <component name="RunManager" selected="Python.case_poct">
     <configuration name="case_earthquake" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="LiteMORT" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -278,7 +293,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="case_qq2019" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="case_poct" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="LiteMORT" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -291,9 +306,9 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/python-package/case_qq2019.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/python-package/case_poct.py" />
       <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
       <option name="REDIRECT_INPUT" value="false" />
@@ -361,19 +376,19 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Python.case_qq2019" />
       <item itemvalue="Python.case_earthquake" />
       <item itemvalue="Python.geo_test" />
       <item itemvalue="Python.lgb_kim" />
       <item itemvalue="Python tests.pytest in pycharm_test.py" />
+      <item itemvalue="Python.case_poct" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.case_poct" />
         <item itemvalue="Python.lgb_kim" />
         <item itemvalue="Python tests.pytest in pycharm_test.py" />
         <item itemvalue="Python.geo_test" />
         <item itemvalue="Python.case_earthquake" />
-        <item itemvalue="Python.case_qq2019" />
       </list>
     </recent_temporary>
   </component>
@@ -449,7 +464,7 @@
       <workItem from="1565571024584" duration="641000" />
       <workItem from="1565579250736" duration="602000" />
       <workItem from="1565663969616" duration="1957000" />
-      <workItem from="1566193609082" duration="7122000" />
+      <workItem from="1566193609082" duration="12589000" />
     </task>
     <task id="LOCAL-00001" summary="README">
       <created>1556249780941</created>
@@ -494,19 +509,18 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="229997000" />
+    <option name="totallyTimeSpent" value="235464000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="-7" width="1410" height="878" extended-state="7" />
-    <editor active="true" />
+    <frame x="-7" y="-7" width="1410" height="878" extended-state="6" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.78150135" visible="true" weight="0.21967456" />
-      <window_info id="Structure" order="1" sideWeight="0.21849866" side_tool="true" visible="true" weight="0.21967456" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.7809695" visible="true" weight="0.21967456" />
+      <window_info id="Structure" order="1" sideWeight="0.21903051" side_tool="true" visible="true" weight="0.21967456" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.25405404" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.21891892" />
+      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.2533512" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.38337803" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -700,6 +714,7 @@
     <SUITE FILE_PATH="coverage/LiteMORT$pycharm_test.coverage" NAME="pycharm_test Coverage Results" MODIFIED="1557050214018" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
     <SUITE FILE_PATH="coverage/LiteMORT$LiteMORT_preprocess.coverage" NAME="LiteMORT_preprocess Coverage Results" MODIFIED="1557816270058" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package/litemort" />
     <SUITE FILE_PATH="coverage/LiteMORT$lgb_kim.coverage" NAME="lgb_kim Coverage Results" MODIFIED="1564801856244" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
+    <SUITE FILE_PATH="coverage/LiteMORT$case_poct.coverage" NAME="case_poct Coverage Results" MODIFIED="1566281353070" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
     <SUITE FILE_PATH="coverage/LiteMORT$pytest_in_pycharm_test_py.coverage" NAME="pytest in pycharm_test.py Coverage Results" MODIFIED="1564799919413" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
     <SUITE FILE_PATH="coverage/LiteMORT$case_qq2019.coverage" NAME="case_qq2019 Coverage Results" MODIFIED="1564799379478" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
     <SUITE FILE_PATH="coverage/LiteMORT$case_higgs.coverage" NAME="case_higgs Coverage Results" MODIFIED="1563763409535" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
@@ -707,7 +722,6 @@
     <SUITE FILE_PATH="coverage/LiteMORT$geo_test.coverage" NAME="geo_test Coverage Results" MODIFIED="1564799540881" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/vs_0/pyMORT/LiteMORT.py" />
     <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/_pydev_imps/_pydev_execfile.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="294">
@@ -1020,8 +1034,18 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/python-package/lgb_kim.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="228">
-          <caret line="25" column="14" lean-forward="true" selection-start-line="25" selection-start-column="14" selection-end-line="25" selection-end-column="14" />
+        <state relative-caret-position="247">
+          <caret line="29" column="12" selection-start-line="29" selection-start-column="12" selection-end-line="29" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python-package/case_poct.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="177">
+          <caret line="27" column="19" selection-start-line="27" selection-start-column="19" selection-end-line="27" selection-end-column="19" />
+          <folding>
+            <element signature="e#0#22#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

@@ -372,6 +372,7 @@ void FeatVec_Q::PerturbeHisto(const FeatsOnFold *hData_, int flag) {
 	}
 }
 
+
 void FeatVec_Q::InitSampHisto(HistoGRAM* histo, bool isRandom, int flag) {
 	if (isRandom) {
 		assert(qHisto_0->bins.size() > 0);
@@ -448,6 +449,7 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 			pBin->nz++;
 		}		
 	}
+
 	//histo->RandomCompress();
 	#ifdef _DEBUG
 	if (true /* && !isRandomDrop*/) {

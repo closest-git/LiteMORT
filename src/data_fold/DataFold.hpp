@@ -538,7 +538,7 @@ namespace Grusoft {
 			tpSAMP_ID samp;
 			bool isQuanti = hData_->isQuanti;		//predict,test对应的数据集并没有格子化!!!
 			//double thrsh = hData_->isQuanti ? hBlit->fruit->T_quanti : hBlit->fruit->thrshold;
-			double thrsh = hBlit->fruit->Thrshold(hData_->isQuanti);
+			//double thrsh = hBlit->fruit->Thrshold(hData_->isQuanti);
 			//if( hBlit->fruit->isY )
 			//	thrsh = hBlit->fruit->thrshold;
 			MT_BiSplit *left = hBlit->left, *rigt = hBlit->right, *child = nullptr;

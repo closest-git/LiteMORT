@@ -128,7 +128,8 @@ namespace Grusoft {
 		double Thrshold(bool isQuanti) {
 			//assert(binSplit.split_Q >= 0);
 			if (isQuanti) {
-				return bin_S1.tic;
+				return bin_S0.tic+1;
+				//return bin_S1.tic;
 			}	else {
 				if(true)
 					return adaptive_thrsh;

@@ -156,6 +156,7 @@ HistoGRAM* HistoGRAM::FromDiff(const HistoGRAM*hP, const HistoGRAM*hB, int flag)
 	return this;
 }
 
+//似乎偏慢，需要提速
 void HistoGRAM::CompressBins(int flag) {
 	vector<HISTO_BIN>::iterator iter = bins.begin();
 	while (iter != bins.end()) {
@@ -166,6 +167,19 @@ void HistoGRAM::CompressBins(int flag) {
 			++iter;
 		}
 	}
+	/*
+	for (i = 0; i < nCheck; i++) {
+	if (i<nCheck-1 && bins[i].nz == 0) {
+	continue;
+	}	else {
+	binsN.push_back(bins[i]);
+	}
+	}
+	if (binsN.size() < bins.size())
+	bins = binsN;
+	else
+	binsN.clear();
+	*/
 }
 
 void HistoGRAM::MoreHisto(const FeatsOnFold *hData_, vector<HistoGRAM*>&more,  int flag) {
@@ -195,9 +209,11 @@ void HistoGRAM::MoreHisto(const FeatsOnFold *hData_, vector<HistoGRAM*>&more,  i
 
 void HistoGRAM::RandomCompress(int flag) {
 	vector<HISTO_BIN> binsN;
-	int nCheck = bins.size(), i,start=0;
+	int nBins_0 = bins.size(), i,start=0;
 	if (true) {
-		for (i = 0; i < nCheck; i++) {
+		this->CompressBins();	//带来扰动，有意思
+		//if (bins.size() < nBins_0/10)	printf("[%d=>%d]\t", nBins_0, bins.size());
+		/*for (i = 0; i < nCheck; i++) {
 			if (i<nCheck-1 && bins[i].nz == 0) {
 				continue;
 			}	else {
@@ -207,11 +223,11 @@ void HistoGRAM::RandomCompress(int flag) {
 		if (binsN.size() < bins.size())
 			bins = binsN;
 		else
-			binsN.clear();
+			binsN.clear();*/
 	}
-	
-	int nTo = max(bins.size()/2,16), nMerge=0;
-	while (bins.size() > nTo && nMerge<nTo) {
+
+	int nTo = max(bins.size()/4,16);
+	while (bins.size() > nTo ) {
 		int no = rand() % (bins.size() - 2);		//binNA总是放在最后
 		HISTO_BIN&target = bins[no + 1],&src= bins[no];
 		if (src.nz == 0)
@@ -219,14 +235,7 @@ void HistoGRAM::RandomCompress(int flag) {
 		target.nz += src.nz;
 		target.G_sum += src.G_sum;
 		target.H_sum += src.H_sum;
-		if (false) {
-			target.split_F = max(target.split_F,src.split_F);
-			target.tic = max(target.tic, src.tic);
-			bins.erase(bins.begin()+no);
-		}	else {
-			nMerge = nMerge + 1;
-			src.nz = 0;			src.G_sum = 0;		src.H_sum = 0;
-		}
+		bins.erase(bins.begin()+no);		
 	}
 }
 /*

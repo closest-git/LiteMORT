@@ -555,7 +555,7 @@ void ManifoldTree::Train(int flag) {
 		}
 	}
 		;//printf("    ---- node=%d gain=%g(%g->%g)\n", nodes.size(), gain, imp_0, a);
-	//Dump( );
+	//Dump( );		//输出GBRT的信息
 
 	ClearSampSet( );		//优化，还需predict
 	for (auto node : nodes) {

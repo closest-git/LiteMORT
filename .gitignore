@@ -293,3 +293,5 @@ ModelManifest.xml
 /python-package/.pytest_cache/v/cache/lastfailed
 /python-package/.pytest_cache/v/cache/nodeids
 /python-package/case_qq2019.py
+*.txt
+*.jpg
