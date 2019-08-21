@@ -449,7 +449,7 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 			pBin->nz++;
 		}		
 	}
-
+	//基于case_poct测试，似乎可以通过遍历更多的空间来提高准确率
 	//histo->RandomCompress();
 	#ifdef _DEBUG
 	if (true /* && !isRandomDrop*/) {
@@ -509,7 +509,7 @@ void FeatVec_Q::UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst,
 
 		if(distri.histo!=nullptr)
 			qHisto_0->CopyBins(*(distri.histo), true, 0x0);
-		hFeat->QuantiAtEDA(edaX, quanti, nMostBin);
+		hFeat->QuantiAtEDA(edaX, quanti, nMostBin, hData_->isTrain(),0x0);
 	}	else{
 		//hFeat->Split2Quanti(hData_->config,edaX, vThrsh, qHisto, yDown, nMostBin);
 		printf( "\n!!! FeatVec_Q::Update_Histo edaX=nullptr !!!\n" );		
@@ -517,7 +517,7 @@ void FeatVec_Q::UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst,
 	}
 	for (nValid=0,i = 0; i < nSamp; i++) {
 		if(quanti[i] == -111)
-		{	printf("\n!!! FeatVec_Q::Update_Histo quanti[%d] is -1 !!!\n",i);		throw "\n!!! FeatVec_Q::Update_Histo quanti is -1 !!!\n";	}
+		{	printf("\n!!! FeatVec_Q::Update_Histo quanti[%d] is -111 !!!\n",i);		throw "\n!!! FeatVec_Q::Update_Histo quanti is -1 !!!\n";	}
 		if (quanti[i] >=0 )
 			nValid++;
 	}

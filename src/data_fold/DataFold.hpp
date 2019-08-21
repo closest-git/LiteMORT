@@ -150,13 +150,13 @@ namespace Grusoft {
 		tpDOWN *GetSampleDown()	const;
 		tpDOWN *GetSampleHessian() const;		
 		/**/
-		bool atTrainTask() {
+		bool atTrainTask()		const	{
 			return config.task == LiteBOM_Config::kTrain;
 		}
-		bool atPredictTask() {
+		bool atPredictTask()	const	{
 			return config.task == LiteBOM_Config::kPredict;
 		}
-		bool isTrain() {
+		bool isTrain()			const	{
 			return BIT_TEST(dType, FeatsOnFold::DF_TRAIN);
 		}
 
@@ -704,60 +704,65 @@ namespace Grusoft {
 			}
 		}
 
-		/*
-			v0.2	反向复制
-				5/16/2019		cys
-			和edaX有区别（数据集有差别），这些区别应该有价值
-		
-		virtual void EDA(const LiteBOM_Config&config, ExploreDA *edaX, int flag) {
-			size_t i;
-			assert(hDistri == nullptr);
-			hDistri = new Distribution();		hDistri->nam = nam;
-			hDistri->STA_at(nSamp_,val, true, 0x0);
-			if (ZERO_DEVIA(hDistri->vMin, hDistri->vMax))
-				BIT_SET(this->type, Distribution::V_ZERO_DEVIA);
-			else if (config.eda_Normal != LiteBOM_Config::NORMAL_off) {
-				Tx *val_c = arr();
-				double mean = hDistri->mean, s = 1.0 / hDistri->devia;
-				//for each(tpSAMP_ID samp in hDistri->sortedA
-				for (i = 0; i < nSamp_; i++) {
-					val_c[i] = (val_c[i] - mean)*s;
+		//参见Distribution::STA_at，需要独立出来		8/20/2019
+		void sorted_idx(vector<tpSAMP_ID>& sortedA,int flag=0x0) {
+			sortedA.clear();
+			size_t i = 0, i_0 = 0, nA = 0, nNA=0, nZERO=0,N= nSamp_;
+			for (i = i_0; i < N; i++) {
+				if (IS_NAN_INF(val[i])) {
+					nNA++;	continue;
 				}
-				hDistri->STA_at(nSamp_, val, true, 0x0);
+				if (IS_ZERO_RANGE(val[i])) {
+					nZERO++;
+				}/**/
+				//a = val[i];
 			}
-			if (edaX != nullptr) {		//复制信息
-				Distribution& distri = edaX->arrDistri[id];
-				if (distri.histo == nullptr) {	//参见LiteMORT_EDA->Analysis(config, (float *)dataX, (tpY *)dataY, nSamp_, nFeat_0, 1, flag);
-					distri = *hDistri;		//反向复制
-					distri.X2Histo_(config, nSamp_, arr(), (double*)nullptr);
-					distri.Dump(this->id, false, flag);
-				}	else {
-					if (distri.vMin != DBL_MAX) {
+
+			if (nNA > 0 && nNA < N ) {
+				vector<Tx> A;
+				vector<tpSAMP_ID> map;
+				A.resize(N - nNA);
+				map.resize(N - nNA);
+				for (i = 0; i < N; i++) {
+					if (IS_NAN_INF(val[i])) {
+						continue;
 					}
-					nam = distri.nam;
-					BIT_SET(type, distri.type);
+					A[nA] = val[i];	map[nA++] = i;
 				}
-				hDistri->binFeatas = distri.binFeatas;
+				assert(N - nNA == nA);
+
+				vector<tpSAMP_ID> idx;
+				sort_indexes(A, idx);
+				sortedA.resize(N - nNA);
+				for (i = 0; i < nA; i++) {
+					sortedA[i] = map[idx[i]];
+				}
+				for (i = 0; i < nA - 1; i++) {
+					assert(!IS_NAN_INF(val[sortedA[i]]));
+					assert(val[sortedA[i]] <= val[sortedA[i + 1]]);
+				}
 			}
-			else {
+			else if(nNA== 0){
+				sort_indexes(N, val, sortedA);
 			}
-		}*/
+		}
 
 		/*
 			参见ExploreDA::
 		*/
-		virtual void QuantiAtEDA(const ExploreDA *edaX, tpQUANTI *quanti, int nMostBin, int flag = 0x0) {
+		virtual void QuantiAtEDA(const ExploreDA *edaX, tpQUANTI *quanti, int nMostBin,bool isSameSorted, int flag) {
 			assert(quanti != nullptr && edaX != nullptr);
 			size_t nSamp_ = size(), i, i_0 = 0, i_1, noBin = 0, pos;
 			vector<tpSAMP_ID> idx;
-			if (hDistri->sortedA.size() > 0) {
+			if (hDistri->sortedA.size() > 0 && isSameSorted) {
 				idx = hDistri->sortedA;
 				for (i = 0; i < nSamp_; i++)
 					quanti[i] = -1;
 			}
-			else
-				sort_indexes(nSamp_,val, idx);
-			//sort_indexes(val, idx);
+			else {
+				//sort_indexes(nSamp_,val, idx);
+				sorted_idx(idx);
+			}
 			size_t nA = idx.size();
 			Tx a0 = val[idx[0]], a1 = val[idx[nA - 1]];
 			double v0 = a0, v1, v2;
@@ -786,7 +791,18 @@ namespace Grusoft {
 					pos = idx[i_0];
 					assert(!IS_NAN_INF(val[pos]));
 					if (val[pos]< distri.vMin || val[pos]>distri.vMax) {//确实有可能
-						quanti[pos] = -1;	i_0++;
+						if (isSameSorted) {
+							quanti[pos] = -1;	i_0++;
+						}
+						else {	//强制扰动
+							if (val[pos] < distri.vMin) {
+								quanti[pos] = 0;
+							}
+							if (val[pos]>distri.vMax) {
+								quanti[pos] = histo->bins.size()-2;
+							}
+							quanti[pos] = -1;	i_0++;
+						}
 						continue;
 					}
 					if (val[pos] < v1) {
@@ -803,7 +819,8 @@ namespace Grusoft {
 				int noNA = distri.histo->bins.size()-1;				
 				HISTO_BIN* hNA=distri.histo->hBinNA();
 				for (i = 0; i < nSamp_; i++) {
-					if (quanti[i] == -1)
+					//if (quanti[i] == -1)
+					if (quanti[i] <0)
 					{	quanti[i] = noNA;		hNA->nz++;		}
 				}
 				hNA->split_F = DBL_MAX;

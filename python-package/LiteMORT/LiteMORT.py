@@ -9,6 +9,11 @@ from sklearn import preprocessing
 import os
 import warnings
 
+'''
+BUG
+    1 predict和predict_raw 参见case_poct.py
+    
+'''
 class MORT_exception(Exception):
     """Error throwed by LiteMORT"""
     pass

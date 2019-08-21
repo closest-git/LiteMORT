@@ -397,8 +397,8 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	for (int feat = 0; feat < ldX_; feat++) {
 		FeatVec_Q *hFQ=nullptr;
 		FeatVector *hFeat = hFold->Feat(feat);
-		//if(feat==116)
-		//	feat = 116;
+		//if(feat==1)
+		//	feat = 1;
 		
 		//printf("\r\tfeat=%d\t......",feat);
 		hFeat->Set(nSamp_, (void*)(X_ + feat*nSamp_));

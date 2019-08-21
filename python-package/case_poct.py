@@ -5,12 +5,18 @@ from sklearn.metrics import roc_auc_score, roc_curve,auc
 import time
 import numpy as np
 from litemort import *
-isMORT=False
+import sys
+isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
+#isMORT = True
 import matplotlib.pyplot as plt
 import pandas as pd
 import gc
 import seaborn as sns
 import pickle
+'''
+    histo->RandomCompress() 似乎可以通过遍历更多的空间来提高准确率
+
+'''
 
 def ROC_plot(features,X_,y_, pred_,title):
     fpr_, tpr_, thresholds = roc_curve(y_, pred_)
@@ -30,17 +36,19 @@ def ROC_plot(features,X_,y_, pred_,title):
     return auc_,optimal_threshold
 
 def runLgb(X, y, test=None, num_rounds=10000, max_depth=-1, eta=0.01, subsample=0.8,
-           colsample=0.8, min_child_weight=1, early_stopping_rounds=50, seeds_val=2017):
+           colsample=0.8, min_child_weight=1, early_stopping_rounds=500, seeds_val=2017):
     plot_feature_importance = True
     features = list(X.columns)
     print("X={} y={}".format(X.shape,y.shape))
     params = {'task': 'train',
+              'max_bin': 256,
              'min_data_in_leaf': 32,
              'boosting_type': 'gbdt',
              'objective': 'binary',
              'learning_rate': eta,
              # 'metric': {'multi_logloss'},
              'metric': 'auc',
+             'early_stop':early_stopping_rounds,
              'max_depth': max_depth,
              # 'min_child_weight':min_child_weight,
              'bagging_fraction': subsample,
@@ -69,7 +77,10 @@ def runLgb(X, y, test=None, num_rounds=10000, max_depth=-1, eta=0.01, subsample=
 
         if isMORT:
             model = LiteMORT(params).fit(X_train, y_train, eval_set=[(X_valid, y_valid)])
-            pass
+            pred_val = model.predict(X_valid)
+            pred_raw = model.predict_raw(X_valid)
+            y_pred[valid_index] = pred_raw
+            fold_score = roc_auc_score(y_valid, pred_raw)
         else:
             lgtrain = lgb.Dataset(X_train, y_train)
             lgval = lgb.Dataset(X_valid, y_valid)
@@ -80,13 +91,18 @@ def runLgb(X, y, test=None, num_rounds=10000, max_depth=-1, eta=0.01, subsample=
             fold_importance["importance"] = model.feature_importance()
             fold_importance["fold"] = fold_n + 1
             feature_importance = pd.concat([feature_importance, fold_importance], axis=0)
-        pred_val = model.predict(X_valid)
-        y_pred[valid_index] = pred_val
-        model.save_model(f'model_lgb_poct_{fold_n}_.txt')
+            model.save_model(f'model_lgb_poct_{fold_n}_.txt')
+            pred_val = model.predict(X_valid)
+            y_pred[valid_index] = pred_val
+            fold_score = roc_auc_score(y_valid, pred_val)
+
+        print("fold n°{} time={:.3g} score={:.4g}".format(fold_n, time.time() - t0, fold_score))
         if test is not None:
             pred_test = model.predict(test, num_iteration=model.best_iteration)
+
         else:
             pred_test = None
+        #break
     auc = roc_auc_score(y, y_pred)
     if feature_importance is not None:
         feature_importance["importance"] /= n_fold

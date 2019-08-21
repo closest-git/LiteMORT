@@ -179,7 +179,10 @@ double GBRT::Predict(FeatsOnFold *hData_, bool isX,bool checkLossy, bool resumeL
 
 		if (BIT_TEST(hData_->dType, FeatsOnFold::DF_EVAL)) {
 			if ((skdu.noT < 100 && skdu.noT % 5 == 0) || skdu.noT % 500 == 0) {
-				printf("%s_%d=%-8.5g ", hData_->nam.c_str(),skdu.noT,  err);		//eval_
+				if (hData_->config.eval_metric == "auc") {
+					printf("auc_%d=%-8.5g ", skdu.noT, hData_->lossy->err_auc);
+				}else
+					printf("%s_%d=%-8.5g ", hData_->nam.c_str(),skdu.noT,  err);		//eval_
 				if(skdu.noT > 100)	printf("tX=%.3g ", FeatsOnFold::stat.tX);
 			}
 
@@ -376,6 +379,7 @@ int GBRT::Train(string sTitle, int x, int flag) {
 			//printf("\t%4d: train=%g sec\r\n\n", t+1, GST_TOC(tick));
 		}
 	}
+
 	//printf("\n====== %d: ERR@%s=%8.5g time=%.3g(%.3g) ======\n", skdu.noT, hTrainData->nam.c_str(), err_0,GST_TOC(tick), 0);
 	for (i = stopping.best_round + 1; i<forest.size(); i++) {
 		delete forest[i];

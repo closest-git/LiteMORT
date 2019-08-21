@@ -625,8 +625,10 @@ void ManifoldTree::Dump( int flag ){
 		if (node->isLeaf()) continue;
 		FeatVector *hFeat = hData_->Feat(node->feat_id);
 		size_t nSamp = node->nSample();
-		//printf("%d ", node->feat_id);
-		printf("%s ", hFeat->nam.c_str());
+		if(hFeat->nam.length()==0)
+			printf("%d ", node->feat_id);
+		else
+			printf("%s ", hFeat->nam.c_str());
 		if (isDistri) {
 			
 			FeatVec_Q *hFQ = dynamic_cast<FeatVec_Q*>(hFeat);
@@ -657,7 +659,7 @@ void ManifoldTree::Dump( int flag ){
 	for (auto node : nodes) {
 	//for each(hMTNode node in nodes) {
 		if (node->isLeaf()) continue;
-		printf("%.8g ", node->fruit->Thrshold(false));		
+		printf("%.8g ", node->fruit->Thrshold(true));		//×ÜÊÇisQuanti
 	}
 	printf("\n\tleaf_value=");
 	for (auto node : nodes) {
