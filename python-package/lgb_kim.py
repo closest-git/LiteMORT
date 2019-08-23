@@ -81,6 +81,7 @@ start = time.time()
 param = {
         'num_leaves': nLeaves,
         'num_round':n_round,
+        'salp_bins':0,
         #'num_leaves': 32,
         #'max_bin': 119,
         'max_bin': max_bin,

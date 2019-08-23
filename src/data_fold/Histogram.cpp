@@ -206,36 +206,60 @@ void HistoGRAM::MoreHisto(const FeatsOnFold *hData_, vector<HistoGRAM*>&more,  i
 	H_1->split_by = SPLIT_HISTOGRAM::BY_DENSITY;
 }
 
-
-void HistoGRAM::RandomCompress(int flag) {
-	vector<HISTO_BIN> binsN;
+void HistoGRAM::RandomCompress(FeatVector *hFV,bool isSwarm,int flag) {
 	int nBins_0 = bins.size(), i,start=0;
-	if (true) {
-		this->CompressBins();	//带来扰动，有意思
-		//if (bins.size() < nBins_0/10)	printf("[%d=>%d]\t", nBins_0, bins.size());
-		/*for (i = 0; i < nCheck; i++) {
-			if (i<nCheck-1 && bins[i].nz == 0) {
+	size_t nz = 0;
+	double G_sum = 0, H_sum = 0;
+	if (isSwarm) {
+		vector<HISTO_BIN> binsN;
+		assert(nBins_0== hFV->select_bins->DIM());
+		vector<int> picks;
+		hFV->select_bins->PickOnStep(nBins_0,picks,true);
+		for (i = 0; i < nBins_0-1; i++) {
+			if (picks[i]==0 && i<nBins_0-2) {
+				nz+= bins[i].nz;
+				G_sum += bins[i].G_sum;		H_sum += bins[i].H_sum;
 				continue;
-			}	else {
+			}
+			if(nz+bins[i].nz>0)	{
+				bins[i].nz += nz;
+				bins[i].G_sum += G_sum;				bins[i].H_sum += H_sum;
+
 				binsN.push_back(bins[i]);
+				nz = 0;		 G_sum = 0, H_sum = 0;
 			}
 		}
+		binsN.push_back(bins[nBins_0 - 1]);
 		if (binsN.size() < bins.size())
 			bins = binsN;
 		else
-			binsN.clear();*/
+			binsN.clear();
 	}
-
-	int nTo = max(bins.size()/4,16);
-	while (bins.size() > nTo ) {
-		int no = rand() % (bins.size() - 2);		//binNA总是放在最后
-		HISTO_BIN&target = bins[no + 1],&src= bins[no];
-		if (src.nz == 0)
-			continue;
-		target.nz += src.nz;
-		target.G_sum += src.G_sum;
-		target.H_sum += src.H_sum;
-		bins.erase(bins.begin()+no);		
+	else {
+		if (true) {
+			this->CompressBins();	//带来扰动，有意思
+		}
+		int nTo = max(bins.size()/4,16);	//
+		while (bins.size() > nTo ) {
+			int no = rand() % (bins.size() - 2);		//binNA总是放在最后
+			HISTO_BIN&target = bins[no + 1],&src= bins[no];
+			if (src.nz == 0)
+				continue;
+			target.nz += src.nz;
+			target.G_sum += src.G_sum;
+			target.H_sum += src.H_sum;
+			bins.erase(bins.begin()+no);		
+		}
+	}
+	if (hFV->select_bins != nullptr) {
+		vector<double>& position = hFV->select_bins->cand.position;
+		int nGate = position.size();
+		for (i = 0; i < nGate; i++)	position[i] = 0;
+		for (auto bin : bins) {
+			assert(bin.tic < nGate);
+			position[bin.tic] = 1;
+		}
+		i = 0;
 	}
 }
 /*

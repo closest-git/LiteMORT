@@ -31,7 +31,7 @@ void BinarySwarm_GBDT::InitBound(int dim,int flag) {
 
 }
 
-BinarySwarm_GBDT::BinarySwarm_GBDT(int nMostSalp_,int dim_,int flag) : nMostSalp(nMostSalp_),DIM(dim_){
+BinarySwarm_GBDT::BinarySwarm_GBDT(int nMostSalp_,int dim_,int flag) : nMostSalp(nMostSalp_),DIM_(dim_){
 
 }
 
@@ -46,7 +46,7 @@ void BSA_salp::UpdateLeader(double loss, int flag) {
 	UpdateC1();
 	int i;
 	double a, b;
-	for (i = 0; i < DIM; i++) {
+	for (i = 0; i < DIM_; i++) {
 		c_2 = rander_.Uniform_(0, 1);
 		c_3 = rander_.Uniform_(0, 1);
 		double a = food->position[i];
@@ -66,7 +66,7 @@ void BinarySwarm_GBDT::NormalSwarms(int nSalp, int flag) {
 	//salps.resize(nSalp);
 	std::sort(salps.begin(), salps.end());
 
-	food = new BinSalp(DIM, flag);
+	food = new BinSalp(DIM(), flag);
 	//UpdateFood();
 	//food->Copy(salp_0);
 }
@@ -89,6 +89,31 @@ bool BSA_salp::Step(int nSalp, int flag) {
 		NormalSwarms(nSalp);
 	}
 	UpdateLeader(0,flag);
+	//UpdatePosition
+
+	BinSalp *pre = nullptr;
+	for (auto salp : salps) {
+		if (salp != leader)
+			salp->MixPosition(0.5, salp, 0.5, pre, 0x0);
+		pre = salp;
+	}
+	UpdateFood();
+	iter = iter + 1;
+	//food.set
+	return true;
+}
+
+
+BSA_gene::BSA_gene(int nBird_, int dim_, int nMaxIter_, int flag) : BinarySwarm_GBDT(nBird_, dim_, flag) {
+
+
+}
+bool BSA_gene::Step(int nSalp, int flag) {
+	assert(salps.size() >= nSalp);
+	if (iter == 0) {
+		NormalSwarms(nSalp);
+	}
+	UpdateLeader(0, flag);
 	//UpdatePosition
 
 	BinSalp *pre = nullptr;

@@ -11,6 +11,8 @@ using namespace std;
 #include "../include/LiteBOM_config.h"
 #include "../tree/BiSplit.hpp"
 #include "../util/GST_def.h"
+#include "../EDA/Feat_Selection.hpp"
+
 #include "EDA.hpp"
 
 #ifdef WIN32
@@ -39,6 +41,7 @@ namespace Grusoft {
 	public:
 		Distribution *hDistri = nullptr;		//仅指向
 		Distribution *hDistriTrain = nullptr;	//仅指向
+		Feature_Selection* select_bins=nullptr;
 		enum {
 			//CATEGORY = 0x100,
 			AGGREGATE = 0x200,
@@ -56,10 +59,10 @@ namespace Grusoft {
 		int agg_no = -1;		//展开为一系列聚合特征
 		
 		string nam = "", desc = "";
-		//virtual void Clear(int flag = 0x0) {		}
+
 		virtual ~FeatVector() {
-			//if (hDistri != nullptr)
-			//	delete hDistri;
+			if (select_bins != nullptr)
+				delete select_bins;
 		}
 		virtual void Empty(int flag = 0x0) {		}
 		virtual void Set(size_t len, void* p, int flag = 0x0) { throw"FeatVector::SetY is ..."; }

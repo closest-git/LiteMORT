@@ -131,7 +131,7 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 		bool isSwarm = feat_salps != nullptr && hForest->stopping.nBraeStep>0;
 		if (isSwarm) {
 			vector<int> pick_1,pick_2;
-			isSwarm = feat_salps->PickOnStep(hForest->stopping.nBraeStep, pick_1);
+			isSwarm = feat_salps->PickOnStep(hForest->stopping.nBraeStep, pick_1,false);
 			for (auto x : pick_1) {
 				int no = picks[x];
 				pick_2.push_back(no);
@@ -450,7 +450,8 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 		}		
 	}
 	//基于case_poct测试，似乎可以通过遍历更多的空间来提高准确率
-	//histo->RandomCompress();
+	bool isSwarm = select_bins != nullptr && select_bins->isFull();
+	histo->RandomCompress(this, isSwarm);
 	#ifdef _DEBUG
 	if (true /* && !isRandomDrop*/) {
 		double G_sum = 0;	// histo->hBinNA()->G_sum;
@@ -525,6 +526,8 @@ void FeatVec_Q::UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst,
 		printf("\n FeatVec_Q(%s) nBin=%d a0=%g a1=%g", desc.c_str(), qHisto_0->bins.size(), 0, -1);
 		BIT_SET(this->type, Distribution::DISTRI_OUTSIDE);
 	}
+	if(hData_->config.nMostSalp4bins>0 && hData_->isTrain())
+		select_bins = new FS_gene_(this->nam,hData_->config.nMostSalp4bins, qHisto_0->bins.size(), 0x0);
 
 		//printf("\n FeatVec_Q(%s) nBin=%d a0=%g a1=%g", desc.c_str(),qHisto->bins.size(),qHisto->a0, qHisto->a1 );	
 }

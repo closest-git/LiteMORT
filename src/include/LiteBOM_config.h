@@ -160,14 +160,14 @@ namespace Grusoft {
 				"\n\tImputation=%s\tNormal=%s"
 				"\n\tIter_refine=%g \tRefine_split=%d"
 				"\n\tnode_task=%s"
-				"\n\thisto_bin_::map=%s",
+				"\n\tnMostSalp4Bins=%d histo_bin_::map=%s",
 				learning_rate, subsample, feature_fraction, min_data_in_leaf, early_stopping_round, drop_out, num_leaves,
 				objective.c_str(), eval_metric.c_str(), leaf_optimal.c_str(),
 				init_scor.c_str(),
 				eda_NA == -1 ? "OFF" : eda_NA == 0 ? "0" : "Other",
 				eda_Normal == 0 ? "OFF" : "Gaussian", T_iterrefine,split_refine,
 				node_task==0 ? "split_X" : node_task == 1 ? "split_Y" : "REGRESS_X",
-				histo_alg.c_str()
+				nMostSalp4bins,histo_alg.c_str()
 				);
 		}
 		
@@ -232,6 +232,7 @@ namespace Grusoft {
 				//eval_metric = "auc";
 				//eval_metric = "WMW";	//"Wilcoxon-Mann-Whitney";
 			}
+			//nMostSalp4bins = 64;
 		}
 
 		// [doc-only]
@@ -259,8 +260,10 @@ namespace Grusoft {
 		// desc = in ``dart``, it also affects on normalization weights of dropped trees
 		double learning_rate = 0.03;
 		bool lr_adptive_leaf = false;
-		bool useRandomSeed = false;	// true;
+		bool useRandomSeed = true;	// true;
 		std::string eda_nan = "zero";
+		int nMostSalp4bins = 0;
+		int nMostSalp4feats = 0;
 
 		//gradient variance
 		//std::string leaf_optimal = "taylor_2";		//似乎有问题，grad_variance收敛速度明显更快

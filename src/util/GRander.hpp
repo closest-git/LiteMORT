@@ -114,6 +114,15 @@ namespace Grusoft{
 			}
 			return ret;
 		}
+
+		inline void kSampleInN(tpSAMP_ID *root_set, int K, int N, bool isOrder = true, int flag = 0x0) {
+			std::vector<int> sampls = kSampleInN(K, N, isOrder, flag);
+			K = sampls.size();
+			for (int i = 0; i < K; i++) {
+				root_set[i] = sampls[i];
+			}
+			return;
+		}
 	};
 
 	/*

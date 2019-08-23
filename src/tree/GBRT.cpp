@@ -178,7 +178,7 @@ double GBRT::Predict(FeatsOnFold *hData_, bool isX,bool checkLossy, bool resumeL
 		}
 
 		if (BIT_TEST(hData_->dType, FeatsOnFold::DF_EVAL)) {
-			if ((skdu.noT < 100 && skdu.noT % 5 == 0) || skdu.noT % 500 == 0) {
+			if ((skdu.noT <= 100 && skdu.noT % 5 == 0) || skdu.noT % 500 == 0) {
 				if (hData_->config.eval_metric == "auc") {
 					printf("auc_%d=%-8.5g ", skdu.noT, hData_->lossy->err_auc);
 				}else

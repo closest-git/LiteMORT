@@ -8,7 +8,18 @@ from .LiteMORT_problems import *
 from sklearn import preprocessing
 import os
 import warnings
+import matplotlib.pyplot as plt
 
+def _check_not_tuple_of_2_elements(obj, obj_name='obj'):
+    """Check object is not tuple or does not have 2 elements."""
+    if not isinstance(obj, tuple) or len(obj) != 2:
+        raise TypeError('%s must be a tuple of 2 elements.' % obj_name)
+
+
+def _float2str(value, precision=None):
+    return ("{0:.{1}f}".format(value, precision)
+            if precision is not None and not isinstance(value, string_type)
+            else str(value))
 '''
 BUG
     1 predict和predict_raw 参见case_poct.py
@@ -66,6 +77,8 @@ class LiteMORT_params(object):
         self.feature_sample = self.alias_param('sub_feature', 1.0, dict_param, ['feature_sample', 'feature_fraction', 'sub_feature', 'colsample_bytree'])
         if 'max_bin' in dict_param:
             self.feature_quanti = dict_param['max_bin']
+        if 'salp_bins' in dict_param:
+            self.salp_bins = dict_param['salp_bins']
         if 'min_data_in_leaf' in dict_param:
             self.min_child_samples = dict_param['min_data_in_leaf']
         if 'boost_from_average' in dict_param:
@@ -414,5 +427,158 @@ class LiteMORT(object):
         X_ = imputed_DF
         #print("head={}\ntail={}".format(X_.head(), X_.tail()))
         return X_
+
+    def feature_name(self):
+        """Get names of features.
+        """
+        num_feature = self.num_feature()
+        # Get name of features
+        tmp_out_len = ctypes.c_int(0)
+        string_buffers = [ctypes.create_string_buffer(255) for i in range_(num_feature)]
+        ptr_string_buffers = (ctypes.c_char_p * num_feature)(*map(ctypes.addressof, string_buffers))
+        (_LIB.LGBM_BoosterGetFeatureNames(
+            self.handle,
+            ctypes.byref(tmp_out_len),
+            ptr_string_buffers))
+        if num_feature != tmp_out_len.value:
+            raise ValueError("Length of feature names doesn't equal with num_feature")
+        return [string_buffers[i].value.decode() for i in range(num_feature)]
+
+    def feature_importance(self, importance_type='split', iteration=None):
+        """Get feature importances.
+
+        Parameters
+        ----------
+        importance_type : string, optional (default="split")
+            How the importance is calculated.
+            If "split", result contains numbers of times the feature is used in a model.
+            If "gain", result contains total gains of splits which use the feature.
+        iteration : int or None, optional (default=None)
+            Limit number of iterations in the feature importance calculation.
+            If None, if the best iteration exists, it is used; otherwise, all trees are used.
+            If <= 0, all trees are used (no limits).
+
+        Returns
+        -------
+        result : numpy array
+            Array with feature importances.
+        """
+        if iteration is None:
+            iteration = self.best_iteration
+        if importance_type == "split":
+            importance_type_int = 0
+        elif importance_type == "gain":
+            importance_type_int = 1
+        else:
+            importance_type_int = -1
+        result = np.zeros(self.num_feature(), dtype=np.float64)
+        (_LIB.LGBM_BoosterFeatureImportance(
+            self.handle,
+            ctypes.c_int(iteration),
+            ctypes.c_int(importance_type_int),
+            result.ctypes.data_as(ctypes.POINTER(ctypes.c_double))))
+        if importance_type_int == 0:
+            return result.astype(int)
+        else:
+            return result
+
+    def plot_importance(self,mort, ax=None, height=0.2,xlim=None, ylim=None,
+            title='Feature importance',xlabel='Feature importance', ylabel='Features',importance_type='split',
+            max_num_features=None, ignore_zero=True, figsize=None, grid=True,precision=None, **kwargs):
+        """Plot model's feature importances.
+
+        Parameters
+        ----------
+        booster : Booster or LGBMModel
+            Booster or LGBMModel instance which feature importance should be plotted.
+        ax : matplotlib.axes.Axes or None, optional (default=None)
+            Target axes instance.
+            If None, new figure and axes will be created.
+        height : float, optional (default=0.2)
+            Bar height, passed to ``ax.barh()``.
+        xlim : tuple of 2 elements or None, optional (default=None)
+            Tuple passed to ``ax.xlim()``.
+        ylim : tuple of 2 elements or None, optional (default=None)
+            Tuple passed to ``ax.ylim()``.
+        title : string or None, optional (default="Feature importance")
+            Axes title.
+            If None, title is disabled.
+        xlabel : string or None, optional (default="Feature importance")
+            X-axis title label.
+            If None, title is disabled.
+        ylabel : string or None, optional (default="Features")
+            Y-axis title label.
+            If None, title is disabled.
+        importance_type : string, optional (default="split")
+            How the importance is calculated.
+            If "split", result contains numbers of times the feature is used in a model.
+            If "gain", result contains total gains of splits which use the feature.
+        max_num_features : int or None, optional (default=None)
+            Max number of top features displayed on plot.
+            If None or <1, all features will be displayed.
+        ignore_zero : bool, optional (default=True)
+            Whether to ignore features with zero importance.
+        figsize : tuple of 2 elements or None, optional (default=None)
+            Figure size.
+        grid : bool, optional (default=True)
+            Whether to add a grid for axes.
+        precision : int or None, optional (default=None)
+            Used to restrict the display of floating point values to a certain precision.
+        **kwargs
+            Other parameters passed to ``ax.barh()``.
+
+        Returns
+        -------
+        ax : matplotlib.axes.Axes
+            The plot with model's feature importances.
+        """
+
+        importance = mort.feature_importance(importance_type=importance_type)
+        feature_name = mort.feature_name()
+
+        if not len(importance):
+            raise ValueError("Booster's feature_importance is empty.")
+
+        tuples = sorted(zip(feature_name, importance), key=lambda x: x[1])
+        if ignore_zero:
+            tuples = [x for x in tuples if x[1] > 0]
+        if max_num_features is not None and max_num_features > 0:
+            tuples = tuples[-max_num_features:]
+        labels, values = zip(*tuples)
+
+        if ax is None:
+            if figsize is not None:
+                _check_not_tuple_of_2_elements(figsize, 'figsize')
+            _, ax = plt.subplots(1, 1, figsize=figsize)
+
+        ylocs = np.arange(len(values))
+        ax.barh(ylocs, values, align='center', height=height, **kwargs)
+
+        for x, y in zip(values, ylocs):
+            ax.text(x + 1, y,_float2str(x, precision) if importance_type == 'gain' else x,va='center')
+
+        ax.set_yticks(ylocs)
+        ax.set_yticklabels(labels)
+
+        if xlim is not None:
+            _check_not_tuple_of_2_elements(xlim, 'xlim')
+        else:
+            xlim = (0, max(values) * 1.1)
+        ax.set_xlim(xlim)
+
+        if ylim is not None:
+            _check_not_tuple_of_2_elements(ylim, 'ylim')
+        else:
+            ylim = (-1, len(values))
+        ax.set_ylim(ylim)
+
+        if title is not None:
+            ax.set_title(title)
+        if xlabel is not None:
+            ax.set_xlabel(xlabel)
+        if ylabel is not None:
+            ax.set_ylabel(ylabel)
+        ax.grid(grid)
+        return ax
 
 

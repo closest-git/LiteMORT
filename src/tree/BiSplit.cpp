@@ -58,19 +58,13 @@ void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const SAMP_SET *from, size_t nMos
 		//memcpy(root_set, from->samps,sizeof(tpSAMP_ID)*nFrom);
 		return;
 	}
+
 	size_t T_1 = nFrom / std::log2(nMost*1.0);
 	unsigned int x = 123456789,next; 
 	//srand(time(0)); 
 	x = hData_->rander_samp.RandInt32() % nFrom;
-	bool isSequence = true && from == nullptr;
+	bool isSequence = false && from == nullptr;
 	if (isSequence) {		//得失之间...		4/11/2019	cys
-		/*size_t n_X = min(nFrom - x, nMost),n_2 = n_X >=nMost ? 0 : nMost- n_X;
-		for (i = 0; i < n_2; i++) {
-			root_set[i] = i ;
-		}
-		for (i = 0; i < n_X; i++) {
-			root_set[n_2+i] = i+x;
-		}*/
 		size_t grid = max(int(nMost/100), 1);
 		while (nz < nMost) {	
 			size_t start = hData_->rander_samp.RandInt32() % nFrom,end=min(grid, nFrom-start);
@@ -82,14 +76,16 @@ void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const SAMP_SET *from, size_t nMos
 		}
 		//std::sort(root_set, root_set + nMost);
 	}else	if (nMost > T_1) {
-		for (nz=0, i = 0; i < nFrom; ++i) {
+		hData_->rander_samp.kSampleInN(root_set,nMost, nFrom);		//case_higgs反复测试，确实有效诶
+		
+		/*for (nz=0, i = 0; i < nFrom; ++i) {
 			double prob = (nMost - nz) / static_cast<double>(nFrom - i);
 			x = (214013 * x + 2531011);
 			x = ((x >> 16) & 0x7FFF);
 			if ((x/32768.0f) < prob) {
 				root_set[nz++]=i;
 			}
-		}
+		}*/
 	}	else {
 		tpSAMP_ID *mask=new tpSAMP_ID[nFrom]();
 		while (nz < nMost) {
@@ -105,7 +101,9 @@ void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const SAMP_SET *from, size_t nMos
 		delete[] mask;
 		std::sort(root_set, root_set + nMost);
 	}
+
 	assert(nz <= nMost);
+	//printf("\nsamps={%d,%d,%d,...%d,...,%d,%d}", samps[0], samps[1], samps[2], samps[nz / 2], samps[nz - 2], samps[nz - 1]);
 }
 
 MT_BiSplit::MT_BiSplit(FeatsOnFold *hData_, int d, int rnd_seed, int flag) : depth(d) {
@@ -446,6 +444,11 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 		if (hFeat->hDistri != nullptr && hFeat->hDistri->rNA > 0) {			
 			//fruit->isNanaLeft = hFeat->hDistri;
 		}	
+		if (hFeat->select_bins!=nullptr) {
+			hFeat->select_bins->AddCandSalp( );
+			hFeat->select_bins->SetCost(1);
+		}/**/
+
 	}
 	else {	//确实有可能,很多情况可以进一步优化，需要积累一些算例来分析
 		//printf("\n\t!!! Failed split at %d nSamp=%d nPick=%d !!!\n", id, nSample(), picks.size());
@@ -485,6 +488,13 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 				//assert(0);
 			}
 		}
+	}
+	if (feat_id >= 0) {
+		/*FeatVector *hFeat = hData_->Feat(feat_id);
+		if (hFeat->select_bins != nullptr) {
+			hFeat->select_bins->AddCandSalp();
+			hFeat->select_bins->SetCost(gain);
+		}*/
 	}
 	FeatsOnFold::stat.tX += GST_TOC(t1);
 	gain_train = gain;

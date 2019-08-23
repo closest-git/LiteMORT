@@ -4,11 +4,11 @@ using namespace Grusoft;
 GRander LogicSalp::rander_(2020);
 GRander Feature_Selection::rander_(2020);
 
-LogicSalp::LogicSalp(int dim, int flag) {
+LogicSalp::LogicSalp(const int dim, int flag) {
 	position.resize(dim);
 }
 
-LogicSalp::LogicSalp(int dim, const vector<int>&picks, int flag) {
+LogicSalp::LogicSalp(const int dim, const vector<int>&picks, int flag) {
 	position.resize(dim);
 	for (int i = 0; i < dim; i++) {
 		position[i] = 0;
@@ -18,14 +18,23 @@ LogicSalp::LogicSalp(int dim, const vector<int>&picks, int flag) {
 	}
 }
 
-void Feature_Selection::GetPicks(const LogicSalp *salp, vector<int>&picks, int flag ) {
-	picks.clear();
+void Feature_Selection::GetPicks(const LogicSalp *salp, vector<int>&picks, bool isMask, int flag ) {
 	int i;
-	for (i = 0; i < DIM; i++) {
-		if (salp->position[i] == 1)
-			picks.push_back(i);
-		else
-			assert(salp->position[i] == 0);
+	if (isMask) {
+		picks.resize(DIM_);
+		for (i = 0; i < DIM_; i++) {
+			picks[i] = salp->position[i] == 1;
+		}
+	}
+	else {
+		picks.clear();
+		for (i = 0; i < DIM_; i++) {
+			if (salp->position[i] == 1)
+				picks.push_back(i);
+			else
+				assert(salp->position[i] == 0);
+		}
+
 	}
 }
 
@@ -51,14 +60,16 @@ void LogicSalp::mutatioin(double T_mut, int flag) {
 
 }
 
-Feature_Selection::Feature_Selection(int nMostSalp_, int dim_, int flag) : nMostSalp(nMostSalp_), DIM(dim_) {
-	T_mute = 1.0 / DIM;		//mutate one feature of each individual (statistically).
+Feature_Selection::Feature_Selection(int nMostSalp_, int dim_, int flag) : nMostSalp(nMostSalp_), DIM_(dim_),cand(dim_) {
+	T_mute = 1.0 / DIM_;		//mutate one feature of each individual (statistically).
 	T_elitism = min(T_elitism, nMostSalp_ / 2-1);
 }
 
 
-FS_gene_::FS_gene_(int nBird_, int dim_, int nMaxIter_, int flag) : Feature_Selection(nBird_, dim_, flag), offspring(dim_){
+FS_gene_::FS_gene_(const string nam_, int nSalp_, int dim_, int nMaxIter_, int flag) : Feature_Selection(nSalp_, dim_, flag), offspring(dim_){
 	//InitBound(dim);
+
+	printf("\nFS_gene_(\"%s\",nSalp_=%d,dim=%d)", nam_.c_str(),nSalp_, dim_);
 
 }
 
@@ -112,15 +123,24 @@ void FS_gene_::Intermediate_Select(int flag) {
 }
 
 //比较有意思，只生成一条
-bool FS_gene_::PickOnStep(int nSalp, vector<int>&picks, int flag) {
+bool FS_gene_::PickOnStep(int nSalp, vector<int>&picks, bool isMask, int flag) {
 	if (iter == 0) {
-		printf("\nFS_gene_::PickOnStep...iter=%d......", iter);
+		//printf("\nFS_gene_::PickOnStep...iter=%d......", iter);
 	}
 	Intermediate_Select();
 	vector<int> pick_2 = rander_.kSampleInN(2, inter_samps_.size());
 	offspring.cross_over(inter_samps_[pick_2[0]], inter_samps_[pick_2[1]]);
 	offspring.mutatioin(T_mute);
-	GetPicks(&offspring,picks);
+	GetPicks(&offspring,picks, isMask);
 	iter = iter + 1;
 	return true;
+}
+
+void Feature_Selection::AddCandSalp(int flag) {
+	if (salps.size() >= nMostSalp)
+		salps.erase(salps.begin());
+	int dim = cand.DIM();
+	LogicSalp *salp = new LogicSalp(dim);
+	salp->Copy(&cand);
+	salps.push_back(salp);
 }

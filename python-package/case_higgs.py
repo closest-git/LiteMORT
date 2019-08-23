@@ -8,6 +8,7 @@ The data has been produced using Monte Carlo simulations. The first 21 features 
     https://blog.bigml.com/2017/09/28/case-study-finding-higgs-bosons-with-deepnets/
 
     5/19/2019 需要确定是regression 或 binary classification
+    8/23/2019   subsample似乎没用，而subfeature能提高准确率
 '''
 import lightgbm as lgb
 import time
@@ -24,8 +25,8 @@ from litemort import *
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 #isMORT = True
 model_type = 'mort' if isMORT else 'lgb'
-some_rows=      200000
-#some_rows=      2000000
+#some_rows=      200000
+some_rows=      2000000
 #some_rows=      10500000
 nTotal =        11000000
 nLastForTest =    500000       #The last 500,000 examples are used as a test set.
@@ -59,23 +60,26 @@ def read_higgs_data(path):
 X,y,X_test = read_higgs_data("F:/Datasets/HIGGS_/HIGGS.csv")
 #X = Unique_Expand(X)
 #X_test = Unique_Expand(X_test)
-
+num_rounds = 10001
 params = {
         "objective": "binary",
-        "metric": "binary_logloss",        #"binary_logloss"
-            'max_bin': 63,
-          'num_leaves': 255,
+        "metric": "auc",        #"binary_logloss"
+        'salp_bins':0,
+            'max_bin': 256,
+          'num_leaves': 64,
           'learning_rate': 0.1,
           'tree_learner': 'serial',
           'task': 'train',
           'is_training_metric': 'false',
           'min_data_in_leaf': 512,
-          'min_sum_hessian_in_leaf': 100,
-          'bagging_fraction': 0.2,
-          'ndcg_eval_at': [1, 3, 5, 10],
-          'sparse_threshold': 1.0,
-            'n_estimators':500,
-            'early_stopping_rounds': 50,
+          #'min_sum_hessian_in_leaf': 100,
+          #'bagging_fraction': 1,#0.2,
+          'subsample': 0.8,     'bagging_freq': 1,
+            'feature_fraction': 0.5,
+          #'ndcg_eval_at': [1, 3, 5, 10],
+          #'sparse_threshold': 1.0,
+            'n_estimators':num_rounds,
+            'early_stopping_rounds': 500,
             'iter_refine':0
           #'device': 'cpu'
            #'device': 'gpu',
@@ -108,7 +112,7 @@ for fold_n, (train_index, valid_index) in enumerate(folds.split(X)):
     if model_type == 'lgb':
         model = lgb.LGBMRegressor(**params, n_jobs=-1)
         model.fit(X_train, y_train,
-                  eval_set=[(X_train, y_train), (X_valid, y_valid)], eval_metric='binary_logloss',verbose=50)
+                  eval_set=[(X_train, y_train), (X_valid, y_valid)], eval_metric='auc',verbose=5)
         model.booster_.save_model('geo_test_.model')
         y_pred_valid = model.predict(X_valid)
         #y_pred = model.predict(X_test, num_iteration=model.best_iteration_)

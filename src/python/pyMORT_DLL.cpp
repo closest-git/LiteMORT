@@ -120,6 +120,9 @@ void OnUserParams(LiteBOM_Config&config, PY_ITEM* params, int nParam, int flag =
 		if (strcmp(params[i].Keys, "objective") == 0) {
 			config.objective = params[i].text;
 		}
+		if (strcmp(params[i].Keys, "salp_bins") == 0) {
+			config.nMostSalp4bins = params[i].Values;
+		}
 		if (strcmp(params[i].Keys, "iter_refine") == 0) {
 			config.T_iterrefine = params[i].Values;
 		}

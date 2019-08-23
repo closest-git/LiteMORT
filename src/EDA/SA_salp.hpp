@@ -39,7 +39,7 @@ namespace Grusoft {
 	class BinarySwarm_GBDT {
 
 	protected:
-		int DIM,iter=0, maxIter;		// the current iteration and the maximum number of iterations
+		int DIM_,iter=0, maxIter;		// the current iteration and the maximum number of iterations
 		static GRander rander_;
 		//bool first_step = true;
 		BinSalp *bound = nullptr;		//二分类，初始化为1向量
@@ -58,6 +58,7 @@ namespace Grusoft {
 	public:
 		BinarySwarm_GBDT(int nMostSalp_,int dim_, int flag = 0x0);
 
+		int DIM() {	return DIM_;		}
 
 		virtual ~BinarySwarm_GBDT() {
 			if (velocity != nullptr)		delete[] velocity;
@@ -84,6 +85,13 @@ namespace Grusoft {
 			return false;
 		}
 
+	};
+
+	class BSA_gene : public BinarySwarm_GBDT {
+	protected:
+	public:
+		BSA_gene(int nBird_, int dim_, int nMaxIter_, int flag = 0x0);
+		virtual bool Step(int nSalp, int flag = 0x0);
 	};
 
 	class BSA_salp : public BinarySwarm_GBDT {

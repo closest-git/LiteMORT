@@ -42,6 +42,7 @@ def runLgb(X, y, test=None, num_rounds=10000, max_depth=-1, eta=0.01, subsample=
     print("X={} y={}".format(X.shape,y.shape))
     params = {'task': 'train',
               'max_bin': 256,
+              'salp_bins':32,
              'min_data_in_leaf': 32,
              'boosting_type': 'gbdt',
              'objective': 'binary',
@@ -86,6 +87,11 @@ def runLgb(X, y, test=None, num_rounds=10000, max_depth=-1, eta=0.01, subsample=
             lgval = lgb.Dataset(X_valid, y_valid)
             model = lgb.train(params, lgtrain, num_rounds, valid_sets=lgval,
                               early_stopping_rounds=early_stopping_rounds, verbose_eval=100)
+            plt.figure(figsize=(12, 6))
+            lgb.plot_importance(model, max_num_features=30)
+            plt.title("Featurertances")
+            plt.show()
+
             fold_importance = pd.DataFrame()
             fold_importance["feature"] = X.columns
             fold_importance["importance"] = model.feature_importance()
