@@ -8,7 +8,9 @@ The data has been produced using Monte Carlo simulations. The first 21 features 
     https://blog.bigml.com/2017/09/28/case-study-finding-higgs-bosons-with-deepnets/
 
     5/19/2019 需要确定是regression 或 binary classification
-    8/23/2019   subsample似乎没用，而subfeature能提高准确率
+    8/23/2019   subsample subfeature 似乎都没用(2000000测试)
+        lesome_rows=2000000 iter=2000 auc=0.83775(1,1) auc=0.83847(0.8,1);auc=0.83618(0.8,0.5)
+
 '''
 import lightgbm as lgb
 import time
@@ -25,7 +27,7 @@ from litemort import *
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 #isMORT = True
 model_type = 'mort' if isMORT else 'lgb'
-#some_rows=      200000
+#some_rows=      20000
 some_rows=      2000000
 #some_rows=      10500000
 nTotal =        11000000
@@ -74,8 +76,8 @@ params = {
           'min_data_in_leaf': 512,
           #'min_sum_hessian_in_leaf': 100,
           #'bagging_fraction': 1,#0.2,
-          'subsample': 0.8,     'bagging_freq': 1,
-            'feature_fraction': 0.5,
+          'subsample': 1,     'bagging_freq': 1,
+            'feature_fraction': 1,
           #'ndcg_eval_at': [1, 3, 5, 10],
           #'sparse_threshold': 1.0,
             'n_estimators':num_rounds,

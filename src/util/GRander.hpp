@@ -4,6 +4,9 @@
 #include <stdint.h>
 #include <vector>
 #include <set>
+#include <assert.h>
+#include <stdint.h>
+#include "pcg_oneil/pcg_basic.h"
 
 #define rotl(r,n) (((r)<<(n)) | ((r)>>((8*sizeof(r))-(n))))
 
@@ -15,15 +18,9 @@ namespace Grusoft{
 	class GRander {
 		unsigned int x = 123456789;		//过于简单，有问题
 		uint64_t xx, yy, zz;
-		uint64_t RandRersResrResdra() {  // Combined period = 2^116.23
-			xx = rotl(xx, 8) - rotl(xx, 29);                 //RERS,   period = 4758085248529 (prime)
-			yy = rotl(yy, 21) - yy;  yy = rotl(yy, 20);      //RESR,   period = 3841428396121 (prime)
-			zz = rotl(zz, 42) - zz;  zz = zz + rotl(zz, 14); //RESDRA, period = 5345004409 (prime)
-			return xx ^ yy ^ zz;
-		}
+		uint64_t RandRersResrResdra();
 
 		inline int RandInt16()		{
-			//x = (214013 * x + 2531011);
 			x = RandRersResrResdra();
 			return static_cast<int>((x >> 16) & 0x7FFF);
 		}
@@ -32,7 +29,7 @@ namespace Grusoft{
 		}
 
 	protected:
-		//std::ranlux64_base_01 eng;
+		pcg32_random_t rng_neil;
 		std::random_device device;
 		uint32_t seed;
 
@@ -42,6 +39,8 @@ namespace Grusoft{
 			auto genrator = std::mt19937(rd());
 			std::uniform_int_distribution<int> distribution(0, x);
 			x = distribution(genrator);
+
+			pcg32_srandom_r(&rng_neil, 42u, 54u);
 		}
 		GRander(uint32_t seed_) { Init(seed_);	 }
 
@@ -60,7 +59,6 @@ namespace Grusoft{
 
 		}
 		inline int RandInt32() {
-			//x = (214013 * x + 2531011);
 			x = RandRersResrResdra();
 			return static_cast<int>(x & 0x7FFFFFFF);
 		}

@@ -39,6 +39,7 @@ void SAMP_SET::Alloc(FeatsOnFold *hData_, size_t nSamp_, int flag) {
 		root_set[i] = i;
 	samps = root_set;
 }
+
 /*
 	v0.2		cys	
 		3/29/2019
@@ -63,9 +64,9 @@ void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const SAMP_SET *from, size_t nMos
 	unsigned int x = 123456789,next; 
 	//srand(time(0)); 
 	x = hData_->rander_samp.RandInt32() % nFrom;
-	bool isSequence = false && from == nullptr;
+	bool isSequence = true && from == nullptr;
 	if (isSequence) {		//µ√ ß÷Æº‰...		4/11/2019	cys
-		size_t grid = max(int(nMost/100), 1);
+		size_t grid = max(int(nMost/100), 1);		//overlap bagging
 		while (nz < nMost) {	
 			size_t start = hData_->rander_samp.RandInt32() % nFrom,end=min(grid, nFrom-start);
 			end = min(end, nMost - nz);
