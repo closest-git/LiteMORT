@@ -140,7 +140,7 @@ namespace Grusoft {
 										//SAMP_SET samp_set;
 										//label or target values of Y，Only one,多个Y显然需要多个模型来训练。	
 		FeatVec_LOSS *lossy = nullptr;
-
+		virtual string LOSSY_INFO(double err, int flag = 0x0);
 		FeatVector* GetPrecict();
 		FeatVector* GetY();
 

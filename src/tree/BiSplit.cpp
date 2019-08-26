@@ -64,7 +64,7 @@ void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const SAMP_SET *from, size_t nMos
 	unsigned int x = 123456789,next; 
 	//srand(time(0)); 
 	x = hData_->rander_samp.RandInt32() % nFrom;
-	bool isSequence = true && from == nullptr;
+	bool isSequence = false && from == nullptr;
 	if (isSequence) {		//µ√ ß÷Æº‰...		4/11/2019	cys
 		size_t grid = max(int(nMost/100), 1);		//overlap bagging
 		while (nz < nMost) {	

@@ -24,6 +24,45 @@ void FeatVec_LOSS::Update(FeatsOnFold *hData_,int round, int flag) {
 	return;
 }
 
+string FeatsOnFold::LOSSY_INFO(double err, int flag) {
+	char tmp[1000];
+	if (config.eval_metric == "auc") {
+		sprintf(tmp, "%-8.5g", 1-err);
+	}
+	else {
+		sprintf(tmp, "%-8.5g", err);
+	}
+	return tmp;
+}
+
+double FeatVec_LOSS::ERR(const FeatsOnFold *hData_, int flag) {
+	double err = 0;
+	if (hData_->config.eval_metric == "mse") {
+		err = hData_->lossy->err_rmse;
+		err = err*err;
+	}
+	else if (hData_->config.eval_metric == "mae") {
+		err = hData_->lossy->err_mae;
+	}
+	else if (hData_->config.eval_metric == "logloss") {
+		err = hData_->lossy->err_logloss;
+	}
+	else if (hData_->config.eval_metric == "auc") {	//需要与EARLY_STOPPING::isOK统一
+		err = 1 - hData_->lossy->err_auc;		
+		//err = hData_->lossy->err_auc;
+	}
+	return err;
+}
+
+bool FeatVec_LOSS::isOK(const FeatsOnFold *hData_, int typ, double thrsh, int flag) {
+	double err = ERR(hData_, flag);
+	if (hData_->config.eval_metric == "auc") {
+		return err < thrsh;
+	}else
+		return err < thrsh;
+	//return err_rmse < thrsh;
+}
+
 void FeatVec_LOSS::EDA(const FeatsOnFold *hData_,  ExploreDA *edaX, int flag) {
 	const LiteBOM_Config&config = hData_->config;
 	size_t nSamp = hData_->nSample();

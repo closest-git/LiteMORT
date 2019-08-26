@@ -83,7 +83,7 @@ namespace Grusoft {
 				if(ZERO_DEVIA(distri.vMin, distri.vMax) )
 				{	nConstFeat++;	}				
 				distri.X2Histo_(config,nSamp_, x, Y_);
-				distri.Dump(feat,false,flag);
+				//distri.Dump(feat,false,flag);		//Êä³ödistributionÐÅÏ¢
 				arrD.push_back(distri.corr.D_sum);
 			}
 			if (nFeat > 9) {	//

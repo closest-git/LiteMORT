@@ -376,9 +376,10 @@ namespace Grusoft {
 
 		virtual void Update(FeatsOnFold *hData_,int round, int flag = 0x0);
 
-		virtual bool isOK(int typ, double thrsh, int flag = 0x0) {
-			return err_rmse < thrsh;
-		}
+		virtual double ERR(const FeatsOnFold *hData_, int flag = 0x0);
+
+		virtual bool isOK(const FeatsOnFold *hData_, int typ, double thrsh, int flag = 0x0);
+
 		friend class FeatsOnFold;
 		friend class GBRT;
 	};

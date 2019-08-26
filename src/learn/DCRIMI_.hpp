@@ -90,18 +90,25 @@ namespace Grusoft{
 				if (y0[i] == 1)	N_pos++;
 			}
 			N_neg = dim - N_pos;*/
-			StatAtLabel(dim, y0, y1, flag);
-			vector<tpSAMP_ID> idx;
-			size_t i;
-			idx.resize(dim);// initialize original index locations
-			std::iota(idx.begin(), idx.end(), 0);
-			std::sort(idx.begin(), idx.end(), [&y1](tpSAMP_ID i1, tpSAMP_ID i2) {return y1[i1] > y1[i2]; });
-			//ParallelSort(idx.begin(), idx.end(), [&y1](tpSAMP_ID i1, tpSAMP_ID i2) {return y1[i1] > y1[i2]; }, IteratorValType(idx.begin()));
 			double dot=0, auc =0;
-			for (i = 0; i < dim; i++) {		//首先对score从大到小排序，然后令最大score对应的sample 的rank为n
-				dot += y0[idx[i]]*(i+1);
+			StatAtLabel(dim, y0, y1, flag);
+			if (N_pos == 0) {
+				auc = 1;
+			}else if (N_neg == 0) {
+				auc = 1;
+			}	else {
+				vector<tpSAMP_ID> idx;
+				size_t i;
+				idx.resize(dim);// initialize original index locations
+				std::iota(idx.begin(), idx.end(), 0);
+				std::sort(idx.begin(), idx.end(), [&y1](tpSAMP_ID i1, tpSAMP_ID i2) {return y1[i1] > y1[i2]; });
+				//ParallelSort(idx.begin(), idx.end(), [&y1](tpSAMP_ID i1, tpSAMP_ID i2) {return y1[i1] > y1[i2]; }, IteratorValType(idx.begin()));
+				for (i = 0; i < dim; i++) {		//首先对score从大到小排序，然后令最大score对应的sample 的rank为n
+					dot += y0[idx[i]]*(i+1);
+				}
+				auc = 1 + ((N_pos + 1.) / (2 * N_neg)) - (1. / (N_pos * N_neg)) * dot;
 			}
-			auc = 1 + ((N_pos + 1.) / (2 * N_neg)) - (1. / (N_pos * N_neg)) * dot;
+
 			//tX += ((clock() - (t1))*1.0f / CLOCKS_PER_SEC);
 			return auc;
 		}
@@ -124,6 +131,12 @@ namespace Grusoft{
 				}
 			}
 			N_neg = dim - N_pos;
+			if (N_pos == 0) {
+				auc = 1;		return auc;
+			}	else if (N_neg == 0) {
+				auc = 1;		return auc;
+			}
+
 			double dot = 0, auc = 0;
 			tpSAMP_ID *idx=new tpSAMP_ID[dim];
 			for (nz_1 = 0, nz_0 = 0,i = 0; i < dim; i++) {
@@ -168,10 +181,16 @@ namespace Grusoft{
 		double AUC_cys(size_t dim, const Tx *label, const Tx *y1, int flag = 0x0) {	//失败的尝试，晕
 			clock_t t1 = clock();
 			size_t i, nStep=1024,pos,*ptr=new size_t[nStep*2+2](),*count=ptr+ nStep+1, nz_1=0;
+			double dot = 0, auc = 0;		
 			StatAtLabel(dim, label, y1, flag);
+			if (N_pos == 0) {
+				auc = 1;		return auc;
+			}
+			else if (N_neg == 0) {
+				auc = 1;		return auc;
+			}
 			//double auc_0= AUC_Jonson(dim,label,y1,flag)
 			Tx a;
-			double dot = 0, auc = 0;		
 			if (P_1 == N_0 && P_1==N_1 && P_1==P_0) {
 				for (i = 0; i < dim; i++) {
 					if (label[i] == 0)

@@ -166,7 +166,8 @@ double GBRT::Predict(FeatsOnFold *hData_, bool isX,bool checkLossy, bool resumeL
 		else {
 		}
 		//on the eval_metric
-		if (hData_->config.eval_metric == "mse") {
+		err = hData_->lossy->ERR(hData_);
+		/*if (hData_->config.eval_metric == "mse") {
 			err = hData_->lossy->err_rmse;
 			err = err*err;
 		}	else if (hData_->config.eval_metric == "mae") {
@@ -175,10 +176,10 @@ double GBRT::Predict(FeatsOnFold *hData_, bool isX,bool checkLossy, bool resumeL
 			err = hData_->lossy->err_logloss;
 		}	else if (hData_->config.eval_metric == "auc") {
 			err = 1-hData_->lossy->err_auc;
-		}
+		}*/
 
 		if (BIT_TEST(hData_->dType, FeatsOnFold::DF_EVAL)) {
-			if ((skdu.noT <= 100 && skdu.noT % 5 == 0) || skdu.noT % 500 == 0) {
+			if ((skdu.noT <= 100 && skdu.noT % 5 == 0) || skdu.noT % 200 == 0) {
 				if (hData_->config.eval_metric == "auc") {
 					printf("auc_%d=%-8.5g ", skdu.noT, hData_->lossy->err_auc);
 				}else
@@ -223,7 +224,7 @@ void  EARLY_STOPPING::CheckBrae(int flag) {
 bool EARLY_STOPPING::isOK(int cur_round) {
 	double e_last = errors[errors.size() - 1];
 	if (true) {
-		if( errors.size()<early_round )
+		if( errors.size()<early_round && e_best>0)
 			return false;
 		if (best_no<= errors.size()- early_round) {
 			assert(e_last>=e_best);
@@ -258,7 +259,7 @@ int GBRT::IterTrain(int round, int flag) {
 			FeatVector *hY1 = hTrainData->GetPrecict();
 			tpDOWN *hDown = hTrainData->GetDownDirection();
 			err_0 = this->Predict(hTrainData, false, true, true);		//可以继续优化
-			if (hTrainData->lossy->isOK(0x0, FLT_EPSILON)) {
+			if (hTrainData->lossy->isOK(hTrainData,0x0, FLT_EPSILON)) {
 				eOOB = 0;	printf("\n********* ERR@Train is ZERO, Break!!! *********\n\n");	return 0x0;
 			}
 			if (skdu.noT % 500 == 0) {
@@ -283,7 +284,7 @@ int GBRT::IterTrain(int round, int flag) {
 					break;
 			}
 			stopping.Add(err, round);
-			if (hEvalData->lossy->isOK(0x0, FLT_EPSILON)) {
+			if (hEvalData->lossy->isOK(hEvalData,0x0, FLT_EPSILON)) {
 				eOOB = 0;	printf("\n********* You are so LUCKY!!! *********\n\n");	return 0x0;
 			}
 		}
@@ -330,7 +331,7 @@ int GBRT::Train(string sTitle, int x, int flag) {
 		else {
 			if (isEvalTrain) {
 				err_0 = this->Predict(hTrainData,false,true, true);		//可以继续优化
-				if (hTrainData->lossy->isOK(0x0,FLT_EPSILON)) {
+				if (hTrainData->lossy->isOK(hTrainData,0x0,FLT_EPSILON)) {
 					eOOB = 0;	printf("\n********* ERR@Train is ZERO, Break!!! *********\n\n");	return 0x0;
 				}
 				if (skdu.noT % 500 == 0) {
@@ -348,18 +349,17 @@ int GBRT::Train(string sTitle, int x, int flag) {
 				}
 				err = this->Predict(hEvalData, true, true, true);	//经过校验，同样可以用resumeLast
 				stopping.Add(err,t);
-				if (hEvalData->lossy->isOK(0x0, FLT_EPSILON)) {
-					eOOB = 0;	printf("\n********* You are so LUCKY!!! *********\n\n");	return 0x0;
+				if (hEvalData->lossy->isOK(hEvalData,0x0, FLT_EPSILON)) {
+					eOOB = 0;	printf("\n********* You are so LUCKY!!! *********\n\n");	
 				}		
 				if (hTrainData->feat_salps != nullptr && t>0) {
 					hTrainData->feat_salps->SetCost(1-err);
 				}
 			}
-		}
-		/*	*/
+		}		
 		if (stopping.isOK(t)) {
-			printf("\n********* early_stopping@[%d,%d]!!! bst=%g ERR@train[%d]=%-8.5g overfit=%-8.5g*********\n\n",
-				stopping.best_no, stopping.best_round, stopping.e_best, skdu.noT, err_0, err - err_0);
+			/*printf("\n********* early_stopping@[%d,%d]!!! bst=%s ERR@train[%d]=%s overfit=%-8.5g*********\n\n",
+				stopping.best_no, stopping.best_round, sLossE.c_str(), skdu.noT, sLossT.c_str(), err - err_0);*/
 			break;
 		}
 
@@ -379,7 +379,7 @@ int GBRT::Train(string sTitle, int x, int flag) {
 			//printf("\t%4d: train=%g sec\r\n\n", t+1, GST_TOC(tick));
 		}
 	}
-
+	string sLossE = hEvalData->LOSSY_INFO(stopping.e_best), sLossT = hTrainData->LOSSY_INFO(err_0);
 	//printf("\n====== %d: ERR@%s=%8.5g time=%.3g(%.3g) ======\n", skdu.noT, hTrainData->nam.c_str(), err_0,GST_TOC(tick), 0);
 	for (i = stopping.best_round + 1; i<forest.size(); i++) {
 		delete forest[i];
@@ -387,8 +387,11 @@ int GBRT::Train(string sTitle, int x, int flag) {
 	forest.resize(stopping.best_round + 1);
 	hTrainData->AfterTrain();
 	string sEval = hEvalData == nullptr ? (isEvalTrain ? hTrainData->nam : "None") : hEvalData->nam;
-	printf("\n********* GBRT::Train nTree=%d aNode=%.6g ERR@train=%-8.5g err@%s=%.8g thread=%d train=%g(tX=%g) sec\r\n", 
-		forest.size(), nzNode*1.0/forest.size(), err_0, sEval.c_str(), stopping.e_best,nThread, GST_TOC(tick), FeatsOnFold::stat.tX);
+	if (stopping.isOK(t)) {
+		printf("\n********* early_stopping@[%d,%d]!!!", stopping.best_no, stopping.best_round);
+	}
+	printf("\n********* GBRT::Train nTree=%d aNode=%.6g ERR@train=%s err@%s=%s thread=%d train=%g(tX=%g) sec\r\n", 
+		forest.size(), nzNode*1.0/forest.size(), sLossT.c_str(), sEval.c_str(), sLossE.c_str(),nThread, GST_TOC(tick), FeatsOnFold::stat.tX);
 
 	if (nOOB>0)
 		TestOOB(hTrainData);
