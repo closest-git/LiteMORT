@@ -374,19 +374,18 @@ void FeatVec_Q::PerturbeHisto(const FeatsOnFold *hData_, int flag) {
 
 
 void FeatVec_Q::InitSampHisto(HistoGRAM* histo, bool isRandom, int flag) {
-	if (isRandom) {
-		assert(qHisto_0->bins.size() > 0);
-		histo->CopyBins(*qHisto_1, true, 0x0);		//变化2 
-		//histo->RandomCompress();					//变化1 
+	if (qHisto_0->bins.size() == 0) {
+		histo->ReSet(0);	return;
+	}	else {
+		histo->CopyBins(*qHisto_0, true, 0x0);
 	}
-	else {
-		if (qHisto_0->bins.size() == 0) {
-			histo->ReSet(0);	return;
-		}
-		else {
-			histo->CopyBins(*qHisto_0, true, 0x0);
-		}
+	if (false) {
+		//assert(qHisto_0->bins.size() > 0);
+		//histo->CopyBins(*qHisto_1, true, 0x0);		//变化2 
+		//histo->CompressBins();
+		histo->RandomCompress(this,false);					//变化1 
 	}
+
 }
 /*
 	v0.2
@@ -449,9 +448,7 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 			pBin->nz++;
 		}		
 	}
-	//基于case_poct测试，似乎可以通过遍历更多的空间来提高准确率
-	bool isSwarm = select_bins != nullptr && select_bins->isFull();
-	histo->RandomCompress(this, isSwarm);
+
 	#ifdef _DEBUG
 	if (true /* && !isRandomDrop*/) {
 		double G_sum = 0;	// histo->hBinNA()->G_sum;

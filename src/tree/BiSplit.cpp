@@ -287,14 +287,15 @@ HistoGRAM *MT_BiSplit::GetHistogram(FeatsOnFold *hData_, int pick, bool isInsert
 	size_t nSamp = samp_set.nSamp, i;
 	if (H_HISTO.size() == 0)
 		return nullptr;
+	HistoGRAM *histo = nullptr;
 	if (H_HISTO[pick]==nullptr) {
 		if (!isInsert)
 			return nullptr;
 		FeatVector *hFeat = hData_->Feat(pick);
-		HistoGRAM *histo = new HistoGRAM(hFeat, nSamp);
+		histo = new HistoGRAM(hFeat, nSamp);
 		HistoGRAM *hP = parent==nullptr ? nullptr : parent->GetHistogram(hData_,pick,false);
 		HistoGRAM *hB = brother==nullptr ? nullptr : brother->GetHistogram(hData_,pick, false);
-		if (hP != nullptr && hB != nullptr && false ) {
+		if (hP != nullptr && hB != nullptr) {
 			//if(pick==0)			printf("%d@(%d %d) ", nSamp,hP->nSamp, hB->nSamp);
 			histo->FromDiff(hP,hB);
 		}
@@ -303,20 +304,18 @@ HistoGRAM *MT_BiSplit::GetHistogram(FeatsOnFold *hData_, int pick, bool isInsert
 		}
 		H_HISTO[pick] = histo;
 		//mapHISTO.insert(pair<int, HistoGRAM *>(pick, histo));
-
-		return histo;
 	}	else {
-		HistoGRAM *histo = H_HISTO[pick];
-		return histo;
+		histo = H_HISTO[pick];
 	}
-	return nullptr;
+	return histo;
 }
+
 
 /*
 	v0.2	并行
 */
 double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats, int x, int flag) {
-	GST_TIC(t1);
+	//GST_TIC(t1);
 	H_HISTO.resize(hData_->feats.size());	//pick_feats.size()
 	/*if (bsfold != nullptr) {
 		bsfold->GreedySplit(hData_, flag);
@@ -359,10 +358,9 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 	}
 	
 	size_t start = 0, end = picks.size();
-	//GST_TIC(t1);
+	GST_TIC(t1);
 #pragma omp parallel for schedule(static)
 	for (int i = start; i < end; i++) {		GetHistogram(hData_, picks[i], true);	}
-	//FeatsOnFold::stat.tX += GST_TOC(t1);	
 	//auto t0 = std::chrono::steady_clock::now();
 	//std::chrono::duration<double, std::milli> ht = std::chrono::steady_clock::now() - t0;
 	//printf("%d-%d(%.3g) ", this->id,nSamp, ht*1.0e-3);
@@ -375,7 +373,15 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 		}
 		FeatVector *hFeat = hData_->Feat(pick);
 		//HistoGRAM *histo = optimal=="grad_variance" ? new HistoGRAM(nSamp) : new Histo_CTQ(nSamp);
-		HistoGRAM *histo = GetHistogram(hData_,pick,true);
+		HistoGRAM *histo = GetHistogram(hData_,pick,true), *histoSwarm=nullptr;
+		if (hFeat->select_bins != nullptr) {			//基于case_poct测试，似乎可以通过遍历更多的空间来提高准确率
+			bool isSwarm = hFeat->select_bins->isFull();
+			histoSwarm = new HistoGRAM(hFeat, nSamp);
+			histoSwarm->CopyBins(*histo,false,0x0);
+			histoSwarm->RandomCompress(hFeat, isSwarm);
+			histo = histoSwarm;
+		}
+
 		histo->fruit = fruit;
 		//arrFruit[i] = new FRUIT(histo);
 		if (nSamp == 400 && pick == 9)
@@ -416,7 +422,11 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 		/*if (!arrFruit[i]->isY) {
 			//delete histo;		arrFruit[i]->histo = nullptr;
 		}*/
+		if (histoSwarm!=nullptr) {
+			delete histoSwarm;
+		}
 	}
+	FeatsOnFold::stat.tX += GST_TOC(t1);
 
 
 	/*for (int i = 0; i < 10; i++) {		//2d feat vector
@@ -497,7 +507,7 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 			hFeat->select_bins->SetCost(gain);
 		}*/
 	}
-	FeatsOnFold::stat.tX += GST_TOC(t1);
+	//FeatsOnFold::stat.tX += GST_TOC(t1);
 	gain_train = gain;
 	gain_ = gain_train;
 	return gain_;

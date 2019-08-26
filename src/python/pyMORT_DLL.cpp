@@ -364,9 +364,11 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	if (config.useRandomSeed) {
 		hFold->rander_samp.Init(31415927 * rand());
 		hFold->rander_feat.Init(123456789 * rand());
+		hFold->rander_bins.Init(123456789 * rand());
 	}	else {
 		hFold->rander_samp.Init(31415927);
 		hFold->rander_feat.Init(123456789);
+		hFold->rander_bins.Init(20190826);
 	}
 
 	hFold->InitMost(nSamp_);

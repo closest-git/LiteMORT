@@ -239,7 +239,7 @@ void HistoGRAM::RandomCompress(FeatVector *hFV,bool isSwarm,int flag) {
 		if (true) {
 			this->CompressBins();	//带来扰动，有意思
 		}
-		int nTo = max(bins.size()/4,16);	//
+		int nTo = max(bins.size()/4,4);	//
 		while (bins.size() > nTo ) {
 			int no = rand() % (bins.size() - 2);		//binNA总是放在最后
 			HISTO_BIN&target = bins[no + 1],&src= bins[no];
@@ -266,7 +266,7 @@ void HistoGRAM::RandomCompress(FeatVector *hFV,bool isSwarm,int flag) {
 	v0.2	cys
 		1/28/2019
 */
-void HistoGRAM::GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp_set, int flag) {
+void HistoGRAM::GreedySplit_X(FeatsOnFold *hData_, const SAMP_SET& samp_set, int flag) {
 	if (fruit == nullptr)
 		throw "HistoGRAM::GreedySplit_X fruit is 0!!!";
 
@@ -326,6 +326,7 @@ void HistoGRAM::GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp_se
 			else
 				g *= 1.2;
 		}
+		//double bin_w = hData_->rander_bins.Uniform_(0, 1);
 		if (g>g1 || gainL>g1) {
 			fruit->best_feat_id = hFeat->id;
 			fruit->split_by = this->split_by;
@@ -362,7 +363,7 @@ void HistoGRAM::GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp_se
 	v0.2	cys
 		3/11/2019
 */
-void HistoGRAM::GreedySplit_Y(const FeatsOnFold *hData_, const SAMP_SET& samp_set, bool tryX, int flag) {
+void HistoGRAM::GreedySplit_Y(FeatsOnFold *hData_, const SAMP_SET& samp_set, bool tryX, int flag) {
 	//FeatBlit flitX=flit;
 	char temp[2000];
 	FRUIT fruitX;

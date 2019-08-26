@@ -258,9 +258,9 @@ namespace Grusoft {
 
 		virtual void RandomCompress(FeatVector *hFV,bool, int flag = 0x0);
 		virtual void MoreHisto(const FeatsOnFold *hData_, vector<HistoGRAM*>&more, int flag = 0x0);
-		virtual void GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp_set, int flag = 0x0);
+		virtual void GreedySplit_X(FeatsOnFold *hData_, const SAMP_SET& samp_set, int flag = 0x0);
 		//virtual void GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp_set, int flag = 0x0);
-		virtual void GreedySplit_Y(const FeatsOnFold *hData_, const SAMP_SET& samp_set,bool tryX, int flag = 0x0);
+		virtual void GreedySplit_Y(FeatsOnFold *hData_, const SAMP_SET& samp_set,bool tryX, int flag = 0x0);
 		virtual void Regress(const FeatsOnFold *hData_, const SAMP_SET& samp_set,  int flag = 0x0);
 
 		virtual void CopyBins(const HistoGRAM &src,bool isReset,int flag) {

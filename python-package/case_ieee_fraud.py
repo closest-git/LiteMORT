@@ -26,7 +26,7 @@ seed_everything(SEED)
 LOCAL_TEST = False
 TARGET = 'isFraud'
 START_DATE = datetime.datetime.strptime('2017-11-30', '%Y-%m-%d')
-#some_rows = 20000
+#some_rows = 200000
 some_rows = None
 data_root = 'E:/Kaggle/ieee_fraud/input/'
 pkl_path = f'{data_root}/ieee_fraud_{some_rows}.pickle'
@@ -70,6 +70,7 @@ def make_predictions(tr_df, tt_df, features_columns, target, lgb_params, NFOLDS=
         del tr_x, tr_y, vl_x, vl_y
         gc.collect()
         print(f'Fold:{fold_} time={time.time()-t0:.4g}'  )
+        break
     tt_df['prediction'] = predictions
 
     return tt_df
@@ -226,6 +227,7 @@ else:
 lgb_params = { 'objective':'binary',
                     'boosting_type':'gbdt',
                     'metric':'auc',
+                    'salp_bins':32,
                     'n_jobs':-1,
                     'learning_rate':0.01,
                     'num_leaves': 2**8,
@@ -253,6 +255,7 @@ else:
     lgb_params['early_stopping_rounds'] = 100
     test_predictions = make_predictions(train_df, test_df, features_columns, TARGET, lgb_params, NFOLDS=10)
 
+input("Press Enter to continue...")
 if not LOCAL_TEST:
     test_predictions['isFraud'] = test_predictions['prediction']
     #test_predictions[['TransactionID', 'isFraud']].to_csv(f'submit_{some_rows}_{0.5}.csv', index=False,compression='gzip')

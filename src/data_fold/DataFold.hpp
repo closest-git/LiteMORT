@@ -100,7 +100,7 @@ namespace Grusoft {
 		Feature_Selection *feat_salps = nullptr;
 		Feat_Importance *importance = nullptr;
 		Move_Accelerator *hMove = nullptr;
-		GRander rander_samp, rander_feat;
+		GRander rander_samp, rander_feat,rander_bins;
 		INIT_SCORE init_score;
 		vector<FeatVector*> feats;				//featrue values of X
 		int nPickFeat = 0;
