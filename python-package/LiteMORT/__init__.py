@@ -10,7 +10,7 @@ import os
 try:
     #from .LiteMORT_problems import Mort_Problems
     from .LiteMORT import LiteMORT
-    from .LiteMORT_preprocess import Mort_Preprocess
+    from .LiteMORT_preprocess import Mort_Preprocess,Mort_PickSamples
 except ImportError:
     pass
 '''

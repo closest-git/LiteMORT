@@ -658,6 +658,13 @@ void INIT_SCORE::Init(FeatsOnFold *hData_, int flag) {
 	else //config.init_scor == "0")
 		step = 0;
 	printf("----Start training from score %g",step);
+	//if(hData_->config.eval_metric == "auc"){
+	if (hData_->config.objective == "binary") {
+		double sigmoid_ = 1, a = step;
+		double score = std::log(a / (1.0f - a)) / sigmoid_;
+		step = score;
+		printf("---->%g", step);
+	}
 }
 
 void INIT_SCORE::ToDownStep(int flag) {

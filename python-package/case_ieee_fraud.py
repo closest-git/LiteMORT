@@ -13,6 +13,7 @@ import lightgbm as lgb
 import pickle
 import time
 from litemort import *
+
 import math
 warnings.filterwarnings('ignore')
 def seed_everything(seed=0):
@@ -26,7 +27,7 @@ seed_everything(SEED)
 LOCAL_TEST = False
 TARGET = 'isFraud'
 START_DATE = datetime.datetime.strptime('2017-11-30', '%Y-%m-%d')
-#some_rows = 200000
+#some_rows = 100000
 some_rows = None
 data_root = 'E:/Kaggle/ieee_fraud/input/'
 pkl_path = f'{data_root}/ieee_fraud_{some_rows}.pickle'
@@ -74,6 +75,15 @@ def make_predictions(tr_df, tt_df, features_columns, target, lgb_params, NFOLDS=
     tt_df['prediction'] = predictions
 
     return tt_df
+
+def M_PickSamples(pick_samples,df_train,df_test):
+    nMost = min(df_train.shape[0], df_test.shape[0])
+    random.seed(42)
+    subset = random.sample(range(nMost), pick_samples)
+    df_train = df_train.iloc[subset, :].reset_index(drop=True)
+    df_test = df_test.iloc[subset, :].reset_index(drop=True)
+    print('====== Mort_PickSamples ... df_train={} df_test={}'.format(df_train.shape, df_test.shape))
+    return df_train,df_test
 
 if os.path.isfile(pkl_path):
     print("====== Load pickle @{} ......".format(pkl_path))
@@ -218,8 +228,7 @@ else:
 
     features_columns = [col for col in list(train_df) if col not in rm_cols]
     if some_rows is not None:
-        train_df = train_df[:some_rows]
-        test_df = test_df[:some_rows]
+        train_df,test_df = M_PickSamples(some_rows,train_df,test_df)
     with open(pkl_path, "wb") as fp:  # Pickling
         pickle.dump([train_df, test_df, features_columns, TARGET], fp)
 
@@ -227,7 +236,7 @@ else:
 lgb_params = { 'objective':'binary',
                     'boosting_type':'gbdt',
                     'metric':'auc',
-                    'salp_bins':32,
+                    #'salp_bins':32,
                     'n_jobs':-1,
                     'learning_rate':0.01,
                     'num_leaves': 2**8,
@@ -238,7 +247,7 @@ lgb_params = { 'objective':'binary',
                     'subsample':0.7,
                     'n_estimators':800,
                     'max_bin':255,
-                    'verbose':-1,
+                    'verbose':1,
                     'seed': SEED,
                     'early_stopping_rounds':100,
                 }
@@ -250,7 +259,7 @@ if LOCAL_TEST:
     test_predictions = make_predictions(train_df, test_df, features_columns, TARGET, lgb_params)
     print(metrics.roc_auc_score(test_predictions[TARGET], test_predictions['prediction']))
 else:
-    lgb_params['learning_rate'] = 0.1 #0.005
+    lgb_params['learning_rate'] = 0.01   #0.005
     lgb_params['n_estimators'] = 18000
     lgb_params['early_stopping_rounds'] = 100
     test_predictions = make_predictions(train_df, test_df, features_columns, TARGET, lgb_params, NFOLDS=10)

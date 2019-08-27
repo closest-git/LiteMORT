@@ -4,6 +4,7 @@ import gc
 from ctypes import *
 from pandas.api.types import is_string_dtype
 from pandas.api.types import is_numeric_dtype
+import random
 
 class M_COLUMN(Structure):
     _fields_ = [    ('name',c_char_p),
@@ -13,6 +14,14 @@ class M_COLUMN(Structure):
                     ('v_min', c_double),
                     ('v_max', c_double),
                ]
+
+def Mort_PickSamples(pick_samples,df_train,df_test):
+    nMost = min(df_train.shape[0], df_test.shape[0])
+    random.seed(42)
+    subset = random.sample(range(nMost), pick_samples)
+    df_train = df_train.iloc[subset, :].reset_index(drop=True)
+    df_test = df_test.iloc[subset, :].reset_index(drop=True)
+    print('====== Mort_PickSamples ... df_train={} df_test={}'.format(df_train.shape, df_test.shape))
 
 class Mort_Preprocess(object):
     #nFeature,nSample=0,0
