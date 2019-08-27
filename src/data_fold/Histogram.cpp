@@ -132,15 +132,15 @@ HistoGRAM::~HistoGRAM() {
 	bins.clear();
 }
 
-
-HistoGRAM* HistoGRAM::FromDiff(const HistoGRAM*hP, const HistoGRAM*hB, int flag) {
-	assert(hP->bins.size() == hB->bins.size());
+/*
+HistoGRAM* HistoGRAM::FromDiff(const HistoGRAM*hP, const HistoGRAM*hBrother, int flag) {
+	assert(hP->bins.size() == hBrother->bins.size());
 	CopyBins(*hP,false,0x0);
 	int i = 0,nBin=bins.size();
 	double G_sum = 0,G_0=0,G_1=0;
 	for (i = 0; i < nBin;i++) {
 		HISTO_BIN& cur = bins[i];
-		const HISTO_BIN& off = hB->bins[i];
+		const HISTO_BIN& off = hBrother->bins[i];
 		assert(cur.nz >= off.nz);
 		cur.nz -= off.nz;
 		G_0 += cur.G_sum;		G_1 += off.G_sum;
@@ -154,11 +154,52 @@ HistoGRAM* HistoGRAM::FromDiff(const HistoGRAM*hP, const HistoGRAM*hB, int flag)
 		G_sum += cur.G_sum;
 	}
 	return this;
+}*/
+/*
+	v0.1	cys
+		8/27/2019
+*/
+HistoGRAM* HistoGRAM::FromDiff(const HistoGRAM*hP, const HistoGRAM*hBrother, bool isCompress, int flag) {
+	assert(hP->bins.size() >= hBrother->bins.size());
+	//CopyBins(*hP, false, 0x0);
+	//bins.reserve(hP->bins.size());
+	int i = 0, nBin = hP->bins.size(),brother=0,nPass=0;
+	double G_sum = 0, G_0 = 0, G_1 = 0;
+	for (i = 0; i < nBin; i++) {
+		//HISTO_BIN& cur = bins[i];
+		HISTO_BIN cur = hP->bins[i];
+		const HISTO_BIN* off = brother >= hBrother->bins.size() ? nullptr : &(hBrother->bins[brother]);
+		if (off!=nullptr && cur.tic == off->tic) {
+			assert(cur.nz >= off->nz);
+			cur.nz -= off->nz;
+			G_0 += cur.G_sum;		G_1 += off->G_sum;
+			cur.G_sum -= off->G_sum;
+			cur.H_sum -= off->H_sum;
+			if (cur.nz == 0) {
+				cur.G_sum = 0;	cur.H_sum = 0;
+			}
+			else {
+				//assert();
+			}
+			G_sum += cur.G_sum;
+			brother = brother + 1;
+			//if (brother == hBrother->bins.size())		break;
+		}
+		if (cur.nz > 0) {
+			bins.push_back(cur);
+		}	else {
+			nPass = nPass + 1;
+		}
+
+	}
+	//assert(brother == hBrother->bins.size());
+	return this;
 }
 
 //似乎偏慢，需要提速
 void HistoGRAM::CompressBins(int flag) {
-	vector<HISTO_BIN>::iterator iter = bins.begin();
+	GST_TIC(t1);
+	/*vector<HISTO_BIN>::iterator iter = bins.begin();		//很慢
 	while (iter != bins.end()) {
 		if (iter->nz == 0) {
 			iter = bins.erase(iter);
@@ -166,21 +207,34 @@ void HistoGRAM::CompressBins(int flag) {
 		else {
 			++iter;
 		}
-	}
-	/*
-	for (i = 0; i < nCheck; i++) {
-	if (i<nCheck-1 && bins[i].nz == 0) {
-	continue;
-	}	else {
-	binsN.push_back(bins[i]);
-	}
+	}*/
+	int i, nBin = bins.size(),nZ=0;
+	/*vector<HISTO_BIN> binsN;
+	for (i = 0; i < nBin; i++) {
+		if (i<nBin -1 && bins[i].nz == 0) {
+			continue;
+		}	else {
+			binsN.push_back(bins[i]);
+		}
 	}
 	if (binsN.size() < bins.size())
-	bins = binsN;
+		bins = binsN;
 	else
-	binsN.clear();
-	*/
+		binsN.clear();*/
+	for (i = 0; i < nBin; i++) {		//这样最快
+		if (i<nBin - 1 && bins[i].nz == 0) {	continue;		}
+		else {	nZ++;		}
+		if (nZ <= i) {
+			bins[nZ-1] = bins[i];		
+		}
+	}
+	//assert(++nZ <= nBin);
+	if (nZ < nBin) {
+		bins.resize(nZ);
+	}
+	FeatsOnFold::stat.tX += GST_TOC(t1);
 }
+
 
 void HistoGRAM::MoreHisto(const FeatsOnFold *hData_, vector<HistoGRAM*>&more,  int flag) {
 	return;
@@ -267,6 +321,8 @@ void HistoGRAM::RandomCompress(FeatVector *hFV,bool isSwarm,int flag) {
 		1/28/2019
 */
 void HistoGRAM::GreedySplit_X(FeatsOnFold *hData_, const SAMP_SET& samp_set, int flag) {
+	//GST_TIC(t1);
+
 	if (fruit == nullptr)
 		throw "HistoGRAM::GreedySplit_X fruit is 0!!!";
 
@@ -353,6 +409,7 @@ void HistoGRAM::GreedySplit_X(FeatsOnFold *hData_, const SAMP_SET& samp_set, int
 		assert(nRight >= item.nz);
 		nLeft += item.nz;			nRight -= item.nz;
 	}
+	//FeatsOnFold::stat.tX += GST_TOC(t1);
 }
 
 /*

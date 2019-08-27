@@ -284,6 +284,7 @@ int MT_BiSplit::PickOnGain(FeatsOnFold *hData_,const vector<FRUIT *>& arrFruit, 
 }
 
 HistoGRAM *MT_BiSplit::GetHistogram(FeatsOnFold *hData_, int pick, bool isInsert, int flag) {
+	//GST_TIC(t1);
 	size_t nSamp = samp_set.nSamp, i;
 	if (H_HISTO.size() == 0)
 		return nullptr;
@@ -297,16 +298,21 @@ HistoGRAM *MT_BiSplit::GetHistogram(FeatsOnFold *hData_, int pick, bool isInsert
 		HistoGRAM *hB = brother==nullptr ? nullptr : brother->GetHistogram(hData_,pick, false);
 		if (hP != nullptr && hB != nullptr) {
 			//if(pick==0)			printf("%d@(%d %d) ", nSamp,hP->nSamp, hB->nSamp);
-			histo->FromDiff(hP,hB);
+			histo->FromDiff(hP,hB,true);
+			//反复测试，碎片化内存确实浪费时间
+			parent->H_HISTO[pick] = nullptr;			delete hP;		
+			brother->H_HISTO[pick] = nullptr;			delete hB;
 		}
 		else {
 			hFeat->Samp2Histo(hData_, samp_set, histo, hData_->config.feat_quanti);
+			histo->CompressBins();
 		}
 		H_HISTO[pick] = histo;
-		//mapHISTO.insert(pair<int, HistoGRAM *>(pick, histo));
 	}	else {
 		histo = H_HISTO[pick];
 	}
+	//histo->CompressBins();
+	//FeatsOnFold::stat.tX += GST_TOC(t1);
 	return histo;
 }
 
@@ -358,7 +364,6 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 	}
 	
 	size_t start = 0, end = picks.size();
-	GST_TIC(t1);
 #pragma omp parallel for schedule(static)
 	for (int i = start; i < end; i++) {		GetHistogram(hData_, picks[i], true);	}
 	//auto t0 = std::chrono::steady_clock::now();
@@ -366,6 +371,7 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 	//printf("%d-%d(%.3g) ", this->id,nSamp, ht*1.0e-3);
 	fruit = new FRUIT();
 	arrFruit.push_back(fruit);
+	GST_TIC(t1);
 	for (int i = start; i < end; i++) {
 		int pick = picks[i];
 		if (i == 0 && this->id == 1) {	//仅用于测试
@@ -426,15 +432,8 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 			delete histoSwarm;
 		}
 	}
-	FeatsOnFold::stat.tX += GST_TOC(t1);
+	//FeatsOnFold::stat.tX += GST_TOC(t1);
 
-
-	/*for (int i = 0; i < 10; i++) {		//2d feat vector
-		//FeatVec_2D *hFQ = new FeatVec_2D(hData_, 0, f2D,0);
-		HistoGRAM_2D *histo = new HistoGRAM_2D(nSamp);
-		FRUIT *f2D = new FRUIT(histo);
-		histo->GreedySplit_X(hData_, samp_set, minSet);
-	}*/
 	double mxmxN = 0;
 	if (isEachFruit) {
 		pick_id = PickOnGain(hData_, arrFruit, flag);

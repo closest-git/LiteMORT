@@ -3,10 +3,13 @@
   <component name="ChangeListManager">
     <list default="true" id="1f20a82c-2842-4728-bc01-7f01847a5972" name="Default" comment="README">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/python-package/LiteMORT/LiteMORT_preprocess.py" beforeDir="false" afterPath="$PROJECT_DIR$/python-package/LiteMORT/LiteMORT_preprocess.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/python-package/LiteMORT/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/python-package/LiteMORT/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/python-package/case_ieee_fraud.py" beforeDir="false" afterPath="$PROJECT_DIR$/python-package/case_ieee_fraud.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_fold/Histogram.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/Histogram.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_fold/Histogram.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/Histogram.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/python/pyMORT_DLL.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/python/pyMORT_DLL.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tree/BiSplit.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/BiSplit.cpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -31,7 +34,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/python-package/case_poct.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="209">
+            <state relative-caret-position="703">
               <caret line="44" column="29" selection-start-line="44" selection-start-column="14" selection-end-line="44" selection-end-column="29" />
               <folding>
                 <element signature="e#0#22#0" expanded="true" />
@@ -43,8 +46,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/python-package/case_ieee_fraud.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-4362">
-              <caret selection-end-line="1" />
+            <state relative-caret-position="62">
+              <caret line="25" column="21" lean-forward="true" selection-start-line="25" selection-start-column="21" selection-end-line="25" selection-end-column="21" />
               <folding>
                 <element signature="e#69#87#0" expanded="true" />
               </folding>
@@ -186,10 +189,10 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="1910" />
-    <option name="y" value="-10" />
-    <option name="width" value="1795" />
-    <option name="height" value="1100" />
+    <option name="x" value="1791" />
+    <option name="y" value="130" />
+    <option name="width" value="1939" />
+    <option name="height" value="1099" />
   </component>
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="1" id="Add" />
@@ -199,6 +202,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -226,7 +230,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -451,7 +454,8 @@
       <workItem from="1566702338662" duration="2519000" />
       <workItem from="1566719681334" duration="15232000" />
       <workItem from="1566791311674" duration="12994000" />
-      <workItem from="1566870439515" duration="1870000" />
+      <workItem from="1566870439515" duration="6069000" />
+      <workItem from="1566890048853" duration="1003000" />
     </task>
     <task id="LOCAL-00001" summary="README">
       <created>1556249780941</created>
@@ -496,17 +500,18 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="306197000" />
+    <option name="totallyTimeSpent" value="311399000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1913" y="-7" width="1434" height="878" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.6834382" visible="true" weight="0.17078489" />
-      <window_info id="Structure" order="1" sideWeight="0.31656185" side_tool="true" visible="true" weight="0.17078489" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.6796875" visible="true" weight="0.17296511" />
+      <window_info id="Structure" order="1" sideWeight="0.3203125" side_tool="true" visible="true" weight="0.17296511" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3297587" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.3605898" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.4852547" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.51876676" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -523,7 +528,7 @@
       <window_info anchor="right" id="R Packages" order="3" />
       <window_info anchor="right" id="R Graphics" order="4" />
       <window_info anchor="right" id="Database" order="5" />
-      <window_info anchor="right" x="601" y="59" width="225" height="746" id="SciView" order="6" sideWeight="0.46989527" visible="true" weight="0.16787791" />
+      <window_info anchor="right" x="601" y="59" width="225" height="746" id="SciView" order="6" sideWeight="0.46989527" visible="true" weight="0.16715117" />
       <window_info anchor="right" x="0" y="0" width="314" height="678" id="Documentation" order="7" sideWeight="0.5301047" side_tool="true" visible="true" weight="0.1398892" />
     </layout>
   </component>
@@ -725,7 +730,7 @@
     <SUITE FILE_PATH="coverage/LiteMORT$pytest_in_pycharm_test_py.coverage" NAME="pytest in pycharm_test.py Coverage Results" MODIFIED="1564799919413" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
     <SUITE FILE_PATH="coverage/LiteMORT$case_qq2019.coverage" NAME="case_qq2019 Coverage Results" MODIFIED="1564799379478" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
     <SUITE FILE_PATH="coverage/LiteMORT$case_higgs.coverage" NAME="case_higgs Coverage Results" MODIFIED="1566698483632" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
-    <SUITE FILE_PATH="coverage/LiteMORT$case_ieee_fraud.coverage" NAME="case_ieee_fraud Coverage Results" MODIFIED="1566870864688" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
+    <SUITE FILE_PATH="coverage/LiteMORT$case_ieee_fraud.coverage" NAME="case_ieee_fraud Coverage Results" MODIFIED="1566892330309" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
     <SUITE FILE_PATH="coverage/LiteMORT$case_earthquake.coverage" NAME="case_earthquake Coverage Results" MODIFIED="1564799423302" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
     <SUITE FILE_PATH="coverage/LiteMORT$geo_test.coverage" NAME="geo_test Coverage Results" MODIFIED="1564799540881" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
   </component>
@@ -1009,6 +1014,16 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/python-package/case_poct.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="703">
+          <caret line="44" column="29" selection-start-line="44" selection-start-column="14" selection-end-line="44" selection-end-column="29" />
+          <folding>
+            <element signature="e#0#22#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/python-package/lgb_kim.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="798">
@@ -1043,20 +1058,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/case_poct.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="209">
-          <caret line="44" column="29" selection-start-line="44" selection-start-column="14" selection-end-line="44" selection-end-column="29" />
-          <folding>
-            <element signature="e#0#22#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/python-package/case_ieee_fraud.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-4362">
-          <caret selection-end-line="1" />
+        <state relative-caret-position="62">
+          <caret line="25" column="21" lean-forward="true" selection-start-line="25" selection-start-column="21" selection-end-line="25" selection-end-column="21" />
           <folding>
             <element signature="e#69#87#0" expanded="true" />
           </folding>

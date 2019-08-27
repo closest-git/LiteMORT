@@ -157,6 +157,8 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 	assert(nPickFeat>0);
 }
 
+
+
 void FeatsOnFold::Feature_Bundling(int flag) {
 	size_t i,feat,next,nFeat=feats.size(),maxDup=0,dup;
 	if(edaX ==nullptr || edaX->bundle.buns.size()==0)
@@ -246,6 +248,39 @@ void FeatsOnFold::PickSample_GH( MT_BiSplit*hBlit,int flag ) {
 			s_hessian[i] = hessian[samps[i]];
 		}
 	}
+}
+
+/*
+	alpha-¿ìËÙ²âÊÔ
+*/
+void FeatsOnFold::Compress(int flag) {
+	size_t i,j, nFeat = feats.size(), nSamp=this->nSample(),nSame=0,cur;
+	double *weight_1 = new double[nSamp](), *weight_2 = new double[nSamp]();
+	for (auto hFeat : feats) {
+		FeatVec_Q *hFQ = dynamic_cast<FeatVec_Q *>(hFeat);
+		if (hFQ == nullptr)		continue;
+		tpQUANTI* quanti = hFQ->arr();
+		for (i = 0; i < nSamp; i++) {
+			weight_1[i] += quanti[i];
+			weight_2[i] += quanti[i]*(i+1);
+		}
+	}
+	//order by weight_1
+	vector<tpSAMP_ID> idx;
+	sort_indexes(nSamp,weight_1, idx);
+	i = 0;
+	while (i < nSamp-1 ) {
+		j = i;		cur = idx[i];
+		while (++j < nSamp) {
+			if (weight_1[idx[j]] == weight_1[cur] && weight_2[idx[j]] == weight_2[cur]) {
+				nSame++;
+			}
+			else
+				break;
+		}
+		i = j;
+	}
+	delete[] weight_1;		delete[] weight_2;
 }
 
 void FeatsOnFold::AfterTrain(int flag) {
@@ -706,6 +741,7 @@ tpDOWN *FeatsOnFold::GetSampleHessian() const {
 	else
 		return VECTOR2ARR(lossy->sample_hessian);
 }
+
 
 int *FeatsOnFold::Tag() { return lossy->Tag(); }
 /*

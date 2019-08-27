@@ -194,7 +194,7 @@ namespace Grusoft {
 
 		virtual void CompressBins(int flag=0x0);
 
-		HistoGRAM* FromDiff(const HistoGRAM*hP, const HistoGRAM*hB, int flag = 0x0);
+		HistoGRAM* FromDiff(const HistoGRAM*hP, const HistoGRAM*hB,bool isCompress, int flag = 0x0);
 
 		template<typename Tx,typename Tf>
 		bool At(Tx x, Tf&f,int flag = 0x0) {

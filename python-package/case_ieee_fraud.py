@@ -27,8 +27,8 @@ seed_everything(SEED)
 LOCAL_TEST = False
 TARGET = 'isFraud'
 START_DATE = datetime.datetime.strptime('2017-11-30', '%Y-%m-%d')
-#some_rows = 100000
-some_rows = None
+some_rows = 10000
+#some_rows = None
 data_root = 'E:/Kaggle/ieee_fraud/input/'
 pkl_path = f'{data_root}/ieee_fraud_{some_rows}.pickle'
 
@@ -48,7 +48,7 @@ def make_predictions(tr_df, tt_df, features_columns, target, lgb_params, NFOLDS=
         print(len(tr_x), len(vl_x))
         if isMORT:
             model = LiteMORT(lgb_params).fit(tr_x, tr_y, eval_set=[(vl_x, vl_y)])
-            pred_val = model.predict(vl_x)
+            #pred_val = model.predict(vl_x)
             pred_raw = model.predict_raw(vl_x)
             #y_pred[val_idx] = pred_raw
             #fold_score = roc_auc_score(y_valid, pred_raw)

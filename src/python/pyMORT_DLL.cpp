@@ -427,6 +427,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	//FeatsOnFold::stat.tX += GST_TOC(t1);
 	if (hFold->isQuanti) {
 		hFold->Feature_Bundling();
+		//hFold->Compress();
 	}
 	/*if (hFold->isQuanti) {
 	printf("\n********* FeatsOnFold::QUANTI nMostQ=%d\r\n", nMostQ);

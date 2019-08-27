@@ -211,6 +211,7 @@ namespace Grusoft {
 		virtual void Empty(int flag) {
 
 		}
+		virtual void Compress(int flag = 0x0);
 		virtual void ExpandFeat(int flag = 0x0);
 		virtual void Feature_Bundling(int flag = 0x0);
 		virtual void Reshape(int flag = 0x0) {
