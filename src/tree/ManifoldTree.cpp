@@ -371,7 +371,6 @@ void ManifoldTree::GrowLeaf(hMTNode hBlit, const char*info, bool isAtLeaf, int f
 	//FeatVector *Feat = hData->Feat(hBlit->feat_id);
 	GST_TIC(t1);
 	hData_->SplitOn(hBlit);
-	//FeatsOnFold::stat.tX += GST_TOC(t1);
 	if (isAtLeaf) {
 		hData_->AtLeaf(hBlit->left);
 		hData_->AtLeaf(hBlit->right);

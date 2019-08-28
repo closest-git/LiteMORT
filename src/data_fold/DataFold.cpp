@@ -128,12 +128,13 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 	if (config.feature_fraction<1) {	//for random forest
 		nPick = MAX(1,picks.size()*config.feature_fraction);
 		hForest->stopping.CheckBrae();
-		bool isSwarm = feat_salps != nullptr && hForest->stopping.nBraeStep>0;
+		//bool isSwarm = feat_salps != nullptr && hForest->stopping.nBraeStep>0;
+		bool isSwarm = feat_salps != nullptr && feat_salps->isFull();
 		if (isSwarm) {
 			vector<int> pick_1,pick_2;
 			isSwarm = feat_salps->PickOnStep(hForest->stopping.nBraeStep, pick_1,false);
 			for (auto x : pick_1) {
-				int no = picks[x];
+				int no = x;	// picks[x];
 				pick_2.push_back(no);
 			}
 			picks = pick_2;
@@ -420,27 +421,26 @@ void FeatVec_Q::InitSampHisto(HistoGRAM* histo, bool isRandom, int flag) {
 		//histo->CompressBins();
 		histo->RandomCompress(this,false);					//变化1 
 	}
-
 }
+
 /*
 	v0.2
 */
-void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin,  int flag0) {
+void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* hParent, HistoGRAM* histo, int nMostBin,  int flag0) {
 	tpDOWN *hessian = hData_->GetSampleHessian();
 	if (hessian == nullptr) {
 		Samp2Histo_null_hessian(hData_, samp_set, histo, nMostBin, flag0);
 		//Samp2Histo_null_hessian_sparse(hData_, samp_set, histo, nMostBin, flag0);
 	}
 	else {
-		InitSampHisto(histo, false);
+		tpQUANTI *quanti = arr(), no, *map = nullptr;
+		if (hParent != nullptr) {
+			histo->CopyBins(*hParent, true, 0x0);
+		}else
+			InitSampHisto(histo, false);
 		if (histo->bins.size() == 0) {
 			return;
 		}
-		/*HistoGRAM *qHisto = GetHisto(histo,true);
-		if (qHisto->bins.size() == 0) {
-			histo->ReSet(0);
-			return;
-		}*/
 		tpDOWN *down = hData_->GetSampleDown();	
 		string optimal = hData_->config.leaf_optimal;
 		bool isLambda = optimal == "lambda_0";
@@ -452,36 +452,53 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 		const tpSAMP_ID *samps = samp_set.samps;
 		tpSAMP_ID samp;
 		tpDOWN a;
-		tpQUANTI *quanti = arr(),no;
 		//histo->CopyBins(*qHisto, true, 0x0);
 		int nBin = histo->bins.size();
 		HISTO_BIN *pBins = histo->bins.data(),*pBin;	//https://stackoverflow.com/questions/7377773/how-can-i-get-a-pointer-to-the-first-element-in-an-stdvector
-
-		nSamp4 =  4 * (int)(nSamp / 4);
-		for (i=0; i < nSamp4; i += 4) {
-			HISTO_BIN *pB0 = pBins+quanti[samps[i]];
-			HISTO_BIN *pB1 = pBins + quanti[samps[i+1]];
-			HISTO_BIN *pB2 = pBins + quanti[samps[i+2]];
-			HISTO_BIN *pB3 = pBins + quanti[samps[i+3]];
-			tpDOWN a0 = down[i], a1 = down[i+1], a2 = down[i+2], a3 = down[i+3];
-			pB0->G_sum -= a0;			pB1->G_sum -= a1;			pB2->G_sum -= a2;			pB3->G_sum -= a3;
-			pB0->H_sum += hessian[i];			pB1->H_sum += hessian[i+1];
-			pB2->H_sum += hessian[i+2];			pB3->H_sum += hessian[i+3];
-			pB0->nz++;	pB1->nz++;	pB2->nz++;	pB3->nz++;
-		}/**/
-		//if(nSamp<10000)
-		for (i = nSamp4; i<nSamp; i++) {
-			tpQUANTI pos = quanti[samps[i]];
-			assert(pos >= 0 && pos < nBin);
+		if (hParent != nullptr && histo->bins.size()<qHisto_0->bins.size()) {
+			map = new tpQUANTI[qHisto_0->bins.size()];		//晕，无效的尝试
+			hParent->TicMap(map, 0x0);
+			for (i = 0; i<nSamp; i++) {
+				tpQUANTI pos = map[quanti[samps[i]]];
+				assert(pos >= 0 && pos < nBin);
+				a = down[i];
+				pBin = pBins + pos;	//HISTO_BIN& bin = histo->bins[no];
+				pBin->G_sum += -a;			pBin->H_sum += hessian[i];
+				//pBin->H_sum += hessian == nullptr ? 1 : hessian[samp];
+				pBin->nz++;
+			}
+			delete[] map;
+		}
+		else {		//主要的时间瓶颈
+		GST_TIC(t1);
+			nSamp4 =  4 * (int)(nSamp / 4);
+			for (i=0; i < nSamp4; i += 4) {
+				HISTO_BIN *pB0 = pBins + quanti[samps[i]];
+				HISTO_BIN *pB1 = pBins + quanti[samps[i+1]];
+				HISTO_BIN *pB2 = pBins + quanti[samps[i+2]];
+				HISTO_BIN *pB3 = pBins + quanti[samps[i+3]];
+				tpDOWN a0 = down[i], a1 = down[i+1], a2 = down[i+2], a3 = down[i+3];
+				pB0->G_sum -= a0;			pB1->G_sum -= a1;			pB2->G_sum -= a2;			pB3->G_sum -= a3;
+				pB0->H_sum += hessian[i];			pB1->H_sum += hessian[i+1];
+				pB2->H_sum += hessian[i+2];			pB3->H_sum += hessian[i+3];
+				pB0->nz++;	pB1->nz++;	pB2->nz++;	pB3->nz++;
+			}/**/
+			//if(nSamp<10000)
+			for (i = nSamp4; i<nSamp; i++) {
+				tpQUANTI pos = quanti[samps[i]];
+				assert(pos >= 0 && pos < nBin);
 		
-			//a = down[samp];
-			a = down[i];
-			pBin= pBins+ pos;	//HISTO_BIN& bin = histo->bins[no];
-			pBin->G_sum += -a;		
-			pBin->H_sum += hessian[i];
-			//pBin->H_sum += hessian == nullptr ? 1 : hessian[samp];
-			pBin->nz++;
-		}		
+				//a = down[samp];
+				a = down[i];
+				pBin= pBins+ pos;	//HISTO_BIN& bin = histo->bins[no];
+				pBin->G_sum += -a;		
+				pBin->H_sum += hessian[i];
+				//pBin->H_sum += hessian == nullptr ? 1 : hessian[samp];
+				pBin->nz++;
+			}	
+		FeatsOnFold::stat.tX += GST_TOC(t1);
+		}
+
 	}
 
 	#ifdef _DEBUG
@@ -493,6 +510,7 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 		assert(fabs(G_sum + samp_set.Y_sum_1)<1.e-7*fabs(G_sum) || fabs(samp_set.Y_sum_1)<0.001);
 	}
 	#endif
+
 }
 
 
@@ -623,7 +641,7 @@ FeatVec_Bundle::FeatVec_Bundle(FeatsOnFold *hData_,int id_, const vector<int>&bu
 		throw("!!!FeatVec_Bundle nDup > nMostDup*nMerge!!!");
 }
 
-void FeatVec_Bundle::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin,  int flag0) {
+void FeatVec_Bundle::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* hParent, HistoGRAM* histo, int nMostBin,  int flag0) {
 	if (qHisto->bins.size() == 0) {
 		histo->ReSet(0);
 		return;

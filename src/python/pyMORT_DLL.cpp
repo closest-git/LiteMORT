@@ -643,6 +643,7 @@ PYMORT_DLL_API void LiteMORT_fit(void *mort_0, float *train_data, tpY *train_tar
 		//hEval->nam = "eval";
 		folds.push_back(hEval);
 	}
+	//FeatsOnFold::stat.tX += GST_TOC(tick);
 	mort->hGBRT = new GBRT(hFold, hEval, 0, flag==0 ? BoostingForest::REGRESSION : BoostingForest::CLASIFY, nTree);
 	
 	mort->hGBRT->Train("", 50, 0x0);
@@ -663,6 +664,7 @@ PYMORT_DLL_API void LiteMORT_fit(void *mort_0, float *train_data, tpY *train_tar
 	catch (...) {
 		printf("\n!!!!!! EXCEPTION@LiteMORT_fit %s!!!!!!\n\n", "...");
 	}
+
 	return ;
 }
 
@@ -718,10 +720,9 @@ PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_COLUMN *train_data, PY_COLUM
 		if (isDelEDA) {
 			delete hEDA;			hEDA = nullptr;
 		}
-
 		//@%p(hEDA=%p,hGBRT=%p)	mort,mort->hEDA,mort->hGBRT,
-		printf("\n********* LiteMORT_api fit  time=%.3g(%.3g)......OK\n\n", GST_TOC(tick), FeatsOnFold::stat.tX + DCRIMI_2::tX);
-
+		FeatsOnFold::stat.tX += GST_TOC(tick);
+		printf("\n********* LiteMORT_fit_1  time=%.3g(%.3g)......OK\n\n", GST_TOC(tick), FeatsOnFold::stat.tX + DCRIMI_2::tX);
 	}
 	catch (char * sInfo) {
 		printf("\n!!!!!! EXCEPTION@LiteMORT_fit \n!!!!!!\"%s\"\n\n", sInfo);

@@ -73,13 +73,7 @@ namespace Grusoft {
 		{		return salps.size() >= nMostSalp;	}
 
 
-		virtual void AddSalp(int dim, const vector<int>&picks,int x_, int flag=0x0) {		
-			if (salps.size() >= nMostSalp)
-				salps.erase(salps.begin());
-			LogicSalp *salp = new LogicSalp(dim, picks, flag);
-			salp->x = x_;
-			salps.push_back(salp);
-		}
+		virtual void AddSalp(int dim, const vector<int>&picks, int x_, int flag = 0x0);
 		virtual void AddCandSalp(int flag = 0x0);
 
 		virtual void SetCost(double cost, int flag = 0x0) {

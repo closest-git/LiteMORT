@@ -132,6 +132,9 @@ namespace Grusoft {
 			int nCheckGain = 0;
 
 			double tX = 0;	//统计时间
+			double tCheckGain = 0;
+			double tHisto = 0;
+			double tSamp2Histo = 0;
 		};
 		static STAT stat;
 		ExploreDA *edaX = nullptr;
@@ -886,7 +889,7 @@ namespace Grusoft {
 		virtual void PerturbeHisto(const FeatsOnFold *hData_, int flag = 0x0);
 		virtual void UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst, int flag = 0x0);
 		//根据样本集，修正每个格子的内容(Y_sum,nz...)
-		virtual void Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag = 0x0);
+		virtual void Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* hParent, HistoGRAM* histo, int nMostBin, int flag = 0x0);
 		virtual void Samp2Histo_null_hessian(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag = 0x0);
 		virtual void Samp2Histo_null_hessian_sparse(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag = 0x0);
 
@@ -932,7 +935,7 @@ namespace Grusoft {
 
 		virtual void UpdateFruit(MT_BiSplit *hBlit, int flag = 0x0);
 
-		virtual void Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag = 0x0);
+		virtual void Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* hParent, HistoGRAM* histo, int nMostBin, int flag = 0x0);
 	};
 
 

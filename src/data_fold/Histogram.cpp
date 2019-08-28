@@ -160,7 +160,7 @@ HistoGRAM* HistoGRAM::FromDiff(const HistoGRAM*hP, const HistoGRAM*hBrother, int
 		8/27/2019
 */
 HistoGRAM* HistoGRAM::FromDiff(const HistoGRAM*hP, const HistoGRAM*hBrother, bool isCompress, int flag) {
-	assert(hP->bins.size() >= hBrother->bins.size());
+	assert(hP->bins.size() >= hBrother->bins.size() || hP->bins.size() >= hBrother->bins.size()-1);		//hP会被压缩掉NA，需要继续核查
 	//CopyBins(*hP, false, 0x0);
 	//bins.reserve(hP->bins.size());
 	int i = 0, nBin = hP->bins.size(),brother=0,nPass=0;
@@ -196,9 +196,17 @@ HistoGRAM* HistoGRAM::FromDiff(const HistoGRAM*hP, const HistoGRAM*hBrother, boo
 	return this;
 }
 
+void HistoGRAM::TicMap(tpQUANTI*map, int flag) {
+	int i, nBin = bins.size(),tic;
+	for (i = 0; i < nBin; i++) {
+		tic = bins[i].tic;
+		map[tic] = i;
+	}
+}
+
 //似乎偏慢，需要提速
 void HistoGRAM::CompressBins(int flag) {
-	GST_TIC(t1);
+	//GST_TIC(t1);
 	/*vector<HISTO_BIN>::iterator iter = bins.begin();		//很慢
 	while (iter != bins.end()) {
 		if (iter->nz == 0) {
@@ -232,13 +240,13 @@ void HistoGRAM::CompressBins(int flag) {
 	if (nZ < nBin) {
 		bins.resize(nZ);
 	}
-	FeatsOnFold::stat.tX += GST_TOC(t1);
+	//FeatsOnFold::stat.tX += GST_TOC(t1);
 }
 
 
 void HistoGRAM::MoreHisto(const FeatsOnFold *hData_, vector<HistoGRAM*>&more,  int flag) {
 	return;
-
+	/*
 	assert(hFeat != nullptr);
 	size_t minSet = hData_->config.min_data_in_leaf, nBin = bins.size(), i;
 	HistoGRAM *H_1 = new HistoGRAM(hFeat, nSamp);
@@ -257,7 +265,7 @@ void HistoGRAM::MoreHisto(const FeatsOnFold *hData_, vector<HistoGRAM*>&more,  i
 	}
 	//sort_by_splitF;
 	more.push_back(H_1);
-	H_1->split_by = SPLIT_HISTOGRAM::BY_DENSITY;
+	H_1->split_by = SPLIT_HISTOGRAM::BY_DENSITY;*/
 }
 
 void HistoGRAM::RandomCompress(FeatVector *hFV,bool isSwarm,int flag) {

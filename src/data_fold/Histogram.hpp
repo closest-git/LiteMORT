@@ -76,6 +76,7 @@ void sort_indexes(const vector<T> &v, vector<tpSAMP_ID>& idx, int flag = 0x0) {
 namespace Grusoft {
 	class FeatsOnFold;
 	class FeatVector;
+	//typedef uint8_t tpQUANTI;
 	typedef short tpQUANTI;
 	//用于快速split,histogram其实是最简单的GreedyCluster
 	class GreedyCluster {
@@ -92,16 +93,14 @@ namespace Grusoft {
 	struct HISTO_BIN {
 		size_t nz = 0;
 		//if (val[pos] < bins[noBin+1].split_F) {		quanti[pos] = noBin;		}
-		double split_F = 0;		
 		char fold = -1;			//每个BIN属于一个FOLD
-		int tic = 0;			//X		可删除
-		//tpQUANTI split_Q = -1;	//量化之后
+		uint16_t tic = 0;			
 		double G_sum = 0, H_sum = 0;		//Second-order approximation from Tianqi Chen's formula
 
-		static bool isSplitSmall(const HISTO_BIN &l, const HISTO_BIN &r)
-		{
+		float split_F = 0;		
+		/*static bool isSplitSmall(const HISTO_BIN &l, const HISTO_BIN &r)		{
 			return l.split_F<r.split_F;
-		}
+		}*/
 
 		
 	};
@@ -123,7 +122,7 @@ namespace Grusoft {
 		int best_feat_id=-1;
 		HistoGRAM *histo = nullptr;		//仅指向，不再删除
 		HISTO_BIN bin_S0, bin_S1;						//有变化，比较危险诶
-		double adaptive_thrsh;					//可指向binSplit中间，所以保留		splitonY也需要这个值
+		double split_0,adaptive_thrsh, split_1;					//可指向binSplit中间，所以保留		splitonY也需要这个值
 		SPLIT_HISTOGRAM split_by = BY_VALUE;
 		double Thrshold(bool isQuanti) {
 			//assert(binSplit.split_Q >= 0);
@@ -134,7 +133,8 @@ namespace Grusoft {
 				if(true)
 					return adaptive_thrsh;
 				else 	
-					return bin_S1.split_F;
+					return adaptive_thrsh;	//split_1-EPSILON
+					//return bin_S1.split_F;
 			}
 		}
 		//tpQUANTI T_quanti = 0;
@@ -193,6 +193,7 @@ namespace Grusoft {
 		virtual ~HistoGRAM();		
 
 		virtual void CompressBins(int flag=0x0);
+		virtual void TicMap(tpQUANTI*map,int flag);
 
 		HistoGRAM* FromDiff(const HistoGRAM*hP, const HistoGRAM*hB,bool isCompress, int flag = 0x0);
 

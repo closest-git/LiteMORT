@@ -137,10 +137,24 @@ bool FS_gene_::PickOnStep(int nSalp, vector<int>&picks, bool isMask, int flag) {
 }
 
 void Feature_Selection::AddCandSalp(int flag) {
-	if (salps.size() >= nMostSalp)
+	if (salps.size() >= nMostSalp) {
+		LogicSalp *sp = salps[0];
 		salps.erase(salps.begin());
+		delete sp;
+	}
 	int dim = cand.DIM();
 	LogicSalp *salp = new LogicSalp(dim);
 	salp->Copy(&cand);
+	salps.push_back(salp);
+}
+
+void Feature_Selection::AddSalp(int dim, const vector<int>&picks, int x_, int flag) {
+	if (salps.size() >= nMostSalp) {
+		LogicSalp *sp = salps[0];
+		salps.erase(salps.begin());
+		delete sp;
+	}
+	LogicSalp *salp = new LogicSalp(dim, picks, flag);
+	salp->x = x_;
 	salps.push_back(salp);
 }

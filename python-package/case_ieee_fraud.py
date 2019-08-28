@@ -1,4 +1,5 @@
 #https://www.kaggle.com/kyakovlev/ieee-cv-options
+#https://www.kaggle.com/kyakovlev/ieee-experimental
 
 # General imports
 import numpy as np
@@ -71,7 +72,7 @@ def make_predictions(tr_df, tt_df, features_columns, target, lgb_params, NFOLDS=
         del tr_x, tr_y, vl_x, vl_y
         gc.collect()
         print(f'Fold:{fold_} time={time.time()-t0:.4g}'  )
-        break
+        #break
     tt_df['prediction'] = predictions
 
     return tt_df
@@ -242,7 +243,7 @@ lgb_params = { 'objective':'binary',
                     'num_leaves': 2**8,
                     'max_depth':-1,
                     'tree_learner':'serial',
-                    'colsample_bytree': 0.7,
+                    'colsample_bytree': 0.07,
                     'subsample_freq':1,
                     'subsample':0.7,
                     'n_estimators':800,
@@ -259,8 +260,8 @@ if LOCAL_TEST:
     test_predictions = make_predictions(train_df, test_df, features_columns, TARGET, lgb_params)
     print(metrics.roc_auc_score(test_predictions[TARGET], test_predictions['prediction']))
 else:
-    lgb_params['learning_rate'] = 0.01   #0.005
-    lgb_params['n_estimators'] = 18000
+    lgb_params['learning_rate'] = 0.1   #0.005
+    lgb_params['n_estimators'] = 20000
     lgb_params['early_stopping_rounds'] = 100
     test_predictions = make_predictions(train_df, test_df, features_columns, TARGET, lgb_params, NFOLDS=10)
 

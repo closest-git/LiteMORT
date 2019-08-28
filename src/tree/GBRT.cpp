@@ -298,7 +298,7 @@ int GBRT::IterTrain(int round, int flag) {
 
 
 int GBRT::Train(string sTitle, int x, int flag) {
-	GST_TIC(tick);
+	GST_TIC(tick);	
 	eOOB = 1.0;
 	size_t nSamp = nSample(), t;
 	assert(forest.size() == 0);
@@ -311,9 +311,9 @@ int GBRT::Train(string sTitle, int x, int flag) {
 	//FeatsOnFold *hData=curF[0]->hData;
 	total = hTrainData->nSample();			
 	stopping.early_round = hTrainData->config.early_stopping_round;
-	//hTrainData->feat_salps = new FS_gene_(stopping.early_round, hTrainData->feats.size(), 0x0);
+	//hTrainData->feat_salps = new FS_gene_("select feature",8, hTrainData->feats.size(), 0x0);
 	float *distri = hTrainData->distri, *dtr = nullptr, tag, d1, rOK = 0;
-	double err_0= DBL_MAX,err=DBL_MAX,a;
+	double err_0= DBL_MAX,err=DBL_MAX,a,t_train=0;
 	size_t nPickSamp=0;
 	
 	//hTrainData->lossy.InitScore_(hTrainData->config);
@@ -370,7 +370,9 @@ int GBRT::Train(string sTitle, int x, int flag) {
 		//	hTree->SetGuideTree(new ManifoldTree(this, hEvalData, "777_" + to_string(t)));
 		nPickSamp = hTree->hRoot()->nSample();
 		forest.push_back(hTree);
+		GST_TIC(t111);
 		hTree->Train(flag);				//
+		t_train += GST_TOC(t111);
 		
 		nzNode +=hTree->nodes.size();
 		//TestOOB(hTrainData);
@@ -390,8 +392,11 @@ int GBRT::Train(string sTitle, int x, int flag) {
 	if (stopping.isOK(t)) {
 		printf("\n********* early_stopping@[%d,%d]!!!", stopping.best_no, stopping.best_round);
 	}
-	printf("\n********* GBRT::Train nTree=%d aNode=%.6g ERR@train=%s err@%s=%s thread=%d train=%g(tX=%g) sec\r\n", 
-		forest.size(), nzNode*1.0/forest.size(), sLossT.c_str(), sEval.c_str(), sLossE.c_str(),nThread, GST_TOC(tick), FeatsOnFold::stat.tX);
+
+	printf("\n********* GBRT::Train nTree=%d aNode=%.6g ERR@train=%s err@%s=%s thread=%d" 
+		"\n********* train=%g(tCheckGain=%g,tHisto=%g(%g),tX=%g) sec\r\n", 
+		forest.size(), nzNode*1.0/forest.size(), sLossT.c_str(), sEval.c_str(), sLossE.c_str(),nThread, 
+		GST_TOC(tick),FeatsOnFold::stat.tCheckGain, FeatsOnFold::stat.tHisto, FeatsOnFold::stat.tSamp2Histo, FeatsOnFold::stat.tX);
 
 	if (nOOB>0)
 		TestOOB(hTrainData);
