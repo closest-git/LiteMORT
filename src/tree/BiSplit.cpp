@@ -300,11 +300,11 @@ HistoGRAM *MT_BiSplit::GetHistogram(FeatsOnFold *hData_, int pick, bool isInsert
 			histo->FromDiff(hP,hB,true);
 			//反复测试，碎片化内存确实浪费时间
 			parent->H_HISTO[pick] = nullptr;			delete hP;		
-			brother->H_HISTO[pick] = nullptr;			delete hB;
+			//brother->H_HISTO[pick] = nullptr;			delete hB;
 		}
 		else {
 	GST_TIC(t333);
-			hFeat->Samp2Histo(hData_, samp_set, nullptr,histo, hData_->config.feat_quanti);
+			hFeat->Samp2Histo(hData_, samp_set, hP,histo, hData_->config.feat_quanti);
 	FeatsOnFold::stat.tSamp2Histo += GST_TOC(t333);
 			histo->CompressBins();
 		}
@@ -399,7 +399,6 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 			//AGG_CheckGain(hData_, hFeat, flag);
 		}
 		else {
-			//hFeat->Samp2Histo(hData_, samp_set, histo, hData_->config.feat_quanti);		//Histo Normalize
 			if (histo->bins.size() == 0)
 				continue;
 			if (hFeat->isCategory()) {
@@ -425,10 +424,6 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 			}
 			moreHisto.clear();
 		}
-		//节省histo所占的空间,	如有需要，可重新调用Samp2Histo
-		/*if (!arrFruit[i]->isY) {
-			//delete histo;		arrFruit[i]->histo = nullptr;
-		}*/
 		if (histoSwarm!=nullptr) {
 			delete histoSwarm;
 		}

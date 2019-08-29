@@ -106,6 +106,7 @@ void FeatsOnFold:: Distri2Tag(int *mark, int nCls, int flag) {
 void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest *hForest, int flag) {
 	int i, nFeat = feats.size(), nPick = (int)(sqrt(nFeat));
 	int nTree = hForest->forest.size();
+	int *mask = new int[nFeat]();
 	//picks.resize(nFeat);
 	for (i = 0; i<nFeat; i++)	{
 		FeatVector *hFeat = Feat(i);
@@ -121,7 +122,7 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 			
 		}
 		//if(hFeat->id!=360)	continue;	//仅用于测试 
-			
+		mask[i] = 1;
 		picks.push_back(i);
 	}
 	assert(picks.size()>0);
@@ -135,20 +136,23 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 			isSwarm = feat_salps->PickOnStep(hForest->stopping.nBraeStep, pick_1,false);
 			for (auto x : pick_1) {
 				int no = x;	// picks[x];
+				if (mask[no] == 0)
+				{		continue;		}
 				pick_2.push_back(no);
+				//if (pick_2.size() > 32)
+				//	break;
 			}
 			picks = pick_2;
 		}
 		if(!isSwarm){
 			vector<int> no_k = rander.kSampleInN(nPick, picks.size()),pick_1;
 			for (auto x : no_k) {
-				int no = picks[x];
-				pick_1.push_back(no);
+				int no = picks[x];				pick_1.push_back(no);
 			}
 			picks = pick_1;
-			if (feat_salps != nullptr) {
-				feat_salps->AddSalp(nFeat, picks, nTree);
-			}
+		}
+		if (feat_salps != nullptr) {
+			feat_salps->AddSalp(nFeat, picks, nTree);
 		}
 		
 		std::sort(picks.begin(), picks.end());
@@ -434,9 +438,9 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 	}
 	else {
 		tpQUANTI *quanti = arr(), no, *map = nullptr;
-		if (hParent != nullptr) {
+		/*if (hParent != nullptr) {
 			histo->CopyBins(*hParent, true, 0x0);
-		}else
+		}else*/
 			InitSampHisto(histo, false);
 		if (histo->bins.size() == 0) {
 			return;
@@ -455,7 +459,7 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 		//histo->CopyBins(*qHisto, true, 0x0);
 		int nBin = histo->bins.size();
 		HISTO_BIN *pBins = histo->bins.data(),*pBin;	//https://stackoverflow.com/questions/7377773/how-can-i-get-a-pointer-to-the-first-element-in-an-stdvector
-		if (hParent != nullptr && histo->bins.size()<qHisto_0->bins.size()) {
+		/*if (hParent != nullptr && histo->bins.size()<qHisto_0->bins.size()) {
 			map = new tpQUANTI[qHisto_0->bins.size()];		//晕，无效的尝试
 			hParent->TicMap(map, 0x0);
 			for (i = 0; i<nSamp; i++) {
@@ -469,7 +473,7 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 			}
 			delete[] map;
 		}
-		else {		//主要的时间瓶颈
+		else*/ {		//主要的时间瓶颈
 		GST_TIC(t1);
 			nSamp4 =  4 * (int)(nSamp / 4);
 			for (i=0; i < nSamp4; i += 4) {
@@ -496,7 +500,8 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 				//pBin->H_sum += hessian == nullptr ? 1 : hessian[samp];
 				pBin->nz++;
 			}	
-		FeatsOnFold::stat.tX += GST_TOC(t1);
+		if(hParent==nullptr)
+			FeatsOnFold::stat.tX += GST_TOC(t1);
 		}
 
 	}

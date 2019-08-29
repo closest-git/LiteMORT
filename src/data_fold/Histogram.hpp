@@ -173,7 +173,7 @@ namespace Grusoft {
 	protected:
 		//FeatVector*	hFeat = nullptr;
 	public:
-		
+		static size_t nAlloc;
 		SPLIT_HISTOGRAM split_by = BY_VALUE;
 
 		size_t nSamp, nLeft = 0, nRight=0;
@@ -187,6 +187,7 @@ namespace Grusoft {
 		{	return &(bins[bins.size()-1]);	 }		//总是放在最后
 
 		HistoGRAM(FeatVector*hFeat_,size_t nMost, int flag = 0x0) : hFeat(hFeat_){
+			nAlloc++;
 			nSamp = nMost;
 			//a1 = -DBL_MAX, a0 = DBL_MAX;	
 		}

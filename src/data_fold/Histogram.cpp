@@ -6,7 +6,7 @@
 
 using namespace Grusoft;
 
-
+size_t HistoGRAM::nAlloc = 0;
 //²Î¼ûbmpp_ii.code
 struct IntegralTable {
 	int *sumary, *sum2, M, N;

@@ -303,7 +303,7 @@ int GBRT::Train(string sTitle, int x, int flag) {
 	size_t nSamp = nSample(), t;
 	assert(forest.size() == 0);
 	mSum = 0;	// mSum.setZero();	
-
+	HistoGRAM::nAlloc = 0;
 	//nzWeak=0.0;
 	//²Î¼ûBoostingForest::Train();
 	stage = RF_TRAIN;
@@ -311,7 +311,7 @@ int GBRT::Train(string sTitle, int x, int flag) {
 	//FeatsOnFold *hData=curF[0]->hData;
 	total = hTrainData->nSample();			
 	stopping.early_round = hTrainData->config.early_stopping_round;
-	//hTrainData->feat_salps = new FS_gene_("select feature",8, hTrainData->feats.size(), 0x0);
+	//hTrainData->feat_salps = new FS_gene_("select feature",64, hTrainData->feats.size(), 0x0);
 	float *distri = hTrainData->distri, *dtr = nullptr, tag, d1, rOK = 0;
 	double err_0= DBL_MAX,err=DBL_MAX,a,t_train=0;
 	size_t nPickSamp=0;
@@ -391,12 +391,14 @@ int GBRT::Train(string sTitle, int x, int flag) {
 	string sEval = hEvalData == nullptr ? (isEvalTrain ? hTrainData->nam : "None") : hEvalData->nam;
 	if (stopping.isOK(t)) {
 		printf("\n********* early_stopping@[%d,%d]!!!", stopping.best_no, stopping.best_round);
+	}	else {
+		printf("\n********* best_@[%d,%d]!!!", stopping.best_no, stopping.best_round);
 	}
 
 	printf("\n********* GBRT::Train nTree=%d aNode=%.6g ERR@train=%s err@%s=%s thread=%d" 
-		"\n********* train=%g(tCheckGain=%g,tHisto=%g(%g),tX=%g) sec\r\n", 
+		"\n********* train=%g(tCheckGain=%g,tHisto=%g(%d,%g),tX=%g) sec\r\n", 
 		forest.size(), nzNode*1.0/forest.size(), sLossT.c_str(), sEval.c_str(), sLossE.c_str(),nThread, 
-		GST_TOC(tick),FeatsOnFold::stat.tCheckGain, FeatsOnFold::stat.tHisto, FeatsOnFold::stat.tSamp2Histo, FeatsOnFold::stat.tX);
+		GST_TOC(tick),FeatsOnFold::stat.tCheckGain, FeatsOnFold::stat.tHisto, HistoGRAM::nAlloc, FeatsOnFold::stat.tSamp2Histo, FeatsOnFold::stat.tX);
 
 	if (nOOB>0)
 		TestOOB(hTrainData);

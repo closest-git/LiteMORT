@@ -72,7 +72,7 @@ def make_predictions(tr_df, tt_df, features_columns, target, lgb_params, NFOLDS=
         del tr_x, tr_y, vl_x, vl_y
         gc.collect()
         print(f'Fold:{fold_} time={time.time()-t0:.4g}'  )
-        #break
+        break
     tt_df['prediction'] = predictions
 
     return tt_df
@@ -243,7 +243,7 @@ lgb_params = { 'objective':'binary',
                     'num_leaves': 2**8,
                     'max_depth':-1,
                     'tree_learner':'serial',
-                    'colsample_bytree': 0.07,
+                    'colsample_bytree': 0.7,
                     'subsample_freq':1,
                     'subsample':0.7,
                     'n_estimators':800,

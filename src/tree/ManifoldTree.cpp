@@ -306,8 +306,11 @@ ManifoldTree::ManifoldTree(BoostingForest *hF, FeatsOnFold *hData, string nam_, 
 }
 
 
-void ManifoldTree::AddNewLeaf(hMTNode hNode, FeatsOnFold *hData_, const vector<int> &pick_feats, int flag) {
+void ManifoldTree::OnNewLeaf(hMTNode hNode, FeatsOnFold *hData_, const vector<int> &pick_feats,bool isOnlyAdd, int flag) {
 	hNode->gain_ = 0;			
+	if (isOnlyAdd)	{
+		leafs.push(hNode);		return;
+	}
 	if (hForest->isPass(hNode)) {
 		;
 	}
@@ -333,7 +336,6 @@ void ManifoldTree::AddNewLeaf(hMTNode hNode, FeatsOnFold *hData_, const vector<i
 			}
 	}
 	leafs.push(hNode);
-
 }
 
 void ManifoldTree::DelChild(hMTNode hNode, int flag) {
@@ -469,7 +471,7 @@ void ManifoldTree::Train(int flag) {
 		}
 	}
 	
-	AddNewLeaf(root, hData_, pick_feats);
+	OnNewLeaf(root, hData_, pick_feats,false);		
 	gain = 0;
 	while (true) {		//参见GBRT::GetBlit
 		if(leafs.size()>=hData_->config.num_leaves )
@@ -479,11 +481,11 @@ void ManifoldTree::Train(int flag) {
 			//Update root sample and update Functional at each nodes
 			BeforeEachBatch(hData_->config.batch*nSamp,42+ leafs.size());
 		}
-		hMTNode hBest = leafs.top();
+		hMTNode hBest = leafs.top();			leafs.pop();
 		if (hBest->id == 2)
 			hBest->id = 2;		//仅用于调试
 		if (hBest->gain_train > 0)		{
-			gain = hBest->gain_train;			leafs.pop();
+			gain = hBest->gain_train;			
 		}		else {
 			hBest = nullptr;
 		}
@@ -506,19 +508,16 @@ void ManifoldTree::Train(int flag) {
 				new_leafs.push_back(hBest->left);		new_leafs.push_back(hBest->right);
 			}	else {
 				new_leafs.push_back(hBest->right);		new_leafs.push_back(hBest->left);
-			}			
+			}	
 		}	else {
 			break;
 		}
+		bool isOnlyAdd = leafs.size() + new_leafs.size() >= hData_->config.num_leaves;
 		//GST_TIC(t1);
 		//FeatsOnFold::stat.tX += GST_TOC(t1);
 		for (auto leaf : new_leafs)		{
-			AddNewLeaf(leaf, hData_, pick_feats);
+			OnNewLeaf(leaf, hData_, pick_feats, isOnlyAdd);
 		}
-		//if(hBest->left!=nullptr)
-		//	AddNewLeaf(hBest->left,hData_, pick_feats);
-		//if (hBest->right != nullptr)
-		//	AddNewLeaf(hBest->right, hData_, pick_feats);
 	}
 
 	//GetLeaf(vLeaf);

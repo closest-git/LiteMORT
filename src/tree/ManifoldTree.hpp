@@ -149,7 +149,7 @@ namespace Grusoft{
 	protected:
 		ManifoldTree *hGuideTree = nullptr;
 		//vector<int> samp_folds;		//fold越少越好
-		virtual void AddNewLeaf(hMTNode node, FeatsOnFold *hData_, const vector<int> &pick_feats, int flag = 0x0);
+		virtual void OnNewLeaf(hMTNode node, FeatsOnFold *hData_, const vector<int> &pick_feats,bool isOnlyAdd, int flag = 0x0);
 		virtual void GrowLeaf(hMTNode node,const char*info,bool isAtLeaf,int flag=0x0);
 		virtual void BeforeEachBatch(size_t no_0,size_t no_1,int flag=0x0);
 	public:

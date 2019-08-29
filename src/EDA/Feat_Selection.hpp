@@ -83,7 +83,8 @@ namespace Grusoft {
 		}
 
 		virtual bool Step(int nSalp,int flag = 0x0)			{	throw "!!!Feature_Selection Step is ...!!!";				}
-		virtual bool PickOnStep(int nSalp, vector<int>&picks,bool, int flag = 0x0)	{	throw "!!!Feature_Selection SubStep_1 is ...!!!";		}
+		//isMask(True-picks[i] = salp->position[i] == 1)
+		virtual bool PickOnStep(int nSalp, vector<int>&picks,bool isMask, int flag = 0x0)	{	throw "!!!Feature_Selection SubStep_1 is ...!!!";		}
 
 		virtual void GetPicks(const LogicSalp *salp,vector<int>&picks,bool isMask, int flag = 0x0);
 
