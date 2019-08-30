@@ -125,6 +125,7 @@ namespace Grusoft {
 		int max_level;
 
 		int verbose=0;
+		int verbose_eval = 200;
 
 		std::string grow_by;
 
@@ -264,6 +265,7 @@ namespace Grusoft {
 		std::string eda_nan = "zero";
 		int nMostSalp4bins = 0;
 		int nMostSalp4feats = 0;
+		int nElitism = 0;
 
 		//gradient variance
 		//std::string leaf_optimal = "taylor_2";		//似乎有问题，grad_variance收敛速度明显更快

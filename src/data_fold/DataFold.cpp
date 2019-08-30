@@ -101,7 +101,37 @@ void FeatsOnFold:: Distri2Tag(int *mark, int nCls, int flag) {
 }
 
 /*
+void FeatsOnFold::nPickBySwarm()
+//bool isSwarm = feat_salps != nullptr && hForest->stopping.nBraeStep>0;
+bool isSwarm = feat_salps != nullptr && feat_salps->isFull();
+if (isSwarm) {
+vector<int> pick_1,pick_2;
+isSwarm = feat_salps->PickOnStep(hForest->stopping.nBraeStep, pick_1,false);
+for (auto x : pick_1) {
+int no = x;	// picks[x];
+if (mask[no] == 0)
+{		continue;		}
+pick_2.push_back(no);
+//if (pick_2.size() > 32)
+//	break;
+}
+picks = pick_2;
+}
+if(!isSwarm){
+vector<int> no_k = rander.kSampleInN(nPick, picks.size()),pick_1;
+for (auto x : no_k) {
+int no = picks[x];				pick_1.push_back(no);
+}
+picks = pick_1;
+}
+if (feat_salps != nullptr) {
+feat_salps->AddSalp(nFeat, picks, nTree);
+}
+*/
+/*
 	feature_fractionËÆºõÄÜ½µµÍoverfitting
+	v0.1	cys
+		8/30/2019
 */
 void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest *hForest, int flag) {
 	int i, nFeat = feats.size(), nPick = (int)(sqrt(nFeat));
@@ -129,39 +159,34 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 	if (config.feature_fraction<1) {	//for random forest
 		nPick = MAX(1,picks.size()*config.feature_fraction);
 		hForest->stopping.CheckBrae();
-		//bool isSwarm = feat_salps != nullptr && hForest->stopping.nBraeStep>0;
-		bool isSwarm = feat_salps != nullptr && feat_salps->isFull();
-		if (isSwarm) {
-			vector<int> pick_1,pick_2;
-			isSwarm = feat_salps->PickOnStep(hForest->stopping.nBraeStep, pick_1,false);
-			for (auto x : pick_1) {
-				int no = x;	// picks[x];
-				if (mask[no] == 0)
-				{		continue;		}
-				pick_2.push_back(no);
-				//if (pick_2.size() > 32)
-				//	break;
+		vector<int> no_k = rander.kSampleInN(nPick, picks.size()),pick_1;
+		double *w = new double[nFeat]();
+		for (auto x : no_k) {
+			int no = picks[x];				pick_1.push_back(no);
+			assert(mask[no] == 1);
+			FeatVector *hFeat = Feat(no);
+			w[no] = -hFeat->wSplit;
+		}
+		picks = pick_1;		
+		nPick = picks.size();
+		if (config.nElitism>0 && hForest->forest.size()>16) {
+			std::sort(picks.begin(), picks.end(), [&w](size_t i1, size_t i2) {return w[i1] < w[i2]; });
+			for (i = 0; i < nPick - 1; i++) {
+				assert(w[picks[i]] <= w[picks[i + 1]]);
+				assert(mask[picks[i]] == 1);
 			}
-			picks = pick_2;
+			int nElitism = min(nPick, 16);
+			std::random_shuffle(picks.begin()+ nElitism, picks.end());
+			picks.resize(min(nPick, nElitism*6));
 		}
-		if(!isSwarm){
-			vector<int> no_k = rander.kSampleInN(nPick, picks.size()),pick_1;
-			for (auto x : no_k) {
-				int no = picks[x];				pick_1.push_back(no);
-			}
-			picks = pick_1;
-		}
-		if (feat_salps != nullptr) {
-			feat_salps->AddSalp(nFeat, picks, nTree);
-		}
-		
-		std::sort(picks.begin(), picks.end());
+		delete[] w;
 
+		std::sort(picks.begin(), picks.end());
 	}
+	delete[] mask;
 	nPickFeat = picks.size();
 	assert(nPickFeat>0);
 }
-
 
 
 void FeatsOnFold::Feature_Bundling(int flag) {

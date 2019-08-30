@@ -74,6 +74,12 @@ void OnUserParams(LiteBOM_Config&config, PY_ITEM* params, int nParam, int flag =
 		if (strcmp(params[i].Keys, "verbose") == 0) {
 			config.verbose = params[i].Values;
 		}
+		if (strcmp(params[i].Keys, "verbose_eval") == 0) {
+			config.verbose_eval = params[i].Values;
+		}
+		if (strcmp(params[i].Keys, "elitism") == 0) {
+			config.nElitism = params[i].Values;
+		}
 		if (strcmp(params[i].Keys, "learning_rate") == 0) {
 			config.learning_rate = params[i].Values;
 		}

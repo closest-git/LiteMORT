@@ -466,7 +466,7 @@ void ManifoldTree::Train(int flag) {
 		size_t nSamp = root->samp_set.nSamp;
 		printf("\t\tsamps={%d,%d,...,%d}",samps[0], samps[nSamp / 2], samps[nSamp - 1]);
 		if (pick_feats.size() > 1) {
-			printf("\tpick_feats={%d...%d...%d}\t",
+			printf("\tfeats[%d]={%d...%d...%d}\t", pick_feats.size(),
 				pick_feats[0], pick_feats[pick_feats.size()/2], pick_feats[pick_feats.size()-1]);
 		}
 	}

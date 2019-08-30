@@ -24,6 +24,7 @@ def seed_everything(seed=0):
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 #isMORT = True
 SEED = 42
+verbose_eval=1
 seed_everything(SEED)
 LOCAL_TEST = False
 TARGET = 'isFraud'
@@ -60,7 +61,7 @@ def make_predictions(tr_df, tt_df, features_columns, target, lgb_params, NFOLDS=
                 vl_data = lgb.Dataset(P, label=P_y)
             else:
                 vl_data = lgb.Dataset(vl_x, label=vl_y)
-            estimator = lgb.train(lgb_params,tr_data,valid_sets=[tr_data, vl_data],verbose_eval=200, )
+            estimator = lgb.train(lgb_params,tr_data,valid_sets=[tr_data, vl_data],verbose_eval=verbose_eval, )
             pp_p = estimator.predict(P)
             del tr_data, vl_data
         predictions += pp_p / NFOLDS
@@ -238,9 +239,10 @@ lgb_params = { 'objective':'binary',
                     'boosting_type':'gbdt',
                     'metric':'auc',
                     #'salp_bins':32,
+                   #'elitism':16
                     'n_jobs':-1,
                     'learning_rate':0.01,
-                    'num_leaves': 2**8,
+                    'num_leaves': 10,#2**8,
                     'max_depth':-1,
                     'tree_learner':'serial',
                     'colsample_bytree': 0.7,
@@ -249,6 +251,7 @@ lgb_params = { 'objective':'binary',
                     'n_estimators':800,
                     'max_bin':255,
                     'verbose':1,
+                    'verbose_eval':verbose_eval,
                     'seed': SEED,
                     'early_stopping_rounds':100,
                 }
@@ -260,8 +263,8 @@ if LOCAL_TEST:
     test_predictions = make_predictions(train_df, test_df, features_columns, TARGET, lgb_params)
     print(metrics.roc_auc_score(test_predictions[TARGET], test_predictions['prediction']))
 else:
-    lgb_params['learning_rate'] = 0.1   #0.005
-    lgb_params['n_estimators'] = 20000
+    lgb_params['learning_rate'] = 0.01#005
+    lgb_params['n_estimators'] = 20
     lgb_params['early_stopping_rounds'] = 100
     test_predictions = make_predictions(train_df, test_df, features_columns, TARGET, lgb_params, NFOLDS=10)
 

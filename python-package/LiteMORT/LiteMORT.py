@@ -79,6 +79,10 @@ class LiteMORT_params(object):
             self.feature_quanti = dict_param['max_bin']
         if 'salp_bins' in dict_param:
             self.salp_bins = dict_param['salp_bins']
+        if 'elitism' in dict_param:
+            self.elitism = dict_param['elitism']
+        if 'verbose_eval' in dict_param:
+            self.verbose_eval = dict_param['verbose_eval']
         if 'min_data_in_leaf' in dict_param:
             self.min_child_samples = dict_param['min_data_in_leaf']
         if 'boost_from_average' in dict_param:
