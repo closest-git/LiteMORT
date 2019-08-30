@@ -166,7 +166,7 @@ double GBRT::Predict(FeatsOnFold *hData_, bool isX,bool checkLossy, bool resumeL
 		else {
 		}
 		//on the eval_metric
-		err = hData_->lossy->ERR(hData_);
+		err = hData_->lossy->ERR();
 		/*if (hData_->config.eval_metric == "mse") {
 			err = hData_->lossy->err_rmse;
 			err = err*err;
@@ -259,7 +259,7 @@ int GBRT::IterTrain(int round, int flag) {
 			FeatVector *hY1 = hTrainData->GetPrecict();
 			tpDOWN *hDown = hTrainData->GetDownDirection();
 			err_0 = this->Predict(hTrainData, false, true, true);		//可以继续优化
-			if (hTrainData->lossy->isOK(hTrainData,0x0, FLT_EPSILON)) {
+			if (hTrainData->lossy->isOK(0x0, FLT_EPSILON)) {
 				eOOB = 0;	printf("\n********* ERR@Train is ZERO, Break!!! *********\n\n");	return 0x0;
 			}
 			if (skdu.noT % 500 == 0) {
@@ -284,7 +284,7 @@ int GBRT::IterTrain(int round, int flag) {
 					break;
 			}
 			stopping.Add(err, round);
-			if (hEvalData->lossy->isOK(hEvalData,0x0, FLT_EPSILON)) {
+			if (hEvalData->lossy->isOK(0x0, FLT_EPSILON)) {
 				eOOB = 0;	printf("\n********* You are so LUCKY!!! *********\n\n");	return 0x0;
 			}
 		}
@@ -331,7 +331,7 @@ int GBRT::Train(string sTitle, int x, int flag) {
 		else {
 			if (isEvalTrain) {
 				err_0 = this->Predict(hTrainData,false,true, true);		//可以继续优化
-				if (hTrainData->lossy->isOK(hTrainData,0x0,FLT_EPSILON)) {
+				if (hTrainData->lossy->isOK(0x0,FLT_EPSILON)) {
 					eOOB = 0;	printf("\n********* ERR@Train is ZERO, Break!!! *********\n\n");	return 0x0;
 				}
 				if (skdu.noT % 500 == 0) {
@@ -349,7 +349,7 @@ int GBRT::Train(string sTitle, int x, int flag) {
 				}
 				err = this->Predict(hEvalData, true, true, true);	//经过校验，同样可以用resumeLast
 				stopping.Add(err,t);
-				if (hEvalData->lossy->isOK(hEvalData,0x0, FLT_EPSILON)) {
+				if (hEvalData->lossy->isOK(0x0, FLT_EPSILON)) {
 					eOOB = 0;	printf("\n********* You are so LUCKY!!! *********\n\n");	
 				}		
 				if (hTrainData->feat_salps != nullptr && t>0) {

@@ -35,45 +35,45 @@ string FeatsOnFold::LOSSY_INFO(double err, int flag) {
 	return tmp;
 }
 
-double FeatVec_LOSS::ERR(const FeatsOnFold *hData_, int flag) {
+double FeatVec_LOSS::ERR(int flag) {
 	double err = 0;
-	if (hData_->config.eval_metric == "mse") {
-		err = hData_->lossy->err_rmse;
+	if (hBaseData_->config.eval_metric == "mse") {
+		err = hBaseData_->lossy->err_rmse;
 		err = err*err;
 	}
-	else if (hData_->config.eval_metric == "mae") {
-		err = hData_->lossy->err_mae;
+	else if (hBaseData_->config.eval_metric == "mae") {
+		err = hBaseData_->lossy->err_mae;
 	}
-	else if (hData_->config.eval_metric == "logloss") {
-		err = hData_->lossy->err_logloss;
+	else if (hBaseData_->config.eval_metric == "logloss") {
+		err = hBaseData_->lossy->err_logloss;
 	}
-	else if (hData_->config.eval_metric == "auc") {	//需要与EARLY_STOPPING::isOK统一
-		err = 1 - hData_->lossy->err_auc;		
+	else if (hBaseData_->config.eval_metric == "auc") {	//需要与EARLY_STOPPING::isOK统一
+		err = 1 - hBaseData_->lossy->err_auc;
 		//err = hData_->lossy->err_auc;
 	}
 	return err;
 }
 
-bool FeatVec_LOSS::isOK(const FeatsOnFold *hData_, int typ, double thrsh, int flag) {
-	double err = ERR(hData_, flag);
-	if (hData_->config.eval_metric == "auc") {
+bool FeatVec_LOSS::isOK(int typ, double thrsh, int flag) {
+	double err = ERR(flag);
+	if (hBaseData_->config.eval_metric == "auc") {
 		return err < thrsh;
 	}else
 		return err < thrsh;
 	//return err_rmse < thrsh;
 }
 
-void FeatVec_LOSS::EDA(const FeatsOnFold *hData_,  ExploreDA *edaX, int flag) {
-	const LiteBOM_Config&config = hData_->config;
-	size_t nSamp = hData_->nSample();
+void FeatVec_LOSS::EDA( ExploreDA *edaX, int flag) {
+	const LiteBOM_Config&config = hBaseData_->config;
+	size_t nSamp = hBaseData_->nSample();
 	bool isPredict = BIT_TEST(flag, FeatsOnFold::DF_PREDIC);
 	bool isEval = BIT_TEST(flag, FeatsOnFold::DF_EVAL);
 	bool isTrain = BIT_TEST(flag, FeatsOnFold::DF_TRAIN);
-	printf("********* FeatVec_LOSS::EDA...\n");
+	printf("********* FeatVec_LOSS::EDA@\"%s\"...\n",hBaseData_->nam.c_str());
 	if (isPredict) {
 
 	}	else {
-		y->EDA(config,false, 0x0);
+		y->EDA(config,true, 0x0);
 		if(y->hDistri!=nullptr)
 			y->hDistri->Dump(-1, false, flag);
 		size_t dim = size(),i,nOutlier;
@@ -86,6 +86,14 @@ void FeatVec_LOSS::EDA(const FeatsOnFold *hData_,  ExploreDA *edaX, int flag) {
 				printf("\toutliers=%lld!!!\n", nOutlier);
 			}	else {
 				printf("\toutliers=%lld(%d,...%d)\n", nOutlier, outliers[0], outliers[nOutlier-1]);
+			}
+		}else if (hBaseData_->config.objective == "binary") {
+			size_t nPosi = 0, nNega = 0;
+			HistoGRAM *histo = y->hDistri != nullptr ? y->hDistri->histo : nullptr;		assert(histo!=nullptr);
+			if (histo != nullptr) {
+				assert(histo->bins.size()==2 || histo->bins.size() == 3);
+				nPosi = histo->bins[1].nz;		nNega = histo->bins[0].nz;
+				printf("\tNumber of positive : %lld, number of negative : %lld\n", nPosi, nNega);
 			}
 		}
 		printf("********* EDA::Analysis......OK\n");

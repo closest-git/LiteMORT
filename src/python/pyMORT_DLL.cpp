@@ -303,7 +303,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 		//Y->Set(nSamp_, (void*)(Y_));
 		Y->Set(nSamp_, cY_->data);
 	}
-	hFold->lossy->EDA(hFold, nullptr, flag);
+	hFold->lossy->EDA(nullptr, flag);
 
 	GST_TIC(t1);
 	//#pragma omp parallel for num_threads(nThread) schedule(dynamic) reduction(+ : sparse,nana,nConstFeat,nLocalConst,nQuant) 
@@ -401,7 +401,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 		Y->Set(nSamp_, (void*)(Y_));	
 		//hFold->lossy->decrimi_2.InitAtLabel(nSamp_,  flag);
 	}
-	hFold->lossy->EDA(hFold, nullptr, flag);
+	hFold->lossy->EDA(nullptr, flag);
 
 	GST_TIC(t1);
 #pragma omp parallel for num_threads(nThread) schedule(dynamic) reduction(+ : sparse,nana,nConstFeat,nLocalConst,nQuant) 
@@ -623,7 +623,7 @@ PYMORT_DLL_API void LiteMORT_fit(void *mort_0, float *train_data, tpY *train_tar
 	}
 	size_t nFeat = nFeat_0,i,feat, nTrain= nSamp;
 	printf( "\n********* LiteMORT_fit nSamp=%d,nFeat=%d hEDA=%p********* \n\n", nSamp, nFeat, hEDA);
-	Distribution disY;	
+	/*Distribution disY;	
 	disY.STA_at(nSamp, train_target, true, 0x0);
 	if (disY.nNA > 0) {
 		printf("********* LiteMORT_fit Y has nans(%lld)!!! Please check the value of Y!!!\n", disY.nNA);
@@ -632,14 +632,14 @@ PYMORT_DLL_API void LiteMORT_fit(void *mort_0, float *train_data, tpY *train_tar
 	if (true) {	//需要输出 Y的分布
 		disY.X2Histo_<tpY, tpY>(config, nSamp, train_target,nullptr);
 		disY.Dump(-1, false, flag);
-	}
+	}*/
 
 	size_t f1= FeatsOnFold::DF_TRAIN ;	
 	vector<FeatsOnFold*> folds;
 	FeatsOnFold *hFold = FeatsOnFold_InitInstance<float, tpY>(config, hEDA, "train",train_data, train_target, nSamp, nFeat_0, 1, flag | f1),
 		*hEval=nullptr;
 	folds.push_back(hFold);
-	//hFold->nam = "train";
+	//hFold->lossy->Stat_Dump("",0x0);	//需要输出 Y的分布
 
 	//int nTree = 501;		//出现过拟合
 	int nTree = hFold->config.num_trees;

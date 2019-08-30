@@ -241,11 +241,19 @@ void FeatsOnFold::BeforeTrain(BoostingForest *hGBRT, int flag) {
 	if (isUpdate) {
 
 	}
+	size_t nTotalBin0 = 0, nTotalBin1 = 0,nValidFeat=0;
 	for (i = 0; i < nFeat; i++) {
 		//printf("\rFeatsOnFold::BeforeTrain\tfeat=%d\t......", i);
 		FeatVector *hFeat = Feat(i);
+		if (hFeat->hDistri != nullptr) {
+			if (hFeat->hDistri->histo == nullptr)
+			{			continue;			}
+			nTotalBin1 += hFeat->hDistri->histo->bins.size();
+			nValidFeat++;
+		}
 		FeatVec_Q *hFQ = dynamic_cast<FeatVec_Q *>(hFeat);
 		if (hFQ != nullptr) {
+			nTotalBin0 += hFQ->GetHisto()->bins.size();
 			if (isUpdate) {
 				assert(0);
 				throw "!!!histogram_bins onY is ...!!!";
@@ -255,6 +263,8 @@ void FeatsOnFold::BeforeTrain(BoostingForest *hGBRT, int flag) {
 		}
 		//hFeat->XY2Histo_(config, this->samp_set, x);
 	}
+	if(hGBRT->skdu.noT==0)
+		printf("Total Bins=[%d,%d,%.4g]\r\n", nTotalBin0, nTotalBin1, nTotalBin1*1.0/ nValidFeat);
 
 	
 }

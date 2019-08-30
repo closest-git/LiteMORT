@@ -29,8 +29,8 @@ seed_everything(SEED)
 LOCAL_TEST = False
 TARGET = 'isFraud'
 START_DATE = datetime.datetime.strptime('2017-11-30', '%Y-%m-%d')
-some_rows = 10000
-#some_rows = None
+#some_rows = 10000
+some_rows = None
 data_root = 'E:/Kaggle/ieee_fraud/input/'
 pkl_path = f'{data_root}/ieee_fraud_{some_rows}.pickle'
 
@@ -242,7 +242,7 @@ lgb_params = { 'objective':'binary',
                    #'elitism':16
                     'n_jobs':-1,
                     'learning_rate':0.01,
-                    'num_leaves': 10,#2**8,
+                    'num_leaves': 64,#2**8,
                     'max_depth':-1,
                     'tree_learner':'serial',
                     'colsample_bytree': 0.7,

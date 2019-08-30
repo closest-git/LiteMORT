@@ -370,6 +370,8 @@ namespace Grusoft {
 				val = new Tx[_len];	// val.resize(_len);
 		}
 
+		virtual size_t nSamp() {	return nSamp_;		}
+
 		virtual ~FeatVec_T() {
 			if (isReferVal()) {
 				printf("");
@@ -861,10 +863,6 @@ namespace Grusoft {
 		//由PerturbeHisto生成，需要重新设计
 		HistoGRAM *qHisto_1 = nullptr;		
 	public:
-		/*union {
-			vector<double> vThrsh;
-			//vector<int> mapCategory;
-		};*/
 		FeatVec_Q(const FeatsOnFold *hData_, FeatVector *hFeat, int nMostBin, int flag = 0x0);
 		virtual ~FeatVec_Q() {
 			if (qHisto_0 != nullptr)			delete qHisto_0;
@@ -874,7 +872,7 @@ namespace Grusoft {
 				hDistri = nullptr;
 			}
 		}
-		HistoGRAM *GetHisto()		{	return qHisto_0;	}
+		HistoGRAM *GetHisto(int flag=0x0)		{	return qHisto_0;	}
 		void InitSampHisto(HistoGRAM* histo, bool isRandom, int flag = 0x0);
 
 		virtual void Observation_AtSamp(LiteBOM_Config config, SAMP_SET& samp, Distribution&distri, int flag = 0x0) { 

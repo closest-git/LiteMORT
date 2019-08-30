@@ -59,8 +59,8 @@ void Distribution::Dump(int feat, bool isQuanti, int flag) {
 		//printf("%4d %c%12s [%.3g,%.3g,%.3g,%.3g,%.3g]\tnBin=%d[%.3g,%.3g,%.3g,%.3g,%.3g]%s \n", feat, typ, nam.c_str(), 
 		//	vMin, q1, q2, q3, vMax,
 		//需要输出中位数
-		printf("%4d %c%12s [%.3g-%.3g]\tD=%.3g\tnBin=%d[%.3g,%.3g,%.3g,%.3g,%.3g]%s \n", feat, typ, nam.c_str(),
-			vMin, vMax,corr.D_sum,
+		printf("%4d %c%12s [%.4g-%.4g]\tBIG=%d\tnBin=%d[%.4g,%.4g,%.4g,%.4g,%.4g]%s \n", feat, typ, nam.c_str(),
+			vMin, vMax, histo == nullptr ? 0 : histo->nBigBins /*corr.D_sum*/,
 			 histo == nullptr ? 0 : histo->bins.size(),
 			H_q0, H_q1, H_q2, H_q3, H_q4, tmp);
 	}
@@ -78,6 +78,7 @@ void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTIN
 			vUnique[i].type = vDISTINCT::LARGE;	 BIG_bins++;
 		}
 	}
+	histo->nBigBins = BIG_bins;
 
 	size_t i_0 = -1,  noBin = 0, pos, nDistinc=0;
 	double a0 = vUnique[0].val, a1 = vUnique[vUnique.size()-1].val, v0;
@@ -98,6 +99,7 @@ void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTIN
 		}
 		do	{
 			if (vUnique[i_0].type == vDISTINCT::LARGE) {
+				nz += vUnique[i_0].nz;
 				BIG_bins--;		break;
 			}			
 			SMALL_na -= vUnique[i_0].nz;
@@ -118,12 +120,27 @@ void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTIN
 		feata.density = nz*1.0 / nDistinc;
 	}
 	assert(SMALL_na>=0 && BIG_bins==0);
-	histo->bins.resize(noBin + 1);		//always last bin for NA
 	assert(i_0 == nUnique+1 || i_0 == nUnique);
 	double delta = double(fabs(a1 - a0)) / nMostBin / 100.0;
 	double d_max = DBL_MAX;	// std::numeric_limits<double>::max();
+	if (nUnique < nMostBin && nA>nMostBin*20) {
+		d_max = a1 + delta;
+		//assert(histo->bins.size()== nUnique);
+	} else {
+	}
+	histo->bins.resize(noBin + 1);		//always last bin for NA
 	histo->bins[noBin].split_F = d_max;	
 	histo->bins[noBin].tic = noBin;
+	histo->bins[noBin].nz = nSamp-nA;
+	histo->CheckValid();
+	nz = histo->bins.size();
+	if (nz >= 2) {
+		size_t n1 = ceil(nz / 4.0), n2 = ceil(nz / 2.0), n3 = ceil(nz *3.0 / 4)-1;
+		HISTO_BIN&b0 = histo->bins[0], &b1 = histo->bins[n1], &b2 = histo->bins[n2], &b3 = histo->bins[n3], &b4 = histo->bins[nz-1];
+		H_q0 = b0.split_F,				H_q4 = b4.split_F;
+		H_q1 = q1 = b1.split_F,			H_q2 = q2 = b2.split_F;		H_q3 = q3 = b3.split_F;/**/
+	}
+
 }
 
 #define IS_INT(dtype) (true)

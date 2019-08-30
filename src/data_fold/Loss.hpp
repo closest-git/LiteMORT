@@ -27,6 +27,7 @@ namespace Grusoft {
 	*/
 	class FeatVec_LOSS {
 	protected:
+		const FeatsOnFold *hBaseData_=nullptr;
 		LambdaRank HT_lambda_;
 		DCRIMI_2 decrimi_2;
 		IS_TYPE tpResi = is_XXX;
@@ -332,6 +333,7 @@ namespace Grusoft {
 
 		template<typename Ty>
 		void Init_T(const FeatsOnFold *hData_, int _len, size_t x, int rnd_seed, int flag) {
+			hBaseData_ = hData_;
 			bool isTrain = BIT_TEST(flag, FeatsOnFold::DF_TRAIN);
 			bool isEval = BIT_TEST(flag, FeatsOnFold::DF_EVAL);
 			bool isPredict = BIT_TEST(flag, FeatsOnFold::DF_PREDIC);
@@ -343,6 +345,7 @@ namespace Grusoft {
 				throw	"tpResi should be flow or double!!!";
 
 			y = new FeatVec_T<Ty>(_len, 0, "loss");			predict = new FeatVec_T<Ty>(_len, 0, "predict");
+			
 			//predict.resize(_len, 0);
 			if (isTrain || isEval ) {
 				down.resize(_len, 0);		sample_down.resize(_len, 0);
@@ -361,7 +364,7 @@ namespace Grusoft {
 				}
 			}
 		}
-		virtual void EDA(const FeatsOnFold *hData_, ExploreDA *edaX, int flag);
+		virtual void EDA(ExploreDA *edaX, int flag);
 
 		FeatVec_LOSS() {
 		}
@@ -371,14 +374,14 @@ namespace Grusoft {
 			hessian.clear();			sample_hessian.clear();
 			//if (lossy != nullptr)			delete lossy;
 		}
-
+		//virtual void Stat_Dump(const string&info, int flag=0x0);
 		virtual FeatVector * GetY() { return y; }
 
 		virtual void Update(FeatsOnFold *hData_,int round, int flag = 0x0);
 
-		virtual double ERR(const FeatsOnFold *hData_, int flag = 0x0);
+		virtual double ERR(int flag = 0x0);
 
-		virtual bool isOK(const FeatsOnFold *hData_, int typ, double thrsh, int flag = 0x0);
+		virtual bool isOK(int typ, double thrsh, int flag = 0x0);
 
 		friend class FeatsOnFold;
 		friend class GBRT;

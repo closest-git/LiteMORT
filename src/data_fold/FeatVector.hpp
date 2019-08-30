@@ -66,6 +66,8 @@ namespace Grusoft {
 			if (select_bins != nullptr)
 				delete select_bins;
 		}
+		virtual size_t nSamp() { throw"FeatVector::nSamp is ..."; }
+
 		virtual void Empty(int flag = 0x0) {		}
 		virtual void Set(size_t len, void* p, int flag = 0x0) { throw"FeatVector::SetY is ..."; }
 		virtual void Set(size_t pos, double a, int flag = 0x0) { throw"FeatVector::SetY is ..."; }

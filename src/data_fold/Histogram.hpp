@@ -174,7 +174,9 @@ namespace Grusoft {
 		//FeatVector*	hFeat = nullptr;
 	public:
 		static size_t nAlloc;
+		static double  memAlloc;
 		SPLIT_HISTOGRAM split_by = BY_VALUE;
+		int nBigBins = 0;
 
 		size_t nSamp, nLeft = 0, nRight=0;
 		FRUIT *fruit=nullptr;			//仅仅指向
@@ -193,6 +195,7 @@ namespace Grusoft {
 		}
 		virtual ~HistoGRAM();		
 
+		virtual void CheckValid(int flag = 0x0);
 		virtual void CompressBins(int flag=0x0);
 		virtual void TicMap(tpQUANTI*map,int flag);
 

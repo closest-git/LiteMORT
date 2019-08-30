@@ -7,6 +7,7 @@
 using namespace Grusoft;
 
 size_t HistoGRAM::nAlloc = 0;
+double HistoGRAM::memAlloc = 0;
 //参见bmpp_ii.code
 struct IntegralTable {
 	int *sumary, *sum2, M, N;
@@ -202,6 +203,15 @@ void HistoGRAM::TicMap(tpQUANTI*map, int flag) {
 		tic = bins[i].tic;
 		map[tic] = i;
 	}
+}
+
+void HistoGRAM::CheckValid(int flag) {
+	int i, nBin = bins.size(), nZ = 0;
+	for (i = 0; i < nBin; i++) {		//这样最快
+		//if (i<nBin - 1 && bins[i].nz == 0) { continue; }
+		nZ += bins[i].nz;
+	}
+	assert(nZ==nSamp);
 }
 
 //似乎偏慢，需要提速
