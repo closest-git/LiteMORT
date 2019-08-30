@@ -175,7 +175,8 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 				assert(w[picks[i]] <= w[picks[i + 1]]);
 				assert(mask[picks[i]] == 1);
 			}
-			int nElitism = min(nPick, 16);
+			//int nElitism = min(nPick, 16);
+			int nElitism = min(nPick, config.nElitism);
 			std::random_shuffle(picks.begin()+ nElitism, picks.end());
 			picks.resize(min(nPick, nElitism*6));
 		}
@@ -187,7 +188,6 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 	nPickFeat = picks.size();
 	assert(nPickFeat>0);
 }
-
 
 void FeatsOnFold::Feature_Bundling(int flag) {
 	size_t i,feat,next,nFeat=feats.size(),maxDup=0,dup;
@@ -538,8 +538,8 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 		if(hParent==nullptr)
 			FeatsOnFold::stat.tX += GST_TOC(t1);
 		}
-
 	}
+	histo->CheckValid(hData_->config);
 
 	#ifdef _DEBUG
 	if (true /* && !isRandomDrop*/) {

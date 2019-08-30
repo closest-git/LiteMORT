@@ -66,18 +66,25 @@ void Distribution::Dump(int feat, bool isQuanti, int flag) {
 	}
 }
 
-//always last bin for NA
+/*
+	always last bin for NA
+	v0.1	cys
+		8/30/2019
+*/
 void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTINCT>& vUnique,size_t nA0, size_t nMostBin, int flag) {
 	assert(histo != nullptr);
 	size_t nA = 0, T_avg = nA0*1.0 / nMostBin,SMALL_na=0, BIG_bins=0,nUnique= vUnique.size(),nz;
 	for (int i = 0; i < nUnique;i++) {
 		nA += vUnique[i].nz;
-		if (vUnique[i].nz <= T_avg) {
+		if (vUnique[i].nz <= T_avg*2) {
 			SMALL_na += vUnique[i].nz;
 		}	else {
 			vUnique[i].type = vDISTINCT::LARGE;	 BIG_bins++;
 		}
 	}
+	size_t T_avg_small = max(config.min_data_in_bin, SMALL_na / (nMostBin - BIG_bins)/ 10);
+	T_avg_small = config.min_data_in_bin;
+
 	histo->nBigBins = BIG_bins;
 
 	size_t i_0 = -1,  noBin = 0, pos, nDistinc=0;
@@ -93,7 +100,9 @@ void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTIN
 		BIN_FEATA& feata = binFeatas[noBin];
 		bin.tic = noBin;	//tic split_F必须一致
 		bin.split_F = i_0 > 0 ? (v0 + vUnique[i_0 - 1].val) / 2 : v0;
-		T_avg = nMostBin - noBin > BIG_bins ? max(1, SMALL_na / (nMostBin- noBin- BIG_bins)) : 1;
+		//bin.split_F =  v0;
+		T_avg = nMostBin - noBin > BIG_bins ? max(config.min_data_in_bin, SMALL_na / (nMostBin- noBin- BIG_bins)) : config.min_data_in_bin;
+		T_avg = max(T_avg, T_avg_small) ;	//T_avg会越来越小
 		if (isDcrimi) {
 			crimi = corr.dcrimi[i_0];
 		}
@@ -110,11 +119,14 @@ void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTIN
 				}
 				crimi += corr.dcrimi[i_0];
 			}
-			else	if (nz >= T_avg)
+			else	if (nz >= T_avg )
 				break;
+			if (i_0+1<nUnique && vUnique[i_0+1].type == vDISTINCT::LARGE && nz>T_avg / 2)
+			{		break;			}
 		} while (++i_0 < nUnique);
 		
 		//assert(i_1 == nUnique );
+		//、assert(nz >= config.min_data_in_bin || i_0 == nUnique);
 		bin.nz = nz;		
 		noBin = noBin + 1;
 		feata.density = nz*1.0 / nDistinc;
@@ -132,7 +144,7 @@ void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTIN
 	histo->bins[noBin].split_F = d_max;	
 	histo->bins[noBin].tic = noBin;
 	histo->bins[noBin].nz = nSamp-nA;
-	histo->CheckValid();
+	histo->CheckValid(config);
 	nz = histo->bins.size();
 	if (nz >= 2) {
 		size_t n1 = ceil(nz / 4.0), n2 = ceil(nz / 2.0), n3 = ceil(nz *3.0 / 4)-1;

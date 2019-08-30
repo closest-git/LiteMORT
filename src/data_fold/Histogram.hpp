@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cmath>
 #include "../util/samp_set.hpp"
+#include "../include/LiteBOM_config.h"
 
 using namespace std;
 typedef map<int, int> MAP_CATEGORY;
@@ -195,7 +196,7 @@ namespace Grusoft {
 		}
 		virtual ~HistoGRAM();		
 
-		virtual void CheckValid(int flag = 0x0);
+		virtual void CheckValid(const LiteBOM_Config&config,  int flag = 0x0);
 		virtual void CompressBins(int flag=0x0);
 		virtual void TicMap(tpQUANTI*map,int flag);
 

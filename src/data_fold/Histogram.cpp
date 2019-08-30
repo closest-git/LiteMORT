@@ -205,11 +205,12 @@ void HistoGRAM::TicMap(tpQUANTI*map, int flag) {
 	}
 }
 
-void HistoGRAM::CheckValid(int flag) {
+void HistoGRAM::CheckValid(const LiteBOM_Config&config,  int flag) {
 	int i, nBin = bins.size(), nZ = 0;
 	for (i = 0; i < nBin; i++) {		//这样最快
 		//if (i<nBin - 1 && bins[i].nz == 0) { continue; }
 		nZ += bins[i].nz;
+		//assert(bins[i].nz>=config.min_data_in_bin || i>= nBin-2);
 	}
 	assert(nZ==nSamp);
 }

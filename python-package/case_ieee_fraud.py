@@ -239,7 +239,7 @@ lgb_params = { 'objective':'binary',
                     'boosting_type':'gbdt',
                     'metric':'auc',
                     #'salp_bins':32,
-                   #'elitism':16
+                   'elitism':16,
                     'n_jobs':-1,
                     'learning_rate':0.01,
                     'num_leaves': 64,#2**8,
@@ -264,7 +264,7 @@ if LOCAL_TEST:
     print(metrics.roc_auc_score(test_predictions[TARGET], test_predictions['prediction']))
 else:
     lgb_params['learning_rate'] = 0.01#005
-    lgb_params['n_estimators'] = 20
+    lgb_params['n_estimators'] = 100
     lgb_params['early_stopping_rounds'] = 100
     test_predictions = make_predictions(train_df, test_df, features_columns, TARGET, lgb_params, NFOLDS=10)
 
