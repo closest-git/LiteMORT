@@ -49,7 +49,7 @@ void SAMP_SET::Alloc(FeatsOnFold *hData_, size_t nSamp_, int flag) {
 		8/31/2019
 */
 void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const BoostingForest *hBoosting, const SAMP_SET *from, size_t nMost, int rnd_seed, int flag) {
-	int nElitism = hData_->config.nElitism;
+	int nElitism = 1;// hData_->config.nElitism;
 	const tpDOWN *hessian = hData_->GetHessian();
 	const tpDOWN *down = hData_->GetDownDirection();
 	Alloc(hData_,nMost);
@@ -99,7 +99,7 @@ void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const BoostingForest *hBoosting, 
 			double prob = (nMost - nz) / static_cast<double>(nFrom - i);
 			if (nElitism > 0 ) {
 				if (fabs(down[i])<T_grad) {
-					prob /= 10.0;		nSmall++;
+					prob /= 10.0;		//nSmall++;
 				}
 			}
 			x = (214013 * x + 2531011);
@@ -126,7 +126,7 @@ void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const BoostingForest *hBoosting, 
 
 	assert(nz <= nMost);
 	if(hBoosting->skdu.noT % hData_->config.verbose_eval==0)
-		printf("\nSAMP_SET::SampleFrom nSamp=%lld[%lld=>%lld] nSmall=%d\t", nFrom, nMost, nz, nSmall);
+		printf("\nSAMP_SET::SampleFrom nSamp=%lld[%lld=>%lld] \t", nFrom, nMost, nz);
 	//printf("\nsamps={%d,%d,%d,...%d,...,%d,%d}", samps[0], samps[1], samps[2], samps[nz / 2], samps[nz - 2], samps[nz - 1]);
 }
 

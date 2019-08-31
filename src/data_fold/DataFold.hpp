@@ -264,12 +264,16 @@ namespace Grusoft {
 			int *feat_ids = tree.feat_ids, *left = tree.left, *rigt = tree.rigt;
 			Tx **arrFeat = new Tx*[nFeat], *val = nullptr;
 			for (t = 0; t < nFeat; t++) {
-				FeatVec_T<Tx>*hFT = dynamic_cast<FeatVec_T<Tx>*>(feats[t]);
-				if (hFT == nullptr)
-				{
-					delete[] arrFeat;	return false;
+				if (feats[t]->hDistri != nullptr && feats[t]->hDistri->isPass())
+				{		arrFeat[t] = nullptr;		}
+				else {
+					FeatVec_T<Tx>*hFT = dynamic_cast<FeatVec_T<Tx>*>(feats[t]);
+					if (hFT == nullptr)
+					{
+						delete[] arrFeat;	return false;
+					}
+					arrFeat[t] = hFT->arr();
 				}
-				arrFeat[t] = hFT->arr();
 			}
 			/**/
 			int num_threads = OMP_FOR_STATIC_1(nSamp, step);

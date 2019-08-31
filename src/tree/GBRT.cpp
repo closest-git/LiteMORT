@@ -81,6 +81,7 @@ void GBRT::BeforeTrain(FeatsOnFold *hData_, int flag ) {
 	}
 }
 
+
 /*
 	如果y已知，就可以checkLossy
 	v0.1	集成hMove加速
@@ -114,11 +115,12 @@ double GBRT::Predict(FeatsOnFold *hData_, bool isX,bool checkLossy, bool resumeL
 		bool isNodeMajor = true;
 		if (true) {		//data-major	似乎快一些
 			ARR_TREE arrTree;
-			if (hTree->To_ARR_Tree(hData_,arrTree)) {
+			//if (hTree->To_ARR_Tree(hData_,true)) {
+			if (hTree->harrTree!=nullptr) {
 				if(hData_->isQuanti)
-					isNodeMajor = !hData_->PredictOnTree<tpQUANTI,double>(arrTree,flag);
+					isNodeMajor = !hData_->PredictOnTree<tpQUANTI,double>(*(hTree->harrTree),flag);
 				else
-					isNodeMajor = !hData_->PredictOnTree<float, double>(arrTree, flag);
+					isNodeMajor = !hData_->PredictOnTree<float, double>(*(hTree->harrTree), flag);
 			}
 		}
 		if(isNodeMajor) {			//node-major
@@ -343,10 +345,10 @@ int GBRT::Train(string sTitle, int x, int flag) {
 					stopping.Add(err_0,t);
 			}
 			if (hEvalData != nullptr) {
-				if (t > 0) {
+				/*if (t > 0) {
 					hMTNode hRoot = (dynamic_cast<ManifoldTree*>(forest[t-1]))->hRoot();		//im1 = hRoot->impuri;
 					assert(hRoot->nSample() == 0);
-				}
+				}*/
 				err = this->Predict(hEvalData, true, true, true);	//经过校验，同样可以用resumeLast
 				stopping.Add(err,t);
 				if (hEvalData->lossy->isOK(0x0, FLT_EPSILON)) {
@@ -372,9 +374,10 @@ int GBRT::Train(string sTitle, int x, int flag) {
 		forest.push_back(hTree);
 		GST_TIC(t111);
 		hTree->Train(flag);				//
+		nzNode +=hTree->nodes.size();
+		hTree->To_ARR_Tree(hTrainData, true);
 		t_train += GST_TOC(t111);
 		
-		nzNode +=hTree->nodes.size();
 		//TestOOB(hTrainData);
 		
 		if (t %10==0) {

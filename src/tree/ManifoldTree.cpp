@@ -581,8 +581,12 @@ void ManifoldTree::ClearSampSet() {
 
 /*
 	v0.1	cys
+	v0.2	cys
+		8/31/2019
 */
-bool ManifoldTree::To_ARR_Tree(FeatsOnFold *hData_, ARR_TREE &arrTree, int flag) {
+bool ManifoldTree::To_ARR_Tree(FeatsOnFold *hData_, bool isClear, int flag) {
+	harrTree = new ARR_TREE();
+	ARR_TREE &arrTree = *(this->harrTree);
 	bool isQuanti = hData_->isQuanti;		//predict,test对应的数据集并没有格子化!!!
 	int nNode = nodes.size(),no=0;
 	arrTree.Init(nNode);
@@ -608,7 +612,25 @@ bool ManifoldTree::To_ARR_Tree(FeatsOnFold *hData_, ARR_TREE &arrTree, int flag)
 		}
 		no = no + 1;
 	}
+	if (isClear) {	//参见 ~ManifoldTree( )
+		for (auto node : nodes)
+			delete node;
+		nodes.clear();		//samp_folds.clear( );
+		if (hGuideTree != nullptr)
+			delete hGuideTree;
+	}
 	return true;
+}
+
+ManifoldTree::~ManifoldTree() {
+	//for each(MT_BiSplit *node in nodes)
+	for (auto node : nodes)
+		delete node;
+	nodes.clear();		//samp_folds.clear( );
+	if (hGuideTree != nullptr)
+		delete hGuideTree;
+	if (harrTree != nullptr)
+		delete harrTree;
 }
 
 void ManifoldTree::Dump( int flag ){

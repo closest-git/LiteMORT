@@ -166,21 +166,15 @@ namespace Grusoft{
 		ManifoldTree(BoostingForest *hF, FeatsOnFold *hData, string nam_, int flag = 0x0);
 		//ÇÐ¼Ç	±ØÐëÉ¾³ý
 		virtual void ClearSampSet( );			
-		virtual ~ManifoldTree( )	{
-			//for each(MT_BiSplit *node in nodes)
-			for (auto node : nodes)
-				delete node;
-			nodes.clear( );		//samp_folds.clear( );
-			if (hGuideTree != nullptr)
-				delete hGuideTree;
-		}		
+		virtual ~ManifoldTree();
 		hMTNode hRoot() {	assert(nodes.size()>0);	return nodes[0]; }
 
 		virtual void Train(int flag = 0x0);
 		virtual void AddScore(INIT_SCORE *score,int flag=0x0);
 		virtual void Dump(int flag = 0x0);
 		virtual void DelChild(hMTNode hNode,int flag=0x0);
-		virtual bool To_ARR_Tree(FeatsOnFold *hData_, ARR_TREE &arrTree, int flag = 0x0);
+		ARR_TREE *harrTree = nullptr;
+		virtual bool To_ARR_Tree(FeatsOnFold *hData_,bool isClear , int flag = 0x0);
 		//virtual void Predict(int flag = 0x0);
 
 		virtual void SetGuideTree(ManifoldTree*hET, int flag = 0x0) {	hGuideTree = hET;	 }
