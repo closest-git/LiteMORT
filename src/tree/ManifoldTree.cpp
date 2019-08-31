@@ -287,13 +287,13 @@ void DecisionTree::Train(  int flag ){
 }
 
 
-ManifoldTree::ManifoldTree(BoostingForest *hF, FeatsOnFold *hData, string nam_, int flag)	{
-	hForest = hF, name = nam_;
+ManifoldTree::ManifoldTree(BoostingForest *hBoosting, FeatsOnFold *hData, string nam_, int flag)	{
+	hForest = hBoosting, name = nam_;
 	hData_ = hData;
 	//FeatsOnFold *hData = hF->GurrentData();
-	int rnd_seed=hF->skdu.noT;
+	int rnd_seed= hBoosting->skdu.noT;
 	//hData->samp_set.Shuffle(rnd_seed);
-	MT_BiSplit *root = new MT_BiSplit(hData, 0, rnd_seed);
+	MT_BiSplit *root = new MT_BiSplit(hData,hBoosting, 0, rnd_seed);
 	root->id = nodes.size();		 nodes.push_back(root);
 	//leafs.push_back(root);
 	//leafs.push(root);
@@ -415,7 +415,7 @@ void ManifoldTree::BeforeEachBatch(size_t nMost, size_t rng_seed, int flag) {
 	//FeatsOnFold *hData_ = hForest->GurrentData();
 	hMTNode root = hRoot();
 	size_t nLeft = root->samp_set.nLeft, nRigt = root->samp_set.nRigt,nSamp= root->samp_set.nSamp;
-	root->samp_set.SampleFrom(hData_,nullptr, nMost, rng_seed, 0);
+	root->samp_set.SampleFrom(hData_,this->hForest,nullptr, nMost, rng_seed, 0);
 
 	for (auto node : nodes) {
 	//for each(hMTNode node in nodes) {

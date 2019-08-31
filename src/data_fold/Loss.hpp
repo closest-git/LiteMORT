@@ -192,7 +192,7 @@ namespace Grusoft {
 			tpDOWN *vHess = VECTOR2ARR(hessian);
 			size_t dim = resi.size(), nSamp = hData_->nSample(), step = dim, start, end;
 			G_INT_64 i;
-			double sum = 0,*y_exp = nullptr, a_logloss = 0;
+			double a2 = 0, sum = 0,*y_exp = nullptr, a_logloss = 0;
 
 			int num_threads = OMP_FOR_STATIC_1(dim, step);
 			/*if (metric == "logloss" || pDown != nullptr) {		//get y_exp
@@ -230,16 +230,16 @@ namespace Grusoft {
 			}
 			if (pDown != nullptr) {
 				Tx P_0 = decrimi_2.P_0, P_1 = decrimi_2.P_1, N_0 = decrimi_2.N_0, N_1 = decrimi_2.N_1;
-#pragma omp parallel for schedule(static,1)
+#pragma omp parallel for schedule(static,1) reduction(+ : a2,sum)
 				for (int thread = 0; thread < num_threads; thread++) {
 					size_t start = thread*step, end = min(start + step, dim), i;
-					for (i = start; i < end; i++) {
-						a = y1[i];
+					for (i = start; i < end; i++) {				
 						//double sig = y_exp[i] / (1 + y_exp[i]);
 						double sig = y1[i]<EXP_UNDERFLOW ? 0 : y1[i]>EXP_OVERFLOW ? 1 : exp(y1[i]) / (1 + exp(y1[i]));
 						//assert(!IS_NAN_INF(sig));
-						pDown[i] = -(sig - label[i]);								vHess[i] = sig*(1 - sig);
-						/*if (label[i] == 0 && a > P_0) {	//很奇怪，这样就是不行
+						pDown[i] = a = -(sig - label[i]);								vHess[i] = sig*(1 - sig);
+						a2 += a*a;				sum += a;
+						/*a = y1[i];if (label[i] == 0 && a > P_0) {	//很奇怪，这样就是不行
 							//pDown[i] *= 10;							
 						}
 						else if (label[i] == 1 && a < N_1) {
@@ -247,6 +247,7 @@ namespace Grusoft {
 						}*/
 					}
 				}
+				DOWN_sum_2 = a2;	DOWN_sum_1 = sum;
 			}
 			//if(y_exp!=nullptr)	
 			//	delete[] y_exp;
@@ -311,7 +312,9 @@ namespace Grusoft {
 		}
 	public:
 		std::vector<tpDOWN> down, resi, hessian,sample_down,sample_hessian;		//negative_gradient,是否下降由LOSS判定		
-
+		//参见samp_set之相关定义
+		double DOWN_sum_1 = 0, DOWN_sum_2 = 0, DOWN_0 = DBL_MAX, DOWN_1 = -DBL_MAX;
+		
 		//https://medium.com/human-in-a-machine-world/mae-and-rmse-which-metric-is-better-e60ac3bde13d
 		double err_rmse = DBL_MAX, err_mae = DBL_MAX, err_l2 = DBL_MAX,err_logloss= DBL_MAX, err_auc= DBL_MAX;
 		double err_AP_outlier = DBL_MAX;		//average precision for outliers

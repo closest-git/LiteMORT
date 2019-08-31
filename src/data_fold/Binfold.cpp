@@ -26,7 +26,7 @@ BinFold::BinFold(const FeatsOnFold *hData_, const vector<int> &pick_feats, const
 	NZ = new size_t[nFeat*ldQ]();
 	size_t *curNZ;
 	const tpDOWN *hessian = hData_->GetHessian();
-	const tpDOWN *down = hData_->GetDownDirection(); ;
+	const tpDOWN *down = hData_->GetDownDirection();
 	const tpSAMP_ID *samps = samp_set.samps;
 	tpSAMP_ID samp;
 	double g,hess,*curGrad,*curHess;

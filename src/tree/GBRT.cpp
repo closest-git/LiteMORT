@@ -128,7 +128,7 @@ double GBRT::Predict(FeatsOnFold *hData_, bool isX,bool checkLossy, bool resumeL
 				;// hData_->hMove->BeforeStep(hData_->samp_set, allx, 0x0);
 			if (isSplit) {
 				//root->samp_set = hData_->samp_set;				root->samp_set.isRef = true;
-				root->samp_set.SampleFrom(hData_,nullptr, hData_->nSample(),-1);
+				root->samp_set.SampleFrom(hData_,this,nullptr, hData_->nSample(),-1);
 			}
 			for (auto node : hTree->nodes)	{
 			//for each(hMTNode node in hTree->nodes) {

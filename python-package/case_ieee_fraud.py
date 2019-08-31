@@ -24,7 +24,7 @@ def seed_everything(seed=0):
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 #isMORT = True
 SEED = 42
-verbose_eval=1
+verbose_eval=200
 seed_everything(SEED)
 LOCAL_TEST = False
 TARGET = 'isFraud'
@@ -242,7 +242,7 @@ lgb_params = { 'objective':'binary',
                    'elitism':16,
                     'n_jobs':-1,
                     'learning_rate':0.01,
-                    'num_leaves': 64,#2**8,
+                    'num_leaves': 2**8,
                     'max_depth':-1,
                     'tree_learner':'serial',
                     'colsample_bytree': 0.7,
@@ -264,7 +264,7 @@ if LOCAL_TEST:
     print(metrics.roc_auc_score(test_predictions[TARGET], test_predictions['prediction']))
 else:
     lgb_params['learning_rate'] = 0.01#005
-    lgb_params['n_estimators'] = 100
+    lgb_params['n_estimators'] = 200000
     lgb_params['early_stopping_rounds'] = 100
     test_predictions = make_predictions(train_df, test_df, features_columns, TARGET, lgb_params, NFOLDS=10)
 

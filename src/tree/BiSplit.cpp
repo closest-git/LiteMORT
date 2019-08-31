@@ -3,6 +3,7 @@
 #include "../data_fold/DataFold.hpp"
 #include "../data_fold/FeatVec_2D.hpp"
 #include "../util/Object.hpp"
+#include "../data_fold/Loss.hpp"
 
 using namespace Grusoft;
 
@@ -40,13 +41,29 @@ void SAMP_SET::Alloc(FeatsOnFold *hData_, size_t nSamp_, int flag) {
 	samps = root_set;
 }
 
+
 /*
 	v0.2		cys	
 		3/29/2019
+	v0.3		cys
+		8/31/2019
 */
-void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const SAMP_SET *from, size_t nMost, int rnd_seed, int flag) {
+void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const BoostingForest *hBoosting, const SAMP_SET *from, size_t nMost, int rnd_seed, int flag) {
+	int nElitism = hData_->config.nElitism;
+	const tpDOWN *hessian = hData_->GetHessian();
+	const tpDOWN *down = hData_->GetDownDirection();
 	Alloc(hData_,nMost);
-	size_t i, nFrom = hData_->nSample(),nz=0,pos;
+	size_t i, nFrom = hData_->nSample(),nz=0,pos,nSmall=0;
+	double T_grad = DBL_MAX;
+	if (hData_->isTrain()) {	
+		T_grad = hData_->lossy->DOWN_sum_2;
+		assert(T_grad > 0);
+		/*for (T_grad = 0,i = 0; i < nFrom; i++) {
+			T_grad += down[i] * down[i];
+		}*/
+		T_grad = sqrt(T_grad / nFrom);
+	}
+	//nElitism = 0;
 	if (from == nullptr) {
 	}	else {
 		assert(from != nullptr && nMost<from->nSamp);
@@ -77,16 +94,20 @@ void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const SAMP_SET *from, size_t nMos
 		}
 		//std::sort(root_set, root_set + nMost);
 	}else	if (nMost > T_1) {
-		hData_->rander_samp.kSampleInN(root_set,nMost, nFrom);		//case_higgs反复测试，确实有效诶
-		
-		/*for (nz=0, i = 0; i < nFrom; ++i) {
+		/*hData_->rander_samp.kSampleInN(root_set,nMost, nFrom);		//case_higgs反复测试，确实有效诶*/		
+		for (nz=0, i = 0; i < nFrom; ++i) {
 			double prob = (nMost - nz) / static_cast<double>(nFrom - i);
+			if (nElitism > 0 ) {
+				if (fabs(down[i])<T_grad) {
+					prob /= 10.0;		nSmall++;
+				}
+			}
 			x = (214013 * x + 2531011);
 			x = ((x >> 16) & 0x7FFF);
 			if ((x/32768.0f) < prob) {
 				root_set[nz++]=i;
 			}
-		}*/
+		}
 	}	else {
 		tpSAMP_ID *mask=new tpSAMP_ID[nFrom]();
 		while (nz < nMost) {
@@ -104,10 +125,12 @@ void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const SAMP_SET *from, size_t nMos
 	}
 
 	assert(nz <= nMost);
+	if(hBoosting->skdu.noT % hData_->config.verbose_eval==0)
+		printf("\nSAMP_SET::SampleFrom nSamp=%lld[%lld=>%lld] nSmall=%d\t", nFrom, nMost, nz, nSmall);
 	//printf("\nsamps={%d,%d,%d,...%d,...,%d,%d}", samps[0], samps[1], samps[2], samps[nz / 2], samps[nz - 2], samps[nz - 1]);
 }
 
-MT_BiSplit::MT_BiSplit(FeatsOnFold *hData_, int d, int rnd_seed, int flag) : depth(d) {
+MT_BiSplit::MT_BiSplit(FeatsOnFold *hData_, const BoostingForest *hBoosting, int d, int rnd_seed, int flag) : depth(d) {
 	assert(hData_ != nullptr);
 	double subsample= hData_->config.subsample;
 	
@@ -115,10 +138,10 @@ MT_BiSplit::MT_BiSplit(FeatsOnFold *hData_, int d, int rnd_seed, int flag) : dep
 	if (subsample < 0.999) {
 		size_t nMost= nSamp*subsample;
 		//samp_set.SampleFrom(hData_,&(hData_->samp_set),nMost, rnd_seed);		
-		samp_set.SampleFrom(hData_, nullptr, nMost, rnd_seed);
+		samp_set.SampleFrom(hData_, hBoosting,nullptr, nMost, rnd_seed);
 	}	else {
 		//samp_set.SampleFrom(hData_, &(hData_->samp_set), nSamp, rnd_seed);
-		samp_set.SampleFrom(hData_, nullptr, nSamp, rnd_seed);
+		samp_set.SampleFrom(hData_, hBoosting,nullptr, nSamp, rnd_seed);
 		//samp_set = hData_->samp_set;
 		//samp_set.isRef = true;
 	}

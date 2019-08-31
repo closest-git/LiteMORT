@@ -72,7 +72,7 @@ namespace Grusoft {
 		};
 		double Y_sum = 0, Y2_sum = 0, G_sum = 0, H_sum = 0;
 
-		MT_BiSplit(FeatsOnFold *hData_, int d, int rnd_seed, int flag = 0x0);
+		MT_BiSplit(FeatsOnFold *hData_, const BoostingForest *hBoosting, int d, int rnd_seed, int flag = 0x0);
 		MT_BiSplit() : feat_id(-1) { ; }
 		MT_BiSplit(MT_BiSplit *hDad, int flag = 0x0) {
 			depth = hDad->depth + 1;

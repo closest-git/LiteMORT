@@ -12,6 +12,7 @@ typedef int tpSAMP_ID;			//SAMP_SET需要节省内存
 
 namespace Grusoft {
 class FeatsOnFold;
+class BoostingForest;
 class SAMP_SET {
 	void clear() {
 		if (!isRef) {
@@ -40,7 +41,7 @@ public:
 	SAMP_SET( )	{}
 
 	//很重要，原则上每棵树的样本可以任意重设
-	virtual void SampleFrom(FeatsOnFold *hData_, const SAMP_SET *,size_t nMost,int rnd_seed, int flag = 0x0);
+	virtual void SampleFrom(FeatsOnFold *hData_, const BoostingForest *hBoosting, const SAMP_SET *,size_t nMost,int rnd_seed, int flag = 0x0);
 	void Alloc(FeatsOnFold *hData_, size_t nSamp_, int flag = 0x0);
 	void ClearInfo() {
 		nSamp = 0;		nLeft = 0, nRigt = 0;
