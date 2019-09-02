@@ -154,12 +154,6 @@ double GBRT::Predict(FeatsOnFold *hData_, bool isX,bool checkLossy, bool resumeL
 	if(checkLossy)
 		hData_->lossy->Update(hData_,this->skdu.noT,0x0);
 
-	/*double nNode=0;
-	for each(ManifoldTree*hTree in forest) {
-		nNode+=hTree->nodes.size();
-		hTree->ClearSampSet( );		
-	}
-	nNode= forest.size()==0 ? nNode : nNode*1.0/ forest.size();*/
 	double err=DBL_MAX, y2 = DBL_MAX;
 	if (checkLossy) {
 		//on the objective

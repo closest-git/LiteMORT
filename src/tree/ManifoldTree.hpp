@@ -166,6 +166,7 @@ namespace Grusoft{
 		ManifoldTree(BoostingForest *hF, FeatsOnFold *hData, string nam_, int flag = 0x0);
 		//ÇĞ¼Ç	±ØĞëÉ¾³ı
 		virtual void ClearSampSet( );			
+		virtual void ClearHisto();
 		virtual ~ManifoldTree();
 		hMTNode hRoot() {	assert(nodes.size()>0);	return nodes[0]; }
 

@@ -29,6 +29,7 @@ seed_everything(SEED)
 LOCAL_TEST = False
 TARGET = 'isFraud'
 START_DATE = datetime.datetime.strptime('2017-11-30', '%Y-%m-%d')
+NFOLDS=10
 #some_rows = 10000
 some_rows = None
 data_root = 'E:/Kaggle/ieee_fraud/input/'
@@ -41,7 +42,7 @@ def make_predictions(tr_df, tt_df, features_columns, target, lgb_params, NFOLDS=
     P, P_y = tt_df[features_columns], tt_df[target]
     tt_df = tt_df[['TransactionID', target]]
     predictions = np.zeros(len(tt_df))
-
+    fold_score_sum=0
     for fold_, (trn_idx, val_idx) in enumerate(folds.split(X, y)):
         t0 = time.time()
         print('Fold:', fold_)
@@ -53,8 +54,8 @@ def make_predictions(tr_df, tt_df, features_columns, target, lgb_params, NFOLDS=
             #pred_val = model.predict(vl_x)
             pred_raw = model.predict_raw(vl_x)
             #y_pred[val_idx] = pred_raw
-            #fold_score = roc_auc_score(y_valid, pred_raw)
-            pp_p = model.predict(P)
+            fold_score = metrics.roc_auc_score(vl_y, pred_raw)
+            pp_p = model.predict_raw(P)
         else:
             tr_data = lgb.Dataset(tr_x, label=tr_y)
             if LOCAL_TEST:
@@ -63,8 +64,11 @@ def make_predictions(tr_df, tt_df, features_columns, target, lgb_params, NFOLDS=
                 vl_data = lgb.Dataset(vl_x, label=vl_y)
             estimator = lgb.train(lgb_params,tr_data,valid_sets=[tr_data, vl_data],verbose_eval=verbose_eval, )
             pp_p = estimator.predict(P)
+            pred_raw = estimator.predict(vl_x)
+            fold_score = metrics.roc_auc_score(vl_y, pred_raw)
             del tr_data, vl_data
         predictions += pp_p / NFOLDS
+        fold_score_sum += fold_score
 
         if LOCAL_TEST:
             feature_imp = pd.DataFrame(sorted(zip(estimator.feature_importance(), X.columns)),columns=['Value', 'Feature'])
@@ -72,11 +76,11 @@ def make_predictions(tr_df, tt_df, features_columns, target, lgb_params, NFOLDS=
 
         del tr_x, tr_y, vl_x, vl_y
         gc.collect()
-        print(f'Fold:{fold_} time={time.time()-t0:.4g}'  )
+        print(f'Fold:{fold_} score={fold_score} time={time.time()-t0:.4g}'  )
         break
     tt_df['prediction'] = predictions
 
-    return tt_df
+    return tt_df,fold_score_sum/NFOLDS
 
 def M_PickSamples(pick_samples,df_train,df_test):
     nMost = min(df_train.shape[0], df_test.shape[0])
@@ -250,7 +254,7 @@ lgb_params = { 'objective':'binary',
                     'subsample':0.7,
                     'n_estimators':800,
                     'max_bin':255,
-                    'verbose':1,
+                    'verbose':0,
                     'verbose_eval':verbose_eval,
                     'seed': SEED,
                     'early_stopping_rounds':100,
@@ -260,21 +264,23 @@ if LOCAL_TEST:
     lgb_params['learning_rate'] = 0.01
     lgb_params['n_estimators'] = 20000
     lgb_params['early_stopping_rounds'] = 100
-    test_predictions = make_predictions(train_df, test_df, features_columns, TARGET, lgb_params)
+    test_predictions,fold_score = make_predictions(train_df, test_df, features_columns, TARGET, lgb_params)
     print(metrics.roc_auc_score(test_predictions[TARGET], test_predictions['prediction']))
 else:
-    lgb_params['learning_rate'] = 0.01#005
+    lgb_params['learning_rate'] = 0.01
     lgb_params['n_estimators'] = 200000
     lgb_params['early_stopping_rounds'] = 100
-    test_predictions = make_predictions(train_df, test_df, features_columns, TARGET, lgb_params, NFOLDS=10)
+    test_predictions,fold_score = make_predictions(train_df, test_df, features_columns, TARGET, lgb_params, NFOLDS=NFOLDS)
 
-input("Press Enter to continue...")
+#input("Press Enter to submit...")
 if not LOCAL_TEST:
+    model='MORT' if isMORT else 'LGB'
     test_predictions['isFraud'] = test_predictions['prediction']
     #test_predictions[['TransactionID', 'isFraud']].to_csv(f'submit_{some_rows}_{0.5}.csv', index=False,compression='gzip')
-    test_predictions[['TransactionID', 'isFraud']].to_csv(f'E:/Kaggle/ieee_fraud/result/submit_{some_rows}_{0.5}.csv.gz', index=False,
-                                                          compression='gzip')
-
+    path = f'E:/Kaggle/ieee_fraud/result/[{model}]_{some_rows}_{fold_score:.5f}_F{NFOLDS}.csv.gz'
+    test_predictions[['TransactionID', 'isFraud']].to_csv(path, index=False,compression='gzip')
+    print(f"test_predictions[['TransactionID', 'isFraud']] to_csv @{path}")
+input("Press Enter to exit...")
 '''
     0.9380  lr=0.1          leaves=32
     0.9444

@@ -444,7 +444,7 @@ void ManifoldTree::BeforeEachBatch(size_t nMost, size_t rng_seed, int flag) {
 		4/25/2019
 */
 void ManifoldTree::Train(int flag) {	
-	int nTree=hForest->forest.size( ),iter=0;
+	int nTree=hForest->forest.size( ),iter=0, nMoreLeaf=0;
 	//FeatsOnFold *hData_ = hForest->GurrentData();
 	bool isBatch = hData_->config.batch < 0.9;
 	tpDOWN *yDown = hData_->GetDownDirection();
@@ -474,8 +474,9 @@ void ManifoldTree::Train(int flag) {
 	OnNewLeaf(root, hData_, pick_feats,false);		
 	gain = 0;
 	while (true) {		//参见GBRT::GetBlit
-		if(leafs.size()>=hData_->config.num_leaves )
+		if (leafs.size() >= hData_->config.num_leaves) {
 			break;
+		}
 		gain = 0;		hBest=nullptr;		nz = 0;
 		if (isBatch && iter%10==0) {
 			//Update root sample and update Functional at each nodes
@@ -519,6 +520,14 @@ void ManifoldTree::Train(int flag) {
 			OnNewLeaf(leaf, hData_, pick_feats, isOnlyAdd);
 		}
 	}
+	while (!leafs.empty()) {
+		hMTNode node = leafs.top();		leafs.pop();
+		assert(node->isLeaf());
+		if (node->gain_ > 0 && node->nSample()>hData_->config.min_data_in_leaf * 3 && rand()%2==0) {	//可以试试
+			GrowLeaf(node, "more_leaf", true);
+			nMoreLeaf++;
+		} /**/
+	}
 
 	//GetLeaf(vLeaf);
 	a = 0;		nz = 0;
@@ -556,14 +565,7 @@ void ManifoldTree::Train(int flag) {
 	//Dump( );		//输出GBRT的信息
 
 	ClearSampSet( );		//优化，还需predict
-	for (auto node : nodes) {
-		for (auto pa : node->H_HISTO) {
-			HistoGRAM* histo = pa;
-			if(histo!=nullptr)
-				delete histo;
-		}
-		node->H_HISTO.clear();
-	}
+	ClearHisto();
 
 	//printf( "\n%d...OK",hForest->skdu.noT );
 }
@@ -572,10 +574,35 @@ void ManifoldTree::Train(int flag) {
 	v0.1	cys
 */
 void ManifoldTree::ClearSampSet() {
+	double d_sum = 0;
+	size_t nLeaf = 0;
 	for (auto node : nodes) {
 	//for each(hMTNode node in nodes) {		
 		node->samp_set.ClearInfo();
-		//node->lef
+		if (node->isLeaf()) {
+			d_sum+=node->down_step*node->down_step;
+			nLeaf++;
+		}
+	}
+	double T_down = sqrt(d_sum/ nLeaf);
+	for (auto node : nodes) {
+		if (node->isLeaf()) {
+			if (fabs(node->down_step) < T_down) {
+				if (rand() % 2==0)
+				{		node->down_step = 0;		}
+			}
+		}
+	}
+}
+
+void ManifoldTree::ClearHisto() {
+	for (auto node : nodes) {
+		for (auto pa : node->H_HISTO) {
+			HistoGRAM* histo = pa;
+			if (histo != nullptr)
+				delete histo;
+		}
+		node->H_HISTO.clear();
 	}
 }
 
