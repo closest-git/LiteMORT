@@ -490,7 +490,6 @@ void ManifoldTree::Train(int flag) {
 		}		else {
 			hBest = nullptr;
 		}
-
 		
 		iter++;
 		MT_Nodes new_leafs;
@@ -585,14 +584,14 @@ void ManifoldTree::ClearSampSet() {
 		}
 	}
 	double T_down = sqrt(d_sum/ nLeaf);
-	for (auto node : nodes) {
+	/*for (auto node : nodes) {	//ÓÐÎÊÌâ
 		if (node->isLeaf()) {
 			if (fabs(node->down_step) < T_down) {
-				if (rand() % 2==0)
+				if (rand() % 10==0)
 				{		node->down_step = 0;		}
 			}
 		}
-	}
+	}*/
 }
 
 void ManifoldTree::ClearHisto() {

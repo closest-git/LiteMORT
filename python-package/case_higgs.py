@@ -67,6 +67,7 @@ params = {
         "objective": "binary",
         "metric": "auc",        #"binary_logloss"
         'salp_bins':0,
+        'elitism': 0,
             'max_bin': 256,
           'num_leaves': 64,
           'learning_rate': 0.1,

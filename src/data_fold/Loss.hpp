@@ -192,7 +192,7 @@ namespace Grusoft {
 			tpDOWN *vHess = VECTOR2ARR(hessian);
 			size_t dim = resi.size(), nSamp = hData_->nSample(), step = dim, start, end;
 			G_INT_64 i;
-			double a2 = 0, sum = 0,*y_exp = nullptr, a_logloss = 0;
+			double a2 = 0, sum = 0,sumGH=0, label_sum=0,*y_exp = nullptr, a_logloss = 0;
 
 			int num_threads = OMP_FOR_STATIC_1(dim, step);
 			/*if (metric == "logloss" || pDown != nullptr) {		//get y_exp
@@ -230,7 +230,7 @@ namespace Grusoft {
 			}
 			if (pDown != nullptr) {
 				Tx P_0 = decrimi_2.P_0, P_1 = decrimi_2.P_1, N_0 = decrimi_2.N_0, N_1 = decrimi_2.N_1;
-#pragma omp parallel for schedule(static,1) reduction(+ : a2,sum)
+#pragma omp parallel for schedule(static,1) reduction(+ : a2,sum,label_sum,sumGH)
 				for (int thread = 0; thread < num_threads; thread++) {
 					size_t start = thread*step, end = min(start + step, dim), i;
 					for (i = start; i < end; i++) {				
@@ -239,6 +239,8 @@ namespace Grusoft {
 						//assert(!IS_NAN_INF(sig));
 						pDown[i] = a = -(sig - label[i]);								vHess[i] = sig*(1 - sig);
 						a2 += a*a;				sum += a;
+						a = pDown[i]* pDown[i] / vHess[i];
+						sumGH += a*a;		label_sum += label[i];
 						/*a = y1[i];if (label[i] == 0 && a > P_0) {	//很奇怪，这样就是不行
 							//pDown[i] *= 10;							
 						}
@@ -248,6 +250,8 @@ namespace Grusoft {
 					}
 				}
 				DOWN_sum_2 = a2;	DOWN_sum_1 = sum;
+				DOWN_GH_2 = sumGH;
+				LABEL_mean = label_sum*1.0/dim;
 			}
 			//if(y_exp!=nullptr)	
 			//	delete[] y_exp;
@@ -313,7 +317,7 @@ namespace Grusoft {
 	public:
 		std::vector<tpDOWN> down, resi, hessian,sample_down,sample_hessian;		//negative_gradient,是否下降由LOSS判定		
 		//参见samp_set之相关定义
-		double DOWN_sum_1 = 0, DOWN_sum_2 = 0, DOWN_0 = DBL_MAX, DOWN_1 = -DBL_MAX;
+		double DOWN_sum_1 = 0, DOWN_sum_2 = 0, DOWN_GH_2 = 0, LABEL_mean = 0, DOWN_0 = DBL_MAX, DOWN_1 = -DBL_MAX;
 		
 		//https://medium.com/human-in-a-machine-world/mae-and-rmse-which-metric-is-better-e60ac3bde13d
 		double err_rmse = DBL_MAX, err_mae = DBL_MAX, err_l2 = DBL_MAX,err_logloss= DBL_MAX, err_auc= DBL_MAX;

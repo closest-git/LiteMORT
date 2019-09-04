@@ -43,6 +43,7 @@ def runLgb(X, y, test=None, num_rounds=10000, max_depth=-1, eta=0.01, subsample=
     params = {'task': 'train',
               'max_bin': 256,
               'salp_bins':32,
+              #'elitism': 2,        #不适用于本算例
              'min_data_in_leaf': 32,
              'boosting_type': 'gbdt',
              'objective': 'binary',

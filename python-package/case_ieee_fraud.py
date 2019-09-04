@@ -8,7 +8,7 @@ import os, sys, gc, warnings, random, datetime
 
 from sklearn import metrics
 from sklearn.preprocessing import LabelEncoder
-from sklearn.model_selection import KFold
+from sklearn.model_selection import KFold, TimeSeriesSplit
 from tqdm import tqdm
 import lightgbm as lgb
 import pickle
@@ -21,29 +21,37 @@ def seed_everything(seed=0):
     random.seed(seed)
     np.random.seed(seed)
 
+isTimeSeires = True
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 #isMORT = True
 SEED = 42
 verbose_eval=200
 seed_everything(SEED)
-LOCAL_TEST = False
 TARGET = 'isFraud'
 START_DATE = datetime.datetime.strptime('2017-11-30', '%Y-%m-%d')
-NFOLDS=10
+NFOLDS_0=20
+NFOLDS = 0 if isTimeSeires else 5
 #some_rows = 10000
 some_rows = None
 data_root = 'E:/Kaggle/ieee_fraud/input/'
-pkl_path = f'{data_root}/ieee_fraud_{some_rows}.pickle'
+pkl_path = f'{data_root}/_yak_{some_rows}.pickle'
 
-def make_predictions(tr_df, tt_df, features_columns, target, lgb_params, NFOLDS=2):
+def make_predictions(tr_df, tt_df, features_columns, target, lgb_params):
     print(f'train_df={tr_df.shape} test_df={tt_df.shape} \nlgb_params={lgb_params}')
-    folds = KFold(n_splits=NFOLDS, shuffle=True, random_state=SEED)
+    if isTimeSeires:
+        folds = TimeSeriesSplit(n_splits=NFOLDS_0)
+    else:
+        folds = KFold(n_splits=NFOLDS, shuffle=True, random_state=SEED)
+    NFOLDS = 0
     X, y = tr_df[features_columns], tr_df[target]
     P, P_y = tt_df[features_columns], tt_df[target]
     tt_df = tt_df[['TransactionID', target]]
     predictions = np.zeros(len(tt_df))
     fold_score_sum=0
     for fold_, (trn_idx, val_idx) in enumerate(folds.split(X, y)):
+        if fold_<15:
+            continue
+        NFOLDS = NFOLDS+1
         t0 = time.time()
         print('Fold:', fold_)
         tr_x, tr_y = X.iloc[trn_idx, :], y[trn_idx]
@@ -51,34 +59,59 @@ def make_predictions(tr_df, tt_df, features_columns, target, lgb_params, NFOLDS=
         print(len(tr_x), len(vl_x))
         if isMORT:
             model = LiteMORT(lgb_params).fit(tr_x, tr_y, eval_set=[(vl_x, vl_y)])
+            best_iter = 1000
             #pred_val = model.predict(vl_x)
             pred_raw = model.predict_raw(vl_x)
             #y_pred[val_idx] = pred_raw
             fold_score = metrics.roc_auc_score(vl_y, pred_raw)
-            pp_p = model.predict_raw(P)
+            if isTimeSeires:
+                pass
+            else:
+                pp_p = model.predict_raw(P)
         else:
             tr_data = lgb.Dataset(tr_x, label=tr_y)
-            if LOCAL_TEST:
-                vl_data = lgb.Dataset(P, label=P_y)
-            else:
-                vl_data = lgb.Dataset(vl_x, label=vl_y)
+            vl_data = lgb.Dataset(vl_x, label=vl_y)
             estimator = lgb.train(lgb_params,tr_data,valid_sets=[tr_data, vl_data],verbose_eval=verbose_eval, )
-            pp_p = estimator.predict(P)
+            best_iter = estimator.best_iteration
+            if isTimeSeires:
+                pass
+            else:
+                pp_p = estimator.predict(P)
             pred_raw = estimator.predict(vl_x)
             fold_score = metrics.roc_auc_score(vl_y, pred_raw)
             del tr_data, vl_data
-        predictions += pp_p / NFOLDS
+        if isTimeSeires:
+            pass
+        else:
+            predictions += pp_p
         fold_score_sum += fold_score
 
-        if LOCAL_TEST:
+        if False:
             feature_imp = pd.DataFrame(sorted(zip(estimator.feature_importance(), X.columns)),columns=['Value', 'Feature'])
             print(feature_imp)
 
+        print(f'Fold:{fold_} score={fold_score} time={time.time()-t0:.4g} tr_x={tr_x.shape} val_x={vl_x.shape}'  )
         del tr_x, tr_y, vl_x, vl_y
         gc.collect()
-        print(f'Fold:{fold_} score={fold_score} time={time.time()-t0:.4g}'  )
-        break
-    tt_df['prediction'] = predictions
+        #break
+
+    if verbose_eval == 1:
+        input("Press Enter to pass this debug model...")
+        os._exit(-1)
+
+    if isTimeSeires:
+        print(f'====== Final model for TimeSeires: best_iter={best_iter} X={X.shape} y={y.shape} ')
+        del lgb_params['early_stopping_rounds']
+        if isMORT:
+            lgb_params['n_estimators'] = (int)(best_iter)
+            model = LiteMORT(lgb_params).fit(X, y)
+            tt_df['prediction'] = model.predict_raw(P)
+        else:
+            clf = lgb.LGBMClassifier(**lgb_params, num_boost_round=best_iter)
+            clf.fit(X, y)
+            tt_df['prediction'] = clf.predict_proba(P)[:, 1]
+    else:
+        tt_df['prediction'] = predictions/ NFOLDS
 
     return tt_df,fold_score_sum/NFOLDS
 
@@ -98,26 +131,9 @@ if os.path.isfile(pkl_path):
 else:
     print('Load Data')
     train_df = pd.read_pickle(f'{data_root}/yak/train_transaction.pkl')
-    if LOCAL_TEST:
-        # Convert TransactionDT to "Month" time-period.
-        # We will also drop penultimate block
-        # to "simulate" test set values difference
-        train_df['DT_M'] = train_df['TransactionDT'].apply(lambda x: (START_DATE + datetime.timedelta(seconds=x)))
-        train_df['DT_M'] = (train_df['DT_M'].dt.year - 2017) * 12 + train_df['DT_M'].dt.month
-        test_df = train_df[train_df['DT_M'] == train_df['DT_M'].max()].reset_index(drop=True)
-        train_df = train_df[train_df['DT_M'] < (train_df['DT_M'].max() - 1)].reset_index(drop=True)
-
-        train_identity = pd.read_pickle(f'{data_root}/yak/train_identity.pkl')
-        test_identity = train_identity[train_identity['TransactionID'].isin(
-            test_df['TransactionID'])].reset_index(drop=True)
-        train_identity = train_identity[train_identity['TransactionID'].isin(
-            train_df['TransactionID'])].reset_index(drop=True)
-        del train_df['DT_M'], test_df['DT_M']
-
-    else:
-        test_df = pd.read_pickle(f'{data_root}/yak/test_transaction.pkl')
-        train_identity = pd.read_pickle(f'{data_root}/yak/train_identity.pkl')
-        test_identity = pd.read_pickle(f'{data_root}/yak/test_identity.pkl')
+    test_df = pd.read_pickle(f'{data_root}/yak/test_transaction.pkl')
+    train_identity = pd.read_pickle(f'{data_root}/yak/train_identity.pkl')
+    test_identity = pd.read_pickle(f'{data_root}/yak/test_identity.pkl')
 
     base_columns = list(train_df) + list(train_identity)
     print('Shape control:', train_df.shape, test_df.shape)
@@ -231,10 +247,13 @@ else:
         TARGET,                          # Not target in features))
         'uid','uid2','uid3',             # Our new client uID -> very noisy data
     ]
-
     features_columns = [col for col in list(train_df) if col not in rm_cols]
     if some_rows is not None:
         train_df,test_df = M_PickSamples(some_rows,train_df,test_df)
+
+    if isTimeSeires:
+        train_df = train_df.sort_values('TransactionDT')
+        test_df = test_df.sort_values('TransactionDT')
     with open(pkl_path, "wb") as fp:  # Pickling
         pickle.dump([train_df, test_df, features_columns, TARGET], fp)
 
@@ -242,10 +261,11 @@ else:
 lgb_params = { 'objective':'binary',
                     'boosting_type':'gbdt',
                     'metric':'auc',
-                    #'salp_bins':32,
+                    'min_data_in_leaf': 64,
+                    'salp_bins':0,
                    'elitism':16,
                     'n_jobs':-1,
-                    'learning_rate':0.01,
+                    'learning_rate':0.01,      #0.005
                     'num_leaves': 2**8,
                     'max_depth':-1,
                     'tree_learner':'serial',
@@ -253,33 +273,23 @@ lgb_params = { 'objective':'binary',
                     'subsample_freq':1,
                     'subsample':0.7,
                     'n_estimators':800,
-                    'max_bin':255,
-                    'verbose':0,
+                    #'max_bin':255,
+                    'verbose':1,
                     'verbose_eval':verbose_eval,
                     'seed': SEED,
                     'early_stopping_rounds':100,
                 }
-
-if LOCAL_TEST:
-    lgb_params['learning_rate'] = 0.01
-    lgb_params['n_estimators'] = 20000
-    lgb_params['early_stopping_rounds'] = 100
-    test_predictions,fold_score = make_predictions(train_df, test_df, features_columns, TARGET, lgb_params)
-    print(metrics.roc_auc_score(test_predictions[TARGET], test_predictions['prediction']))
-else:
-    lgb_params['learning_rate'] = 0.01
-    lgb_params['n_estimators'] = 200000
-    lgb_params['early_stopping_rounds'] = 100
-    test_predictions,fold_score = make_predictions(train_df, test_df, features_columns, TARGET, lgb_params, NFOLDS=NFOLDS)
+lgb_params['n_estimators'] = 20000
+lgb_params['early_stopping_rounds'] = 100
+test_predictions,fold_score = make_predictions(train_df, test_df, features_columns, TARGET, lgb_params)
 
 #input("Press Enter to submit...")
-if not LOCAL_TEST:
-    model='MORT' if isMORT else 'LGB'
-    test_predictions['isFraud'] = test_predictions['prediction']
-    #test_predictions[['TransactionID', 'isFraud']].to_csv(f'submit_{some_rows}_{0.5}.csv', index=False,compression='gzip')
-    path = f'E:/Kaggle/ieee_fraud/result/[{model}]_{some_rows}_{fold_score:.5f}_F{NFOLDS}.csv.gz'
-    test_predictions[['TransactionID', 'isFraud']].to_csv(path, index=False,compression='gzip')
-    print(f"test_predictions[['TransactionID', 'isFraud']] to_csv @{path}")
+model='MORT' if isMORT else 'LGB'
+test_predictions['isFraud'] = test_predictions['prediction']
+#test_predictions[['TransactionID', 'isFraud']].to_csv(f'submit_{some_rows}_{0.5}.csv', index=False,compression='gzip')
+path = f'E:/Kaggle/ieee_fraud/result/[{model}]_{some_rows}_{fold_score:.5f}_F{NFOLDS}.csv'
+test_predictions[['TransactionID', 'isFraud']].to_csv(path, index=False)        #,compression='gzip'
+print(f"test_predictions[['TransactionID', 'isFraud']] to_csv @{path}")
 input("Press Enter to exit...")
 '''
     0.9380  lr=0.1          leaves=32

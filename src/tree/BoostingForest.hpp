@@ -17,6 +17,7 @@ namespace Grusoft{
 		double e_best=DBL_MAX;
 		int best_no=-1,best_round=-1, nBraeStep=0;
 		int early_round = 10;
+		int LR_jump = 0;
 		EARLY_STOPPING(){}
 		EARLY_STOPPING(int nEarly) : early_round(nEarly)
 		{	}
@@ -26,7 +27,7 @@ namespace Grusoft{
 			else
 				return errors[errors.size() - 1];
 		}
-		void Add(double err, int best_round, int flag=0x0);
+		void Add(double err, int best_round,bool& isLRjump, int flag=0x0);
 		bool isOK(int cur_round);
 
 		//Brae£∫À’∏Ò¿º«¡Í

@@ -54,13 +54,11 @@ void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const BoostingForest *hBoosting, 
 	const tpDOWN *down = hData_->GetDownDirection();
 	Alloc(hData_,nMost);
 	size_t i, nFrom = hData_->nSample(),nz=0,pos,nSmall=0;
-	double T_grad = DBL_MAX;
+	double T_grad = DBL_MAX,b;
 	if (hData_->isTrain()) {	
 		T_grad = hData_->lossy->DOWN_sum_2;
+		//T_grad = hData_->lossy->DOWN_GH_2;
 		assert(T_grad > 0);
-		/*for (T_grad = 0,i = 0; i < nFrom; i++) {
-			T_grad += down[i] * down[i];
-		}*/
 		T_grad = sqrt(T_grad / nFrom);
 	}
 	//nElitism = 0;
@@ -94,19 +92,24 @@ void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const BoostingForest *hBoosting, 
 		}
 		//std::sort(root_set, root_set + nMost);
 	}else	if (nMost > T_1) {
-		/*hData_->rander_samp.kSampleInN(root_set,nMost, nFrom);		//case_higgs反复测试，确实有效诶*/		
+		/*size_t nz0 = hData_->rander_samp.kSampleInN(root_set,nMost, nFrom);		//case_higgs反复测试，确实有效诶*/		
 		for (nz=0, i = 0; i < nFrom; ++i) {
 			double prob = (nMost - nz) / static_cast<double>(nFrom - i);
 			if (nElitism > 0 ) {
-				if (fabs(down[i])<T_grad) {
+				b = fabs(down[i]);		
+				//b = down[i] * down[i] / hessian[i];
+				//if (b < T_grad/100) continue;
+				if (b<T_grad) {
 					prob /= 10.0;		//nSmall++;
 				}
 			}
-			x = (214013 * x + 2531011);
+			double c = hData_->rander_samp.Uniform_(0, 1);
+			if (c < prob) {				root_set[nz++] = i;			}
+			/*x = (214013 * x + 2531011);
 			x = ((x >> 16) & 0x7FFF);
 			if ((x/32768.0f) < prob) {
 				root_set[nz++]=i;
-			}
+			}*/
 		}
 	}	else {
 		tpSAMP_ID *mask=new tpSAMP_ID[nFrom]();
@@ -172,6 +175,7 @@ void MT_BiSplit::Observation_AtLocalSamp(FeatsOnFold *hData_, int flag) {
 	if (dim == 0)
 		return;
 	tpDOWN *down = hData_->GetDownDirection(),*hess= hData_->GetHessian();
+	hData_->GetY();
 	//double a, x_0 = DBL_MAX, x_1 = -DBL_MAX;
 	tpDOWN a, a2 = 0.0, mean = 0, y_0, y_1;
 	double DOWN_sum = 0;

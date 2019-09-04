@@ -198,15 +198,6 @@ double GBRT::Predict(FeatsOnFold *hData_, bool isX,bool checkLossy, bool resumeL
 	return err;
 }
 
-void EARLY_STOPPING::Add(double err,int best_tree, int flag) {
-	errors.push_back(err);
-	if (err < e_best) {
-		e_best=err;		
-		best_no=errors.size()-1;
-		best_round = best_tree;
-	}
-}
-
 void  EARLY_STOPPING::CheckBrae(int flag) {
 	nBraeStep = 0;
 	if (errors.size() < early_round)
@@ -215,8 +206,26 @@ void  EARLY_STOPPING::CheckBrae(int flag) {
 	//if (best_no < errors.size() - early_round/2) {
 		nBraeStep = errors.size()- best_no;
 	}
-
 }
+
+void EARLY_STOPPING::Add(double err,int best_tree, bool& isLRjump, int flag) {
+	isLRjump = false;
+	errors.push_back(err);
+	if (err <= e_best) {
+		e_best=err;		
+		best_no=errors.size()-1;
+		best_round = best_tree;
+	}
+	else if(errors.size() - best_no>early_round/10 && LR_jump > 0){
+		printf("\n********* stopping JUMP e_best=%.6g@%d,cur=%.6g\t*********", e_best, best_no, err);
+		best_no = errors.size()-1;		e_best = err;	//有问题
+		LR_jump--;
+		isLRjump = true;
+	}
+}
+
+
+
 bool EARLY_STOPPING::isOK(int cur_round) {
 	double e_last = errors[errors.size() - 1];
 	if (true) {
@@ -248,7 +257,7 @@ int GBRT::IterTrain(int round, int flag) {
 	size_t nPickSamp = 0;
 	int nIns = 0, no = 0, total, i, j, nzNode = 0, nIter = 0;
 	double err_0 = DBL_MAX, err = DBL_MAX, a;
-	bool isEvalTrain = true;
+	bool isEvalTrain = true,isLRjump=false;
 	//vector<double> err_eval;
 	do {
 		if (isEvalTrain) {
@@ -264,7 +273,7 @@ int GBRT::IterTrain(int round, int flag) {
 					a, hTrainData->nPickFeat, nPickSamp, GST_TOC(tick));
 			}
 			if (hEvalData == nullptr)
-				stopping.Add(err_0, round);
+				stopping.Add(err_0, round, isLRjump);
 		}
 		if (hEvalData != nullptr) {
 			if (round > 0) {
@@ -279,7 +288,7 @@ int GBRT::IterTrain(int round, int flag) {
 				if (fabs(err_last - err) < err_last / 1000)
 					break;
 			}
-			stopping.Add(err, round);
+			stopping.Add(err, round,isLRjump);
 			if (hEvalData->lossy->isOK(0x0, FLT_EPSILON)) {
 				eOOB = 0;	printf("\n********* You are so LUCKY!!! *********\n\n");	return 0x0;
 			}
@@ -311,7 +320,12 @@ int GBRT::Train(string sTitle, int x, int flag) {
 	float *distri = hTrainData->distri, *dtr = nullptr, tag, d1, rOK = 0;
 	double err_0= DBL_MAX,err=DBL_MAX,a,t_train=0;
 	size_t nPickSamp=0;
+	bool isLRjump = false;
 	
+	if (stopping.LR_jump>0){
+		hTrainData->config.learning_rate *= 2;
+	}
+
 	//hTrainData->lossy.InitScore_(hTrainData->config);
 	hTrainData->init_score.Init(hTrainData);
 
@@ -336,7 +350,7 @@ int GBRT::Train(string sTitle, int x, int flag) {
 						a, hTrainData->nPickFeat, nPickSamp, GST_TOC(tick));
 				}
 				if (hEvalData == nullptr)
-					stopping.Add(err_0,t);
+					stopping.Add(err_0,t, isLRjump);
 			}
 			if (hEvalData != nullptr) {
 				/*if (t > 0) {
@@ -344,10 +358,15 @@ int GBRT::Train(string sTitle, int x, int flag) {
 					assert(hRoot->nSample() == 0);
 				}*/
 				err = this->Predict(hEvalData, true, true, true);	//经过校验，同样可以用resumeLast
-				stopping.Add(err,t);
+				stopping.Add(err,t, isLRjump);
 				if (hEvalData->lossy->isOK(0x0, FLT_EPSILON)) {
 					eOOB = 0;	printf("\n********* You are so LUCKY!!! *********\n\n");	
 				}		
+				if (isLRjump) {
+					double lr0 = hTrainData->config.learning_rate;
+					hTrainData->config.learning_rate /= 2;
+					printf("\n********* stopping LR(%g=>%g)!!!\t*********\n", lr0, hTrainData->config.learning_rate);
+				}
 				if (hTrainData->feat_salps != nullptr && t>0) {
 					hTrainData->feat_salps->SetCost(1-err);
 				}
@@ -378,7 +397,7 @@ int GBRT::Train(string sTitle, int x, int flag) {
 			//printf("\t%4d: train=%g sec\r\n\n", t+1, GST_TOC(tick));
 		}
 	}
-	string sLossE = hEvalData->LOSSY_INFO(stopping.e_best), sLossT = hTrainData->LOSSY_INFO(err_0);
+	string sLossE = hEvalData==nullptr?"":hEvalData->LOSSY_INFO(stopping.e_best), sLossT = hTrainData->LOSSY_INFO(err_0);
 	//printf("\n====== %d: ERR@%s=%8.5g time=%.3g(%.3g) ======\n", skdu.noT, hTrainData->nam.c_str(), err_0,GST_TOC(tick), 0);
 	for (i = stopping.best_round + 1; i<forest.size(); i++) {
 		delete forest[i];

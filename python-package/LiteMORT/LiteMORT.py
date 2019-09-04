@@ -322,6 +322,8 @@ class LiteMORT(object):
             nTest = eval_X0.shape[0]
             self.preprocess.eval_X, self.preprocess.eval_y = eval_X0.ctypes.data_as(
                 POINTER(c_float)), eval_y0.ctypes.data_as(POINTER(c_double))
+        else:
+            self.preprocess.eval_X, self.preprocess.eval_y = None,None
         self.EDA(flag)
 
         self.mort_fit(self.hLIB, self.preprocess.train_X, self.preprocess.train_y, nFeat, nTrain,
