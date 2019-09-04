@@ -377,6 +377,9 @@ int GBRT::Train(string sTitle, int x, int flag) {
 				stopping.best_no, stopping.best_round, sLossE.c_str(), skdu.noT, sLossT.c_str(), err - err_0);*/
 			break;
 		}
+		/*if (stopping.isOsilate()) {
+			//Remapping();
+		}*/
 
 		this->BeforeTrain(hTrainData);
 		//gradients = self.loss.negative_gradient(preds, y)

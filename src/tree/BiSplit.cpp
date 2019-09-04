@@ -50,6 +50,7 @@ void SAMP_SET::Alloc(FeatsOnFold *hData_, size_t nSamp_, int flag) {
 */
 void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const BoostingForest *hBoosting, const SAMP_SET *from, size_t nMost, int rnd_seed, int flag) {
 	int nElitism = 1;// hData_->config.nElitism;
+	float *weight = hData_->lossy->GetSampWeight(0x0);
 	const tpDOWN *hessian = hData_->GetHessian();
 	const tpDOWN *down = hData_->GetDownDirection();
 	Alloc(hData_,nMost);
@@ -96,7 +97,8 @@ void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const BoostingForest *hBoosting, 
 		for (nz=0, i = 0; i < nFrom; ++i) {
 			double prob = (nMost - nz) / static_cast<double>(nFrom - i);
 			if (nElitism > 0 ) {
-				b = fabs(down[i]);		
+				//b = weight==nullptr ? fabs(down[i]) : fabs(down[i])*weight[i];
+				b = fabs(down[i]);
 				//b = down[i] * down[i] / hessian[i];
 				//if (b < T_grad/100) continue;
 				if (b<T_grad) {
@@ -171,18 +173,20 @@ void MT_BiSplit::Observation_AtLocalSamp(FeatsOnFold *hData_, int flag) {
 	string optimal = hData_->config.leaf_optimal;
 
 	impuri = 0;		devia = 0;
-	size_t dim = nSample();
+	size_t dim = nSample(),i;
 	if (dim == 0)
 		return;
 	tpDOWN *down = hData_->GetDownDirection(),*hess= hData_->GetHessian();
-	hData_->GetY();
+	hData_->GetY()->STA_at(samp_set);
+	Y_mean = samp_set.a1_sum*1.0/dim;		Y2_mean = samp_set.a2_sum*1.0 / dim;
+	samp_set.ClearStat();
 	//double a, x_0 = DBL_MAX, x_1 = -DBL_MAX;
 	tpDOWN a, a2 = 0.0, mean = 0, y_0, y_1;
 	double DOWN_sum = 0;
-	samp_set.STA_at<tpDOWN>(down, a2, DOWN_sum, y_0, y_1,true);
+	samp_set.STA_at_<tpDOWN>(down, a2, DOWN_sum, y_0, y_1,true);
 	mean = DOWN_sum / dim;
 	G_sum = -DOWN_sum;		//很重要 gradient方向和down正好相反
-	Y2_sum = a2;
+	G2_sum = a2;
 	//if (y_0 == y_1 || fabs(y_0-y_1)<1.0e-6*fabs(y_0)) {	//基本为常量
 	if ZERO_DEVIA(y_0,y_1) {	//基本为常量
 	}	else {
@@ -199,33 +203,37 @@ void MT_BiSplit::Observation_AtLocalSamp(FeatsOnFold *hData_, int flag) {
 		//G_sum = 0;
 	}
 
-//REF:	"XGBoost: A Scalable Tree Boosting System" 对于mse-loss 基本等价
-	/*if (optimal == "taylor_2") {	
-		H_sum = 2*dim;		G_sum=-2*mean*dim;
-		impuri = G_sum*G_sum/H_sum;
-		//down_step = mean/2;
-		down_step = -G_sum/ H_sum;
-	}	else*/ 
 	if (optimal == "lambda_0") {
 		if (hess == nullptr) {
 			H_sum = dim;
 		}	else {
 			double h2, h_0, h_1;
-			samp_set.STA_at<tpDOWN>(hess, h2, H_sum, h_0, h_1,false);
+			samp_set.STA_at_<tpDOWN>(hess, h2, H_sum, h_0, h_1,false);
+			assert(fabs(h_0)<1000 && fabs(h_1)<1000);
 		}
 		if (H_sum == 0) {
 			throw "Observation_AtLocalSamp:H_sum = 0!!!";
 		}
 		impuri = G_sum*G_sum / H_sum;		//已略去常数
 		down_step = -G_sum / H_sum;
-		assert(!IS_NAN_INF(down_step));
+		//assert(!IS_NAN_INF(down_step));
+		if (false) {	//hess[samp]会变得很小
+			double sum = 0;
+			for (i = 0; i < dim; i++) {
+				tpSAMP_ID samp = samp_set.samps[i];
+				sum += fabs(hess[samp]<0.001) ? 0 : down[samp] / hess[samp];
+				assert(fabs(sum/(i+1)) < 1000);
+			}
+			down_step = -sum / dim;
+		}
 		//sprintf(temp, "impuri(%g/%g %d)", G_sum, H_sum, dim);
 		//sX = temp;
 	}else	{
 		down_step = mean;
-		assert(!IS_NAN_INF(down_step));
 		//down_step = sqrt(a2/dim);		 为啥这样不行，有意思
 	}
+	assert(fabs(down_step)<1000);
+	assert(!IS_NAN_INF(down_step));
 	//printf("%.4g ", down_step);
 	double shrink = hData_->config.learning_rate;
 	//double init_score=hData_->lossy.init_score;
@@ -510,13 +518,13 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 			}
 			//return gMax;
 		}	else {
-			double bst_imp = Y2_sum - mxmxN;
-			bst_imp = FLOAT_ZERO(Y2_sum - mxmxN, mxmxN);
+			double bst_imp = G2_sum - mxmxN;
+			bst_imp = FLOAT_ZERO(G2_sum - mxmxN, mxmxN);
 			//if (bst_imp > -DBL_EPSILON*1000* Y2_sum && bst_imp < 0)	//Y2_sum,mxmxN计算方式不一样，确实会有浮点误差
 			//	bst_imp = 0;
 			gain = impuri - bst_imp;		assert(gain>=0);			
 			if (!(bst_imp >= 0 && bst_imp < impuri)) {
-				printf("\n!!!! bst_imp=%5.3g impuri=%5.3g Y_sum_2=%5.3g mean*mean*N=%5.3g!!!!", bst_imp, impuri, Y2_sum, mxmxN);
+				printf("\n!!!! bst_imp=%5.3g impuri=%5.3g Y_sum_2=%5.3g mean*mean*N=%5.3g!!!!", bst_imp, impuri, G2_sum, mxmxN);
 				//assert(0);
 			}
 		}
@@ -532,6 +540,13 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 	FeatsOnFold::stat.tCheckGain += GST_TOC(tick);
 	gain_train = gain;
 	gain_ = gain_train;
+	/*	很难调整，没啥效果
+		if ((this->Y_mean == 0 || this->Y_mean == 1)&& gain_>0) {
+			//printf("gain_(%.2g,%.5g)\t", Y_mean, gain_);
+			//gain_ /= 10;
+		}
+		double purity = max(Y_mean, 1 - Y_mean);
+		gain_ *= (1 - purity);*/
 	return gain_;
 }
 

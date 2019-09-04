@@ -70,7 +70,7 @@ namespace Grusoft {
 			double impuri = DBL_MAX;
 			double score ;
 		};
-		double Y_sum = 0, Y2_sum = 0, G_sum = 0, H_sum = 0;
+		double Y_mean = 0, Y2_mean = 0, G2_sum = 0, G_sum = 0, H_sum = 0;
 
 		MT_BiSplit(FeatsOnFold *hData_, const BoostingForest *hBoosting, int d, int rnd_seed, int flag = 0x0);
 		MT_BiSplit() : feat_id(-1) { ; }

@@ -82,6 +82,8 @@ namespace Grusoft {
 		virtual Regression *InitRegression(FeatsOnFold *hData_, MT_BiSplit *hBlit, int flag = 0x0) { throw"FeatVector::RegressionAt is ..."; }
 
 		virtual void Set(double a, int flag = 0x0) { throw "FeatVector::Set is ..."; }
+		//注意，统计信息记录在some_set
+		virtual void STA_at(SAMP_SET& some_set, int flag = 0x0) { throw "FeatVector::STA_at is ..."; }
 		virtual void Observation_AtSamp(LiteBOM_Config config, SAMP_SET& samp, Distribution&distri, int flag=0x0)	{	throw "FeatVector::Observation_AtSamp is ...";	}
 
 		/*vResi=predict-target		pDown=target-predict*/

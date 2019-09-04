@@ -35,9 +35,14 @@ public:
 	//实际上是down vector的sum_1, 参见samp_set.STA_at<tpDOWN>(down, a2, mean, y_0, y_1,true)
 	double Y_sum_1 = 0;
 	double Y_sum_2 = 0, Y_0 = DBL_MAX, Y_1 = -DBL_MAX;
-	/*tpSAMP_ID *samps_() {
-		return set + off;
-	}*/
+	double a2_sum = 0, a1_sum = 0;
+	void ClearStat() {
+		Y_sum_1 = 0;
+		Y_sum_2 = 0, Y_0 = DBL_MAX, Y_1 = -DBL_MAX;
+		a2_sum = 0, a1_sum = 0;
+		nLeft = 0, nRigt = 0;
+	}	
+
 	SAMP_SET( )	{}
 
 	//很重要，原则上每棵树的样本可以任意重设
@@ -47,6 +52,7 @@ public:
 		nSamp = 0;		nLeft = 0, nRigt = 0;
 		samps = nullptr, left = nullptr, rigt = nullptr;
 	}/**/
+
 
 
 	virtual ~SAMP_SET() {
@@ -104,7 +110,7 @@ public:
 
 	//v0.2	parallel
 	template<typename Tx>
-	void STA_at(const Tx *vec, Tx&a2_, Tx&sum_, Tx&x_0, Tx&x_1,bool hasY) {
+	void STA_at_(const Tx *vec, Tx&a2_, Tx&sum_, Tx&x_0, Tx&x_1,bool hasY) {
 		size_t step;
 		double a2 = 0,sum = 0;
 		x_0 = vec[samps[0]], x_1 = x_0;
@@ -127,6 +133,8 @@ public:
 			{	x_0 = MIN(local_0, x_0);			x_1 = MAX(local_1, x_1);	}
 		}
 		a2_ = a2;	sum_ = sum;
+		//记录统计信息
+		a2_sum = a2;		a1_sum = sum;
 		if (hasY) {
 			Y_sum_1 = sum;		Y_sum_2 = a2;
 			Y_0 =x_0,			Y_1 =x_1;

@@ -33,6 +33,7 @@ namespace Grusoft {
 		IS_TYPE tpResi = is_XXX;
 		FeatVector *y = nullptr, *predict = nullptr;
 		vector<tpSAMP_ID> outliers;
+		float *samp_weight = nullptr;
 		//Average Precision (AP) 确实有问题
 		template <typename Tx>
 		void Down_AP() {
@@ -238,6 +239,7 @@ namespace Grusoft {
 						double sig = y1[i]<EXP_UNDERFLOW ? 0 : y1[i]>EXP_OVERFLOW ? 1 : exp(y1[i]) / (1 + exp(y1[i]));
 						//assert(!IS_NAN_INF(sig));
 						pDown[i] = a = -(sig - label[i]);								vHess[i] = sig*(1 - sig);
+						//pDown[i] *= samp_weight[i];		//思路有问题
 						a2 += a*a;				sum += a;
 						a = pDown[i]* pDown[i] / vHess[i];
 						sumGH += a*a;		label_sum += label[i];
@@ -362,6 +364,7 @@ namespace Grusoft {
 			resi.resize(_len, 0);
 			if (hData_->config.objective == "binary") {
 				hessian.resize(_len, 0);	sample_hessian.resize(_len, 0);
+				samp_weight = new float[_len]();
 			}else	if (hData_->config.objective == "outlier") {
 				if (isTrain) {
 					hessian.resize(_len, 0);		sample_hessian.resize(_len, 0);
@@ -372,6 +375,7 @@ namespace Grusoft {
 			}
 		}
 		virtual void EDA(ExploreDA *edaX, int flag);
+		virtual float* GetSampWeight(int flag) { return samp_weight; }
 
 		FeatVec_LOSS() {
 		}
@@ -379,7 +383,8 @@ namespace Grusoft {
 			down.clear();				sample_down.clear();
 			resi.clear();
 			hessian.clear();			sample_hessian.clear();
-			//if (lossy != nullptr)			delete lossy;
+
+			if (samp_weight != nullptr)			delete samp_weight;
 		}
 		//virtual void Stat_Dump(const string&info, int flag=0x0);
 		virtual FeatVector * GetY() { return y; }
