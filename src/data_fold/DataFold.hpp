@@ -294,11 +294,15 @@ namespace Grusoft {
 						else {
 							assert(rigt[no] != -1);
 							Tx *feat = arrFeat[feat_ids[no]];
-							if (feat[t] < thrsh_step[no]) {
-								no = left[no];
-							}
-							else {
+							if (IS_NAN_INF(feat[t]) ) {
 								no = rigt[no];
+							}	else {
+								if (feat[t] < thrsh_step[no]) {
+									no = left[no];
+								}
+								else {
+									no = rigt[no];
+								}
 							}
 						}
 					}
@@ -773,7 +777,7 @@ namespace Grusoft {
 		*/
 		virtual void QuantiAtEDA(const ExploreDA *edaX, tpQUANTI *quanti, int nMostBin,bool isSameSorted, int flag) {
 			assert(quanti != nullptr && edaX != nullptr);
-			size_t nSamp_ = size(), i, i_0 = 0, i_1, noBin = 0, pos;
+			size_t nSamp_ = size(), i, i_0 = 0, i_1, noBin = 0, pos, nzHisto=0;
 			vector<tpSAMP_ID> idx;
 			if (hDistri->sortedA.size() > 0 && isSameSorted) {
 				idx = hDistri->sortedA;
@@ -830,6 +834,12 @@ namespace Grusoft {
 						quanti[pos] = noBin;	i_0++;
 					}
 					else {
+						if (isSameSorted) {
+							nzHisto += histo->bins[noBin].nz;
+							if (i_0 != nzHisto) {
+								throw "QuantiAtEDA i_0 != nzHisto!!!";
+							}
+						}
 						noBin++;
 						if (noBin >= histo->bins.size())
 							throw "QuantiAtEDA noBin is XXX";

@@ -92,7 +92,7 @@ namespace Grusoft {
 
 	//feature vector的数据类型多变，所以映射很复杂
 	struct HISTO_BIN {
-		float split_F = 0;		
+		double split_F = 0;		
 		size_t nz = 0;
 		//if (val[pos] < bins[noBin+1].split_F) {		quanti[pos] = noBin;		}
 		char fold = -1;			//每个BIN属于一个FOLD

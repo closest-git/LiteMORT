@@ -657,7 +657,7 @@ ManifoldTree::~ManifoldTree() {
 	if (hGuideTree != nullptr)
 		delete hGuideTree;
 	if (ArrTree_quanti != nullptr)
-		delete ArrTree_quanti;
+ 		delete ArrTree_quanti;
 	if (ArrTree_data != nullptr)
 		delete ArrTree_data;
 }

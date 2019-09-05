@@ -373,8 +373,6 @@ void HistoGRAM::GreedySplit_X(FeatsOnFold *hData_, const SAMP_SET& samp_set, int
 		if (nLeft<minSet || nRight<minSet) {
 			goto LOOP;
 		}
-		if (i == nBin-1)		//仅用于测试
-			i = nBin - 1;
 		//4/9/2019	cys	注销item.nz == 0 这样可以使split thrshold更紧凑
 		if (item.tic == a /*|| item.nz == 0*/) {
 			goto LOOP;
@@ -403,6 +401,8 @@ void HistoGRAM::GreedySplit_X(FeatsOnFold *hData_, const SAMP_SET& samp_set, int
 		}
 		//double bin_w = hData_->rander_bins.Uniform_(0, 1);
 		if (g>g1 || gainL>g1) {
+			if (i == nBin - 1)		//仅用于测试
+				i = nBin - 1;
 			fruit->best_feat_id = hFeat->id;
 			fruit->split_by = this->split_by;
 			fruit->bin_S0 = bins[i-1];		fruit->bin_S1 = item;
@@ -412,6 +412,7 @@ void HistoGRAM::GreedySplit_X(FeatsOnFold *hData_, const SAMP_SET& samp_set, int
 			fruit->nLeft = nLeft;		fruit->nRight = nRight;
 			//fruit->thrshold = item.tic;
 			fruit->adaptive_thrsh = item.split_F;
+			//assert(fruit->adaptive_thrsh!= DBL_MAX);
 			fruit->isNanaLeft = false;
 			if (gainL > g) {
 				fruit->isNanaLeft = true;

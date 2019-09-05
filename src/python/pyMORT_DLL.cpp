@@ -409,7 +409,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	hFold->lossy->EDA(nullptr, flag);
 
 	GST_TIC(t1);
-#pragma omp parallel for num_threads(nThread) schedule(dynamic) reduction(+ : sparse,nana,nConstFeat,nLocalConst,nQuant) 
+//#pragma omp parallel for num_threads(nThread) schedule(dynamic) reduction(+ : sparse,nana,nConstFeat,nLocalConst,nQuant) 
 	for (int feat = 0; feat < ldX_; feat++) {
 		FeatVec_Q *hFQ=nullptr;
 		FeatVector *hFeat = hFold->Feat(feat);

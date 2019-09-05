@@ -253,6 +253,7 @@ namespace Grusoft {
 
 		//always last bin for NA
 		void HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTINCT>& vUnique, size_t nA0, size_t nMostBin, int flag = 0x0);
+		void HistoOnUnique_1(const LiteBOM_Config&config, vector<vDISTINCT>& vUnique, size_t nA0, bool isMap, int flag = 0x0);
 
 		/*	
 			v0.2	cys
@@ -434,8 +435,12 @@ namespace Grusoft {
 			case LiteBOM_Config::HISTO_BINS_MAP::on_FREQ:
 				if( y!=nullptr && config.histo_bin_map== LiteBOM_Config::HISTO_BINS_MAP::on_FREQ_and_Y)
 					corr.DCRIMI_2(config, val,y, idx,flag );
-				HistoOnFrequncy_1(config, vUnique, nA, nMostBin-1);
-				//HistoOnFrequncy(config, val, idx, nMostBin);
+				/*if (vUnique.size() <= nMostBin - 1) {	
+					HistoOnUnique_1(config, vUnique, nA, false);//与第二函数冲突!!!
+				}	else*/ {
+					HistoOnFrequncy_1(config, vUnique, nA, nMostBin-1);
+					//HistoOnFrequncy(config, val, idx, nMostBin);
+				}
 				corr.Clear();
 				break;
 				
@@ -453,14 +458,12 @@ namespace Grusoft {
 
 			}*/
 
-			/*if (vThrsh.size() > nMostBin+1) {
-				printf( "Distribution::X2Histo_ vThrsh[%ld] > nMostBin=%d!!!", vThrsh.size(), nMostBin);
-				throw "Distribution::X2Histo_ vThrsh.size() > nMostBin!!!";
+			if (nBin >= 2) {
+				size_t n1 = ceil(nBin / 4.0), n2 = ceil(nBin / 2.0), n3 = ceil(nBin *3.0 / 4) - 1;
+				HISTO_BIN&b0 = histo->bins[0], &b1 = histo->bins[n1], &b2 = histo->bins[n2], &b3 = histo->bins[n3], &b4 = histo->bins[nBin - 1];
+				H_q0 = b0.split_F, H_q4 = b4.split_F;
+				H_q1 = q1 = b1.split_F, H_q2 = q2 = b2.split_F;		H_q3 = q3 = b3.split_F;/**/
 			}
-			histo->bins.resize(vThrsh.size());*/
-			/*size_t nBin = histo->bins.size(),n1=ceil((nBin-1)/4.0), n2 = ceil((nBin - 1) / 2.0), n3 = ceil((nBin - 1) *3.0/ 4);
-			H_q0 = vThrsh[0],				H_q4 = vThrsh[nBin - 1];
-			H_q1 = vThrsh[n1],	H_q2 = vThrsh[n2];		H_q3 = vThrsh[n3];*/
 		}
 
 	};

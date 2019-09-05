@@ -116,6 +116,31 @@ void Distribution::Dump(int feat, bool isQuanti, int flag) {
 	}
 }
 
+void Distribution::HistoOnUnique_1(const LiteBOM_Config&config, vector<vDISTINCT>&uniques, size_t nA0, bool isMap, int flag) {
+	isUnique = true;
+	size_t nMostBin = uniques.size();
+	assert(histo != nullptr);
+	int noBin = 0;
+	size_t i, i_0 = 0, nUnique = vUnique.size(), nz;
+	double a0 = vUnique[0].val, a1 = vUnique[vUnique.size() - 1].val, v0;
+	//mapCategory.clear();
+	while (i_0 < nUnique) {
+		v0 = vUnique[i_0].val;		
+		HISTO_BIN& bin = histo->bins[noBin];
+		bin.tic = noBin;
+		bin.split_F = std::nextafter(v0, INFINITY);
+		//mapCategory.insert(pair<int, int>((int)(v0), noBin));
+		bin.nz = vUnique[i_0].nz;
+		++i_0; ++noBin;
+	}
+	double delta = double(fabs(a1 - a0)) / nMostBin / 100.0;
+	histo->bins.resize(noBin + 1);		//always last bin for NA
+	histo->bins[noBin].split_F = a1+delta;
+	histo->bins[noBin].tic = noBin;
+	histo->bins[noBin].nz = nSamp - nA0;
+	histo->CheckValid(config);
+}
+
 /*
 	always last bin for NA
 	v0.1	cys
@@ -132,6 +157,8 @@ void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTIN
 			vUnique[i].type = vDISTINCT::LARGE;	 BIG_bins++;
 		}
 	}
+	//if (BIG_bins > 0)	while会自动更新
+	//	T_avg = SMALL_na*1.0 / (nMostBin - BIG_bins);
 	size_t T_avg_small = max(config.min_data_in_bin, SMALL_na / (nMostBin - BIG_bins)/ 10);
 	T_avg_small = config.min_data_in_bin;
 
@@ -171,6 +198,8 @@ void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTIN
 			}
 			else	if (nz >= T_avg )
 				break;
+			if (isUnique && nz>= T_avg_small)
+				break;
 			if (i_0+1<nUnique && vUnique[i_0+1].type == vDISTINCT::LARGE && nz>T_avg / 2)
 			{		break;			}
 		} while (++i_0 < nUnique);
@@ -196,13 +225,13 @@ void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTIN
 	histo->bins[noBin].tic = noBin;
 	histo->bins[noBin].nz = nSamp-nA;
 	histo->CheckValid(config);
-	nz = histo->bins.size();
+	/*nz = histo->bins.size();
 	if (nz >= 2) {
 		size_t n1 = ceil(nz / 4.0), n2 = ceil(nz / 2.0), n3 = ceil(nz *3.0 / 4)-1;
 		HISTO_BIN&b0 = histo->bins[0], &b1 = histo->bins[n1], &b2 = histo->bins[n2], &b3 = histo->bins[n3], &b4 = histo->bins[nz-1];
 		H_q0 = b0.split_F,				H_q4 = b4.split_F;
-		H_q1 = q1 = b1.split_F,			H_q2 = q2 = b2.split_F;		H_q3 = q3 = b3.split_F;/**/
-	}
+		H_q1 = q1 = b1.split_F,			H_q2 = q2 = b2.split_F;		H_q3 = q3 = b3.split_F;
+	}*/
 
 }
 
