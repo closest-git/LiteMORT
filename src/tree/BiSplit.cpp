@@ -531,7 +531,12 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 	}
 	if (feat_id >= 0) {
 		FeatVector *hFeat = hData_->Feat(feat_id);
-		hFeat->wGain += gain;		hFeat->wSplit += 1;
+		hFeat->wGain += gain;		
+		hFeat->wSplit += 1;			hFeat->wSplit_last += 1;
+		if (hFeat->wBins != nullptr) {
+			int tic = fruit->bin_S0.tic;
+			hFeat->wBins[tic] += 1;
+		}
 		/*if (hFeat->select_bins != nullptr) {
 			hFeat->select_bins->AddCandSalp();
 			hFeat->select_bins->SetCost(gain);

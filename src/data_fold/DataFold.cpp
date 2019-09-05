@@ -32,8 +32,8 @@ FeatsOnFold::STAT FeatsOnFold::stat;
 */
 FeatsOnFold::FeatsOnFold(LiteBOM_Config confi_, ExploreDA *eda_, string nam_, int dtype) :config(confi_), edaX(eda_), nam(nam_) {
 	dType = dtype;
-	//isQuanti = config.feat_quanti >0 && BIT_TEST(dType, FeatsOnFold::DF_TRAIN);	//BIT_TEST(dType, FAST_QUANTI);
-	isQuanti = config.feat_quanti > 0;
+	isQuanti = config.feat_quanti >0 && BIT_TEST(dType, FeatsOnFold::DF_TRAIN);	//BIT_TEST(dType, FAST_QUANTI);
+	//isQuanti = config.feat_quanti > 0;
 /*https://stackoverflow.com/questions/9878965/rand-between-0-and-1
 	uint64_t timeSeed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
 	std::seed_seq ss{ uint32_t(timeSeed & 0xffffffff), uint32_t(timeSeed >> 32) };
@@ -236,8 +236,9 @@ void FeatsOnFold::BeforeTrain(BoostingForest *hGBRT, int flag) {
 	bool isFirst = hGBRT->forest.size()==0;
 	//if (config.histo_algorithm != LiteBOM_Config::HISTO_ALGORITHM::on_EDA) {
 	//printf("\r\n");
-	bool isUpdate = config.histo_bins_onY() && hGBRT->skdu.noT % 50 == 0;
-	//isUpdate = hGBRT->skdu.noT>1;
+	bool isByY = config.histo_bins_onY();
+	bool isUpdate = isByY && hGBRT->skdu.noT % 50 == 0;
+	//isUpdate = hGBRT->skdu.noT>1 ;
 	if (isUpdate) {
 
 	}
@@ -254,11 +255,17 @@ void FeatsOnFold::BeforeTrain(BoostingForest *hGBRT, int flag) {
 		FeatVec_Q *hFQ = dynamic_cast<FeatVec_Q *>(hFeat);
 		if (hFQ != nullptr) {
 			nTotalBin0 += hFQ->GetHisto()->bins.size();
-			if (isUpdate) {
-				assert(0);
-				throw "!!!histogram_bins onY is ...!!!";
-				//hFeat->distri.X2Histo_(config, nSamp_, x, Y_);
-				hFeat->UpdateHisto(this, true,isFirst, 0x0);
+			if (isUpdate) {		//很多原因导致update
+				if (isByY) {
+					assert(0);
+					throw "!!!histogram_bins onY is ...!!!";
+					//hFeat->distri.X2Histo_(config, nSamp_, x, Y_);
+					hFeat->UpdateHisto(this, true, isFirst, 0x0);
+				}
+				else if(hFeat->wSplit_last>16 && !hFeat->hDistri->isUnique){
+					hFeat->hDistri->UpdateHistoByW(this->config,hFeat->wBins);
+					hFeat->UpdateHisto(this, false,isFirst, 0x0);
+				}
 			}
 		}
 		//hFeat->XY2Histo_(config, this->samp_set, x);
@@ -581,7 +588,9 @@ void FeatVec_Q::UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst,
 		yDown = ((FeatsOnFold *)hData_)->GetDownDirection();
 	}/**/
 	assert(val == nullptr);
-	val = new tpQUANTI[nSamp];
+	if (val == nullptr) {		
+		val = new tpQUANTI[nSamp];
+	}
 	//val.resize(nSamp);
 	tpQUANTI *quanti = arr(), no;
 	//qHisto->quanti = quanti;
@@ -618,7 +627,10 @@ void FeatVec_Q::UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst,
 	}
 	if(hData_->config.nMostSalp4bins>0 && hData_->isTrain())
 		select_bins = new FS_gene_(this->nam,hData_->config.nMostSalp4bins, qHisto_0->bins.size(), 0x0);
-
+	if (wBins != nullptr)
+		delete[] wBins;
+	wBins = new float[qHisto_0->bins.size()]();
+	wSplit_last = 0;
 		//printf("\n FeatVec_Q(%s) nBin=%d a0=%g a1=%g", desc.c_str(),qHisto->bins.size(),qHisto->a0, qHisto->a1 );	
 }
 

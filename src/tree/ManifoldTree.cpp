@@ -610,11 +610,12 @@ void ManifoldTree::ClearHisto() {
 	v0.2	cys
 		8/31/2019
 */
-bool ManifoldTree::To_ARR_Tree(FeatsOnFold *hData_, bool isClear, int flag) {
-	harrTree = new ARR_TREE();
-	ARR_TREE &arrTree = *(this->harrTree);
+ARR_TREE *ManifoldTree::To_ARR_Tree(FeatsOnFold *hData_, bool isQuant_, bool isClear, int flag) {
+	ARR_TREE *harrTree = new ARR_TREE();
+	ARR_TREE &arrTree = *(harrTree);
 	bool isQuanti = hData_->isQuanti;		//predict,test对应的数据集并没有格子化!!!
 	int nNode = nodes.size(),no=0;
+	assert(nNode > 0);
 	arrTree.Init(nNode);
 	no = 0;
 	for (auto node : nodes) {
@@ -632,7 +633,7 @@ bool ManifoldTree::To_ARR_Tree(FeatsOnFold *hData_, bool isClear, int flag) {
 			assert(node->right != nullptr);
 			arrTree.rigt[no] = node->right->id;
 			//arrTree.thrsh_step[no] = isQuanti ? node->fruit->T_quanti : node->fruit->thrshold;
-			arrTree.thrsh_step[no] = node->fruit->Thrshold(isQuanti);
+			arrTree.thrsh_step[no] = node->fruit->Thrshold(isQuant_);
 		}	else {
 			arrTree.thrsh_step[no] = node->GetDownStep();
 		}
@@ -643,9 +644,9 @@ bool ManifoldTree::To_ARR_Tree(FeatsOnFold *hData_, bool isClear, int flag) {
 			delete node;
 		nodes.clear();		//samp_folds.clear( );
 		if (hGuideTree != nullptr)
-			delete hGuideTree;
+		{		delete hGuideTree;		hGuideTree = nullptr;	}
 	}
-	return true;
+	return harrTree;
 }
 
 ManifoldTree::~ManifoldTree() {
@@ -655,8 +656,10 @@ ManifoldTree::~ManifoldTree() {
 	nodes.clear();		//samp_folds.clear( );
 	if (hGuideTree != nullptr)
 		delete hGuideTree;
-	if (harrTree != nullptr)
-		delete harrTree;
+	if (ArrTree_quanti != nullptr)
+		delete ArrTree_quanti;
+	if (ArrTree_data != nullptr)
+		delete ArrTree_data;
 }
 
 void ManifoldTree::Dump( int flag ){

@@ -2,14 +2,17 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1f20a82c-2842-4728-bc01-7f01847a5972" name="Default" comment="README">
-      <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/python-package/case_ieee_fraud.py" beforeDir="false" afterPath="$PROJECT_DIR$/python-package/case_ieee_fraud.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_fold/Distribution.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/Distribution.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_fold/EDA.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/EDA.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/data_fold/FeatVector.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/FeatVector.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/data_fold/Loss.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/Loss.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_fold/Histogram.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/Histogram.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/python/pyMORT_DLL.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/python/pyMORT_DLL.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/tree/BiSplit.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/BiSplit.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tree/BiSplit.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/BiSplit.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/tree/GBRT.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/GBRT.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/util/samp_set.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/samp_set.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tree/ManifoldTree.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/ManifoldTree.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tree/ManifoldTree.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/ManifoldTree.hpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -67,8 +70,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/python-package/case_ieee_fraud.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="236">
-              <caret line="33" column="1" selection-start-line="33" selection-start-column="1" selection-end-line="33" selection-end-column="1" />
+            <state relative-caret-position="141">
+              <caret line="28" column="21" lean-forward="true" selection-start-line="28" selection-start-column="21" selection-end-line="28" selection-end-column="21" />
               <folding>
                 <element signature="e#121#139#0" expanded="true" />
               </folding>
@@ -177,10 +180,10 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="1405" />
-    <option name="y" value="287" />
+    <option name="x" value="17" />
+    <option name="y" value="96" />
     <option name="width" value="1775" />
-    <option name="height" value="1099" />
+    <option name="height" value="1098" />
   </component>
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="1" id="Add" />
@@ -444,7 +447,7 @@
       <workItem from="1567242030886" duration="4081000" />
       <workItem from="1567258984385" duration="15929000" />
       <workItem from="1567405586253" duration="14093000" />
-      <workItem from="1567488571194" duration="12134000" />
+      <workItem from="1567488571194" duration="16703000" />
     </task>
     <task id="LOCAL-00001" summary="README">
       <created>1556249780941</created>
@@ -489,19 +492,18 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="395815000" />
+    <option name="totallyTimeSpent" value="400384000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1913" y="-7" width="1434" height="878" extended-state="6" />
-    <editor active="true" />
+    <frame x="-7" y="-7" width="1420" height="878" extended-state="6" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.81677705" visible="true" weight="0.18822674" />
-      <window_info id="Structure" order="1" sideWeight="0.18322296" side_tool="true" visible="true" weight="0.18822674" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.81769437" visible="true" weight="0.19016153" />
+      <window_info id="Structure" order="1" sideWeight="0.18230563" side_tool="true" visible="true" weight="0.19016153" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3297587" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.24664879" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.39276138" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.17158177" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -517,7 +519,7 @@
       <window_info anchor="right" id="R Packages" order="3" />
       <window_info anchor="right" id="R Graphics" order="4" />
       <window_info anchor="right" id="Database" order="5" />
-      <window_info anchor="right" x="601" y="59" width="225" height="746" id="SciView" order="6" sideWeight="0.46989527" visible="true" weight="0.09011628" />
+      <window_info anchor="right" x="601" y="59" width="225" height="746" id="SciView" order="6" sideWeight="0.46989527" visible="true" weight="0.091042586" />
       <window_info anchor="right" x="0" y="0" width="314" height="678" id="Documentation" order="7" sideWeight="0.5301047" side_tool="true" visible="true" weight="0.1398892" />
     </layout>
   </component>
@@ -1054,8 +1056,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/python-package/case_ieee_fraud.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="236">
-          <caret line="33" column="1" selection-start-line="33" selection-start-column="1" selection-end-line="33" selection-end-column="1" />
+        <state relative-caret-position="141">
+          <caret line="28" column="21" lean-forward="true" selection-start-line="28" selection-start-column="21" selection-end-line="28" selection-end-column="21" />
           <folding>
             <element signature="e#121#139#0" expanded="true" />
           </folding>

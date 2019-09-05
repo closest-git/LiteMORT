@@ -42,8 +42,9 @@ namespace Grusoft {
 		Distribution *hDistri = nullptr;		//仅指向
 		Distribution *hDistriTrain = nullptr;	//仅指向
 		Feature_Selection* select_bins=nullptr;
-		double wSplit=0;		//"split", result contains numbers of times the feature is used in a model.
+		double wSplit=0, wSplit_last=0;		//"split", result contains numbers of times the feature is used in a model.
 		double wGain=0;			//"gain", result contains total gains of splits which use the feature.
+		float *wBins = nullptr;
 		enum {
 			//CATEGORY = 0x100,
 			AGGREGATE = 0x200,

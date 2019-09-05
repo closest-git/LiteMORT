@@ -31,8 +31,8 @@ TARGET = 'isFraud'
 START_DATE = datetime.datetime.strptime('2017-11-30', '%Y-%m-%d')
 NFOLDS_0=20
 NFOLDS = 0 if isTimeSeires else 5
-#some_rows = 10000
-some_rows = None
+some_rows = 10000
+#some_rows = None
 data_root = 'E:/Kaggle/ieee_fraud/input/'
 pkl_path = f'{data_root}/_yak_{some_rows}.pickle'
 

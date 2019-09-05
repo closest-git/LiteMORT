@@ -102,7 +102,7 @@ namespace Grusoft {
 		MAP_CATEGORY mapCategory;
 		HistoGRAM *histo = nullptr;
 		vector<BIN_FEATA> binFeatas;
-
+		bool isUnique = false;
 		bool isValidFeatas();
 
 		size_t nSamp, nZERO = 0, nNA = 0;
@@ -366,6 +366,9 @@ namespace Grusoft {
 			assert(nBin > 0);
 			return nBin;
 		}
+
+		//只修改split_F
+		virtual void UpdateHistoByW(const LiteBOM_Config&config, float *wBins,int flag=0x0);
 
 		/*
 		必须保证histo与vThrsh严格一致		需要重新设计histo与vThrsh		3/11/2019

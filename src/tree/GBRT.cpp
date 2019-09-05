@@ -116,11 +116,12 @@ double GBRT::Predict(FeatsOnFold *hData_, bool isX,bool checkLossy, bool resumeL
 		if (true) {		//data-major	ËÆºõ¿ìÒ»Ð©
 			ARR_TREE arrTree;
 			//if (hTree->To_ARR_Tree(hData_,true)) {
-			if (hTree->harrTree!=nullptr) {
-				if(hData_->isQuanti)
-					isNodeMajor = !hData_->PredictOnTree<tpQUANTI,double>(*(hTree->harrTree),flag);
-				else
-					isNodeMajor = !hData_->PredictOnTree<float, double>(*(hTree->harrTree), flag);
+			if (hTree->ArrTree_quanti !=nullptr) {
+				if (hData_->isQuanti)
+					isNodeMajor = !hData_->PredictOnTree<tpQUANTI, double>(*(hTree->ArrTree_quanti), flag);
+				else				{
+					isNodeMajor = !hData_->PredictOnTree<float, double>(*(hTree->ArrTree_data), flag);
+				}// 
 			}
 		}
 		if(isNodeMajor) {			//node-major
@@ -377,9 +378,9 @@ int GBRT::Train(string sTitle, int x, int flag) {
 				stopping.best_no, stopping.best_round, sLossE.c_str(), skdu.noT, sLossT.c_str(), err - err_0);*/
 			break;
 		}
-		/*if (stopping.isOsilate()) {
+		if (false /*stopping.isOsilate()*/) {
 			//Remapping();
-		}*/
+		}
 
 		this->BeforeTrain(hTrainData);
 		//gradients = self.loss.negative_gradient(preds, y)
@@ -391,7 +392,8 @@ int GBRT::Train(string sTitle, int x, int flag) {
 		GST_TIC(t111);
 		hTree->Train(flag);				//
 		nzNode +=hTree->nodes.size();
-		hTree->To_ARR_Tree(hTrainData, true);
+		hTree->ArrTree_quanti = hTree->To_ARR_Tree(hTrainData,true, false);
+		hTree->ArrTree_data = hTree->To_ARR_Tree(hTrainData, false,true);
 		t_train += GST_TOC(t111);
 		
 		//TestOOB(hTrainData);

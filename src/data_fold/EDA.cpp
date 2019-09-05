@@ -27,6 +27,56 @@ Distribution::~Distribution() {
 		delete histo;
 }
 
+//
+void Distribution::UpdateHistoByW(const LiteBOM_Config&config, float *wBins, int flag) {
+	size_t nBin = histo->bins.size(), nBin_0= nBin,i,nMaxSplit=min(16, nBin/10),nSplit=0,id,nDrop=0;
+	int *mask = new int[nBin]();
+	vector<tpSAMP_ID> idx;
+	float split_1=0;
+	sort_indexes(nBin, wBins, idx);
+	for (i = 0; i < nMaxSplit; i++) {
+		id = idx[nBin-1-i];
+		if (wBins[id] > 0 ) {
+			if(id==nBin-1)	//最后一个保留
+			{		continue;			}
+			mask[id] = -1;
+			nSplit++;
+		}	
+	}
+	assert(nSplit > 0);
+	if(nBin + nSplit>config.max_bin)
+		nDrop = nBin + nSplit - config.max_bin;
+	for (i = 0; i < nDrop; i++) {
+		id = idx[i];
+		mask[id] = -2;
+	}
+	vector<HISTO_BIN> binX;
+	for (i = 0; i < nBin; i++) {
+		HISTO_BIN bin0 = histo->bins[i];
+		split_1 = i==nBin-1 ? DBL_MAX : histo->bins[i + 1].split_F;
+		if (mask[i] == -2) {
+			continue;
+		}
+		binX.push_back(bin0);
+		if (mask[i] == -1) {
+			HISTO_BIN bin1 = bin0;
+			bin1.split_F = (bin0.split_F + split_1) / 2;
+			binX.push_back(bin1);
+		}
+	}
+	histo->bins = binX;
+
+	nBin = histo->bins.size();
+	assert(nBin <= config.max_bin);
+	for (i = 0; i < nBin; i++) {
+		histo->bins[i].tic = i;
+		if (i < nBin - 1)
+			assert(histo->bins[i].split_F<histo->bins[i+1].split_F);
+	}
+	delete[] mask;
+	printf("[nSplit=%d,nDrop=%d,nBin=%d=>%d]\t", nSplit, nDrop, nBin_0, nBin);
+}
+
 bool Distribution::isValidFeatas() {
 	if (histo == nullptr)
 		return false;
@@ -137,6 +187,7 @@ void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTIN
 	double d_max = DBL_MAX;	// std::numeric_limits<double>::max();
 	if (nUnique < nMostBin && nA>nMostBin*20) {
 		d_max = a1 + delta;
+		isUnique = true;
 		//assert(histo->bins.size()== nUnique);
 	} else {
 	}

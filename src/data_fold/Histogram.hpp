@@ -92,13 +92,13 @@ namespace Grusoft {
 
 	//feature vector的数据类型多变，所以映射很复杂
 	struct HISTO_BIN {
+		float split_F = 0;		
 		size_t nz = 0;
 		//if (val[pos] < bins[noBin+1].split_F) {		quanti[pos] = noBin;		}
 		char fold = -1;			//每个BIN属于一个FOLD
 		uint16_t tic = 0;			
 		double G_sum = 0, H_sum = 0;		//Second-order approximation from Tianqi Chen's formula
 
-		float split_F = 0;		
 		/*static bool isSplitSmall(const HISTO_BIN &l, const HISTO_BIN &r)		{
 			return l.split_F<r.split_F;
 		}*/

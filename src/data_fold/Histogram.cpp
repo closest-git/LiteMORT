@@ -373,8 +373,8 @@ void HistoGRAM::GreedySplit_X(FeatsOnFold *hData_, const SAMP_SET& samp_set, int
 		if (nLeft<minSet || nRight<minSet) {
 			goto LOOP;
 		}
-		if (nLeft == 62433)		//仅用于测试
-			nLeft = 62433;
+		if (i == nBin-1)		//仅用于测试
+			i = nBin - 1;
 		//4/9/2019	cys	注销item.nz == 0 这样可以使split thrshold更紧凑
 		if (item.tic == a /*|| item.nz == 0*/) {
 			goto LOOP;
