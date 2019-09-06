@@ -67,7 +67,7 @@ params = {
         "objective": "binary",
         "metric": "auc",        #"binary_logloss"
         'salp_bins':0,
-        'elitism': 0,
+        'elitism': 4,
             'max_bin': 256,
           'num_leaves': 64,
           'learning_rate': 0.1,
@@ -109,7 +109,7 @@ for fold_n, (train_index, valid_index) in enumerate(folds.split(X)):
     if model_type == 'mort':
         #model = LiteMORT(params).fit(X_train, y_train, eval_set=[(X_valid, y_valid)])
         model = LiteMORT(params).fit_1(X_train, y_train, eval_set=[(X_valid, y_valid)])
-        y_pred_valid = model.predict(X_valid)
+        #y_pred_valid = model.predict(X_valid)
         #y_pred = model.predict(X_test)
 
     if model_type == 'lgb':
@@ -117,7 +117,7 @@ for fold_n, (train_index, valid_index) in enumerate(folds.split(X)):
         model.fit(X_train, y_train,
                   eval_set=[(X_train, y_train), (X_valid, y_valid)], eval_metric='auc',verbose=5)
         model.booster_.save_model('geo_test_.model')
-        y_pred_valid = model.predict(X_valid)
+        #y_pred_valid = model.predict(X_valid)
         #y_pred = model.predict(X_test, num_iteration=model.best_iteration_)
     break
 

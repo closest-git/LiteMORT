@@ -274,8 +274,7 @@ namespace Grusoft {
 				else {
 					FeatVec_T<Tx>*hFT = dynamic_cast<FeatVec_T<Tx>*>(feats[t]);
 					if (hFT == nullptr)
-					{
-						delete[] arrFeat;	return false;
+					{						delete[] arrFeat;	return false;
 					}
 					arrFeat[t] = hFT->arr();
 				}
@@ -837,12 +836,12 @@ namespace Grusoft {
 						if (isSameSorted) {
 							nzHisto += histo->bins[noBin].nz;
 							if (i_0 != nzHisto) {
-								throw "QuantiAtEDA i_0 != nzHisto!!!";
+								;// throw "QuantiAtEDA i_0 != nzHisto!!!";
 							}
 						}
 						noBin++;
 						if (noBin >= histo->bins.size())
-							throw "QuantiAtEDA noBin is XXX";
+						{		throw "QuantiAtEDA noBin is XXX";						}
 						//v1 = vThrsh[noBin + 1];
 						v1 = histo->bins[noBin+1].split_F;
 					}

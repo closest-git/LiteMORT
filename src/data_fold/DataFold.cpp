@@ -178,7 +178,7 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 			//int nElitism = min(nPick, 16);
 			int nElitism = min(nPick, config.nElitism);
 			std::random_shuffle(picks.begin()+ nElitism, picks.end());
-			picks.resize(min(nPick, nElitism*6));
+			picks.resize(min(nPick, min(nElitism*6, nElitism+nFeat/3)));
 		}
 		delete[] w;
 
@@ -238,7 +238,7 @@ void FeatsOnFold::BeforeTrain(BoostingForest *hGBRT, int flag) {
 	//printf("\r\n");
 	bool isByY = config.histo_bins_onY();
 	bool isUpdate = isByY && hGBRT->skdu.noT % 50 == 0;
-	//isUpdate = hGBRT->skdu.noT>1 ;
+	isUpdate = hGBRT->skdu.noT>1 ;
 	if (isUpdate) {
 
 	}
@@ -262,7 +262,7 @@ void FeatsOnFold::BeforeTrain(BoostingForest *hGBRT, int flag) {
 					//hFeat->distri.X2Histo_(config, nSamp_, x, Y_);
 					hFeat->UpdateHisto(this, true, isFirst, 0x0);
 				}
-				else if(hFeat->wSplit_last>16 && !hFeat->hDistri->isUnique){
+				else if(hFeat->wSplit_last>512 && !hFeat->hDistri->isUnique){
 					hFeat->hDistri->UpdateHistoByW(this->config,hFeat->wBins);
 					hFeat->UpdateHisto(this, false,isFirst, 0x0);
 				}
@@ -587,7 +587,7 @@ void FeatVec_Q::UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst,
 		}	
 		yDown = ((FeatsOnFold *)hData_)->GetDownDirection();
 	}/**/
-	assert(val == nullptr);
+	//assert(val == nullptr);
 	if (val == nullptr) {		
 		val = new tpQUANTI[nSamp];
 	}

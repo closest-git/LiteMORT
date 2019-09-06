@@ -25,7 +25,7 @@ namespace Grusoft {
 			std::string _eval_metric,
 			int _num_classes,
 			int _num_threads,
-			int _max_bin,
+			//int _max_bin,
 			double _min_sum_hessian_in_leaf,
 			int _num_vars,
 			std::string _grow_by,
@@ -44,7 +44,7 @@ namespace Grusoft {
 			eval_metric(_eval_metric),
 			num_classes(_num_classes),
 			num_threads(_num_threads),
-			max_bin(_max_bin),
+			//max_bin(_max_bin),
 			min_sum_hessian_in_leaf(_min_sum_hessian_in_leaf),
 			num_vars(_num_vars),
 			grow_by(_grow_by),
@@ -83,7 +83,7 @@ namespace Grusoft {
 			cout << "eval_metric " << eval_metric << endl;
 			cout << "num_classes " << num_classes << endl;
 			cout << "num_threads " << num_threads << endl;
-			cout << "max_bin " << _max_bin << endl;
+			//cout << "max_bin " << _max_bin << endl;
 			cout << "min_sum_hessian_in_leaf " << min_sum_hessian_in_leaf << endl;
 			cout << "num_vars " << num_vars << endl;
 			cout << "grow_by " << grow_by << endl;
@@ -116,7 +116,7 @@ namespace Grusoft {
 
 		//int num_threads;
 
-		int max_bin;
+		//int max_bin;
 		int min_data_in_bin = 8;
 
 		//double min_sum_hessian_in_leaf;

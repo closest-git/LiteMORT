@@ -49,7 +49,7 @@ def make_predictions(tr_df, tt_df, features_columns, target, lgb_params):
     predictions = np.zeros(len(tt_df))
     fold_score_sum=0
     for fold_, (trn_idx, val_idx) in enumerate(folds.split(X, y)):
-        if fold_<15:
+        if fold_!=18:
             continue
         NFOLDS = NFOLDS+1
         t0 = time.time()

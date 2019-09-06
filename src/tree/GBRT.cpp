@@ -120,6 +120,7 @@ double GBRT::Predict(FeatsOnFold *hData_, bool isX,bool checkLossy, bool resumeL
 				if (hData_->isQuanti)
 					isNodeMajor = !hData_->PredictOnTree<tpQUANTI, double>(*(hTree->ArrTree_quanti), flag);
 				else				{
+					//isNodeMajor = !hData_->PredictOnTree<double, double>(*(hTree->ArrTree_data), flag);
 					isNodeMajor = !hData_->PredictOnTree<float, double>(*(hTree->ArrTree_data), flag);
 				}// 
 			}
