@@ -12,7 +12,7 @@ GBRT::GBRT(FeatsOnFold *hTrain, FeatsOnFold *hEval, double sOOB, MODEL mod_, int
 #endif
 	model = mod_;	
 	skdu.cascad = 0;			//skdu.nStep = nStep_;
-	int seed = skdu.cascad + 31415927, nTrain = hTrain->nSample(), i, cls;
+	int seed = skdu.cascad + 31415927, nTrain = hTrain->nSample(), i, cls, nMostThread;
 	skdu.nTree = nTree = rounds = nTre_;
 
 	hTrainData = hTrain;	// new FeatsOnFold(nullptr, nTrain, 0, nCls, 0);
@@ -22,13 +22,14 @@ GBRT::GBRT(FeatsOnFold *hTrain, FeatsOnFold *hEval, double sOOB, MODEL mod_, int
 	//InitRander(seed);
 	
 	//lenda = 10;	//MAX(1.0,10-cas*0.5);			
-	int nCand = 400;	//有意思
+#pragma omp parallel
+	nMostThread = omp_get_num_threads();
 	//eta = 0.1;
-	nBlitThread = 8;	//并行导致结果不再可重复
-						//nBlitThread=1;	
+	//nBlitThread = 8;	//并行导致结果不再可重复
+	
 	maxDepth = hTrain->config.max_depth;
 	//int histo = hTrain->config.histo_bins;
-	nThread = hTrain->config.num_threads;
+	nThread = hTrain->config.num_threads<=0 ? nMostThread : hTrain->config.num_threads;
 	assert(nThread>0 && nThread<32);
 	omp_set_num_threads(nThread);
 	omp_set_nested(0);
@@ -55,10 +56,7 @@ GBRT::GBRT(FeatsOnFold *hTrain, FeatsOnFold *hEval, double sOOB, MODEL mod_, int
 		SamplSet.push_back(hX);	*/	
 	}
 	nOOB = nTrain*sOOB;
-	if (nBlitThread>1) {
-		for (int i = 0; i<nBlitThread; i++) {
-		}
-	}
+	
 	const char *mod = model==CLASIFY ? "CLASIFY" : "REGRESSION";
 	printf("\n\n********* GBRT[%s]\n\tnTrainSamp=%d,nTree=%d,maxDepth=%d regress@LEAF=%s thread=%d feat_quanti=%d...",
 		mod,nTrain, nTree, maxDepth, hTrain->config.leaf_regression.c_str(),nThread, hTrain->config.feat_quanti);
@@ -117,9 +115,9 @@ double GBRT::Predict(FeatsOnFold *hData_, bool isX,bool checkLossy, bool resumeL
 			ARR_TREE arrTree;
 			//if (hTree->To_ARR_Tree(hData_,true)) {
 			if (hTree->ArrTree_quanti !=nullptr) {
-				if (hData_->isQuanti)
+				if (hData_->isQuanti) {
 					isNodeMajor = !hData_->PredictOnTree<tpQUANTI, double>(*(hTree->ArrTree_quanti), flag);
-				else				{
+				}		else				{
 					//isNodeMajor = !hData_->PredictOnTree<double, double>(*(hTree->ArrTree_data), flag);
 					isNodeMajor = !hData_->PredictOnTree<float, double>(*(hTree->ArrTree_data), flag);
 				}// 
@@ -163,19 +161,7 @@ double GBRT::Predict(FeatsOnFold *hData_, bool isX,bool checkLossy, bool resumeL
 		}
 		else {
 		}
-		//on the eval_metric
-		err = hData_->lossy->ERR();
-		/*if (hData_->config.eval_metric == "mse") {
-			err = hData_->lossy->err_rmse;
-			err = err*err;
-		}	else if (hData_->config.eval_metric == "mae") {
-			err = hData_->lossy->err_mae;
-		}	else if (hData_->config.eval_metric == "logloss") {
-			err = hData_->lossy->err_logloss;
-		}	else if (hData_->config.eval_metric == "auc") {
-			err = 1-hData_->lossy->err_auc;
-		}*/
-
+		err = hData_->lossy->ERR();	
 		if (BIT_TEST(hData_->dType, FeatsOnFold::DF_EVAL)) {
 			if ((skdu.noT <= 100 && skdu.noT % 5 == 0) || skdu.noT % hData_->config.verbose_eval == 0) {
 				if (hData_->config.eval_metric == "auc") {
@@ -418,9 +404,9 @@ int GBRT::Train(string sTitle, int x, int flag) {
 	}
 
 	printf("\n********* GBRT::Train nTree=%d aNode=%.6g ERR@train=%s err@%s=%s thread=%d" 
-		"\n********* train=%g(tCheckGain=%g,tHisto=%g(%d,%g),tX=%g) sec\r\n", 
+		"\n********* train=%g(hTree->Train=%g,tCheckGain=%g,tHisto=%g(%d,%g),tX=%g) sec\r\n", 
 		forest.size(), nzNode*1.0/forest.size(), sLossT.c_str(), sEval.c_str(), sLossE.c_str(),nThread, 
-		GST_TOC(tick),FeatsOnFold::stat.tCheckGain, FeatsOnFold::stat.tHisto, HistoGRAM::nAlloc, FeatsOnFold::stat.tSamp2Histo, FeatsOnFold::stat.tX);
+		GST_TOC(tick), t_train,FeatsOnFold::stat.tCheckGain, FeatsOnFold::stat.tHisto, HistoGRAM::nAlloc, FeatsOnFold::stat.tSamp2Histo, FeatsOnFold::stat.tX);
 
 	if (nOOB>0)
 		TestOOB(hTrainData);

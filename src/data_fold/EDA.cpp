@@ -85,6 +85,7 @@ void Distribution::UpdateHistoByW(const LiteBOM_Config&config, float *wBins, int
 			assert(i < nBin_0 - 1);
 			HISTO_BIN bin1 = bin0;
 			bin1.split_F = (bin0.split_F + split_1) / 2;
+			bin1.split_F = bin0.split_F+(split_1- bin0.split_F)*0.618;
 			binX.push_back(bin1);
 		}
 	}

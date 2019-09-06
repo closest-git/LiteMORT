@@ -241,8 +241,8 @@ namespace Grusoft {
 						pDown[i] = a = -(sig - label[i]);								vHess[i] = sig*(1 - sig);
 						//pDown[i] *= samp_weight[i];		//思路有问题
 						a2 += a*a;				sum += a;
-						a = pDown[i]* pDown[i] / vHess[i];
-						sumGH += a*a;		label_sum += label[i];
+						//a = pDown[i]* pDown[i] / vHess[i];
+						//sumGH += a*a;		label_sum += label[i];
 						/*a = y1[i];if (label[i] == 0 && a > P_0) {	//很奇怪，这样就是不行
 							//pDown[i] *= 10;							
 						}
@@ -252,8 +252,8 @@ namespace Grusoft {
 					}
 				}
 				DOWN_sum_2 = a2;	DOWN_sum_1 = sum;
-				DOWN_GH_2 = sumGH;
-				LABEL_mean = label_sum*1.0/dim;
+				//DOWN_GH_2 = sumGH;
+				//LABEL_mean = label_sum*1.0/dim;
 			}
 			//if(y_exp!=nullptr)	
 			//	delete[] y_exp;

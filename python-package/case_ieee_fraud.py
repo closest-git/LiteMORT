@@ -38,62 +38,64 @@ pkl_path = f'{data_root}/_yak_{some_rows}.pickle'
 
 def make_predictions(tr_df, tt_df, features_columns, target, lgb_params):
     print(f'train_df={tr_df.shape} test_df={tt_df.shape} \nlgb_params={lgb_params}')
-    if isTimeSeires:
-        folds = TimeSeriesSplit(n_splits=NFOLDS_0)
-    else:
-        folds = KFold(n_splits=NFOLDS, shuffle=True, random_state=SEED)
-    NFOLDS = 0
+    best_iter = 1300
     X, y = tr_df[features_columns], tr_df[target]
     P, P_y = tt_df[features_columns], tt_df[target]
     tt_df = tt_df[['TransactionID', target]]
     predictions = np.zeros(len(tt_df))
-    fold_score_sum=0
-    for fold_, (trn_idx, val_idx) in enumerate(folds.split(X, y)):
-        if fold_!=18:
-            continue
-        NFOLDS = NFOLDS+1
-        t0 = time.time()
-        print('Fold:', fold_)
-        tr_x, tr_y = X.iloc[trn_idx, :], y[trn_idx]
-        vl_x, vl_y = X.iloc[val_idx, :], y[val_idx]
-        print(len(tr_x), len(vl_x))
-        if isMORT:
-            model = LiteMORT(lgb_params).fit(tr_x, tr_y, eval_set=[(vl_x, vl_y)])
-            best_iter = 1000
-            #pred_val = model.predict(vl_x)
-            pred_raw = model.predict_raw(vl_x)
-            #y_pred[val_idx] = pred_raw
-            fold_score = metrics.roc_auc_score(vl_y, pred_raw)
-            if isTimeSeires:
-                pass
-            else:
-                pp_p = model.predict_raw(P)
-        else:
-            tr_data = lgb.Dataset(tr_x, label=tr_y)
-            vl_data = lgb.Dataset(vl_x, label=vl_y)
-            estimator = lgb.train(lgb_params,tr_data,valid_sets=[tr_data, vl_data],verbose_eval=verbose_eval, )
-            best_iter = estimator.best_iteration
-            if isTimeSeires:
-                pass
-            else:
-                pp_p = estimator.predict(P)
-            pred_raw = estimator.predict(vl_x)
-            fold_score = metrics.roc_auc_score(vl_y, pred_raw)
-            del tr_data, vl_data
+    fold_score_sum = 0
+    if best_iter < 0:
         if isTimeSeires:
-            pass
+            folds = TimeSeriesSplit(n_splits=NFOLDS_0)
         else:
-            predictions += pp_p
-        fold_score_sum += fold_score
+            folds = KFold(n_splits=NFOLDS, shuffle=True, random_state=SEED)
+        NFOLDS = 0
+        for fold_, (trn_idx, val_idx) in enumerate(folds.split(X, y)):
+            if fold_<15:            continue
+            NFOLDS = NFOLDS+1
+            t0 = time.time()
+            print('Fold:', fold_)
+            tr_x, tr_y = X.iloc[trn_idx, :], y[trn_idx]
+            vl_x, vl_y = X.iloc[val_idx, :], y[val_idx]
+            print(len(tr_x), len(vl_x))
+            if isMORT:
+                model = LiteMORT(lgb_params).fit(tr_x, tr_y, eval_set=[(vl_x, vl_y)])
+                best_iter = 1000
+                #pred_val = model.predict(vl_x)
+                pred_raw = model.predict_raw(vl_x)
+                #y_pred[val_idx] = pred_raw
+                fold_score = metrics.roc_auc_score(vl_y, pred_raw)
+                if isTimeSeires:
+                    pass
+                else:
+                    pp_p = model.predict_raw(P)
+            else:
+                tr_data = lgb.Dataset(tr_x, label=tr_y)
+                vl_data = lgb.Dataset(vl_x, label=vl_y)
+                estimator = lgb.train(lgb_params,tr_data,valid_sets=[tr_data, vl_data],verbose_eval=verbose_eval, )
+                best_iter = estimator.best_iteration
+                if isTimeSeires:
+                    pass
+                else:
+                    pp_p = estimator.predict(P)
+                pred_raw = estimator.predict(vl_x)
+                fold_score = metrics.roc_auc_score(vl_y, pred_raw)
+                del tr_data, vl_data
+            if isTimeSeires:
+                pass
+            else:
+                predictions += pp_p
+            fold_score_sum += fold_score
 
-        if False:
-            feature_imp = pd.DataFrame(sorted(zip(estimator.feature_importance(), X.columns)),columns=['Value', 'Feature'])
-            print(feature_imp)
+            if False:
+                feature_imp = pd.DataFrame(sorted(zip(estimator.feature_importance(), X.columns)),columns=['Value', 'Feature'])
+                print(feature_imp)
 
-        print(f'Fold:{fold_} score={fold_score} time={time.time()-t0:.4g} tr_x={tr_x.shape} val_x={vl_x.shape}'  )
-        del tr_x, tr_y, vl_x, vl_y
-        gc.collect()
-        #break
+            print(f'Fold:{fold_} score={fold_score} time={time.time()-t0:.4g} tr_x={tr_x.shape} val_x={vl_x.shape}'  )
+            del tr_x, tr_y, vl_x, vl_y
+            gc.collect()
+            #break
+        fold_score_sum / NFOLDS
 
     if verbose_eval == 1:
         input("Press Enter to pass this debug model...")
@@ -113,7 +115,7 @@ def make_predictions(tr_df, tt_df, features_columns, target, lgb_params):
     else:
         tt_df['prediction'] = predictions/ NFOLDS
 
-    return tt_df,fold_score_sum/NFOLDS
+    return tt_df,fold_score_sum,best_iter
 
 def M_PickSamples(pick_samples,df_train,df_test):
     nMost = min(df_train.shape[0], df_test.shape[0])
@@ -280,14 +282,13 @@ lgb_params = { 'objective':'binary',
                     'early_stopping_rounds':100,
                 }
 lgb_params['n_estimators'] = 20000
-lgb_params['early_stopping_rounds'] = 100
-test_predictions,fold_score = make_predictions(train_df, test_df, features_columns, TARGET, lgb_params)
+test_predictions,fold_score,best_iter = make_predictions(train_df, test_df, features_columns, TARGET, lgb_params)
 
 #input("Press Enter to submit...")
 model='MORT' if isMORT else 'LGB'
 test_predictions['isFraud'] = test_predictions['prediction']
 #test_predictions[['TransactionID', 'isFraud']].to_csv(f'submit_{some_rows}_{0.5}.csv', index=False,compression='gzip')
-path = f'E:/Kaggle/ieee_fraud/result/[{model}]_{some_rows}_{fold_score:.5f}_F{NFOLDS}.csv'
+path = f'E:/Kaggle/ieee_fraud/result/[{model}]_{some_rows}_{fold_score:.5f}_F{NFOLDS}_{best_iter}.csv'
 test_predictions[['TransactionID', 'isFraud']].to_csv(path, index=False)        #,compression='gzip'
 print(f"test_predictions[['TransactionID', 'isFraud']] to_csv @{path}")
 input("Press Enter to exit...")

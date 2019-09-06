@@ -344,7 +344,7 @@ namespace Grusoft {
 		// desc = refer to `Parallel Learning Guide <./Parallel-Learning-Guide.rst>`__ to get more details
 		std::string tree_learner = "serial";
 
-		int num_threads = 8;
+		int num_threads = -1;
 
 		// [doc-only]
 		// alias = random_seed

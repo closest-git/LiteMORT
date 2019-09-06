@@ -471,7 +471,7 @@ void ManifoldTree::Train(int flag) {
 		}
 	}
 	
-	OnNewLeaf(root, hData_, pick_feats,false);		
+	OnNewLeaf(root, hData_, pick_feats,false);
 	gain = 0;
 	while (true) {		//参见GBRT::GetBlit
 		if (leafs.size() >= hData_->config.num_leaves) {
@@ -513,8 +513,6 @@ void ManifoldTree::Train(int flag) {
 			break;
 		}
 		bool isOnlyAdd = leafs.size() + new_leafs.size() >= hData_->config.num_leaves;
-		//GST_TIC(t1);
-		//FeatsOnFold::stat.tX += GST_TOC(t1);
 		for (auto leaf : new_leafs)		{
 			OnNewLeaf(leaf, hData_, pick_feats, isOnlyAdd);
 		}
@@ -564,7 +562,9 @@ void ManifoldTree::Train(int flag) {
 	//Dump( );		//输出GBRT的信息
 
 	ClearSampSet( );		//优化，还需predict
+	GST_TIC(t1);
 	ClearHisto();
+	FeatsOnFold::stat.tX += GST_TOC(t1);
 
 	//printf( "\n%d...OK",hForest->skdu.noT );
 }

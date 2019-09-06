@@ -262,9 +262,11 @@ void FeatsOnFold::BeforeTrain(BoostingForest *hGBRT, int flag) {
 					//hFeat->distri.X2Histo_(config, nSamp_, x, Y_);
 					hFeat->UpdateHisto(this, true, isFirst, 0x0);
 				}
-				else if(hFeat->wSplit_last>512 && !hFeat->hDistri->isUnique){
+				else if(hFeat->wSplit_last>1024 && !hFeat->hDistri->isUnique){
 					hFeat->hDistri->UpdateHistoByW(this->config,hFeat->wBins);
+					//GST_TIC(t1);
 					hFeat->UpdateHisto(this, false,isFirst, 0x0);
+					//FeatsOnFold::stat.tX += GST_TOC(t1);
 				}
 			}
 		}
@@ -516,7 +518,6 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 			delete[] map;
 		}
 		else*/ {		//主要的时间瓶颈
-		GST_TIC(t1);
 			nSamp4 =  4 * (int)(nSamp / 4);
 			for (i=0; i < nSamp4; i += 4) {
 				HISTO_BIN *pB0 = pBins + quanti[samps[i]];
@@ -542,8 +543,7 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 				//pBin->H_sum += hessian == nullptr ? 1 : hessian[samp];
 				pBin->nz++;
 			}	
-		if(hParent==nullptr)
-			FeatsOnFold::stat.tX += GST_TOC(t1);
+			//if(hParent==nullptr)
 		}
 	}
 	histo->CheckValid(hData_->config);
