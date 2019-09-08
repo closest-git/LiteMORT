@@ -46,7 +46,7 @@ namespace Grusoft {
 		//FeatsOnFold *hData=nullptr;
 		virtual double AGG_CheckGain(FeatsOnFold *hData_, FeatVector *hFeat, int flag = 0x0);
 		virtual int PickOnGain(FeatsOnFold *hData_, const vector<FRUIT *>& arrFruit, int flag = 0x0);
-
+		const BoostingForest *hBForest=nullptr;
 	public:
 		static double tX;
 		tpDOWN down_step;	//ManifoldTree的目标函数是negative_gradient
@@ -75,6 +75,7 @@ namespace Grusoft {
 		MT_BiSplit(FeatsOnFold *hData_, const BoostingForest *hBoosting, int d, int rnd_seed, int flag = 0x0);
 		MT_BiSplit() : feat_id(-1) { ; }
 		MT_BiSplit(MT_BiSplit *hDad, int flag = 0x0) {
+			hBForest = hDad->hBForest;
 			depth = hDad->depth + 1;
 			assert(hDad->feat_id != -1);
 			feat_regress = hDad->feat_id;
@@ -93,7 +94,7 @@ namespace Grusoft {
 		bool isLeaf() const {
 			return left == nullptr && right == nullptr;
 		}
-		H_HistoGRAM H_HISTO;
+		//H_HistoGRAM H_HISTO;
 		HistoGRAM *GetHistogram(FeatsOnFold *hData_, int pick,bool isInsert, int flag = 0x0);
 
 		//样本只是某个泛函的观测值!!!

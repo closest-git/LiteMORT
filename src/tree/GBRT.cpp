@@ -56,7 +56,7 @@ GBRT::GBRT(FeatsOnFold *hTrain, FeatsOnFold *hEval, double sOOB, MODEL mod_, int
 		SamplSet.push_back(hX);	*/	
 	}
 	nOOB = nTrain*sOOB;
-	
+	histo_buffer = new HistoGRAM_BUFFER(hTrain);
 	const char *mod = model==CLASIFY ? "CLASIFY" : "REGRESSION";
 	printf("\n\n********* GBRT[%s]\n\tnTrainSamp=%d,nTree=%d,maxDepth=%d regress@LEAF=%s thread=%d feat_quanti=%d...",
 		mod,nTrain, nTree, maxDepth, hTrain->config.leaf_regression.c_str(),nThread, hTrain->config.feat_quanti);
@@ -375,6 +375,8 @@ int GBRT::Train(string sTitle, int x, int flag) {
 		//if (hEvalData != nullptr)		//case_higgs.py实测确实有BUG
 		//	hTree->SetGuideTree(new ManifoldTree(this, hEvalData, "777_" + to_string(t)));
 		nPickSamp = hTree->hRoot()->nSample();
+		histo_buffer->BeforeTrainTree(nPickSamp,flag);
+
 		forest.push_back(hTree);
 		GST_TIC(t111);
 		hTree->Train(flag);				//

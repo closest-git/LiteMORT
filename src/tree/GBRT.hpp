@@ -20,7 +20,6 @@ namespace Grusoft{
 		double nzWeak;
 		bool isCalcErr;
 		int nBlitThread;
-
 		virtual bool GetFeatDistri(WeakLearner *hWeak, float *distri = nullptr, int flag = 0x0);
 		//virtual bool LeafModel(WeakLearner *hWeak, int flag = 0x0);
 		//virtual void UpdateFeat(int flag);

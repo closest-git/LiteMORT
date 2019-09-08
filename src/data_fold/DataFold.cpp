@@ -481,6 +481,7 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 		//Samp2Histo_null_hessian_sparse(hData_, samp_set, histo, nMostBin, flag0);
 	}
 	else {
+		//histo->nSamp = samp_set.nSamp;
 		tpQUANTI *quanti = arr(), no, *map = nullptr;
 		/*if (hParent != nullptr) {
 			histo->CopyBins(*hParent, true, 0x0);

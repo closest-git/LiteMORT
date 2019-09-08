@@ -457,6 +457,7 @@ namespace Grusoft {
 			}	else {
 
 			}*/
+			histo->nMostBins = histo->bins.size();
 
 			if (nBin >= 2) {
 				size_t n1 = ceil(nBin / 4.0), n2 = ceil(nBin / 2.0), n3 = ceil(nBin *3.0 / 4) - 1;

@@ -23,7 +23,7 @@ def seed_everything(seed=0):
 
 isTimeSeires = True
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
-#isMORT = True
+isMORT = True
 SEED = 42
 verbose_eval=200
 seed_everything(SEED)
@@ -31,20 +31,20 @@ TARGET = 'isFraud'
 START_DATE = datetime.datetime.strptime('2017-11-30', '%Y-%m-%d')
 NFOLDS_0=20
 NFOLDS = 0 if isTimeSeires else 5
-#some_rows = 10000
+#some_rows = 100000
 some_rows = None
 data_root = 'E:/Kaggle/ieee_fraud/input/'
 pkl_path = f'{data_root}/_yak_{some_rows}.pickle'
 
 def make_predictions(tr_df, tt_df, features_columns, target, lgb_params):
     print(f'train_df={tr_df.shape} test_df={tt_df.shape} \nlgb_params={lgb_params}')
-    best_iter = 1300
+    best_iter = 0
     X, y = tr_df[features_columns], tr_df[target]
     P, P_y = tt_df[features_columns], tt_df[target]
     tt_df = tt_df[['TransactionID', target]]
     predictions = np.zeros(len(tt_df))
     fold_score_sum = 0
-    if best_iter < 0:
+    if best_iter <= 0:
         if isTimeSeires:
             folds = TimeSeriesSplit(n_splits=NFOLDS_0)
         else:
@@ -65,10 +65,7 @@ def make_predictions(tr_df, tt_df, features_columns, target, lgb_params):
                 pred_raw = model.predict_raw(vl_x)
                 #y_pred[val_idx] = pred_raw
                 fold_score = metrics.roc_auc_score(vl_y, pred_raw)
-                if isTimeSeires:
-                    pass
-                else:
-                    pp_p = model.predict_raw(P)
+                #pp_p = model.predict_raw(P)        效果不好啊
             else:
                 tr_data = lgb.Dataset(tr_x, label=tr_y)
                 vl_data = lgb.Dataset(vl_x, label=vl_y)
@@ -107,7 +104,8 @@ def make_predictions(tr_df, tt_df, features_columns, target, lgb_params):
         if isMORT:
             lgb_params['n_estimators'] = (int)(best_iter)
             model = LiteMORT(lgb_params).fit(X, y)
-            tt_df['prediction'] = model.predict_raw(P)
+            pp_p = model.predict_raw(P)
+            tt_df['prediction'] = pp_p  #(predictions+pp_p)/(NFOLDS+1)
         else:
             clf = lgb.LGBMClassifier(**lgb_params, num_boost_round=best_iter)
             clf.fit(X, y)

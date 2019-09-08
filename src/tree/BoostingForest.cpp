@@ -171,6 +171,8 @@ void BoostingForest::ClearData( )	{
 
 }
 void BoostingForest::Clear( ){
+	if (histo_buffer != nullptr)
+		delete histo_buffer;
 	ClearData( );
 	WeakLearners vNodes;
 	for (auto hTree : forest) {

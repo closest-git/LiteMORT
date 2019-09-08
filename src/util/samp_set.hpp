@@ -27,11 +27,11 @@ class SAMP_SET {
 		root_set = nullptr;
 	}
 public:
+	size_t nSamp = 0, nLeft=0,nRigt=0;
 	bool isRef = true;
 	tpSAMP_ID *root_set = nullptr;
 	//samps当前节点，总是指向root_set的某个位置
 	tpSAMP_ID *samps=nullptr,*left = nullptr, *rigt = nullptr;
-	size_t nSamp = 0, nLeft=0,nRigt=0;
 	//实际上是down vector的sum_1, 参见samp_set.STA_at<tpDOWN>(down, a2, mean, y_0, y_1,true)
 	double Y_sum_1 = 0;
 	double Y_sum_2 = 0, Y_0 = DBL_MAX, Y_1 = -DBL_MAX;

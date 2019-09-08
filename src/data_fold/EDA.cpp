@@ -29,14 +29,16 @@ Distribution::~Distribution() {
 
 //
 void Distribution::UpdateHistoByW(const LiteBOM_Config&config, float *wBins, int flag) {
-	size_t nBin_0 = histo->bins.size(), i,nMaxSplit=min(16, nBin_0 /10),nSplit=0,id,nDrop=0;
+	size_t nBin_0 = histo->bins.size(), i,nMaxSplit=int((nBin_0-1) /10.0),nSplit=0,id,nDrop=0;
 	if (nMaxSplit == 0)
 		return;
-	double*comp_=new double[2* nBin_0]();
+	double*comp_=new double[2* nBin_0](),w_avg=0;
 	for (i = 0; i < nBin_0-1; i++) {	//最后一个无法拆分诶
 		comp_[2 * i] = wBins[i];
 		comp_[2 * i+1] = histo->bins[i].nz;
+		w_avg += wBins[i] * wBins[i];
 	}
+	w_avg = sqrt(w_avg / (nBin_0 - 1));
 	int *mask = new int[nBin_0]();
 	vector<tpSAMP_ID> idx;
 	double split_1=0;
@@ -52,16 +54,23 @@ void Distribution::UpdateHistoByW(const LiteBOM_Config&config, float *wBins, int
 	}
 	for (i = 0; i < nMaxSplit; i++) {
 		id = idx[nBin_0-2-i];
-		if (wBins[id] > 0 ) {
+		bool isSplit = false;
+		if (wBins[id] > w_avg ) {
+			isSplit = true;
+		}	else if (rand() % 10 == 0) {
+			isSplit = true;
+		}
+		if(isSplit){
 			assert(id != nBin_0 - 1);
 			mask[id] = -1;
 			nSplit++;
-		}	
+		}
 	}
 
 	assert(nSplit > 0);
-	if(nBin_0 + nSplit>config.feat_quanti)
-		nDrop = nBin_0 + nSplit - config.feat_quanti;
+	//if(nBin_0 + nSplit>config.feat_quanti)
+	if (nBin_0 + nSplit > histo->nMostBins)
+		nDrop = nBin_0 + nSplit - histo->nMostBins;	// config.feat_quanti;
 	for (i = 0; i < nDrop; i++) {
 		id = idx[i];
 		assert(id != nBin_0 - 1);
@@ -93,7 +102,8 @@ void Distribution::UpdateHistoByW(const LiteBOM_Config&config, float *wBins, int
 	histo->bins = binX;
 
 	size_t nBin = histo->bins.size();
-	assert(nBin <= config.feat_quanti);
+	//assert(nBin <= config.feat_quanti);
+	assert(nBin <= histo->nMostBins);
 	for (i = 0; i < nBin; i++) {
 		histo->bins[i].tic = i;
 		if (i < nBin - 1)

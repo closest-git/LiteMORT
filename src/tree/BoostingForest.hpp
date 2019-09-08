@@ -65,6 +65,7 @@ namespace Grusoft{
 		};
 		
 		EARLY_STOPPING stopping;
+		HistoGRAM_BUFFER *histo_buffer=nullptr;
 
 		/*
 		需要整合
@@ -146,7 +147,8 @@ namespace Grusoft{
 		string name;
 		bool isClasify;
 		BoostingForest( ):nFeat(0),nClass(0),nTree(0),impurity(0),stage(RF_UNDEF),hfIsObj(nullptr),user_data(nullptr),nThread(1),
-			sBalance(-1),maxDepth(100000000),isDumpLeaf(false),hTrainData(nullptr),hTestData(nullptr){ ;}
+			sBalance(-1),maxDepth(100000000),isDumpLeaf(false),hTrainData(nullptr),hTestData(nullptr)
+		{ ;}
 		virtual ~BoostingForest( ){	Clear( );	}
 
 		virtual void SetUserData( void*ud_,isTrueObj hf,int flag=0x0 );
@@ -176,6 +178,7 @@ namespace Grusoft{
 	friend ManifoldTree;
 	friend RandRegress;
 	friend WeakLearner;
+	friend MT_BiSplit;
 	};
 	
 }

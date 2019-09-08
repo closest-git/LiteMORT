@@ -563,7 +563,7 @@ void ManifoldTree::Train(int flag) {
 
 	ClearSampSet( );		//优化，还需predict
 	GST_TIC(t1);
-	ClearHisto();
+	//ClearHisto();
 	FeatsOnFold::stat.tX += GST_TOC(t1);
 
 	//printf( "\n%d...OK",hForest->skdu.noT );
@@ -594,16 +594,7 @@ void ManifoldTree::ClearSampSet() {
 	}*/
 }
 
-void ManifoldTree::ClearHisto() {
-	for (auto node : nodes) {
-		for (auto pa : node->H_HISTO) {
-			HistoGRAM* histo = pa;
-			if (histo != nullptr)
-				delete histo;
-		}
-		node->H_HISTO.clear();
-	}
-}
+
 
 /*
 	v0.1	cys

@@ -37,7 +37,7 @@ namespace Grusoft {
 			double _goss_alpha,
 			double _goss_beta) :
 			num_trees(_num_trees),
-			max_leaf(_max_leaf),
+			//max_leaf(_max_leaf),
 			min_gain(_min_gain),
 			loss(_loss),
 			learning_rate(_learning_rate),
@@ -75,7 +75,7 @@ namespace Grusoft {
 			after_train_tree_time = 0.0;
 
 			cout << "num_trees " << num_trees << endl;
-			cout << "max_leaf " << max_leaf << endl;
+			//cout << "max_leaf " << max_leaf << endl;
 			cout << "min_gain " << min_gain << endl;
 			cout << "l2_reg " << l2_reg << endl;
 			cout << "loss " << loss << endl;
@@ -98,7 +98,7 @@ namespace Grusoft {
 
 		int num_trees;
 
-		int max_leaf;
+		//int max_leaf;
 
 		double min_gain;
 

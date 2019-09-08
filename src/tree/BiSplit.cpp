@@ -135,7 +135,7 @@ void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const BoostingForest *hBoosting, 
 	//printf("\nsamps={%d,%d,%d,...%d,...,%d,%d}", samps[0], samps[1], samps[2], samps[nz / 2], samps[nz - 2], samps[nz - 1]);
 }
 
-MT_BiSplit::MT_BiSplit(FeatsOnFold *hData_, const BoostingForest *hBoosting, int d, int rnd_seed, int flag) : depth(d) {
+MT_BiSplit::MT_BiSplit(FeatsOnFold *hData_, const BoostingForest *hBoosting_, int d, int rnd_seed, int flag) : hBForest(hBoosting_),depth(d) {
 	assert(hData_ != nullptr);
 	double subsample= hData_->config.subsample;
 	
@@ -143,10 +143,10 @@ MT_BiSplit::MT_BiSplit(FeatsOnFold *hData_, const BoostingForest *hBoosting, int
 	if (subsample < 0.999) {
 		size_t nMost= nSamp*subsample;
 		//samp_set.SampleFrom(hData_,&(hData_->samp_set),nMost, rnd_seed);		
-		samp_set.SampleFrom(hData_, hBoosting,nullptr, nMost, rnd_seed);
+		samp_set.SampleFrom(hData_, hBForest,nullptr, nMost, rnd_seed);
 	}	else {
 		//samp_set.SampleFrom(hData_, &(hData_->samp_set), nSamp, rnd_seed);
-		samp_set.SampleFrom(hData_, hBoosting,nullptr, nSamp, rnd_seed);
+		samp_set.SampleFrom(hData_, hBForest,nullptr, nSamp, rnd_seed);
 		//samp_set = hData_->samp_set;
 		//samp_set.isRef = true;
 	}
@@ -318,23 +318,31 @@ int MT_BiSplit::PickOnGain(FeatsOnFold *hData_,const vector<FRUIT *>& arrFruit, 
 	return pick_id;
 }
 
+/*
+	v0.1	cys	
+		9/8/2019
+*/
 HistoGRAM *MT_BiSplit::GetHistogram(FeatsOnFold *hData_, int pick, bool isInsert, int flag) {
 	size_t nSamp = samp_set.nSamp, i;
-	if (H_HISTO.size() == 0)
-		return nullptr;
-	HistoGRAM *histo = nullptr;
-	if (H_HISTO[pick]==nullptr) {
+	//if (H_HISTO.size() == 0)
+	//	return nullptr;
+	const HistoGRAM_BUFFER *H_buffer = hBForest->histo_buffer;
+	HistoGRAM *histo = H_buffer->Get(id,pick);
+	histo->nSamp = nSamp;		//nSamp动态变化，H_buffer无法确定
+	assert(histo != nullptr);
+	if (!histo->isFilled) {
+	//if (H_HISTO[pick]==nullptr) {
 		if (!isInsert)
 			return nullptr;
 		FeatVector *hFeat = hData_->Feat(pick);
-		histo = new HistoGRAM(hFeat, nSamp);
+		//histo = new HistoGRAM(hFeat, nSamp);
 		HistoGRAM *hP = parent==nullptr ? nullptr : parent->GetHistogram(hData_,pick,false);
 		HistoGRAM *hB = brother==nullptr ? nullptr : brother->GetHistogram(hData_,pick, false);
 		if (hP != nullptr && hB != nullptr) {
 			//if(pick==0)			printf("%d@(%d %d) ", nSamp,hP->nSamp, hB->nSamp);
 			histo->FromDiff(hP,hB,true);
 			//反复测试，碎片化内存确实浪费时间
-			parent->H_HISTO[pick] = nullptr;			delete hP;		
+			//parent->H_HISTO[pick] = nullptr;			delete hP;		
 			//brother->H_HISTO[pick] = nullptr;			delete hB;
 		}
 		else {
@@ -343,9 +351,11 @@ HistoGRAM *MT_BiSplit::GetHistogram(FeatsOnFold *hData_, int pick, bool isInsert
 	FeatsOnFold::stat.tSamp2Histo += GST_TOC(t333);
 			histo->CompressBins();
 		}
-		H_HISTO[pick] = histo;
+		histo->isFilled=true;
+		//H_HISTO[pick] = histo;
+		histo->CheckValid(hData_->config);
 	}	else {
-		histo = H_HISTO[pick];
+		//histo = H_HISTO[pick];
 	}
 	//histo->CompressBins();
 	return histo;
@@ -358,7 +368,7 @@ HistoGRAM *MT_BiSplit::GetHistogram(FeatsOnFold *hData_, int pick, bool isInsert
 double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats, int x, int flag) {
 	GST_TIC(tick);
 	GST_TIC(t1);
-	H_HISTO.resize(hData_->feats.size());	//pick_feats.size()
+	//H_HISTO.resize(hData_->feats.size());	
 	/*if (bsfold != nullptr) {
 		bsfold->GreedySplit(hData_, flag);
 		return 0;

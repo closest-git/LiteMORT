@@ -177,8 +177,8 @@ namespace Grusoft {
 		static size_t nAlloc;
 		static double  memAlloc;
 		SPLIT_HISTOGRAM split_by = BY_VALUE;
-		int nBigBins = 0;
-
+		int nBigBins = 0,nMostBins=0;
+		bool isFilled = false;
 		size_t nSamp, nLeft = 0, nRight=0;
 		FRUIT *fruit=nullptr;			//仅仅指向
 		FeatVector *hFeat = nullptr;	//仅仅指向
@@ -200,7 +200,7 @@ namespace Grusoft {
 		virtual void CompressBins(int flag=0x0);
 		virtual void TicMap(tpQUANTI*map,int flag);
 
-		HistoGRAM* FromDiff(const HistoGRAM*hP, const HistoGRAM*hB,bool isCompress, int flag = 0x0);
+		HistoGRAM* FromDiff(const HistoGRAM*hP, const HistoGRAM*hB,bool isBuffer, int flag = 0x0);
 
 		template<typename Tx,typename Tf>
 		bool At(Tx x, Tf&f,int flag = 0x0) {
@@ -271,6 +271,7 @@ namespace Grusoft {
 
 		virtual void CopyBins(const HistoGRAM &src,bool isReset,int flag) {
 			//nSamp = src.nSamp;
+			nMostBins = src.nMostBins;
 			bins = src.bins;
 			if (isReset) {
 				for (int i=0;i<bins.size();i++){
@@ -284,7 +285,22 @@ namespace Grusoft {
 		}
 	};
 	//typedef map<int, HistoGRAM*> MAP_HistoGRAM;
-	typedef vector<HistoGRAM*> H_HistoGRAM;
+	class HistoGRAM_BUFFER {
+		vector<HistoGRAM*> buffers;
+		int NodeFeat2NO(int node, int feat)	const;
+		int ldFeat=0, nMostNode=0,nzMost=0;
+		size_t nzMEM;
+	public:
+		HistoGRAM_BUFFER(const FeatsOnFold *hData_, int flag=0x0);
+		virtual ~HistoGRAM_BUFFER( );
+		HistoGRAM*Get(int node,int feat, int flag = 0x0)	const;
+
+		virtual void Set(int feat, HistoGRAM*histo);
+
+		virtual void BeforeTrainTree(size_t nPickSamp,int flag);
+
+		virtual void Clear(int flag = 0x0);
+	};
 
 	/*
 		from Tianqi Chen's formula
