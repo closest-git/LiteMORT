@@ -4,7 +4,6 @@
 #include "../util/Object.hpp"
 #include "../EDA/SA_salp.hpp"
 
-
 GBRT::GBRT(FeatsOnFold *hTrain, FeatsOnFold *hEval, double sOOB, MODEL mod_, int nTre_, int flag) : BoostingForest() {
 	double rou = 1.0;
 #ifdef _DEBUG
@@ -88,7 +87,6 @@ void GBRT::BeforeTrain(FeatsOnFold *hData_, int flag ) {
 double GBRT::Predict(FeatsOnFold *hData_, bool isX,bool checkLossy, bool resumeLast, int flag) {
 	GST_TIC(tick);
 	size_t nSamp = hData_->nSample(), t;
-	int *samp_at_leaf = nullptr;
 	bool isEval = hData_->isEval();
 	hData_->BeforePredict( );
 	ManifoldTree *lastTree = nullptr;
@@ -112,13 +110,13 @@ double GBRT::Predict(FeatsOnFold *hData_, bool isX,bool checkLossy, bool resumeL
 		assert(hTree!=nullptr);
 		if (lastTree != nullptr && hTree != lastTree)
 			continue;
-		if (samp_at_leaf != nullptr) {
 
-		}
 		bool isNodeMajor = true;
 		if (true) {		//data-major	似乎快一些
-			ARR_TREE arrTree;
 			if (hTree->ArrTree_quanti !=nullptr) {
+				/*if (isEval) {		// 需要快速评估函数， auc不合适啊
+					hData_->UpdateStepOnReduce<float, double>(hTree->ArrTree_data, hTree->ArrTree_quanti);
+				}*/
 				if (hData_->isQuanti) {
 					isNodeMajor = !hData_->PredictOnTree<tpQUANTI, double>(*(hTree->ArrTree_quanti), flag);
 				}		else				{
@@ -153,9 +151,7 @@ double GBRT::Predict(FeatsOnFold *hData_, bool isX,bool checkLossy, bool resumeL
 
 		}
 		if (hData_->hMove != nullptr);// hData_->hMove->AfterStep(hData_->samp_set, allx);
-		if (samp_at_leaf != nullptr) {
-			//hTree->UpdateOnEval(hData_->lossy, samp_at_leaf);
-		}
+		
 	}
 	if(checkLossy)
 		hData_->lossy->Update(hData_,this->skdu.noT,0x0);

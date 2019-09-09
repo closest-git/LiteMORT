@@ -182,8 +182,6 @@ namespace Grusoft {
 		size_t nSamp, nLeft = 0, nRight=0;
 		FRUIT *fruit=nullptr;			//仅仅指向
 		FeatVector *hFeat = nullptr;	//仅仅指向
-		//tpQUANTI *quanti=nullptr;	//指向qHisto->quanti(参见FeatVec_Q::UpdateHisto)，不用删除
-		//double a0 = 0, a1 = 0,split;
 		//vector<HISTO_BIN> bins;
 		HISTO_BIN *bins = nullptr;
 		//NA value---样本的某featrue确实missing value ,但总体上还是有down direction

@@ -317,6 +317,80 @@ namespace Grusoft {
 			return true;
 		}
 
+		template<typename Tx, typename Ty>
+		bool UpdateStepOnReduce(ARR_TREE*treeEval, ARR_TREE*tree4train, int flag=0x0) {
+			ARR_TREE& tree = *treeEval;
+			size_t nSamp = nSample(), nNode = tree.nNode, no, nFeat = feats.size(), step = nSamp;
+			G_INT_64 t;
+			double *thrsh_step = tree.thrsh_step;
+			FeatVec_T<Ty> *predict = dynamic_cast<FeatVec_T<Ty>*>(GetPrecict());
+			if (predict == nullptr)
+				return false;
+			FeatVec_T<Ty> *ftY = dynamic_cast<FeatVec_T<Ty>*>(GetY());
+			if (ftY == nullptr)
+				return false;
+			Ty *pred = predict->arr(),*Y=ftY->arr();
+			int *feat_ids = tree.feat_ids, *left = tree.left, *rigt = tree.rigt;
+			Tx **arrFeat = new Tx*[nFeat], *val = nullptr;
+			double *reduce = new double[nNode]();
+			for (t = 0; t < nFeat; t++) {
+				if (feats[t]->hDistri != nullptr && feats[t]->hDistri->isPass())	{
+					arrFeat[t] = nullptr;
+				}
+				else {
+					FeatVec_T<Tx>*hFT = dynamic_cast<FeatVec_T<Tx>*>(feats[t]);
+					if (hFT == nullptr)
+					{
+						delete[] arrFeat;	return false;
+					}
+					arrFeat[t] = hFT->arr();
+				}
+			}
+			/**/
+			int num_threads = OMP_FOR_STATIC_1(nSamp, step);			
+//#pragma omp parallel for schedule(static,1)
+			for (int thread = 0; thread < num_threads; thread++) {
+				size_t start = thread*step, end = min(start + step, nSamp), t;
+				double err_0,err_1;
+				for (t = start; t < end; t++) {
+					int no = 0, feat;
+					while (no != -1) {
+						if (left[no] == -1) {
+							err_0 = fabs(Y[t]-pred[t]);
+							err_1 = fabs(Y[t] -( thrsh_step[no]+pred[t]));
+							reduce[no] += err_0-err_1;
+							break;
+						}
+						else {
+							assert(rigt[no] != -1);
+							Tx *feat = arrFeat[feat_ids[no]];
+							if (IS_NAN_INF(feat[t])) {
+								no = rigt[no];
+							}
+							else {
+								if (feat[t] < thrsh_step[no]) {
+									no = left[no];
+								}
+								else {
+									no = rigt[no];
+								}
+							}
+						}
+					}
+				}
+			}
+			for (no = 0; no < nNode; no++) {
+				if (left[no] >= 0)		continue;
+				if (reduce[no] < 0) {	//没有改进，不如归零
+					thrsh_step[no] = 0;
+					tree4train->thrsh_step[no] = 0;
+				}
+			}
+			delete[] arrFeat;
+			delete[] reduce;
+			return true;
+		}
+
 		/*
 			Train(Observation_AtSamp) predict(Update_step)
 		*/

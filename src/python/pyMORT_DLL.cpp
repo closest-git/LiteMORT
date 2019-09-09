@@ -56,6 +56,28 @@ struct MORT{
 
 //LiteBOM_Config config;
 //ExploreDA *g_hEDA=nullptr;
+void LiteBOM_Config::OnObjective() {
+	if (objective == "outlier") {
+		leaf_optimal = "lambda_0";
+
+	}
+	if (objective == "lambdaMART") {
+	}
+	if (objective == "binary") {
+		//eval_metric = "logloss";
+		//eval_metric = "auc";
+		//eval_metric = "WMW";	//"Wilcoxon-Mann-Whitney";
+	}
+	//nMostSalp4bins = 64;
+	if (num_threads <= 0) {
+		int nMostThread = 0;
+#pragma omp parallel
+		nMostThread = omp_get_num_threads();
+		num_threads = nMostThread;
+	}
+	//eta = 0.1;
+	//nBlitThread = 8;	//并行导致结果不再可重复
+}
 
 void OnUserParams(LiteBOM_Config&config, PY_ITEM* params, int nParam, int flag = 0x0) {
 	char sERR[10000];
@@ -723,7 +745,7 @@ PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_COLUMN *train_data, PY_COLUM
 			delete hEDA;			hEDA = nullptr;
 		}
 		//@%p(hEDA=%p,hGBRT=%p)	mort,mort->hEDA,mort->hGBRT,
-		FeatsOnFold::stat.tX += GST_TOC(tick);
+		//FeatsOnFold::stat.tX += GST_TOC(tick);
 		printf("\n********* LiteMORT_fit_1  time=%.3g(%.3g)......OK\n\n", GST_TOC(tick), FeatsOnFold::stat.tX + DCRIMI_2::tX);
 	}
 	catch (char * sInfo) {

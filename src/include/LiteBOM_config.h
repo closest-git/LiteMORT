@@ -223,20 +223,7 @@ namespace Grusoft {
 		// descl2 = all values in ``label`` must be smaller than number of elements in ``label_gain``
 		std::string objective = "regression";
 
-		virtual void OnObjective() {
-			if (objective=="outlier") {
-				leaf_optimal = "lambda_0";
-
-			}
-			if (objective == "lambdaMART") {
-			}
-			if (objective == "binary") {
-				//eval_metric = "logloss";
-				//eval_metric = "auc";
-				//eval_metric = "WMW";	//"Wilcoxon-Mann-Whitney";
-			}
-			//nMostSalp4bins = 64;
-		}
+		virtual void OnObjective();
 
 		// [doc-only]
 		// type = enum

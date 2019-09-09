@@ -210,6 +210,8 @@ namespace Grusoft {
 #pragma omp parallel for schedule(static,1)
 			for (int th_ = 0; th_ < num_threads; th_++) {
 				size_t start = th_*step, end = min(start + step, nSamp),i;
+				if (end <= start)
+				{		continue;				}
 				G_INT_64	nL=0,nR=0;
 				for (i = start; i < end; i++) {
 					tpSAMP_ID samp = samps[i];
@@ -220,11 +222,13 @@ namespace Grusoft {
 			}
 			for (int th_ = 0; th_ < num_threads; th_++) {
 				size_t start = th_*step, end = min(start + step, nSamp);
+				if (end <= start)		{	continue;		}
 				memcpy(samps + nLeft, samps+start, sizeof(tpSAMP_ID)*pL[th_]);
 				nLeft += pL[th_];
 			}
 			for (int th_ = 0; th_ < num_threads; th_++) {
 				size_t start = th_*step, end = min(start + step, nSamp);
+				if (end <= start)		{		continue;		}				
 				memcpy(samps + nLeft+ nRigt, rigt + start, sizeof(tpSAMP_ID)*pR[th_]);
 				nRigt += pR[th_];
 			}
@@ -232,6 +236,7 @@ namespace Grusoft {
 			//memcpy(samps, samp_set.left, sizeof(tpSAMP_ID)*nLeft);
 
 			samp_set.nLeft = nLeft;				samp_set.nRigt = nRigt;
+			assert(nLeft + nRigt == nSamp);
 			//tX += ((clock() - (t1))*1.0f / CLOCKS_PER_SEC);
 			lSet.samps = samps;				lSet.nSamp = nLeft;
 			//std::sort(lSet.samps, lSet.samps + lSet.nSamp);
