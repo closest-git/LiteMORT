@@ -91,13 +91,15 @@ void HistoGRAM_2D::GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp
 	if (fruit == nullptr)
 		throw "HistoGRAM_2D::GreedySplit_X fruit is 0!!!";
 
-	size_t minSet = hData_->config.min_data_in_leaf;
+	size_t minSet = hData_->config.min_data_in_leaf,i;
 	double sum = samp_set.Y_sum_1, a = -DBL_MAX, errL = 0, g, gL = 0, g1 = 0, lft, rgt;
 	//size_t nLeft = 0, nRight = nSamp,minSet=0;
 	nRight = nSamp;		assert(nRight >= 0);
 	HISTO_BIN*binNA = this->hBinNA();
-	for (auto item : bins) {
-	//for each(HISTO_BIN item in bins) {
+//	for (auto item : bins) {
+	for (i = 0; i < nBins; i++) {
+		const HISTO_BIN &item = bins[i];
+
 		double errR = sum - errL;
 		if (nLeft<minSet || nRight<minSet) {
 			goto LOOP;
@@ -130,7 +132,9 @@ void HistoGRAM_2D::GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp
 }
 
 HistoGRAM::~HistoGRAM() {
-	bins.clear();
+	//bins.clear();
+	if (bins != nullptr)		
+		delete[] bins;
 }
 
 /*
@@ -138,15 +142,15 @@ HistoGRAM::~HistoGRAM() {
 		8/27/2019
 */
 HistoGRAM* HistoGRAM::FromDiff(const HistoGRAM*hP, const HistoGRAM*hBrother, bool isBuffer, int flag) {
-	assert(hP->bins.size() >= hBrother->bins.size() || hP->bins.size() >= hBrother->bins.size()-1);		//hP会被压缩掉NA，需要继续核查
+	assert(hP->nBins >= hBrother->nBins || hP->nBins >= hBrother->nBins -1);		//hP会被压缩掉NA，需要继续核查
 	//CopyBins(*hP, false, 0x0);
 	//bins.reserve(hP->bins.size());
-	int i = 0, nBin = hP->bins.size(),brother=0,nPass=0,nValid=0;
+	int i = 0, nBin = hP->nBins,brother=0,nPass=0,nValid=0;
 	double G_sum = 0, G_0 = 0, G_1 = 0;
 	for (i = 0; i < nBin; i++) {
 		//HISTO_BIN& cur = bins[i];
 		HISTO_BIN cur = hP->bins[i];
-		const HISTO_BIN* off = brother >= hBrother->bins.size() ? nullptr : &(hBrother->bins[brother]);
+		const HISTO_BIN* off = brother >= hBrother->nBins ? nullptr : &(hBrother->bins[brother]);
 		if (off!=nullptr && cur.tic == off->tic) {
 			assert(cur.nz >= off->nz);
 			cur.nz -= off->nz;
@@ -164,35 +168,35 @@ HistoGRAM* HistoGRAM::FromDiff(const HistoGRAM*hP, const HistoGRAM*hBrother, boo
 			//if (brother == hBrother->bins.size())		break;
 		}
 		if (cur.nz > 0) {
-			if (isBuffer) {
-				bins[nValid++] = cur;
+			bins[nValid++] = cur;
+			/*if (isBuffer) {
 			}else
-				bins.push_back(cur);
+				bins.push_back(cur);*/
 		}	else {
 			nPass = nPass + 1;
 		}
 
 	}
 	if (isBuffer) {
-		assert(nValid <= bins.size());
-		bins.resize(nValid);
-		//this->CompressBins();
+		//assert(nValid <= nBins);
+		//bins.resize(nValid);
+		nBins = nValid;
 	}
 	//assert(brother == hBrother->bins.size());
 	return this;
 }
 
 void HistoGRAM::TicMap(tpQUANTI*map, int flag) {
-	int i, nBin = bins.size(),tic;
-	for (i = 0; i < nBin; i++) {
+	int i, tic;
+	for (i = 0; i < nBins; i++) {
 		tic = bins[i].tic;
 		map[tic] = i;
 	}
 }
 
 void HistoGRAM::CheckValid(const LiteBOM_Config&config,  int flag) {
-	int i, nBin = bins.size(), nZ = 0, tic_0=-1;
-	for (i = 0; i < nBin; i++) {		//这样最快
+	int i,  nZ = 0, tic_0=-1;
+	for (i = 0; i < nBins; i++) {		//这样最快
 		//if (i<nBin - 1 && bins[i].nz == 0) { continue; }
 		nZ += bins[i].nz;
 		//assert(bins[i].nz>=config.min_data_in_bin || i>= nBin-2);
@@ -214,7 +218,7 @@ void HistoGRAM::CompressBins(int flag) {
 			++iter;
 		}
 	}*/
-	int i, nBin = bins.size(),nZ=0;
+	int i, nZ=0;
 	/*vector<HISTO_BIN> binsN;
 	for (i = 0; i < nBin; i++) {
 		if (i<nBin -1 && bins[i].nz == 0) {
@@ -227,16 +231,17 @@ void HistoGRAM::CompressBins(int flag) {
 		bins = binsN;
 	else
 		binsN.clear();*/
-	for (i = 0; i < nBin; i++) {		//这样最快
-		if (i<nBin - 1 && bins[i].nz == 0) {	continue;		}
+	for (i = 0; i < nBins; i++) {		//这样最快
+		if (i<nBins - 1 && bins[i].nz == 0) {	continue;		}
 		else {	nZ++;		}
 		if (nZ <= i) {
 			bins[nZ-1] = bins[i];		
 		}
 	}
 	//assert(++nZ <= nBin);
-	if (nZ < nBin) {
-		bins.resize(nZ);
+	if (nZ < nBins) {
+		nBins = nZ;
+		//bins.resize(nZ);
 	}
 	//FeatsOnFold::stat.tX += GST_TOC(t1);
 }
@@ -267,7 +272,7 @@ void HistoGRAM::MoreHisto(const FeatsOnFold *hData_, vector<HistoGRAM*>&more,  i
 }
 
 void HistoGRAM::RandomCompress(FeatVector *hFV,bool isSwarm,int flag) {
-	int nBins_0 = bins.size(), i,start=0;
+	/*int nBins_0 = bins.size(), i,start=0;
 	size_t nz = 0;
 	double G_sum = 0, H_sum = 0;
 	if (isSwarm) {
@@ -320,8 +325,9 @@ void HistoGRAM::RandomCompress(FeatVector *hFV,bool isSwarm,int flag) {
 			position[bin.tic] = 1;
 		}
 		i = 0;
-	}
+	}*/
 }
+
 /*
 	v0.2	cys
 		1/28/2019
@@ -332,7 +338,7 @@ void HistoGRAM::GreedySplit_X(FeatsOnFold *hData_, const SAMP_SET& samp_set, int
 	if (fruit == nullptr)
 		throw "HistoGRAM::GreedySplit_X fruit is 0!!!";
 
-	size_t minSet = hData_->config.min_data_in_leaf,nBin=bins.size(),i;
+	size_t minSet = hData_->config.min_data_in_leaf,i;
 	string optimal = hData_->config.leaf_optimal, obj = hData_->config.objective;
 	//double sum = samp_set.Y_sum_1, a = a0, errL = 0, g, gL = 0, g1 = 0, lft, rgt;
 	double gL = 0, gR0, hL = 0, hR = 0, a = -DBL_MAX, g, g1 = fruit->mxmxN, split_0= -DBL_MAX;
@@ -340,9 +346,9 @@ void HistoGRAM::GreedySplit_X(FeatsOnFold *hData_, const SAMP_SET& samp_set, int
 	HISTO_BIN*binNA = this->hBinNA();
 	double gSum = 0, hSum = 0;	// binNA->G_sum, hSum = binNA->H_sum;
 	double gainL = 0;		//对应于isNanaLeft
-	for (auto item : bins) {
-	//for each(HISTO_BIN item in bins) {
-		gSum += item.G_sum, hSum += item.H_sum;
+	//for (auto item : bins) {
+	for (i = 0; i < nBins;i++) {
+		gSum += bins[i].G_sum, hSum += bins[i].H_sum;
 	}
 	if (optimal == "lambda_0") {
 		//assert(hSum == nSamp);
@@ -353,7 +359,7 @@ void HistoGRAM::GreedySplit_X(FeatsOnFold *hData_, const SAMP_SET& samp_set, int
 		printf( "\tHistoGRAM::gSum is mismatch(%g-%g)", gSum,samp_set.Y_sum_1);
 
 	//for (auto item : bins) {
-	for (i = 0; i < nBin;i++) {
+	for (i = 0; i < nBins;i++) {
 		const HISTO_BIN &item = bins[i];
 		//for each(HISTO_BIN item in bins) {
 		double gR = gSum - gL, hR = hSum - hL;
@@ -388,8 +394,8 @@ void HistoGRAM::GreedySplit_X(FeatsOnFold *hData_, const SAMP_SET& samp_set, int
 		}
 		//double bin_w = hData_->rander_bins.Uniform_(0, 1);
 		if (g>g1 || gainL>g1) {
-			if (i == nBin - 1)		//仅用于测试
-				i = nBin - 1;
+			if (i == nBins - 1)		//仅用于测试
+				i = nBins - 1;
 			fruit->best_feat_id = hFeat->id;
 			fruit->split_by = this->split_by;
 			fruit->bin_S0 = bins[i-1];		fruit->bin_S1 = item;
@@ -428,8 +434,7 @@ void HistoGRAM::GreedySplit_X(FeatsOnFold *hData_, const SAMP_SET& samp_set, int
 		3/11/2019
 */
 void HistoGRAM::GreedySplit_Y(FeatsOnFold *hData_, const SAMP_SET& samp_set, bool tryX, int flag) {
-	//FeatBlit flitX=flit;
-	char temp[2000];
+	/*char temp[2000];
 	FRUIT fruitX;
 	HISTO_BIN*binNA = this->hBinNA();
 	if (tryX) {
@@ -518,12 +523,12 @@ void HistoGRAM::GreedySplit_Y(FeatsOnFold *hData_, const SAMP_SET& samp_set, boo
 		}
 		assert(nY_l== fruit->nLeft && nY_r== fruit->nRight);
 	}
-	else/**/ {
+	else {
 		if (fruit->mxmxN < fruitX.mxmxN)
 			;// printf("!!!Split_X(%g)>Split_Y(%g)!!!", fruitX.mxmxN, fruit->mxmxN);
 		*fruit = fruitX;
 	}
-	fruitX.histo = nullptr;
+	fruitX.histo = nullptr;*/
 	return;
 }
 
@@ -535,12 +540,13 @@ void HistoGRAM::Regress(const FeatsOnFold *hData_, const SAMP_SET& samp_set, int
 	if (fruit == nullptr)
 		throw "HistoGRAM::GreedySplit_X fruit is 0!!!";
 
-	size_t minSet = hData_->config.min_data_in_leaf;
+	size_t minSet = hData_->config.min_data_in_leaf,i;
 	double sum = samp_set.Y_sum_1, g0 = sum*sum / nSamp, g1 = 0, mean_0 = sum / nSamp, a;
 	//size_t nLeft = 0, nRight = nSamp,minSet=0;
 
-	for (auto item : bins) {
-	//for each(HISTO_BIN item in bins) {
+//	for (auto item : bins) {
+	for (i = 0; i < nBins; i++) {
+		const HISTO_BIN &item = bins[i];
 		if (item.nz == 0) {
 			continue;
 		}
@@ -582,19 +588,21 @@ HistoGRAM_BUFFER::HistoGRAM_BUFFER(const FeatsOnFold *hData_, int flag) {
 }
 
 void HistoGRAM_BUFFER::BeforeTrainTree(size_t nPickSamp, int flag) {
+	GST_TIC(t1);
 	for (auto histo : buffers) {
 		if (histo == nullptr)
 			continue;
 
-		histo->isFilled = false;
+		histo->nBins = 0;
 		histo->nSamp = 0;
-		if (histo->bins.size() < histo->nMostBins) {
+		/*if (histo->bins.size() < histo->nMostBins) {
 			histo->bins.resize(histo->nMostBins);
-		}
-		for (auto bin : histo->bins) {
+		}*/
+		/*for (auto bin : histo->bins) {
 			bin.nz = 0;
-		}
+		}*/
 	}
+	FeatsOnFold::stat.tX += GST_TOC(t1);
 }
 
 HistoGRAM_BUFFER::~HistoGRAM_BUFFER() {
@@ -634,3 +642,50 @@ node->H_HISTO.clear();
 }
 }
 */
+
+//Sturge’s Rule	http://www.statisticshowto.com/choose-bin-sizes-statistics/
+//Histogram Binwidth Optimization Method	http://176.32.89.45/~hideaki/res/histogram.html
+//Optimal Data-Based Binning for Histograms
+void HistoGRAM::OptimalBins(size_t nMost, size_t nSamp, double a0_, double a1_, int flag) {
+	/*bins.clear();
+	if (a0_ == a1_)
+		return;
+	if (nMost == 0) {
+		//nMost = 3.49*sigma/pow(nSamp, 0.333);	//Rice’s Rule
+		nMost = 1 + 2 * pow(nSamp, 0.333);	//Rice’s Rule
+		nMost = 1 + 3.322*log(nSamp);	//Sturge’s Rule
+	}
+	assert(nMost >= 2);
+	bins.resize(nMost);*/
+	//a1 = a1_,		a0 = a0_;
+}
+
+/*需要合并*/
+void HistoGRAM::ReSet(size_t nMost, int flag) {
+	nSamp = nMost;
+	delete[] bins;
+	bins = new HISTO_BIN[nMost];
+	nBins = 0;	 nMostBins = nMost;
+	//bins.clear();
+	//bins.resize(nMost);
+	//a1 = -DBL_MAX, a0 = DBL_MAX;
+}
+
+void  HistoGRAM::CopyBins(const HistoGRAM &src, bool isReset, int flag) {
+	//nSamp = src.nSamp;
+	nBins = src.nBins;
+	nMostBins = nBins;		// src.nMostBins;
+	if (bins != nullptr)
+	{		delete[] bins;	}
+	bins = new HISTO_BIN[nBins];
+	memcpy(bins, src.bins, sizeof(HISTO_BIN)*nBins);
+	if (isReset) {
+		for (int i = 0; i<nBins; i++) {
+			HISTO_BIN &item = bins[i];
+			item.nz = 0;
+			//item.Y_sum = 0;		
+			item.H_sum = 0;		item.G_sum = 0;
+		}
+	}
+	//a1 = -DBL_MAX, a0 = DBL_MAX;
+}

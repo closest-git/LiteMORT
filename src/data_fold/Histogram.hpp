@@ -177,17 +177,20 @@ namespace Grusoft {
 		static size_t nAlloc;
 		static double  memAlloc;
 		SPLIT_HISTOGRAM split_by = BY_VALUE;
-		int nBigBins = 0,nMostBins=0;
-		bool isFilled = false;
+		int nBigBins = 0,nMostBins=0,nBins=0;
+		//bool isFilled = false;
 		size_t nSamp, nLeft = 0, nRight=0;
 		FRUIT *fruit=nullptr;			//仅仅指向
 		FeatVector *hFeat = nullptr;	//仅仅指向
 		//tpQUANTI *quanti=nullptr;	//指向qHisto->quanti(参见FeatVec_Q::UpdateHisto)，不用删除
 		//double a0 = 0, a1 = 0,split;
-		vector<HISTO_BIN> bins;
+		//vector<HISTO_BIN> bins;
+		HISTO_BIN *bins = nullptr;
 		//NA value---样本的某featrue确实missing value ,但总体上还是有down direction
-		HISTO_BIN* hBinNA( )		
-		{	return &(bins[bins.size()-1]);	 }		//总是放在最后
+		HISTO_BIN* hBinNA( )	{
+			assert(nBins>0);	return bins + nBins - 1;
+		}		//总是放在最后
+		//{	return &(bins[bins.size()-1]);	 }		//总是放在最后
 
 		HistoGRAM(FeatVector*hFeat_,size_t nMost, int flag = 0x0) : hFeat(hFeat_){
 			nAlloc++;
@@ -206,9 +209,9 @@ namespace Grusoft {
 		bool At(Tx x, Tf&f,int flag = 0x0) {
 			double rigt=DBL_MAX;
 			bool isFind=false;
-			size_t nBin = bins.size(),i;
-			for (i=0;i<nBin;i++) {
-				rigt = i<nBin-1 ? bins[i+1].tic : DBL_MAX;
+			size_t i;
+			for (i=0;i<nBins;i++) {
+				rigt = i<nBins-1 ? bins[i+1].tic : DBL_MAX;
 				const HISTO_BIN& bin= bins[i];
 				if(bin.nz>0 && bin.tic<=x && x<rigt)				{	
 					f = bin.G_sum/ bin.nz;
@@ -224,9 +227,9 @@ namespace Grusoft {
 			double rigt = DBL_MAX;
 			//bool isFind = false;
 			int pos=-1;
-			size_t nBin = bins.size(), i;
-			for (i = 0; i<nBin; i++) {
-				rigt = i<nBin - 1 ? bins[i + 1].tic : DBL_MAX;
+			size_t i;
+			for (i = 0; i<nBins; i++) {
+				rigt = i<nBins - 1 ? bins[i + 1].tic : DBL_MAX;
 				const HISTO_BIN& bin = bins[i];
 				if (bin.nz>0 && bin.tic <= x && x<rigt) {
 				//if (bin.tic <= x && x<rigt) {
@@ -237,30 +240,10 @@ namespace Grusoft {
 			return pos;
 		}
 
-	//Sturge’s Rule	http://www.statisticshowto.com/choose-bin-sizes-statistics/
-	//Histogram Binwidth Optimization Method	http://176.32.89.45/~hideaki/res/histogram.html
 		//Optimal Data-Based Binning for Histograms
-		virtual void OptimalBins(size_t nMost, size_t nSamp, double a0_,double a1_,int flag=0x0){
-			bins.clear();
-			if(a0_==a1_)
-				return;
-			if (nMost == 0) {
-				//nMost = 3.49*sigma/pow(nSamp, 0.333);	//Rice’s Rule
-				nMost = 1 + 2*pow(nSamp,0.333);	//Rice’s Rule
-				nMost = 1 + 3.322*log(nSamp);	//Sturge’s Rule
-			}
-			assert(nMost >=2 );
-			bins.resize(nMost);
-			//a1 = a1_,		a0 = a0_;
-		}
+		virtual void OptimalBins(size_t nMost, size_t nSamp, double a0_, double a1_, int flag = 0x0);
 
-		/*仅在Samp2Histo_qsort中调用，应删除*/
-		virtual void ReSet(size_t nMost,int flag=0x0){
-			nSamp = nMost;
-			bins.clear();
-			bins.resize(nMost);
-			//a1 = -DBL_MAX, a0 = DBL_MAX;
-		}
+		virtual void ReSet(size_t nMost, int flag=0x0);
 
 		virtual void RandomCompress(FeatVector *hFV,bool, int flag = 0x0);
 		virtual void MoreHisto(const FeatsOnFold *hData_, vector<HistoGRAM*>&more, int flag = 0x0);
@@ -269,20 +252,7 @@ namespace Grusoft {
 		virtual void GreedySplit_Y(FeatsOnFold *hData_, const SAMP_SET& samp_set,bool tryX, int flag = 0x0);
 		virtual void Regress(const FeatsOnFold *hData_, const SAMP_SET& samp_set,  int flag = 0x0);
 
-		virtual void CopyBins(const HistoGRAM &src,bool isReset,int flag) {
-			//nSamp = src.nSamp;
-			nMostBins = src.nMostBins;
-			bins = src.bins;
-			if (isReset) {
-				for (int i=0;i<bins.size();i++){
-					HISTO_BIN &item = bins[i];
-					item.nz=0;
-					//item.Y_sum = 0;		
-					item.H_sum = 0;		item.G_sum = 0;
-				}
-			}
-			//a1 = -DBL_MAX, a0 = DBL_MAX;
-		}
+		virtual void CopyBins(const HistoGRAM &src, bool isReset, int flag);
 	};
 	//typedef map<int, HistoGRAM*> MAP_HistoGRAM;
 	class HistoGRAM_BUFFER {

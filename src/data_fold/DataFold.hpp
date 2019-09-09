@@ -823,7 +823,7 @@ namespace Grusoft {
 								quanti[pos] = 0;
 							}
 							if (val[pos]>distri.vMax) {
-								quanti[pos] = histo->bins.size()-2;
+								quanti[pos] = histo->nBins -2;
 							}
 							quanti[pos] = -1;	i_0++;
 						}
@@ -840,13 +840,14 @@ namespace Grusoft {
 							}
 						}
 						noBin++;
-						if (noBin >= histo->bins.size())
+						if (noBin >= histo->nBins)
 						{		throw "QuantiAtEDA noBin is XXX";						}
 						//v1 = vThrsh[noBin + 1];
 						v1 = histo->bins[noBin+1].split_F;
 					}
 				}
-				int noNA = distri.histo->bins.size()-1;				
+				//int noNA = distri.histo->bins.size()-1;				
+				int noNA = distri.histo->nBins - 1;
 				HISTO_BIN* hNA=distri.histo->hBinNA();
 				for (i = 0; i < nSamp_; i++) {
 					//if (quanti[i] == -1)
@@ -918,7 +919,7 @@ namespace Grusoft {
 		virtual void UpdateFruit(const FeatsOnFold *hData_, MT_BiSplit *hBlit, int flag = 0x0) {
 			//double split = hBlit->fruit->thrshold;
 			if (hBlit->fruit->isY) {
-				vector<HISTO_BIN>& bins=hBlit->fruit->histo->bins;
+				//vector<HISTO_BIN>& bins=hBlit->fruit->histo->bins;
 				if (this->isCategory())
 					hBlit->fruit->mapCategory = this->hDistri->mapCategory;
 				else {

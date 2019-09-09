@@ -330,7 +330,7 @@ HistoGRAM *MT_BiSplit::GetHistogram(FeatsOnFold *hData_, int pick, bool isInsert
 	HistoGRAM *histo = H_buffer->Get(id,pick);
 	histo->nSamp = nSamp;		//nSamp动态变化，H_buffer无法确定
 	assert(histo != nullptr);
-	if (!histo->isFilled) {
+	if (histo->nBins==0) {
 	//if (H_HISTO[pick]==nullptr) {
 		if (!isInsert)
 			return nullptr;
@@ -351,7 +351,7 @@ HistoGRAM *MT_BiSplit::GetHistogram(FeatsOnFold *hData_, int pick, bool isInsert
 	FeatsOnFold::stat.tSamp2Histo += GST_TOC(t333);
 			histo->CompressBins();
 		}
-		histo->isFilled=true;
+		//histo->isFilled=true;
 		//H_HISTO[pick] = histo;
 		histo->CheckValid(hData_->config);
 	}	else {
@@ -444,7 +444,7 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 			//AGG_CheckGain(hData_, hFeat, flag);
 		}
 		else {
-			if (histo->bins.size() == 0)
+			if (histo->nBins == 0)
 				continue;
 			if (hFeat->isCategory()) {
 				histo->GreedySplit_Y(hData_, samp_set, false);

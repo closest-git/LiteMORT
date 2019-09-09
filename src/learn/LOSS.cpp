@@ -91,7 +91,7 @@ void FeatVec_LOSS::EDA( ExploreDA *edaX, int flag) {
 			size_t nPosi = 0, nNega = 0;
 			HistoGRAM *histo = y->hDistri != nullptr ? y->hDistri->histo : nullptr;		assert(histo!=nullptr);
 			if (histo != nullptr) {
-				assert(histo->bins.size()==2 || histo->bins.size() == 3);
+				assert(histo->nBins==2 || histo->nBins == 3);
 				nPosi = histo->bins[1].nz;		nNega = histo->bins[0].nz;
 				printf("\tNumber of positive : %lld, number of negative : %lld\n", nPosi, nNega);
 			}

@@ -249,12 +249,12 @@ void FeatsOnFold::BeforeTrain(BoostingForest *hGBRT, int flag) {
 		if (hFeat->hDistri != nullptr) {
 			if (hFeat->hDistri->histo == nullptr)
 			{			continue;			}
-			nTotalBin1 += hFeat->hDistri->histo->bins.size();
+			nTotalBin1 += hFeat->hDistri->histo->nBins;
 			nValidFeat++;
 		}
 		FeatVec_Q *hFQ = dynamic_cast<FeatVec_Q *>(hFeat);
 		if (hFQ != nullptr) {
-			nTotalBin0 += hFQ->GetHisto()->bins.size();
+			nTotalBin0 += hFQ->GetHisto()->nBins;
 			if (isUpdate) {		//很多原因导致update
 				if (isByY) {
 					assert(0);
@@ -364,8 +364,8 @@ void FeatVec_Q::Samp2Histo_null_hessian(const FeatsOnFold *hData_, const SAMP_SE
 	tpDOWN a;
 	tpQUANTI *quanti = arr(), no;
 	histo->CopyBins(*qHisto, true, 0x0);
-	int nBin = histo->bins.size();
-	HISTO_BIN *pBins = histo->bins.data(), *pBin;	//https://stackoverflow.com/questions/7377773/how-can-i-get-a-pointer-to-the-first-element-in-an-stdvector
+	int nBin = histo->nBins;// bins.size();
+	HISTO_BIN *pBins = histo->bins, *pBin;	//https://stackoverflow.com/questions/7377773/how-can-i-get-a-pointer-to-the-first-element-in-an-stdvector
 
 	nSamp_LD = LD==0 ? 0 : LD * (int)(nSamp / LD);
 	for (i = 0; i < nSamp_LD; i += LD) {
@@ -414,8 +414,8 @@ void FeatVec_Q::Samp2Histo_null_hessian_sparse(const FeatsOnFold *hData_, const 
 	tpDOWN a=0;
 	tpQUANTI *quanti = arr(), no,cur=0,next=-1;
 	histo->CopyBins(*qHisto, true, 0x0);
-	int nBin = histo->bins.size();
-	HISTO_BIN *pBins = histo->bins.data(), *pBin;	//https://stackoverflow.com/questions/7377773/how-can-i-get-a-pointer-to-the-first-element-in-an-stdvector
+	int nBin = histo->nBins;	// bins.size();
+	HISTO_BIN *pBins = histo->bins, *pBin;	//https://stackoverflow.com/questions/7377773/how-can-i-get-a-pointer-to-the-first-element-in-an-stdvector
 	i = 0;		next = quanti[samps[0]];
 	while (i<nSamp) {
 		cur = next;
@@ -444,7 +444,7 @@ void FeatVec_Q::PerturbeHisto(const FeatsOnFold *hData_, int flag) {
 	qHisto_1 = new HistoGRAM(this, qHisto_0->nSamp);
 	qHisto_1->CopyBins(*qHisto_0, true, 0x0);
 	//qHisto_1->RandomCompress();
-	int nBin = qHisto_0->bins.size() - 1,i;
+	int nBin = qHisto_0->nBins - 1,i;
 	HISTO_BIN *cur = nullptr;
 
 	for(i=1;i<nBin;i++){
@@ -458,7 +458,7 @@ void FeatVec_Q::PerturbeHisto(const FeatsOnFold *hData_, int flag) {
 
 
 void FeatVec_Q::InitSampHisto(HistoGRAM* histo, bool isRandom, int flag) {
-	if (qHisto_0->bins.size() == 0) {
+	if (qHisto_0->nBins == 0) {
 		histo->ReSet(0);	return;
 	}	else {
 		histo->CopyBins(*qHisto_0, true, 0x0);
@@ -487,7 +487,7 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 			histo->CopyBins(*hParent, true, 0x0);
 		}else*/
 			InitSampHisto(histo, false);
-		if (histo->bins.size() == 0) {
+		if (histo->nBins == 0) {
 			return;
 		}
 		tpDOWN *down = hData_->GetSampleDown();	
@@ -502,8 +502,8 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 		tpSAMP_ID samp;
 		tpDOWN a;
 		//histo->CopyBins(*qHisto, true, 0x0);
-		int nBin = histo->bins.size();
-		HISTO_BIN *pBins = histo->bins.data(),*pBin;	//https://stackoverflow.com/questions/7377773/how-can-i-get-a-pointer-to-the-first-element-in-an-stdvector
+		int nBin = histo->nBins;//bins.size();
+		HISTO_BIN *pBins = histo->bins,*pBin;	//https://stackoverflow.com/questions/7377773/how-can-i-get-a-pointer-to-the-first-element-in-an-stdvector
 		/*if (hParent != nullptr && histo->bins.size()<qHisto_0->bins.size()) {
 			map = new tpQUANTI[qHisto_0->bins.size()];		//晕，无效的尝试
 			hParent->TicMap(map, 0x0);
@@ -552,8 +552,9 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 	#ifdef _DEBUG
 	if (true /* && !isRandomDrop*/) {
 		double G_sum = 0;	// histo->hBinNA()->G_sum;
-		for (auto item : histo->bins) {
-			G_sum += item.G_sum;
+		for (int i = 0; i < histo->nBins; i++) {
+		//for (auto item : histo->bins) {
+			G_sum += histo->bins[i].G_sum;
 		}
 		assert(fabs(G_sum + samp_set.Y_sum_1)<1.e-7*fabs(G_sum) || fabs(samp_set.Y_sum_1)<0.001);
 	}
@@ -623,14 +624,14 @@ void FeatVec_Q::UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst,
 			nValid++;
 	}
 	if (nValid == 0) {
-		printf("\n FeatVec_Q(%s) nBin=%d a0=%g a1=%g", desc.c_str(), qHisto_0->bins.size(), 0, -1);
+		printf("\n FeatVec_Q(%s) nBin=%d a0=%g a1=%g", desc.c_str(), qHisto_0->nBins, 0, -1);
 		BIT_SET(this->type, Distribution::DISTRI_OUTSIDE);
 	}
 	if(hData_->config.nMostSalp4bins>0 && hData_->isTrain())
-		select_bins = new FS_gene_(this->nam,hData_->config.nMostSalp4bins, qHisto_0->bins.size(), 0x0);
+		select_bins = new FS_gene_(this->nam,hData_->config.nMostSalp4bins, qHisto_0->nBins, 0x0);
 	if (wBins != nullptr)
 		delete[] wBins;
-	wBins = new float[qHisto_0->bins.size()]();
+	wBins = new float[qHisto_0->nBins]();
 	wSplit_last = 0;
 		//printf("\n FeatVec_Q(%s) nBin=%d a0=%g a1=%g", desc.c_str(),qHisto->bins.size(),qHisto->a0, qHisto->a1 );	
 }
@@ -641,7 +642,7 @@ void FeatVec_Q::UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst,
 		10/19/2013
 */
 FeatVec_Bundle::FeatVec_Bundle(FeatsOnFold *hData_,int id_, const vector<int>&bun, size_t nMostDup, int flag) {
-	id=id_;
+	/*id=id_;
 	//const SAMP_SET&samp_set = hData_->samp_set;
 	size_t nSamp = hData_->nSample(),nnz = 0, i, nMerge = 0,stp=0,off=0, nDup=0;
 	string optimal = hData_->config.leaf_optimal;
@@ -691,11 +692,11 @@ FeatVec_Bundle::FeatVec_Bundle(FeatsOnFold *hData_,int id_, const vector<int>&bu
 	assert(nDup<=nMostDup*nMerge);
 	printf( "\n-------- Feat(Bundle)_%d nMerge=%d[%d-%d] dup=%.3g \n", this->id, nMerge, feat_ids[0], feat_ids[bins.size()-1], nDup*1.0/(nMostDup*nMerge) );
 	if(nDup > nMostDup*nMerge)
-		throw("!!!FeatVec_Bundle nDup > nMostDup*nMerge!!!");
+		throw("!!!FeatVec_Bundle nDup > nMostDup*nMerge!!!");*/
 }
 
 void FeatVec_Bundle::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* hParent, HistoGRAM* histo, int nMostBin,  int flag0) {
-	if (qHisto->bins.size() == 0) {
+	if (qHisto->nBins == 0) {
 		histo->ReSet(0);
 		return;
 	}
@@ -707,7 +708,7 @@ void FeatVec_Bundle::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_s
 	tpQUANTI *quanti = arr(), no;
 	histo->CopyBins(*qHisto, true,0x0);
 	//histo->nSamp = nSamp;
-	HISTO_BIN *pBins = histo->bins.data(), *pBin;	//https://stackoverflow.com/questions/7377773/how-can-i-get-a-pointer-to-the-first-element-in-an-stdvector
+	HISTO_BIN *pBins = histo->bins, *pBin;	//https://stackoverflow.com/questions/7377773/how-can-i-get-a-pointer-to-the-first-element-in-an-stdvector
 	for (i = 0; i<nSamp; i++) {
 		samp = samps[i];
 		//no = quanti[samp];

@@ -29,7 +29,7 @@ Distribution::~Distribution() {
 
 //
 void Distribution::UpdateHistoByW(const LiteBOM_Config&config, float *wBins, int flag) {
-	size_t nBin_0 = histo->bins.size(), i,nMaxSplit=int((nBin_0-1) /10.0),nSplit=0,id,nDrop=0;
+	size_t nBin_0 = histo->nBins, i,nMaxSplit=int((nBin_0-1) /10.0),nSplit=0,id,nDrop=0;
 	if (nMaxSplit == 0)
 		return;
 	double*comp_=new double[2* nBin_0](),w_avg=0;
@@ -99,9 +99,13 @@ void Distribution::UpdateHistoByW(const LiteBOM_Config&config, float *wBins, int
 		}
 	}
 	binX.push_back(histo->bins[nBin_0 - 1]);
-	histo->bins = binX;
+	delete[] histo->bins;
+	histo->nBins = binX.size();
+	histo->bins = new HISTO_BIN[histo->nBins];
+	for(i=0;i<histo->nBins;i++)
+		histo->bins[i] = binX[i];
 
-	size_t nBin = histo->bins.size();
+	size_t nBin = histo->nBins;
 	//assert(nBin <= config.feat_quanti);
 	assert(nBin <= histo->nMostBins);
 	for (i = 0; i < nBin; i++) {
@@ -117,7 +121,7 @@ void Distribution::UpdateHistoByW(const LiteBOM_Config&config, float *wBins, int
 bool Distribution::isValidFeatas() {
 	if (histo == nullptr)
 		return false;
-	if (binFeatas.size() != histo->bins.size())
+	if (binFeatas.size() != histo->nBins)
 		return false;
 
 	for (auto feata : binFeatas) {
@@ -135,12 +139,12 @@ void Distribution::Dump(int feat, bool isQuanti, int flag) {
 	}
 	char typ = BIT_TEST(type, Distribution::CATEGORY) ? '#' : ' ';
 	if (isQuanti && histo!=nullptr) {
-		size_t nBin=histo->bins.size(),n1 = ceil(nBin / 4.0), n2 = ceil(nBin / 2.0), n3 = ceil(nBin *3.0 / 4);
+		size_t nBin=histo->nBins,n1 = ceil(nBin / 4.0), n2 = ceil(nBin / 2.0), n3 = ceil(nBin *3.0 / 4);
 		HISTO_BIN&b0 = histo->bins[0], &b1 = histo->bins[n1], &b2 = histo->bins[n2], &b3 = histo->bins[n3], &b4 = histo->bins[nBin-1];
 		if(b4.nz==0)	//最后一个BIN是冗余的
 			b4= histo->bins[nBin - 2];
 		printf("%4d %c%12s nBin=%d[%.3g(%d),%.3g(%ld),%.3g(%ld),%.3g(%ld),%.3g(%ld)]%s \n", feat, typ, nam.c_str(), 
-			histo == nullptr ? 0 : histo->bins.size(),
+			histo == nullptr ? 0 : histo->nBins,
 			b0.tic,b0.nz, b1.tic, b1.nz, b2.tic, b2.nz, b3.tic, b3.nz, b4.tic, b4.nz,tmp);
 	}	else {
 		//printf("%4d %c%12s [%.3g,%.3g,%.3g,%.3g,%.3g]\tnBin=%d[%.3g,%.3g,%.3g,%.3g,%.3g]%s \n", feat, typ, nam.c_str(), 
@@ -148,7 +152,7 @@ void Distribution::Dump(int feat, bool isQuanti, int flag) {
 		//需要输出中位数
 		printf("%4d %c%12s [%.4g-%.4g]\tBIG=%d\tnBin=%d[%.4g,%.4g,%.4g,%.4g,%.4g]%s \n", feat, typ, nam.c_str(),
 			vMin, vMax, histo == nullptr ? 0 : histo->nBigBins /*corr.D_sum*/,
-			 histo == nullptr ? 0 : histo->bins.size(),
+			 histo == nullptr ? 0 : histo->nBins,
 			H_q0, H_q1, H_q2, H_q3, H_q4, tmp);
 	}
 }
@@ -171,7 +175,8 @@ void Distribution::HistoOnUnique_1(const LiteBOM_Config&config, vector<vDISTINCT
 		++i_0; ++noBin;
 	}
 	double delta = double(fabs(a1 - a0)) / nMostBin / 100.0;
-	histo->bins.resize(noBin + 1);		//always last bin for NA
+	//histo->bins.resize(noBin + 1);		//always last bin for NA
+	histo->nBins = noBin + 1;
 	histo->bins[noBin].split_F = a1+delta;
 	histo->bins[noBin].tic = noBin;
 	histo->bins[noBin].nz = nSamp - nA0;
@@ -258,7 +263,8 @@ void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTIN
 	} else {
 	}
 
-	histo->bins.resize(noBin + 1);		//always last bin for NA
+	//histo->bins.resize(noBin + 1);		//always last bin for NA
+	histo->nBins = noBin + 1;
 	histo->bins[noBin].split_F = d_max;	
 	histo->bins[noBin].tic = noBin;
 	histo->bins[noBin].nz = nSamp-nA;

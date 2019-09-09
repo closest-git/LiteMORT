@@ -417,7 +417,9 @@ namespace Grusoft {
 			if (BIT_TEST(type, Distribution::CATEGORY)) {
 				if (vUnique.size() > 0) {
 					assert(config.feat_quanti > 1);
-					histo->bins.resize(vUnique.size());
+					//histo->bins.resize(vUnique.size());
+					assert(histo->bins == nullptr);
+					histo->bins = new HISTO_BIN[vUnique.size()];
 					HistoOnUnique(config, val, idx, vUnique);
 					vUnique.clear();
 					return;		//必须保持一致
@@ -425,7 +427,9 @@ namespace Grusoft {
 			}
 
 			//int histo_alg = config.histo_algorithm;
-			histo->bins.resize(nMostBin + 3);
+			//histo->bins.resize(nMostBin + 3);
+			assert(histo->bins==nullptr);
+			histo->bins = new HISTO_BIN[nMostBin + 3];
 			binFeatas.resize(nMostBin + 3);
 			switch (config.histo_bin_map) {
 			case LiteBOM_Config::HISTO_BINS_MAP::onUNIQUE:
@@ -449,7 +453,8 @@ namespace Grusoft {
 				break;
 			}
 			vUnique.clear();
-			int nBin = histo->bins.size();		//always last bin for NA
+			int nBin = histo->nBins;	// bins.size();		//always last bin for NA
+			histo->nMostBins = histo->nBins;	// bins.size();
 			assert(binFeatas.size()>=nBin);
 			binFeatas.resize(nBin);
 			//histo->bins.resize(nBin + 1);
@@ -457,7 +462,6 @@ namespace Grusoft {
 			}	else {
 
 			}*/
-			histo->nMostBins = histo->bins.size();
 
 			if (nBin >= 2) {
 				size_t n1 = ceil(nBin / 4.0), n2 = ceil(nBin / 2.0), n3 = ceil(nBin *3.0 / 4) - 1;
