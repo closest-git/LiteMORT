@@ -386,12 +386,7 @@ void HistoGRAM::GreedySplit_X(FeatsOnFold *hData_, const SAMP_SET& samp_set, int
 			else
 				gainL = 0;
 		}
-		if (false) {
-			if (rand() % 2 == 0)
-				g/=1.2;
-			else
-				g *= 1.2;
-		}
+		
 		//double bin_w = hData_->rander_bins.Uniform_(0, 1);
 		if (g>g1 || gainL>g1) {
 			if (i == nBins - 1)		//½öÓÃÓÚ²âÊÔ
@@ -588,7 +583,6 @@ HistoGRAM_BUFFER::HistoGRAM_BUFFER(const FeatsOnFold *hData_, int flag) {
 }
 
 void HistoGRAM_BUFFER::BeforeTrainTree(size_t nPickSamp, int flag) {
-	GST_TIC(t1);
 	for (auto histo : buffers) {
 		if (histo == nullptr)
 			continue;
@@ -602,7 +596,6 @@ void HistoGRAM_BUFFER::BeforeTrainTree(size_t nPickSamp, int flag) {
 			bin.nz = 0;
 		}*/
 	}
-	FeatsOnFold::stat.tX += GST_TOC(t1);
 }
 
 HistoGRAM_BUFFER::~HistoGRAM_BUFFER() {
@@ -673,11 +666,15 @@ void HistoGRAM::ReSet(size_t nMost, int flag) {
 
 void  HistoGRAM::CopyBins(const HistoGRAM &src, bool isReset, int flag) {
 	//nSamp = src.nSamp;
-	nBins = src.nBins;
-	nMostBins = nBins;		// src.nMostBins;
-	if (bins != nullptr)
-	{		delete[] bins;	}
-	bins = new HISTO_BIN[nBins];
+	if (nMostBins >= src.nBins) {
+		nBins = src.nBins;
+	}	else {
+		nBins = src.nBins;
+		if (bins != nullptr)
+		{		delete[] bins;	}
+		bins = new HISTO_BIN[nBins];
+		nMostBins = nBins;		
+	}
 	memcpy(bins, src.bins, sizeof(HISTO_BIN)*nBins);
 	if (isReset) {
 		for (int i = 0; i<nBins; i++) {

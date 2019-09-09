@@ -88,6 +88,8 @@ void GBRT::BeforeTrain(FeatsOnFold *hData_, int flag ) {
 double GBRT::Predict(FeatsOnFold *hData_, bool isX,bool checkLossy, bool resumeLast, int flag) {
 	GST_TIC(tick);
 	size_t nSamp = hData_->nSample(), t;
+	int *samp_at_leaf = nullptr;
+	bool isEval = hData_->isEval();
 	hData_->BeforePredict( );
 	ManifoldTree *lastTree = nullptr;
 	bool isResetZero=false;		//init_score带来了很多问题，需要重新设计,参见ManifoldTree::Train之AddScore
@@ -110,10 +112,12 @@ double GBRT::Predict(FeatsOnFold *hData_, bool isX,bool checkLossy, bool resumeL
 		assert(hTree!=nullptr);
 		if (lastTree != nullptr && hTree != lastTree)
 			continue;
+		if (samp_at_leaf != nullptr) {
+
+		}
 		bool isNodeMajor = true;
 		if (true) {		//data-major	似乎快一些
 			ARR_TREE arrTree;
-			//if (hTree->To_ARR_Tree(hData_,true)) {
 			if (hTree->ArrTree_quanti !=nullptr) {
 				if (hData_->isQuanti) {
 					isNodeMajor = !hData_->PredictOnTree<tpQUANTI, double>(*(hTree->ArrTree_quanti), flag);
@@ -148,8 +152,10 @@ double GBRT::Predict(FeatsOnFold *hData_, bool isX,bool checkLossy, bool resumeL
 			hTree->ClearSampSet();
 
 		}
-		if (hData_->hMove != nullptr)
-			;// hData_->hMove->AfterStep(hData_->samp_set, allx);
+		if (hData_->hMove != nullptr);// hData_->hMove->AfterStep(hData_->samp_set, allx);
+		if (samp_at_leaf != nullptr) {
+			//hTree->UpdateOnEval(hData_->lossy, samp_at_leaf);
+		}
 	}
 	if(checkLossy)
 		hData_->lossy->Update(hData_,this->skdu.noT,0x0);
@@ -326,20 +332,7 @@ int GBRT::Train(string sTitle, int x, int flag) {
 		tpDOWN *hDown = hTrainData->GetDownDirection();
 		if(hTrainData->config.T_iterrefine>0)
 			IterTrain(t,flag);
-		else {
-			if (isEvalTrain) {
-				err_0 = this->Predict(hTrainData,false,true, true);		//可以继续优化
-				if (hTrainData->lossy->isOK(0x0,FLT_EPSILON)) {
-					eOOB = 0;	printf("\n********* ERR@Train is ZERO, Break!!! *********\n\n");	return 0x0;
-				}
-				if (skdu.noT % 500 == 0) {
-					a = forest.size() == 0 ? 0 : nzNode*1.0 / forest.size();
-					printf("\n====== %d: ERR@%s=%8.5g nNode=%g nPickFeat=%d nPickSamp=%lld time=%.3g======\n", skdu.noT, hTrainData->nam.c_str(), err_0, 
-						a, hTrainData->nPickFeat, nPickSamp, GST_TOC(tick));
-				}
-				if (hEvalData == nullptr)
-					stopping.Add(err_0,t, isLRjump);
-			}
+		else {			
 			if (hEvalData != nullptr) {
 				/*if (t > 0) {
 					hMTNode hRoot = (dynamic_cast<ManifoldTree*>(forest[t-1]))->hRoot();		//im1 = hRoot->impuri;
@@ -358,6 +351,19 @@ int GBRT::Train(string sTitle, int x, int flag) {
 				if (hTrainData->feat_salps != nullptr && t>0) {
 					hTrainData->feat_salps->SetCost(1-err);
 				}
+			}
+			if (isEvalTrain) {
+				err_0 = this->Predict(hTrainData, false, true, true);		//可以继续优化
+				if (hTrainData->lossy->isOK(0x0, FLT_EPSILON)) {
+					eOOB = 0;	printf("\n********* ERR@Train is ZERO, Break!!! *********\n\n");	return 0x0;
+				}
+				if (skdu.noT % 500 == 0) {
+					a = forest.size() == 0 ? 0 : nzNode*1.0 / forest.size();
+					printf("\n====== %d: ERR@%s=%8.5g nNode=%g nPickFeat=%d nPickSamp=%lld time=%.3g======\n", skdu.noT, hTrainData->nam.c_str(), err_0,
+						a, hTrainData->nPickFeat, nPickSamp, GST_TOC(tick));
+				}
+				if (hEvalData == nullptr)
+					stopping.Add(err_0, t, isLRjump);
 			}
 		}		
 		if (stopping.isOK(t)) {

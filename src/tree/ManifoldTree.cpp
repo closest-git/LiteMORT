@@ -520,7 +520,7 @@ void ManifoldTree::Train(int flag) {
 	while (!leafs.empty()) {
 		hMTNode node = leafs.top();		leafs.pop();
 		assert(node->isLeaf());
-		if (node->gain_ > 0 && node->nSample()>hData_->config.min_data_in_leaf * 3 && rand()%2==0) {	//可以试试
+		if (node->gain_ > 0 && node->nSample()>hData_->config.min_data_in_leaf * 3 ) {	//可以试试&& rander_.Uniform_(0,1)<0.5
 			GrowLeaf(node, "more_leaf", true);
 			nMoreLeaf++;
 		} /**/
@@ -585,7 +585,7 @@ void ManifoldTree::ClearSampSet() {
 	/*for (auto node : nodes) {	//有问题
 		if (node->isLeaf()) {
 			if (fabs(node->down_step) < T_down) {
-				if (rand() % 10==0)
+				if (rander_.Uniform_(0,1)<0.1)
 				{		node->down_step = 0;		}
 			}
 		}

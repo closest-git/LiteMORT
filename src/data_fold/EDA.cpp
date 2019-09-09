@@ -5,7 +5,7 @@
 #include <limits>
 
 using namespace Grusoft;
-
+GRander Distribution::rander_(42);
 /*
 	- If "mean", then replace missing values using the mean along
           the axis.
@@ -57,7 +57,8 @@ void Distribution::UpdateHistoByW(const LiteBOM_Config&config, float *wBins, int
 		bool isSplit = false;
 		if (wBins[id] > w_avg ) {
 			isSplit = true;
-		}	else if (rand() % 10 == 0) {
+		}
+		else if (rander_.Uniform_(0,1)<=0.1) {
 			isSplit = true;
 		}
 		if(isSplit){

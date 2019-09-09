@@ -312,7 +312,7 @@ int MT_BiSplit::PickOnGain(FeatsOnFold *hData_,const vector<FRUIT *>& arrFruit, 
 				range = i + 1;
 			}
 		}
-		pos = rand() % range;
+		pos = 0;//rand() % range;
 		pick_id = idx_1[pos];		
 	}
 	return pick_id;
@@ -367,7 +367,6 @@ HistoGRAM *MT_BiSplit::GetHistogram(FeatsOnFold *hData_, int pick, bool isInsert
 */
 double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats, int x, int flag) {
 	GST_TIC(tick);
-	GST_TIC(t1);
 	//H_HISTO.resize(hData_->feats.size());	
 	/*if (bsfold != nullptr) {
 		bsfold->GreedySplit(hData_, flag);
@@ -418,6 +417,7 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 
 	fruit = new FRUIT();
 	arrFruit.push_back(fruit);
+				GST_TIC(t1);
 	for (int i = start; i < end; i++) {
 		int pick = picks[i];
 		if (i == 0 && this->id == 1) {	//Ωˆ”√”⁄≤‚ ‘
@@ -459,7 +459,7 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 					histo->Regress(hData_, samp_set);
 				else
 					throw "MT_BiSplit::CheckGain task is !!!";
-			}/**/
+			}/*
 			vector<HistoGRAM *> moreHisto; 
 			histo->MoreHisto(hData_,moreHisto);
 			for (size_t i = 0; i < moreHisto.size();i++) {
@@ -467,12 +467,13 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 				moreHisto[i]->GreedySplit_X(hData_, samp_set);
 				delete moreHisto[i];
 			}
-			moreHisto.clear();
+			moreHisto.clear();*/
 		}
 		if (histoSwarm!=nullptr) {
 			delete histoSwarm;
 		}
 	}
+		FeatsOnFold::stat.tX += GST_TOC(t1);
 
 	double mxmxN = 0;
 	if (isEachFruit) {

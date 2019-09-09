@@ -162,6 +162,9 @@ namespace Grusoft {
 		bool isTrain()			const	{
 			return BIT_TEST(dType, FeatsOnFold::DF_TRAIN);
 		}
+		bool isEval()			const {
+			return BIT_TEST(dType, FeatsOnFold::DF_EVAL);
+		}
 
 		enum {
 			TAG_ZERO = 0x10000,
@@ -288,7 +291,9 @@ namespace Grusoft {
 					int no = 0, feat;
 					while (no != -1) {
 						if (left[no] == -1) {
-							pred[t] += thrsh_step[no];		break;
+							pred[t] += thrsh_step[no];		
+							//samp_at_leaf[t] = no;
+							break;
 						}
 						else {
 							assert(rigt[no] != -1);

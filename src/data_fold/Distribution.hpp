@@ -4,6 +4,7 @@
 #include "./Histogram.hpp"
 #include "../util/GST_def.h"
 #include "../learn/DCRIMI_.hpp"
+#include "../util/GRander.hpp"
 
 using namespace std;
 #define ZERO_REGION 1.0e-16
@@ -78,6 +79,7 @@ namespace Grusoft {
 	};
 
 	struct Distribution {
+		static GRander rander_;
 		enum {
 			CATEGORY = 0x100,
 			V_ZERO_DEVIA = 0x10000,	//常值，一般可忽略
