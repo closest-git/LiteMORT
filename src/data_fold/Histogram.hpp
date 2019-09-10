@@ -152,18 +152,8 @@ namespace Grusoft {
 		//char buf[256] = { 0 };		//https://stackoverflow.com/questions/4523497/typedef-fixed-length-array	Arrays can't be passed as function parameters by value in C.
 		//double lft_impuri,rgt_impuri;		//为了调试
 		virtual ~FRUIT();
-		/*
-		参见FeatVec_T::SplitOn
 		
-		template<typename Tx>
-		Tx Get_() {
-			assert(histo == nullptr);
-			Tx a = thrshold;
-			//a = *reinterpret_cast<double*>(buf);		//https://stackoverflow.com/questions/15464427/cast-char-to-double-as-bytes
-			//memcpy(&a, buf, sizeof(Tx));
-			return a;
-		}*/
-		
+		virtual void Set(HistoGRAM*histo,int flag=0x0);		
 	};
 
 	
@@ -173,6 +163,7 @@ namespace Grusoft {
 	class HistoGRAM {
 	protected:
 		//FeatVector*	hFeat = nullptr;
+		virtual void UpdateBestGain(int tic, double g1, size_t nLef, size_t nRight, int flag = 0x0);
 	public:
 		static size_t nAlloc;
 		static double  memAlloc;
@@ -180,7 +171,16 @@ namespace Grusoft {
 		int nBigBins = 0,nMostBins=0,nBins=0;
 		//bool isFilled = false;
 		size_t nSamp, nLeft = 0, nRight=0;
-		FRUIT *fruit=nullptr;			//仅仅指向
+		//FRUIT *fruit=nullptr;			//仅仅指向
+		struct {	//为了并行诶
+			double mxmxN = -1;		//mean*mean*N
+			size_t nLeft = 0, nRight = 0;
+			int tic=-1;
+
+			void Clear() {
+				mxmxN = -1;		nLeft = 0,	nRight = 0;		tic = -1;
+			}
+		}fruit_info;
 		FeatVector *hFeat = nullptr;	//仅仅指向
 		//vector<HISTO_BIN> bins;
 		HISTO_BIN *bins = nullptr;

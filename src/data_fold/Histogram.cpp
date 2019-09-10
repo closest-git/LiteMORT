@@ -88,8 +88,8 @@ struct IntegralTable {
 
 
 void HistoGRAM_2D::GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp_set, int flag) {
-	if (fruit == nullptr)
-		throw "HistoGRAM_2D::GreedySplit_X fruit is 0!!!";
+	//if (fruit == nullptr)
+	//	throw "HistoGRAM_2D::GreedySplit_X fruit is 0!!!";
 
 	size_t minSet = hData_->config.min_data_in_leaf,i;
 	double sum = samp_set.Y_sum_1, a = -DBL_MAX, errL = 0, g, gL = 0, g1 = 0, lft, rgt;
@@ -114,7 +114,8 @@ void HistoGRAM_2D::GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp
 
 		if (g>g1 || gL>g1) {
 			g1 = MAX(g, gL);
-			fruit->mxmxN = g1;			fruit->tic_left = item.tic;
+			UpdateBestGain(item.tic,g1,nLeft,nRight);
+			/*fruit->mxmxN = g1;			fruit->tic_left = item.tic;
 			fruit->nLeft = nLeft;		fruit->nRight = nRight;
 			//fruit->thrshold = item.tic;
 			fruit->isNanaLeft = false;
@@ -122,7 +123,7 @@ void HistoGRAM_2D::GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp
 				fruit->isNanaLeft = true;
 				fruit->nLeft += binNA->nz;		fruit->nRight -= binNA->nz;
 			}
-			//fruit->lft_impuri = nLeft*lft*lft;		fruit->rgt_impuri = nRight*rgt*rgt;
+			//fruit->lft_impuri = nLeft*lft*lft;		fruit->rgt_impuri = nRight*rgt*rgt;*/
 		}
 	LOOP:
 		errL += item.G_sum;		a = item.tic;
@@ -328,20 +329,59 @@ void HistoGRAM::RandomCompress(FeatVector *hFV,bool isSwarm,int flag) {
 	}*/
 }
 
+void FRUIT::Set(HistoGRAM*histo, int flag) {
+	assert(histo != nullptr);
+	best_feat_id = histo->hFeat->id;
+	split_by = histo->split_by;
+	int tic = histo->fruit_info.tic;
+	tic_left = tic;
+	bin_S0 = histo->bins[tic - 1];			bin_S1 = histo->bins[tic];
+	//assert(fruit->bin_S0.nz>0);
+	mxmxN = histo->fruit_info.mxmxN;			
+	nLeft = histo->fruit_info.nLeft;		nRight = histo->fruit_info.nRight;
+	//fruit->thrshold = item.tic;
+	adaptive_thrsh = bin_S1.split_F;
+	//assert(fruit->adaptive_thrsh!= DBL_MAX);
+	isNanaLeft = false;
+}
+
+void HistoGRAM::UpdateBestGain(int item_tic,double g1,size_t nLef,size_t nRight,int flag) {
+	fruit_info.mxmxN = g1;
+	fruit_info.nLeft = nLeft;		fruit_info.nRight = nRight;
+	fruit_info.tic = item_tic;
+	/*fruit->best_feat_id = hFeat->id;
+	fruit->split_by = this->split_by;
+	fruit->bin_S0 = bins[i-1];		fruit->bin_S1 = item;
+	//assert(fruit->bin_S0.nz>0);
+	g1 = MAX(g, gainL);
+	fruit->mxmxN = g1;			fruit->tic_left = item.tic;
+	fruit->nLeft = nLeft;		fruit->nRight = nRight;
+	//fruit->thrshold = item.tic;
+	fruit->adaptive_thrsh = item.split_F;
+	//assert(fruit->adaptive_thrsh!= DBL_MAX);
+	fruit->isNanaLeft = false;
+	if (gainL > g) {
+	fruit->isNanaLeft = true;
+	fruit->nLeft += binNA->nz;		fruit->nRight -= binNA->nz;
+	assert(bins[(int)(item.tic) - 1].nz>0);
+
+	}
+	//fruit->lft_impuri = nLeft*lft*lft;		fruit->rgt_impuri = nRight*rgt*rgt;*/
+}
 /*
 	v0.2	cys
 		1/28/2019
 */
 void HistoGRAM::GreedySplit_X(FeatsOnFold *hData_, const SAMP_SET& samp_set, int flag) {
 	//GST_TIC(t1);
-
-	if (fruit == nullptr)
-		throw "HistoGRAM::GreedySplit_X fruit is 0!!!";
-
+	//if (fruit == nullptr)
+	//	throw "HistoGRAM::GreedySplit_X fruit is 0!!!";
+	fruit_info.Clear();
+	
 	size_t minSet = hData_->config.min_data_in_leaf,i;
 	string optimal = hData_->config.leaf_optimal, obj = hData_->config.objective;
 	//double sum = samp_set.Y_sum_1, a = a0, errL = 0, g, gL = 0, g1 = 0, lft, rgt;
-	double gL = 0, gR0, hL = 0, hR = 0, a = -DBL_MAX, g, g1 = fruit->mxmxN, split_0= -DBL_MAX;
+	double gL = 0, gR0, hL = 0, hR = 0, a = -DBL_MAX, g, g1 = 0, split_0= -DBL_MAX;	//g1 = fruit->mxmxN
 	nLeft = 0;				nRight = nSamp;		assert(nRight >= 0);
 	HISTO_BIN*binNA = this->hBinNA();
 	double gSum = 0, hSum = 0;	// binNA->G_sum, hSum = binNA->H_sum;
@@ -391,11 +431,12 @@ void HistoGRAM::GreedySplit_X(FeatsOnFold *hData_, const SAMP_SET& samp_set, int
 		if (g>g1 || gainL>g1) {
 			if (i == nBins - 1)		//½öÓÃÓÚ²âÊÔ
 				i = nBins - 1;
-			fruit->best_feat_id = hFeat->id;
+			g1 = MAX(g, gainL);
+			UpdateBestGain(i, g1, nLeft, nRight);
+			/*fruit->best_feat_id = hFeat->id;
 			fruit->split_by = this->split_by;
 			fruit->bin_S0 = bins[i-1];		fruit->bin_S1 = item;
 			//assert(fruit->bin_S0.nz>0);
-			g1 = MAX(g, gainL);
 			fruit->mxmxN = g1;			fruit->tic_left = item.tic;
 			fruit->nLeft = nLeft;		fruit->nRight = nRight;
 			//fruit->thrshold = item.tic;
@@ -408,7 +449,7 @@ void HistoGRAM::GreedySplit_X(FeatsOnFold *hData_, const SAMP_SET& samp_set, int
 				assert(bins[(int)(item.tic) - 1].nz>0);
 
 			}
-			//fruit->lft_impuri = nLeft*lft*lft;		fruit->rgt_impuri = nRight*rgt*rgt;
+			//fruit->lft_impuri = nLeft*lft*lft;		fruit->rgt_impuri = nRight*rgt*rgt;*/
 		}
 	LOOP:
 		//errL += item.Y_sum;		
@@ -532,8 +573,8 @@ void HistoGRAM::GreedySplit_Y(FeatsOnFold *hData_, const SAMP_SET& samp_set, boo
 		10/10/2018
 */
 void HistoGRAM::Regress(const FeatsOnFold *hData_, const SAMP_SET& samp_set, int flag) {
-	if (fruit == nullptr)
-		throw "HistoGRAM::GreedySplit_X fruit is 0!!!";
+	//if (fruit == nullptr)
+	//	throw "HistoGRAM::GreedySplit_X fruit is 0!!!";
 
 	size_t minSet = hData_->config.min_data_in_leaf,i;
 	double sum = samp_set.Y_sum_1, g0 = sum*sum / nSamp, g1 = 0, mean_0 = sum / nSamp, a;
@@ -549,7 +590,7 @@ void HistoGRAM::Regress(const FeatsOnFold *hData_, const SAMP_SET& samp_set, int
 		g1 += a;
 	}
 	assert(g1 >= g0);
-	fruit->mxmxN = g1;
+	//fruit->mxmxN = g1;
 }
 
 int HistoGRAM_BUFFER::NodeFeat2NO(int node, int feat)	const {

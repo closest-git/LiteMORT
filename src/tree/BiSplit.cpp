@@ -412,12 +412,34 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 	GST_TIC(t222);
 	size_t start = 0, end = picks.size();
 #pragma omp parallel for schedule(static)
-	for (int i = start; i < end; i++) {		GetHistogram(hData_, picks[i], true);	}
+	for (int i = start; i < end; i++) {		
+		HistoGRAM *histo=GetHistogram(hData_, picks[i], true);
+		histo->fruit_info.Clear();
+		if (histo->nBins == 0)
+			continue;
+		FeatVector *hFeat = hData_->Feat(picks[i]);
+		if (hFeat->isCategory()) {
+			histo->GreedySplit_Y(hData_, samp_set, false);
+			//continue;
+		}
+		else {
+			if (node_task == LiteBOM_Config::split_X)
+				histo->GreedySplit_X(hData_, samp_set);
+			else if (node_task == LiteBOM_Config::histo_X_split_G)
+				histo->GreedySplit_Y(hData_, samp_set, true);
+			else if (node_task == LiteBOM_Config::REGRESS_X)
+				histo->Regress(hData_, samp_set);
+			else
+				throw "MT_BiSplit::CheckGain task is !!!";
+		}
+	}
 	FeatsOnFold::stat.tHisto += GST_TOC(t222);
 
 	fruit = new FRUIT();
 	arrFruit.push_back(fruit);
-				GST_TIC(t1);
+	GST_TIC(t1);
+	feat_id = -1;
+	double mxmxN = 0;
 	for (int i = start; i < end; i++) {
 		int pick = picks[i];
 		if (i == 0 && this->id == 1) {	//仅用于测试
@@ -426,6 +448,9 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 		FeatVector *hFeat = hData_->Feat(pick);
 		//HistoGRAM *histo = optimal=="grad_variance" ? new HistoGRAM(nSamp) : new Histo_CTQ(nSamp);
 		HistoGRAM *histo = GetHistogram(hData_,pick,true), *histoSwarm=nullptr;
+		if (histo->fruit_info.mxmxN > mxmxN) {
+			mxmxN = histo->fruit_info.mxmxN;		feat_id = pick;
+		}
 		if (hFeat->select_bins != nullptr) {			//基于case_poct测试，似乎可以通过遍历更多的空间来提高准确率
 			bool isSwarm = hFeat->select_bins->isFull();
 			histoSwarm = new HistoGRAM(hFeat, nSamp);
@@ -434,32 +459,12 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 			histo = histoSwarm;
 		}
 
-		histo->fruit = fruit;
-		//arrFruit[i] = new FRUIT(histo);
-		if (nSamp == 400 && pick == 9)
-			pick = 9;
-
 		if (BIT_TEST(hFeat->type, FeatVector::AGGREGATE)) {
 			throw "AGG_CheckGain is ...";		//需要重新设计
 			//AGG_CheckGain(hData_, hFeat, flag);
 		}
 		else {
-			if (histo->nBins == 0)
-				continue;
-			if (hFeat->isCategory()) {
-				histo->GreedySplit_Y(hData_, samp_set, false);
-				//continue;
-			}
-			else {
-				if (node_task == LiteBOM_Config::split_X)
-					histo->GreedySplit_X(hData_, samp_set);
-				else if (node_task == LiteBOM_Config::histo_X_split_G)
-					histo->GreedySplit_Y(hData_, samp_set, true);
-				else if (node_task == LiteBOM_Config::REGRESS_X)
-					histo->Regress(hData_, samp_set);
-				else
-					throw "MT_BiSplit::CheckGain task is !!!";
-			}/*
+			/*
 			vector<HistoGRAM *> moreHisto; 
 			histo->MoreHisto(hData_,moreHisto);
 			for (size_t i = 0; i < moreHisto.size();i++) {
@@ -475,8 +480,7 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 	}
 		FeatsOnFold::stat.tX += GST_TOC(t1);
 
-	double mxmxN = 0;
-	if (isEachFruit) {
+	/*if (isEachFruit) {//EachFruit需要重新设计，暂时保留
 		pick_id = PickOnGain(hData_, arrFruit, flag);
 		if (pick_id >= 0) {
 			feat_id = picks[pick_id];
@@ -485,11 +489,11 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 	}
 	else {
 		feat_id = fruit->best_feat_id;
-	}
+	}*/
 	if (feat_id >= 0) {
-		//feat_id = picks[pick_id];		
+		fruit->Set(GetHistogram(hData_, feat_id, false));
 		feat_regress = -1;
-		mxmxN = fruit->mxmxN;
+		assert( mxmxN == fruit->mxmxN );
 		FeatVector *hFeat = hData_->Feat(feat_id);
 		hFeat->UpdateFruit(hData_,this);
 		if (hFeat->hDistri != nullptr && hFeat->hDistri->rNA > 0) {			
@@ -516,7 +520,6 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 	arrFruit.clear( );
 	hData_->stat.nCheckGain++;
 	double gain = 0;
-	//if (fruit != nullptr) {
 	if (feat_id >= 0)		{
 		if (fruit->split_by == SPLIT_HISTOGRAM::BY_DENSITY) {
 			int i = 0;

@@ -503,6 +503,7 @@ void ManifoldTree::Train(int flag) {
 				hSplit->fruit = nullptr;/**/
 			}
 			//hBest->Dump(info, 0x0);
+			size_t nLeft_0 = hBest->left->nSample(), nRigt_0 = hBest->right->nSample();
 			assert( hBest->left->nSample()==hBest->fruit->nLeft && hBest->right->nSample()==hBest->fruit->nRight);
 			if (hBest->left->nSample() < hBest->right->nSample()) {
 				new_leafs.push_back(hBest->left);		new_leafs.push_back(hBest->right);

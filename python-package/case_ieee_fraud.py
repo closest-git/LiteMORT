@@ -189,8 +189,8 @@ if LOCAL_TEST:
     test_predictions = make_predictions(train_df, test_df, features_columns, TARGET, lgb_params)
     print(metrics.roc_auc_score(test_predictions[TARGET], test_predictions['prediction']))
 else:
-    lgb_params['learning_rate'] = 0.01
-    lgb_params['n_estimators'] = 1800
+    lgb_params['learning_rate'] = 0.005
+    lgb_params['n_estimators'] = 2800
     lgb_params['early_stopping_rounds'] = 100
     test_predictions,fold_score = make_predictions(train_df, test_df, features_columns, TARGET, lgb_params, NFOLDS=NFOLDS)
     test_predictions['isFraud'] = test_predictions['prediction']
