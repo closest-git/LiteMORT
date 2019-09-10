@@ -21,6 +21,7 @@ NFOLDS = 8
 #some_rows = 10000
 some_rows = None
 data_root = 'E:/Kaggle/ieee_fraud/input/'
+#data_root = '../input/'
 pkl_path = f'{data_root}/_kyakovlev_{some_rows}.pickle'
 
 def M_PickSamples(pick_samples,df_train,df_test):
@@ -133,16 +134,14 @@ lgb_params = {
                     'objective':'binary',
                     'boosting_type':'gbdt',
                     'metric':'auc',
-                    'salp_bins':0,
-                    'elitism':32,
                     'n_jobs':-1,
                     'learning_rate':0.01,
                     'num_leaves': 2**8,
                     'max_depth':-1,
                     'tree_learner':'serial',
-                    'colsample_bytree': 0.7,
+                    'colsample_bytree': 0.3,
                     'subsample_freq':1,
-                    'subsample':0.7,
+                    'subsample':0.3,
                     'n_estimators':800,
                     'max_bin':255,
                     'verbose':1,
@@ -190,7 +189,7 @@ if LOCAL_TEST:
     print(metrics.roc_auc_score(test_predictions[TARGET], test_predictions['prediction']))
 else:
     lgb_params['learning_rate'] = 0.005
-    lgb_params['n_estimators'] = 2800
+    lgb_params['n_estimators'] = 4800
     lgb_params['early_stopping_rounds'] = 100
     test_predictions,fold_score = make_predictions(train_df, test_df, features_columns, TARGET, lgb_params, NFOLDS=NFOLDS)
     test_predictions['isFraud'] = test_predictions['prediction']

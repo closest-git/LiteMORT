@@ -169,16 +169,17 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 		}
 		picks = pick_1;		
 		nPick = picks.size();
-		if (config.nElitism>0 && hForest->forest.size()>16) {
+		if (config.rElitism>0 && hForest->forest.size()>16) {
 			std::sort(picks.begin(), picks.end(), [&w](size_t i1, size_t i2) {return w[i1] < w[i2]; });
 			for (i = 0; i < nPick - 1; i++) {
 				assert(w[picks[i]] <= w[picks[i + 1]]);
 				assert(mask[picks[i]] == 1);
 			}
-			//int nElitism = min(nPick, 16);
-			int nElitism = min(nPick, config.nElitism);
+			int nElitism = max(16, nFeat*config.rElitism);
+			nElitism = min(nPick, nElitism);
+			int nExp = nElitism + min(nElitism * 3,  nFeat / 3);
 			std::random_shuffle(picks.begin()+ nElitism, picks.end());
-			picks.resize(min(nPick, min(nElitism*6, nElitism+nFeat/3)));
+			picks.resize(min(nPick, nExp));
 		}
 		delete[] w;
 

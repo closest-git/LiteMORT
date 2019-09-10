@@ -462,15 +462,15 @@ void ManifoldTree::Train(int flag) {
 			hData_->feats[no]->PerturbeHisto(hData_);
 		}
 	}
-	if (this->hForest->skdu.noT % 500 == 0) {
+	/*if (this->hForest->skdu.noT % 500 == 0) {
 		tpSAMP_ID *samps = root->samp_set.samps;
 		size_t nSamp = root->samp_set.nSamp;
-		printf("\t\tsamps={%d,%d,...,%d}",samps[0], samps[nSamp / 2], samps[nSamp - 1]);
+		printf("\t\tN=%lld{%d,%d,,%d,,%d}", root->samp_set.nSamp,samps[0], samps[1], samps[nSamp / 2], samps[nSamp - 1]);
 		if (pick_feats.size() > 1) {
-			printf("\tfeats[%d]={%d...%d...%d}\t", pick_feats.size(),
+			printf(",{%d.%d.%d}\t", pick_feats.size(),
 				pick_feats[0], pick_feats[pick_feats.size()/2], pick_feats[pick_feats.size()-1]);
 		}
-	}
+	}*/
 	
 	OnNewLeaf(root, hData_, pick_feats,false);
 	gain = 0;

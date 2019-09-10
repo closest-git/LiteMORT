@@ -168,7 +168,7 @@ namespace Grusoft {
 				init_scor.c_str(),
 				eda_NA == -1 ? "OFF" : eda_NA == 0 ? "0" : "Other",
 				eda_Normal == 0 ? "OFF" : "Gaussian", 
-				nElitism,T_iterrefine,split_refine,
+				rElitism,T_iterrefine,split_refine,
 				node_task==0 ? "split_X" : node_task == 1 ? "split_Y" : "REGRESS_X",
 				nMostSalp4bins,histo_alg.c_str()
 				);
@@ -254,7 +254,7 @@ namespace Grusoft {
 		std::string eda_nan = "zero";
 		int nMostSalp4bins = 0;
 		int nMostSalp4feats = 0;
-		int nElitism = 0;
+		double rElitism = 0.05;
 
 		//gradient variance
 		//std::string leaf_optimal = "taylor_2";		//似乎有问题，grad_variance收敛速度明显更快

@@ -41,7 +41,6 @@ void SAMP_SET::Alloc(FeatsOnFold *hData_, size_t nSamp_, int flag) {
 	samps = root_set;
 }
 
-
 /*
 	v0.2		cys	
 		3/29/2019
@@ -95,7 +94,9 @@ void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const BoostingForest *hBoosting, 
 	}else	if (nMost > T_1) {
 		/*size_t nz0 = hData_->rander_samp.kSampleInN(root_set,nMost, nFrom);		//case_higgs反复测试，确实有效诶*/		
 		for (nz=0, i = 0; i < nFrom; ++i) {
-			double prob = (nMost - nz) / static_cast<double>(nFrom - i);
+			if (i == nFrom - 1)
+				i = nFrom - 1;
+			double prob = min(0.9999,(nMost - nz)*1.0/(nFrom - i));
 			if (nElitism > 0 ) {
 				//b = weight==nullptr ? fabs(down[i]) : fabs(down[i])*weight[i];
 				b = fabs(down[i]);
@@ -130,6 +131,7 @@ void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const BoostingForest *hBoosting, 
 	}
 
 	assert(nz <= nMost);
+	nSamp = nz;
 	if (hBoosting->skdu.noT % hData_->config.verbose_eval == 0)
 		;//	printf("\nSAMP_SET::SampleFrom nSamp=%lld[%lld=>%lld] \t", nFrom, nMost, nz);
 	//printf("\nsamps={%d,%d,%d,...%d,...,%d,%d}", samps[0], samps[1], samps[2], samps[nz / 2], samps[nz - 2], samps[nz - 1]);
@@ -150,6 +152,7 @@ MT_BiSplit::MT_BiSplit(FeatsOnFold *hData_, const BoostingForest *hBoosting_, in
 		//samp_set = hData_->samp_set;
 		//samp_set.isRef = true;
 	}
+	size_t nPickSamp = samp_set.nSamp;
 	//Init_BFold(hData_);
 	if (hData_->atTrainTask()) {
 		Observation_AtLocalSamp(hData_);

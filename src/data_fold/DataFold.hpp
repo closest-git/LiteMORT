@@ -257,11 +257,60 @@ namespace Grusoft {
 		}
 
 		//int  OMP_FOR_STATIC_1(const size_t nSamp, size_t& step, int flag = 0x0);
+		template<typename Ty>
+		bool PredictOnTree(const ARR_TREE&tree, int flag) {
+			size_t nSamp = nSample(), nNode = tree.nNode, no, nFeat = feats.size(), step = nSamp;
+			G_INT_64 t;
+			double *thrsh_step = tree.thrsh_step;
+			FeatVec_T<Ty> *predict = dynamic_cast<FeatVec_T<Ty>*>(GetPrecict());
+			if (predict == nullptr)
+				return false;
+			Ty *pred = predict->arr();
+			int *feat_ids = tree.feat_ids, *left = tree.left, *rigt = tree.rigt;
+			
+			/**/
+			int num_threads = OMP_FOR_STATIC_1(nSamp, step);
+#pragma omp parallel for schedule(static,1)
+			for (int thread = 0; thread < num_threads; thread++) {
+				size_t start = thread*step, end = min(start + step, nSamp), t;
+				for (t = start; t < end; t++) {
+					int no = 0, feat;
+					while (no != -1) {
+						if (left[no] == -1) {
+							pred[t] += thrsh_step[no];
+							//samp_at_leaf[t] = no;
+							break;
+						}
+						else {
+							assert(rigt[no] != -1);
+							FeatVector *hFT = feats[feat_ids[no]];
+							no = hFT->left_rigt(t,thrsh_step[no], left[no], rigt[no]);
+							/*Tx *feat = arrFeat[feat_ids[no]];
+							if (IS_NAN_INF(feat[t])) {
+								no = rigt[no];
+							}
+							else {
+								if (feat[t] < thrsh_step[no]) {
+									no = left[no];
+								}
+								else {
+									no = rigt[no];
+								}
+							}*/
+						}
+					}
+				}
+
+			}
+			
+			return true;
+		}
+
 		/*
 			¾¡Á¿ÓÅ»¯
 		*/
 		template<typename Tx, typename Ty>
-		bool PredictOnTree(const ARR_TREE&tree, int flag) {
+		bool PredictOnTree_0(const ARR_TREE&tree, int flag) {
 			size_t nSamp = nSample(), nNode = tree.nNode, no, nFeat = feats.size(), step = nSamp;
 			G_INT_64 t;
 			double *thrsh_step = tree.thrsh_step;
@@ -635,6 +684,19 @@ namespace Grusoft {
 			}
 		}
 
+		virtual inline int left_rigt(const size_t& t, const double& thrsh, const int lft, const int rgt,int flag=0x0) {
+			//Tx *feat = arrFeat[feat_ids[no]];
+			if (IS_NAN_INF(val[t])) {
+				return rgt;
+			}	else {
+				if (val[t] < thrsh) {
+					return lft;
+				}	else {
+					return rgt;
+				}
+			}
+			return lft;
+		}
 
 		virtual void SplitOn(FeatsOnFold *hData_, MT_BiSplit *hBlit, int flag = 0x0) {
 			//assert (BLIT_thrsh.find(hBlit) != BLIT_thrsh.end());

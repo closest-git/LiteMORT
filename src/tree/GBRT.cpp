@@ -78,7 +78,6 @@ void GBRT::BeforeTrain(FeatsOnFold *hData_, int flag ) {
 	}
 }
 
-
 /*
 	如果y已知，就可以checkLossy
 	v0.1	集成hMove加速
@@ -118,10 +117,9 @@ double GBRT::Predict(FeatsOnFold *hData_, bool isX,bool checkLossy, bool resumeL
 					hData_->UpdateStepOnReduce<float, double>(hTree->ArrTree_data, hTree->ArrTree_quanti);
 				}*/
 				if (hData_->isQuanti) {
-					isNodeMajor = !hData_->PredictOnTree<tpQUANTI, double>(*(hTree->ArrTree_quanti), flag);
+					isNodeMajor = !hData_->PredictOnTree<double>(*(hTree->ArrTree_quanti), flag);
 				}		else				{
-					//isNodeMajor = !hData_->PredictOnTree<double, double>(*(hTree->ArrTree_data), flag);
-					isNodeMajor = !hData_->PredictOnTree<float, double>(*(hTree->ArrTree_data), flag);
+					isNodeMajor = !hData_->PredictOnTree<double>(*(hTree->ArrTree_data), flag);					
 				}// 
 			}
 		}
@@ -355,7 +353,7 @@ int GBRT::Train(string sTitle, int x, int flag) {
 				}
 				if (skdu.noT % 500 == 0) {
 					a = forest.size() == 0 ? 0 : nzNode*1.0 / forest.size();
-					printf("\n====== %d: ERR@%s=%8.5g nNode=%g nPickFeat=%d nPickSamp=%lld time=%.3g======\n", skdu.noT, hTrainData->nam.c_str(), err_0,
+					printf("\n====== %d: ERR@%s=%8.5g nNode=%g nPickFeat=%d nPickSamp=%lld time=%.5g======\n", skdu.noT, hTrainData->nam.c_str(), err_0,
 						a, hTrainData->nPickFeat, nPickSamp, GST_TOC(tick));
 				}
 				if (hEvalData == nullptr)
