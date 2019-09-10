@@ -103,7 +103,9 @@ namespace Grusoft {
 		vector<vDISTINCT>  vUnique;		//vThrsh
 		MAP_CATEGORY mapCategory;
 		HistoGRAM *histo = nullptr;
+		
 		vector<BIN_FEATA> binFeatas;
+		double split_F(int no, int flag=0x0) const;
 		bool isUnique = false;
 		bool isValidFeatas();
 
@@ -432,7 +434,7 @@ namespace Grusoft {
 			//histo->bins.resize(nMostBin + 3);
 			assert(histo->bins==nullptr);
 			histo->bins = new HISTO_BIN[nMostBin + 3];
-			binFeatas.resize(nMostBin + 3);
+			binFeatas.resize(nMostBin + 3);		
 			switch (config.histo_bin_map) {
 			case LiteBOM_Config::HISTO_BINS_MAP::onUNIQUE:
 				
@@ -457,19 +459,18 @@ namespace Grusoft {
 			vUnique.clear();
 			int nBin = histo->nBins;	// bins.size();		//always last bin for NA
 			histo->nMostBins = histo->nBins;	// bins.size();
-			assert(binFeatas.size()>=nBin);
+			assert(binFeatas.size()>=nBin );
 			binFeatas.resize(nBin);
 			//histo->bins.resize(nBin + 1);
 			/*if (vUnique.size() > 0) {	//ÄÑµÀÓÐBUG???
 			}	else {
 
 			}*/
-
 			if (nBin >= 2) {
 				size_t n1 = ceil(nBin / 4.0), n2 = ceil(nBin / 2.0), n3 = ceil(nBin *3.0 / 4) - 1;
 				HISTO_BIN&b0 = histo->bins[0], &b1 = histo->bins[n1], &b2 = histo->bins[n2], &b3 = histo->bins[n3], &b4 = histo->bins[nBin - 1];
-				H_q0 = b0.split_F, H_q4 = b4.split_F;
-				H_q1 = q1 = b1.split_F, H_q2 = q2 = b2.split_F;		H_q3 = q3 = b3.split_F;/**/
+				//H_q0 = b0.split_F, H_q4 = b4.split_F;
+				//H_q1 = q1 = b1.split_F, H_q2 = q2 = b2.split_F;		H_q3 = q3 = b3.split_F;/**/
 			}
 		}
 

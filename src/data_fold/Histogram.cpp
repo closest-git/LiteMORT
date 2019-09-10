@@ -335,14 +335,14 @@ void FRUIT::Set(HistoGRAM*histo, int flag) {
 	assert(histo != nullptr);
 	best_feat_id = histo->hFeat->id;
 	split_by = histo->split_by;
-	int tic = histo->fruit_info.tic;
-	tic_left = tic;
-	bin_S0 = histo->bins[tic - 1];			bin_S1 = histo->bins[tic];
+	int pos = histo->fruit_info.tic;
+	tic_left = pos;
+	bin_S0 = histo->bins[pos - 1];			bin_S1 = histo->bins[pos];
 	//assert(fruit->bin_S0.nz>0);
 	mxmxN = histo->fruit_info.mxmxN;			
 	nLeft = histo->fruit_info.nLeft;		nRight = histo->fruit_info.nRight;
 	//fruit->thrshold = item.tic;
-	adaptive_thrsh = bin_S1.split_F;
+	adaptive_thrsh = histo->split_F(bin_S1.tic);	// bin_S1.split_F;
 	//assert(fruit->adaptive_thrsh!= DBL_MAX);
 	isNanaLeft = false;
 }
@@ -413,9 +413,7 @@ void HistoGRAM::GreedySplit_X(FeatsOnFold *hData_, const SAMP_SET& samp_set, int
 			goto LOOP;
 		}
 		assert(item.tic>a);
-		if (item.split_F == split_0 /*|| item.nz == 0*/) {
-			goto LOOP;
-		}
+		//if (item.split_F == split_0 /*|| item.nz == 0*/) {			goto LOOP;		}
 		//double errR = sum - errL;
 		//Regression trees in CART have a constant numerical value in the leaves and use the variance as a measure of impurity
 		//g = errL*errL / nLeft + errR*errR / nRight;
@@ -456,7 +454,7 @@ void HistoGRAM::GreedySplit_X(FeatsOnFold *hData_, const SAMP_SET& samp_set, int
 	LOOP:
 		//errL += item.Y_sum;		
 		gL += item.G_sum;		hL += item.H_sum;
-		a = item.tic;			split_0 = item.split_F;
+		a = item.tic;			//split_0 = item.split_F;
 		assert(nRight >= item.nz);
 		nLeft += item.nz;			nRight -= item.nz;
 	}
@@ -609,8 +607,11 @@ int HistoGRAM_BUFFER::NodeFeat2NO(int node, int feat)	const {
 	return no;
 }
 
+/*
+	v0.1	cys
+		9/10/2019
+*/
 size_t HistoGRAM_BUFFER::SetBinsAtBuffer(const FeatsOnFold *hData_, vector<int>& pick_feats, int flag = 0x0) {
-	GST_TIC(t1);
 	size_t pos = 0, node,no;
 	for (node = 0; node < nMostNode; node++) {
 		for (auto feat: pick_feats) {
@@ -622,19 +623,21 @@ size_t HistoGRAM_BUFFER::SetBinsAtBuffer(const FeatsOnFold *hData_, vector<int>&
 			}
 			if (histo == nullptr) {
 				histo = new HistoGRAM(hFV, 0);			
-				histo->buffer = this;
+				histo->buffer = this;		
 			}	else {
+				//assert(histo->nMostBins >= H_src->nBins);
 				histo->hFeat = hFV;
 			}
+			histo->nMostBins = H_src->nBins;
 			//histo->CopyBins(*(hFV->hDistri->histo), true, 0x0);
-			histo->bins = bins_buffer + pos;		histo->nMostBins = H_src->nBins;
-			histo->CopyBins(*(H_src), true, 0x0);
+			histo->nBins = H_src->nBins;	
+			histo->bins = bins_buffer + pos;		
+			//histo->CopyBins(*(H_src), true, 0x0);
 			pos += histo->nBins;
 
 			buffers[no] = histo;
 		}
 	}
-	FeatsOnFold::stat.tX += GST_TOC(t1);
 	return pos;
 }
 
@@ -668,6 +671,7 @@ HistoGRAM_BUFFER::HistoGRAM_BUFFER(const FeatsOnFold *hData_0, int flag):hData_(
 }
 
 void HistoGRAM_BUFFER::BeforeTrainTree(vector<int>& pick_feats, size_t nPickSamp, int flag) {
+	GST_TIC(t1);
 	assert(pick_feats.size() <= nMostFeat);
 	mapFeats.clear();
 	int no = 0,node;
@@ -696,6 +700,7 @@ void HistoGRAM_BUFFER::BeforeTrainTree(vector<int>& pick_feats, size_t nPickSamp
 		/*for (auto bin : histo->bins) {
 			bin.nz = 0;
 		}*/
+	FeatsOnFold::stat.tX += GST_TOC(t1);
 
 }
 
@@ -767,6 +772,11 @@ void HistoGRAM::ReSet(size_t nMost, int flag) {
 	//a1 = -DBL_MAX, a0 = DBL_MAX;
 }
 
+double  HistoGRAM::split_F(int no, int flag) const { 
+	assert(hFeat != nullptr && hFeat->hDistri!=nullptr);
+	double a = hFeat->hDistri->split_F(no,flag);
+	return a; 
+}
 void  HistoGRAM::CopyBins(const HistoGRAM &src, bool isReset, int flag) {
 	//nSamp = src.nSamp;
 	if (nMostBins >= src.nBins) {

@@ -27,6 +27,11 @@ Distribution::~Distribution() {
 		delete histo;
 }
 
+double Distribution::split_F(int no, int flag) const {
+	assert(no >= 0 && no < binFeatas.size());
+	double a = binFeatas[no].split_F;
+	return a;
+}
 //
 void Distribution::UpdateHistoByW(const LiteBOM_Config&config, float *wBins, int flag) {
 	size_t nBin_0 = histo->nBins, i,nMaxSplit=int((nBin_0-1) /10.0),nSplit=0,id,nDrop=0;
@@ -79,10 +84,12 @@ void Distribution::UpdateHistoByW(const LiteBOM_Config&config, float *wBins, int
 	}
 
 	vector<HISTO_BIN> binX;
+	vector<BIN_FEATA> feataX;
 	for (i = 0; i < nBin_0-1; i++) {
 		HISTO_BIN bin0 = histo->bins[i];
-		assert(bin0.split_F < vMax);
-		split_1 = i==nBin_0-1 ? DBL_MAX : histo->bins[i + 1].split_F;
+		//assert(bin0.split_F < vMax);
+		assert(binFeatas[i].split_F < vMax);
+		split_1 = i == nBin_0 - 1 ? DBL_MAX : binFeatas[i+1].split_F;	// histo->bins[i + 1].split_F;
 		if (split_1 == DBL_MAX )
 			split_1 = this->vMax;
 		if(IS_NAN_INF(split_1))
@@ -90,17 +97,22 @@ void Distribution::UpdateHistoByW(const LiteBOM_Config&config, float *wBins, int
 		if (mask[i] == -2) {
 			continue;
 		}
+		feataX.push_back(binFeatas[i]);
 		binX.push_back(bin0);
 		if (mask[i] == -1) {
 			assert(i < nBin_0 - 1);
 			HISTO_BIN bin1 = bin0;
-			bin1.split_F = (bin0.split_F + split_1) / 2;
-			bin1.split_F = bin0.split_F+(split_1- bin0.split_F)*0.618;
+			//bin1.split_F = (bin0.split_F + split_1) / 2;
+			//bin1.split_F = bin0.split_F+(split_1- bin0.split_F)*0.618;
+			BIN_FEATA f_;
+			f_.split_F = binFeatas[i].split_F + (split_1 - binFeatas[i].split_F) * 0.618;
+			feataX.push_back(f_);
 			binX.push_back(bin1);
 		}
 	}
 	binX.push_back(histo->bins[nBin_0 - 1]);
 	delete[] histo->bins;
+	binFeatas = feataX;
 	histo->nBins = binX.size();
 	histo->bins = new HISTO_BIN[histo->nBins];
 	for(i=0;i<histo->nBins;i++)
@@ -112,11 +124,14 @@ void Distribution::UpdateHistoByW(const LiteBOM_Config&config, float *wBins, int
 	for (i = 0; i < nBin; i++) {
 		histo->bins[i].tic = i;
 		if (i < nBin - 1)
-			assert(histo->bins[i].split_F<histo->bins[i+1].split_F);
+			assert(binFeatas[i].split_F<binFeatas[i + 1].split_F);
+			//assert(histo->bins[i].split_F<histo->bins[i+1].split_F);
 	}
 	delete[] mask;
 	delete[] comp_;
 	//printf("[+%d,-%d,nBin=%d=>%d]\t", nSplit, nDrop, nBin_0, nBin);
+	assert(binFeatas.size() == histo->nBins);
+
 }
 
 bool Distribution::isValidFeatas() {
@@ -170,7 +185,8 @@ void Distribution::HistoOnUnique_1(const LiteBOM_Config&config, vector<vDISTINCT
 		v0 = vUnique[i_0].val;		
 		HISTO_BIN& bin = histo->bins[noBin];
 		bin.tic = noBin;
-		bin.split_F = std::nextafter(v0, INFINITY);
+		//bin.split_F = std::nextafter(v0, INFINITY);
+		binFeatas[noBin].split_F = std::nextafter(v0, INFINITY);
 		//mapCategory.insert(pair<int, int>((int)(v0), noBin));
 		bin.nz = vUnique[i_0].nz;
 		++i_0; ++noBin;
@@ -178,7 +194,8 @@ void Distribution::HistoOnUnique_1(const LiteBOM_Config&config, vector<vDISTINCT
 	double delta = double(fabs(a1 - a0)) / nMostBin / 100.0;
 	//histo->bins.resize(noBin + 1);		//always last bin for NA
 	histo->nBins = noBin + 1;
-	histo->bins[noBin].split_F = a1+delta;
+	//histo->bins[noBin].split_F = a1+delta;
+	binFeatas[noBin].split_F = a1 + delta;
 	histo->bins[noBin].tic = noBin;
 	histo->bins[noBin].nz = nSamp - nA0;
 	histo->CheckValid(config);
@@ -219,7 +236,8 @@ void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTIN
 		HISTO_BIN& bin = histo->bins[noBin];
 		BIN_FEATA& feata = binFeatas[noBin];
 		bin.tic = noBin;	//tic split_F必须一致
-		bin.split_F = i_0 > 0 ? (v0 + vUnique[i_0 - 1].val) / 2 : v0;
+		//bin.split_F = i_0 > 0 ? (v0 + vUnique[i_0 - 1].val) / 2 : v0;
+		feata.split_F = i_0 > 0 ? (v0 + vUnique[i_0 - 1].val) / 2 : v0;
 		//bin.split_F =  v0;
 		T_avg = nMostBin - noBin > BIG_bins ? max(config.min_data_in_bin, SMALL_na / (nMostBin- noBin- BIG_bins)) : config.min_data_in_bin;
 		T_avg = max(T_avg, T_avg_small) ;	//T_avg会越来越小
@@ -266,7 +284,8 @@ void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTIN
 
 	//histo->bins.resize(noBin + 1);		//always last bin for NA
 	histo->nBins = noBin + 1;
-	histo->bins[noBin].split_F = d_max;	
+	//histo->bins[noBin].split_F = d_max;	
+	binFeatas[noBin].split_F = d_max;
 	histo->bins[noBin].tic = noBin;
 	histo->bins[noBin].nz = nSamp-nA;
 	histo->CheckValid(config);

@@ -448,8 +448,8 @@ void FeatVec_Q::PerturbeHisto(const FeatsOnFold *hData_, int flag) {
 	HISTO_BIN *cur = nullptr;
 
 	for(i=1;i<nBin;i++){
-		double T0 = qHisto_0->bins[i - 1].split_F, T1 = qHisto_0->bins[i].split_F, T2 = qHisto_0->bins[i + 1].split_F;
-		cur = &(qHisto_1->bins[i]);
+		//double T0 = qHisto_0->bins[i - 1].split_F, T1 = qHisto_0->bins[i].split_F, T2 = qHisto_0->bins[i + 1].split_F;
+		//cur = &(qHisto_1->bins[i]);
 		//测试数据也量化之后，在测试集上已无意义
 		//cur->split_F = kk == 0 ? T1 - (T1 - T0) *30 : T1 + (T2 - T1) *30;
 	}

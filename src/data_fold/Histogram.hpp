@@ -92,7 +92,7 @@ namespace Grusoft {
 
 	//feature vector的数据类型多变，所以映射很复杂
 	struct HISTO_BIN {
-		double split_F = 0;		
+		//double split_F = 0;		
 		size_t nz = 0;
 		//if (val[pos] < bins[noBin+1].split_F) {		quanti[pos] = noBin;		}
 		char fold = -1;			//每个BIN属于一个FOLD
@@ -200,6 +200,8 @@ namespace Grusoft {
 		virtual void CheckValid(const LiteBOM_Config&config,  int flag = 0x0);
 		virtual void CompressBins(int flag=0x0);
 		virtual void TicMap(tpQUANTI*map,int flag);
+
+		virtual double split_F(int no, int flag = 0x0) const;
 
 		HistoGRAM* FromDiff(const HistoGRAM*hP, const HistoGRAM*hB,bool isBuffer, int flag = 0x0);
 

@@ -656,7 +656,8 @@ namespace Grusoft {
 				还是有问题	12/19/2018	cys
 				1/11/2019	发现train的histo->AtBin_不适用于test
 			*/
-			double T_0 = hBlit->fruit->bin_S0.split_F, T_1 = hBlit->fruit->bin_S1.split_F;
+			//double T_0 = hBlit->fruit->bin_S0.split_F, T_1 = hBlit->fruit->bin_S1.split_F;
+			double T_1 = hBlit->fruit->adaptive_thrsh;
 			if (hBlit->fruit->isY) {
 				SAMP_SET &lSet = left->samp_set, &rSet = rigt->samp_set;
 				tpSAMP_ID *samps = hBlit->samp_set.samps, *left = hBlit->samp_set.left, *rigt = hBlit->samp_set.rigt;
@@ -722,7 +723,7 @@ namespace Grusoft {
 
 		//参见 FeatVec_Q::Samp2Histo
 		virtual void  RefineThrsh(const FeatsOnFold *hData_, const MT_BiSplit *hBlit,int flag = 0x0) {
-			assert(hBlit->fruit->bin_S0.nz>0);
+			/*assert(hBlit->fruit->bin_S0.nz>0);
 			double T_0 = hBlit->fruit->bin_S0.split_F, T_1 = hBlit->fruit->bin_S1.split_F;
 			FRUIT *fruit = hBlit->fruit;
 			tpSAMP_ID *samps = hBlit->samp_set.samps,samp;
@@ -756,7 +757,7 @@ namespace Grusoft {
 				double gR = gSum - gL, hR = hSum - hL;
 				/*if (nLeft<minSet || nRight<minSet) {
 					goto LOOP;
-				}*/
+				}*//*
 				if (hL==0 || hR==0 )		{ goto LOOP; }
 				if (val_c[samp] == a )		{	goto LOOP;	}
 				a = val_c[samp];
@@ -772,7 +773,7 @@ namespace Grusoft {
 				gL += -down[samp];		hL += hessian[samp];
 				nLeft ++;				nRight --;
 			}
-			assert(fruit->adaptive_thrsh>= T_0 && fruit->adaptive_thrsh < T_1);
+			assert(fruit->adaptive_thrsh>= T_0 && fruit->adaptive_thrsh < T_1);*/
 			return ;
 		}
 		
@@ -888,7 +889,7 @@ namespace Grusoft {
 			else {
 				const HistoGRAM *histo = distri.histo;		assert(histo!=nullptr);
 				noBin = 0;	//v1 = vThrsh[noBin + 1];
-				v1 = histo->bins[noBin+1].split_F;
+				v1 = distri.binFeatas[noBin + 1].split_F;		// bins[noBin + 1].split_F;
 				i_0 = 0;
 				while (i_0 < nA) {
 					pos = idx[i_0];
@@ -921,8 +922,7 @@ namespace Grusoft {
 						noBin++;
 						if (noBin >= histo->nBins)
 						{		throw "QuantiAtEDA noBin is XXX";						}
-						//v1 = vThrsh[noBin + 1];
-						v1 = histo->bins[noBin+1].split_F;
+						v1 = distri.binFeatas[noBin + 1].split_F;// histo->bins[noBin + 1].split_F;
 					}
 				}
 				//int noNA = distri.histo->bins.size()-1;				
@@ -933,7 +933,7 @@ namespace Grusoft {
 					if (quanti[i] <0)
 					{	quanti[i] = noNA;		hNA->nz++;		}
 				}
-				hNA->split_F = DBL_MAX;
+				//hNA->split_F = DBL_MAX;
 				return;
 			}
 		}
