@@ -134,8 +134,10 @@ void HistoGRAM_2D::GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp
 
 HistoGRAM::~HistoGRAM() {
 	//bins.clear();
-	if (bins != nullptr)		
-		delete[] bins;
+	if (buffer == nullptr) {
+		if (bins != nullptr)		
+			delete[] bins;
+	}
 }
 
 /*
@@ -593,50 +595,108 @@ void HistoGRAM::Regress(const FeatsOnFold *hData_, const SAMP_SET& samp_set, int
 	//fruit->mxmxN = g1;
 }
 
+
 int HistoGRAM_BUFFER::NodeFeat2NO(int node, int feat)	const {
-	int no = node*ldFeat + feat;
+	int feat_pos = feat;
+	if (!mapFeats.empty()) {
+		feat_pos = mapFeats.at(feat);
+		assert(feat_pos >= 0 && feat_pos < ldFeat_);
+	}	
+	
+	int no = node*ldFeat_ + feat_pos;
 	assert(no >= 0 && no < nzMost);
+
 	return no;
 }
-HistoGRAM_BUFFER::HistoGRAM_BUFFER(const FeatsOnFold *hData_, int flag) {
-	int nMostLeaf = hData_->config.num_leaves,node,feat,no,nzZ=0;
-	nMostNode = nMostLeaf * 2;
-	ldFeat = hData_->nFeat();
-	nzMost = nMostNode*ldFeat;
-	buffers.resize(nzMost);
-	nzMEM = sizeof(HISTO_BIN*)*nzMost;
+
+size_t HistoGRAM_BUFFER::SetBinsAtBuffer(const FeatsOnFold *hData_, vector<int>& pick_feats, int flag = 0x0) {
+	GST_TIC(t1);
+	size_t pos = 0, node,no;
 	for (node = 0; node < nMostNode; node++) {
-		for (feat = 0; feat < ldFeat; feat++) {
-			no = NodeFeat2NO(node,feat);
+		for (auto feat: pick_feats) {
+			no = NodeFeat2NO(node, feat);
 			FeatVector *hFV = hData_->feats[feat];
-			if (hFV->hDistri->histo == nullptr)
-			{
-				buffers[no] = nullptr;	 nzZ++;
-				continue;
+			HistoGRAM *H_src = hFV->hDistri->histo,*histo = buffers[no];
+			if (H_src == nullptr) {
+				buffers[no] = nullptr;	 	continue;
 			}
-			HistoGRAM *histo  = new HistoGRAM(hFV,0);
-			histo->CopyBins(*(hFV->hDistri->histo), true, 0x0);
-			nzMEM += sizeof(*histo)+sizeof(HISTO_BIN)*histo->nMostBins;
+			if (histo == nullptr) {
+				histo = new HistoGRAM(hFV, 0);			
+				histo->buffer = this;
+			}	else {
+				histo->hFeat = hFV;
+			}
+			//histo->CopyBins(*(hFV->hDistri->histo), true, 0x0);
+			histo->bins = bins_buffer + pos;		histo->nMostBins = H_src->nBins;
+			histo->CopyBins(*(H_src), true, 0x0);
+			pos += histo->nBins;
+
 			buffers[no] = histo;
 		}
 	}
-	printf("\n********* HistoGRAM_BUFFER MEM=%.6g(M) ldFeat=%d,nMostNode=%d zero=%d\n", nzMEM/1.0e6, nMostNode, ldFeat, nzZ);
+	FeatsOnFold::stat.tX += GST_TOC(t1);
+	return pos;
 }
 
-void HistoGRAM_BUFFER::BeforeTrainTree(size_t nPickSamp, int flag) {
-	for (auto histo : buffers) {
-		if (histo == nullptr)
-			continue;
+HistoGRAM_BUFFER::HistoGRAM_BUFFER(const FeatsOnFold *hData_0, int flag):hData_(hData_0){
+	int nMostLeaf = hData_->config.num_leaves,node,feat,no,nzZ=0;
+	nzMEM = 0;
+	nMostNode = nMostLeaf * 2;
+	nMostFeat = hData_->nFeat();	
+	for (nMostBin = 0,feat = 0; feat < nMostFeat; feat++) {
+		FeatVector *hFV = hData_->feats[feat];
+		if (hFV->hDistri->histo == nullptr)		{
+			nzZ++;		 continue;
+		}
+		nMostBin += hFV->hDistri->histo->nBins;
+	}
+	nMostBin *= nMostNode;
+	bins_buffer = new HISTO_BIN[nMostBin];	nzMEM +=sizeof(HISTO_BIN)*nMostBin;
 
-		histo->nBins = 0;
-		histo->nSamp = 0;
+	ldFeat_ = nMostFeat;
+	nzMost = nMostNode*nMostFeat;
+	buffers.resize(nzMost);
+	nzMEM += sizeof(HistoGRAM)*nzMost;
+	vector<int> feats;
+	feats.resize(nMostFeat);
+	iota(feats.begin(), feats.end(), 0);
+	size_t pos = SetBinsAtBuffer(hData_,feats);
+	assert(pos==nMostBin);
+
+	printf("\n********* HistoGRAM_BUFFER MEM=%.6g(M) nMostBin=%lld\n********* \tnMostFeat=%d,nMostNode=%d zero=%d\n", 
+		nzMEM/1.0e6, nMostBin, nMostNode, nMostFeat, nzZ);
+}
+
+void HistoGRAM_BUFFER::BeforeTrainTree(vector<int>& pick_feats, size_t nPickSamp, int flag) {
+	assert(pick_feats.size() <= nMostFeat);
+	mapFeats.clear();
+	int no = 0,node;
+	if (pick_feats.size() < nMostFeat) {
+		for (auto feat : pick_feats) {
+			mapFeats.insert(pair<int, int>(feat, no++));
+		}
+		ldFeat_ = pick_feats.size();
+		SetBinsAtBuffer(hData_, pick_feats, 0x0);
+	}
+	else
+		ldFeat_ = nMostFeat;
+	
+	for (node = 0; node < nMostNode; node++) {
+		for (auto feat : pick_feats) {
+			no = NodeFeat2NO(node, feat);
+			HistoGRAM *histo = buffers[no];
+			assert(histo != nullptr);
+			histo->nBins = 0;
+			histo->nSamp = 0;
+		}
+	}
 		/*if (histo->bins.size() < histo->nMostBins) {
 			histo->bins.resize(histo->nMostBins);
 		}*/
 		/*for (auto bin : histo->bins) {
 			bin.nz = 0;
 		}*/
-	}
+
 }
 
 HistoGRAM_BUFFER::~HistoGRAM_BUFFER() {
@@ -645,18 +705,20 @@ HistoGRAM_BUFFER::~HistoGRAM_BUFFER() {
 
 HistoGRAM*HistoGRAM_BUFFER::Get(int node, int feat, int flag)	const {
 	assert(node >= 0 && node < nMostNode);
-	assert(feat >= 0 && feat < ldFeat);
+	assert(feat >= 0 && feat < nMostFeat);
 	int no = NodeFeat2NO(node, feat);
 	if (buffers[no] == nullptr)
 		throw "HistoGRAM_BUFFER::Get is 0 !!!";
 	return buffers[no];
 }
 
-void HistoGRAM_BUFFER::Set(int feat, HistoGRAM*histo) {
+/*void HistoGRAM_BUFFER::Set(int feat, HistoGRAM*histo) {
 
-}
+}*/
 
 void HistoGRAM_BUFFER::Clear(int flag) {
+	if (bins_buffer != nullptr)
+		delete[] bins_buffer;
 	for (auto histo : buffers) {
 		if (histo == nullptr)
 			continue;

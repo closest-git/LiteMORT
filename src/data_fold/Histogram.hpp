@@ -156,7 +156,7 @@ namespace Grusoft {
 		virtual void Set(HistoGRAM*histo,int flag=0x0);		
 	};
 
-	
+	class HistoGRAM_BUFFER;
 	/*
 		与特定FeatVector对应的HistoGRAM
 	*/
@@ -171,7 +171,6 @@ namespace Grusoft {
 		int nBigBins = 0,nMostBins=0,nBins=0;
 		//bool isFilled = false;
 		size_t nSamp, nLeft = 0, nRight=0;
-		//FRUIT *fruit=nullptr;			//仅仅指向
 		struct {	//为了并行诶
 			double mxmxN = -1;		//mean*mean*N
 			size_t nLeft = 0, nRight = 0;
@@ -183,6 +182,7 @@ namespace Grusoft {
 		}fruit_info;
 		FeatVector *hFeat = nullptr;	//仅仅指向
 		//vector<HISTO_BIN> bins;
+		HistoGRAM_BUFFER *buffer = nullptr;
 		HISTO_BIN *bins = nullptr;
 		//NA value---样本的某featrue确实missing value ,但总体上还是有down direction
 		HISTO_BIN* hBinNA( )	{
@@ -254,18 +254,23 @@ namespace Grusoft {
 	};
 	//typedef map<int, HistoGRAM*> MAP_HistoGRAM;
 	class HistoGRAM_BUFFER {
+		const FeatsOnFold *hData_=nullptr;
+		typedef map<int, int> MAP_FEAT;
+		MAP_FEAT mapFeats;
+		HISTO_BIN *bins_buffer = nullptr;
 		vector<HistoGRAM*> buffers;
 		int NodeFeat2NO(int node, int feat)	const;
-		int ldFeat=0, nMostNode=0,nzMost=0;
-		size_t nzMEM;
+		int ldFeat_=0, nMostNode=0,nMostFeat=0,nzMost=0;
+		size_t nzMEM, nMostBin=0;
+		virtual size_t SetBinsAtBuffer(const FeatsOnFold *hData_, vector<int>& pick_feats, int flag);
 	public:
 		HistoGRAM_BUFFER(const FeatsOnFold *hData_, int flag=0x0);
 		virtual ~HistoGRAM_BUFFER( );
 		HistoGRAM*Get(int node,int feat, int flag = 0x0)	const;
 
-		virtual void Set(int feat, HistoGRAM*histo);
+		//virtual void Set(int feat, HistoGRAM*histo);
 
-		virtual void BeforeTrainTree(size_t nPickSamp,int flag);
+		virtual void BeforeTrainTree( vector<int>& pick_feats,size_t nPickSamp,int flag);
 
 		virtual void Clear(int flag = 0x0);
 	};

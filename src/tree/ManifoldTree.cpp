@@ -456,6 +456,7 @@ void ManifoldTree::Train(int flag) {
 	//printf("\n-----TREE(nodes=%d,leaf=%d),imp_0=%g,", nodes.size(), leafs.size(), imp_0 );
 	vector<int> pick_feats;
 	hData_->nPick4Split(pick_feats, hData_->rander_feat, hForest,-1 );
+	hForest->histo_buffer->BeforeTrainTree(pick_feats, root->nSample(), flag);
 	if(false){
 		for (auto no : pick_feats) { 
 			hData_->feats[no]->PerturbeHisto(hData_);

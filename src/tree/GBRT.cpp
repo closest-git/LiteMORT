@@ -377,7 +377,6 @@ int GBRT::Train(string sTitle, int x, int flag) {
 		//if (hEvalData != nullptr)		//case_higgs.py实测确实有BUG
 		//	hTree->SetGuideTree(new ManifoldTree(this, hEvalData, "777_" + to_string(t)));
 		nPickSamp = hTree->hRoot()->nSample();
-		histo_buffer->BeforeTrainTree(nPickSamp,flag);
 
 		forest.push_back(hTree);
 		GST_TIC(t111);

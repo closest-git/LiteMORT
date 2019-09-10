@@ -437,7 +437,7 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 
 	fruit = new FRUIT();
 	arrFruit.push_back(fruit);
-	GST_TIC(t1);
+	//GST_TIC(t1);
 	feat_id = -1;
 	double mxmxN = 0;
 	for (int i = start; i < end; i++) {
@@ -478,7 +478,6 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 			delete histoSwarm;
 		}
 	}
-		FeatsOnFold::stat.tX += GST_TOC(t1);
 
 	/*if (isEachFruit) {//EachFruit需要重新设计，暂时保留
 		pick_id = PickOnGain(hData_, arrFruit, flag);
