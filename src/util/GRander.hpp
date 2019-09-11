@@ -77,7 +77,7 @@ namespace Grusoft{
 
 		/*
 			K sample in N	(K<=N)
-			v0.1	为了和lightgbm对比
+			v0.1	对比,需要重写
 				3/2/2019
 		*/
 		inline std::vector<int> kSampleInN(int K,int N, bool isOrder=true,int flag=0x0) {

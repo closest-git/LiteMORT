@@ -33,6 +33,7 @@
 using namespace Grusoft;
 
 
+
 struct MORT{
 	LiteBOM_Config config;
 	GBRT *hGBRT = nullptr;
@@ -181,6 +182,8 @@ END:
 //GBRT *hGBRT = nullptr;
 PYMORT_DLL_API void* LiteMORT_init(PY_ITEM* params, int nParam, int flag = 0x0) {
 	try {
+		printf("");
+
 		MORT *mort = new MORT();
 		OnUserParams(mort->config, params, nParam);
 		printf("\n======LiteMORT_api init @%p(hEDA=%p,hGBRT=%p)...OK\n", mort,mort->hEDA,mort->hGBRT);
@@ -756,4 +759,44 @@ PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_COLUMN *train_data, PY_COLUM
 		printf("\n!!!!!! EXCEPTION@LiteMORT_fit %s!!!!!!\n\n", "...");
 	}
 	return;
+}
+
+const char *GRUS_LITEMORT_APP_NAME = "LiteMORT-alpha";
+
+void GRUS_LITEMORT_VERSION(char * str) {
+	char sName[80];
+	int i, nLen = (int)strlen(GRUS_LITEMORT_APP_NAME), nFrame = 68, off;
+
+	for (i = 1; i < nFrame - 1; i++)		sName[i] = ' ';
+	sName[0] = sName[nFrame - 1] = '*';
+	sName[nFrame] = '\n';
+	off = (nFrame - 2 - nLen) / 2 + 1;
+	for (i = 0; i < nLen; i++)
+		sName[i + off] = GRUS_LITEMORT_APP_NAME[i];
+	sName[nFrame + 1] = '\0';
+
+	sprintf(str, "%s%s%s",
+		"********************************************************************\n",
+		sName,
+		"*                   for personal, non-commercial use.              *\n"
+		"*    Copyright (c) 2018-2019 by YingShiChen. All Rights Reserved.  *\n"
+		"*                         gsp@grusoft.com                          *\n"
+		"********************************************************************\n"
+	);	
+}
+
+BOOL APIENTRY DllMain(HANDLE hModule,DWORD  ul_reason_for_call,	LPVOID lpReserved){
+	char str_version[1000];
+	switch (ul_reason_for_call) {
+	case DLL_PROCESS_ATTACH:		
+		GRUS_LITEMORT_VERSION(str_version);
+		printf("%s", str_version);
+		break;
+	case DLL_THREAD_ATTACH:
+		break;
+	default:
+		break;
+	}
+
+	return TRUE;
 }

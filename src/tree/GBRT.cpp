@@ -255,9 +255,9 @@ int GBRT::IterTrain(int round, int flag) {
 			if (hTrainData->lossy->isOK(0x0, FLT_EPSILON)) {
 				eOOB = 0;	printf("\n********* ERR@Train is ZERO, Break!!! *********\n\n");	return 0x0;
 			}
-			if (skdu.noT % 500 == 0) {
+			if (skdu.noT % 500 == 0 && hTrainData->config.verbose == 666) {
 				a = forest.size() == 0 ? 0 : nzNode*1.0 / forest.size();
-				printf("\n====== %d: ERR@%s=%8.5g nNode=%g nPickFeat=%d nPickSamp=%lld time=%.3g======\n", skdu.noT, hTrainData->nam.c_str(), err_0,
+				printf("\n====== %d: ERR@%s=%8.5g nNode=%g nPick=[%d,%lld] time=%.3g======\n", skdu.noT, hTrainData->nam.c_str(), err_0,
 					a, hTrainData->nPickFeat, nPickSamp, GST_TOC(tick));
 			}
 			if (hEvalData == nullptr)
@@ -351,9 +351,9 @@ int GBRT::Train(string sTitle, int x, int flag) {
 				if (hTrainData->lossy->isOK(0x0, FLT_EPSILON)) {
 					eOOB = 0;	printf("\n********* ERR@Train is ZERO, Break!!! *********\n\n");	return 0x0;
 				}
-				if (skdu.noT % 500 == 0) {
+				if (skdu.noT % 500 == 0 && hTrainData->config.verbose==666) {
 					a = forest.size() == 0 ? 0 : nzNode*1.0 / forest.size();
-					printf("\n====== %d: ERR@%s=%8.5g nNode=%g nPickFeat=%d nPickSamp=%lld time=%.5g======\n", skdu.noT, hTrainData->nam.c_str(), err_0,
+					printf("\n====== %d: ERR@%s=%8.5g nNode=%g nPick=[%d,%lld] time=%.5g======\n", skdu.noT, hTrainData->nam.c_str(), err_0,
 						a, hTrainData->nPickFeat, nPickSamp, GST_TOC(tick));
 				}
 				if (hEvalData == nullptr)
