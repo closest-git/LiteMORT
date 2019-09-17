@@ -295,3 +295,5 @@ ModelManifest.xml
 /python-package/case_qq2019.py
 *.txt
 *.jpg
+/src/learn/discpy.py
+/src/learn/sparsipy.py

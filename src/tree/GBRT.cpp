@@ -3,6 +3,7 @@
 #include "../data_fold/Loss.hpp"
 #include "../util/Object.hpp"
 #include "../EDA/SA_salp.hpp"
+#include "../learn/Pruning.hpp"
 
 GBRT::GBRT(FeatsOnFold *hTrain, FeatsOnFold *hEval, double sOOB, MODEL mod_, int nTre_, int flag) : BoostingForest() {
 	double rou = 1.0;
@@ -426,6 +427,26 @@ int GBRT::Train(string sTitle, int x, int flag) {
 	return 0x0;
 }
 
+/*
+	v0.1	cys
+		9/17/2019
+*/
+int GBRT::Prune(int flag) {
+	size_t nSamp = nSample();
+	int nTree = forest.size(),T = nTree /4,i;
+	EnsemblePruning prune(nSamp, nTree);
+	DForest ft_1;
+	prune.Pick(T,0x0);
+	for (i = 0; i < nTree; i++) {
+		if (prune.w[i] == 0) {
+			continue;
+		}
+		ft_1.push_back(forest[i]);
+	}
+	forest = ft_1;
+
+	return 0x0;
+}
 
 void GBRT::AfterTrain(FeatsOnFold *hData, int cas, int nMulti, int flag) {
 	if (model != REGRESSION) {

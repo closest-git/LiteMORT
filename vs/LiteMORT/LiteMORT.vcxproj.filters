@@ -87,6 +87,9 @@
     <ClCompile Include="..\..\src\util\pcg_oneil\xoshiro256plusplus.c">
       <Filter>源文件\util</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\learn\Pruning.cpp">
+      <Filter>源文件\learn</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\data_fold\Loss.hpp">
@@ -169,6 +172,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\util\pcg_oneil\pcg_basic.h">
       <Filter>源文件\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\learn\Pruning.hpp">
+      <Filter>源文件\learn</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

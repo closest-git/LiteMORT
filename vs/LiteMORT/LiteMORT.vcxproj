@@ -173,6 +173,7 @@ copy $(OutDir)$(TargetName)$(TargetExt) D:\Anaconda3\Lib\site-packages\litemort<
     <ClCompile Include="..\..\src\EDA\SA_salp.cpp" />
     <ClCompile Include="..\..\src\learn\DCRIMI_.cpp" />
     <ClCompile Include="..\..\src\learn\LOSS.cpp" />
+    <ClCompile Include="..\..\src\learn\Pruning.cpp" />
     <ClCompile Include="..\..\src\LiteMORT.cpp" />
     <ClCompile Include="..\..\src\python\pyMORT_DLL.cpp" />
     <ClCompile Include="..\..\src\tree\BiSplit.cpp" />
@@ -199,6 +200,7 @@ copy $(OutDir)$(TargetName)$(TargetExt) D:\Anaconda3\Lib\site-packages\litemort<
     <ClInclude Include="..\..\src\EDA\SA_salp.hpp" />
     <ClInclude Include="..\..\src\include\LiteBOM_config.h" />
     <ClInclude Include="..\..\src\learn\DCRIMI_.hpp" />
+    <ClInclude Include="..\..\src\learn\Pruning.hpp" />
     <ClInclude Include="..\..\src\python\pyMORT_DLL.h" />
     <ClInclude Include="..\..\src\tree\BiSplit.hpp" />
     <ClInclude Include="..\..\src\tree\BoostingForest.hpp" />
