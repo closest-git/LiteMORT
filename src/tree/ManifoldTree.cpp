@@ -606,6 +606,7 @@ ARR_TREE *ManifoldTree::To_ARR_Tree(FeatsOnFold *hData_, bool isQuant_, bool isC
 	ARR_TREE &arrTree = *(harrTree);
 	bool isQuanti = hData_->isQuanti;		//predict,test对应的数据集并没有格子化!!!
 	int nNode = nodes.size(),no=0;
+	double step;
 	assert(nNode > 0);
 	arrTree.Init(nNode);
 	no = 0;
@@ -626,7 +627,8 @@ ARR_TREE *ManifoldTree::To_ARR_Tree(FeatsOnFold *hData_, bool isQuant_, bool isC
 			//arrTree.thrsh_step[no] = isQuanti ? node->fruit->T_quanti : node->fruit->thrshold;
 			arrTree.thrsh_step[no] = node->fruit->Thrshold(isQuant_);
 		}	else {
-			arrTree.thrsh_step[no] = node->GetDownStep();
+			arrTree.thrsh_step[no] = step = node->GetDownStep();
+			assert(-1000<step && step<1000);
 		}
 		no = no + 1;
 	}

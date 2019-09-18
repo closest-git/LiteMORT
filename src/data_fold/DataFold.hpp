@@ -149,6 +149,7 @@ namespace Grusoft {
 
 		//pDown=target-predict
 		tpDOWN *GetDownDirection()	const;
+		tpDOWN *GetDeltaStep()	const;
 		tpDOWN *GetHessian() const;
 		tpDOWN *GetSampleDown()	const;
 		tpDOWN *GetSampleHessian() const;		
@@ -265,6 +266,8 @@ namespace Grusoft {
 			FeatVec_T<Ty> *predict = dynamic_cast<FeatVec_T<Ty>*>(GetPrecict());
 			if (predict == nullptr)
 				return false;
+			//tpDOWN *delta_step = GetDeltaStep();
+			//assert(delta_step != nullptr);
 			Ty *pred = predict->arr();
 			int *feat_ids = tree.feat_ids, *left = tree.left, *rigt = tree.rigt;
 			
@@ -278,6 +281,7 @@ namespace Grusoft {
 					while (no != -1) {
 						if (left[no] == -1) {
 							pred[t] += thrsh_step[no];
+							//delta_step[t] = thrsh_step[no];
 							//samp_at_leaf[t] = no;
 							break;
 						}

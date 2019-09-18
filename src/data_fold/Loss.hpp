@@ -205,7 +205,7 @@ namespace Grusoft {
 					for (i = start; i < end; i++) {y_exp[i] = exp(y1[i]);}
 				}
 			}*/
-			if (metric == "logloss") {
+			if (metric == "logloss") {	//binary cross entropy
 				err_logloss = 0;		//-np.mean(true_y*np.log(pred_h) + (1 - true_y)*np.log(1 - pred_h))
 				//vEXP(dim, y_exp);
 #pragma omp parallel for reduction( + : a_logloss )  schedule(static,1)
@@ -318,6 +318,7 @@ namespace Grusoft {
 		}
 	public:
 		std::vector<tpDOWN> down, resi, hessian,sample_down,sample_hessian;		//negative_gradient,是否下降由LOSS判定		
+		std::vector<tpDOWN> delta_step;
 		//参见samp_set之相关定义
 		double DOWN_sum_1 = 0, DOWN_sum_2 = 0, DOWN_GH_2 = 0, LABEL_mean = 0, DOWN_0 = DBL_MAX, DOWN_1 = -DBL_MAX;
 		
@@ -327,6 +328,9 @@ namespace Grusoft {
 		//pDown=target-predict
 		tpDOWN *GetDownDirection() {
 			return VECTOR2ARR(down);
+		}
+		tpDOWN *GetDeltaStep() {
+			return VECTOR2ARR(delta_step);
 		}
 		tpDOWN *GetSampleDown() {
 			return VECTOR2ARR(sample_down);
@@ -358,6 +362,7 @@ namespace Grusoft {
 			//predict.resize(_len, 0);
 			if (isTrain || isEval ) {
 				down.resize(_len, 0);		sample_down.resize(_len, 0);
+				delta_step.resize(_len, 0);
 				resi.clear();				
 				hessian.clear();			sample_hessian.clear();
 			}
@@ -381,11 +386,14 @@ namespace Grusoft {
 		}
 		virtual ~FeatVec_LOSS() {
 			down.clear();				sample_down.clear();
-			resi.clear();
+			resi.clear();				delta_step.clear();
 			hessian.clear();			sample_hessian.clear();
 
 			if (samp_weight != nullptr)			delete samp_weight;
+			if (y != nullptr)			delete y;
+			if (predict != nullptr)		delete predict;
 		}
+
 		//virtual void Stat_Dump(const string&info, int flag=0x0);
 		virtual FeatVector * GetY() { return y; }
 

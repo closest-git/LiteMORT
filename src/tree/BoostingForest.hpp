@@ -12,6 +12,8 @@
 using namespace std;
 
 namespace Grusoft{
+	class EnsemblePruning;
+
 	struct EARLY_STOPPING {
 		vector<double> errors;
 		double e_best=DBL_MAX;
@@ -36,9 +38,8 @@ namespace Grusoft{
 
 	typedef bool (*isTrueObj)(void* user_data,int flag);
 	/*
-		提升算法于maniflod-tree的结合
+		提升算法与maniflod-tree的结合
 
-		广义的随机森林(GBRT一样可以看做是随机森林)
 		建议从"../learn/LMachine.hpp"派生
 		v0.1	cys
 			7/17/2018
@@ -110,6 +111,7 @@ namespace Grusoft{
 		vector<string>FeatNames;
 		//vector<FeatsOnFold *> arrDat;
 		
+		EnsemblePruning *prune = nullptr;
 		FeatsOnFold *hTrainData=nullptr;
 		FeatsOnFold *hTestData = nullptr;
 		FeatsOnFold *hEvalData = nullptr;

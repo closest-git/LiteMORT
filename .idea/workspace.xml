@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1f20a82c-2842-4728-bc01-7f01847a5972" name="Default" comment="README" />
+    <list default="true" id="1f20a82c-2842-4728-bc01-7f01847a5972" name="Default" comment="README">
+      <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_fold/Loss.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/Loss.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/learn/Pruning.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/learn/Pruning.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/learn/Pruning.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/learn/Pruning.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tree/BoostingForest.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/BoostingForest.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tree/GBRT.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/GBRT.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tree/ManifoldTree.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/ManifoldTree.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/util/Object.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/Object.hpp" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,7 +35,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/python-package/case_poct.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="779">
+            <state>
               <caret line="48" column="35" selection-start-line="48" selection-start-column="35" selection-end-line="48" selection-end-column="35" />
               <folding>
                 <element signature="e#0#22#0" expanded="true" />
@@ -35,18 +45,9 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/python-package/case_higgs.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="380">
-              <caret line="29" selection-start-line="29" selection-end-line="29" selection-end-column="1" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/python-package/litemort/LiteMORT.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="6042">
+            <state relative-caret-position="-1249">
               <caret line="328" selection-start-line="328" selection-end-line="328" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
@@ -55,11 +56,32 @@
           </provider>
         </entry>
       </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/learn/sparsipy.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1615">
+              <caret line="85" selection-start-line="85" selection-end-line="85" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://D:/Anaconda3/Lib/site-packages/sklearn/metrics/ranking.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="128">
+              <caret line="242" column="4" selection-start-line="242" selection-start-column="4" selection-end-line="242" selection-end-column="4" />
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/python-package/case_ieee_fraud.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="323">
-              <caret line="17" column="13" selection-start-line="17" selection-start-column="13" selection-end-line="17" selection-end-column="13" />
+            <state relative-caret-position="19">
+              <caret line="20" selection-start-line="20" selection-end-line="20" selection-end-column="1" />
               <folding>
                 <element signature="e#70#88#0" expanded="true" />
               </folding>
@@ -70,7 +92,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/python-package/case_earthquake.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="950">
+            <state relative-caret-position="342">
               <caret line="56" column="31" selection-start-line="56" selection-start-column="24" selection-end-line="56" selection-end-column="31" />
             </state>
           </provider>
@@ -87,7 +109,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>early_stop</find>
       <find>plt</find>
       <find>_check_not_tuple_of_2_elements</find>
       <find>_safe_call</find>
@@ -117,6 +138,7 @@
       <find>y_pred_valid</find>
       <find>100</find>
       <find>input</find>
+      <find>auc</find>
     </findStrings>
     <replaceStrings>
       <replace />
@@ -163,15 +185,15 @@
         <option value="$PROJECT_DIR$/python-package/case_poct.py" />
         <option value="$PROJECT_DIR$/python-package/litemort/LiteMORT.py" />
         <option value="$PROJECT_DIR$/python-package/case_higgs.py" />
+        <option value="$PROJECT_DIR$/src/learn/sparsipy.py" />
         <option value="$PROJECT_DIR$/python-package/case_ieee_fraud.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
+  <component name="ProjectFrameBounds" extendedState="7">
     <option name="x" value="-10" />
-    <option name="y" value="-10" />
-    <option name="width" value="1775" />
-    <option name="height" value="1100" />
+    <option name="width" value="1765" />
+    <option name="height" value="1090" />
   </component>
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="1" id="Add" />
@@ -181,7 +203,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -199,10 +220,17 @@
               <item name="LiteMORT" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="LiteMORT" type="b2602c69:ProjectViewProjectNode" />
+              <item name="LiteMORT" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="learn" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -225,7 +253,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.case_ieee_fraud">
+  <component name="RunManager" selected="Python.sparsipy">
     <configuration name="LiteMORT" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="LiteMORT" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -314,7 +342,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="lgb_kim" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="sparsipy" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="LiteMORT" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -322,12 +350,12 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/python-package" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/learn" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/python-package/lgb_kim.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/learn/sparsipy.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -337,19 +365,19 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Python.lgb_kim" />
       <item itemvalue="Python.case_poct" />
       <item itemvalue="Python.case_higgs" />
       <item itemvalue="Python.case_ieee_fraud" />
       <item itemvalue="Python.LiteMORT" />
+      <item itemvalue="Python.sparsipy" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.sparsipy" />
         <item itemvalue="Python.case_ieee_fraud" />
         <item itemvalue="Python.LiteMORT" />
         <item itemvalue="Python.case_higgs" />
         <item itemvalue="Python.case_poct" />
-        <item itemvalue="Python.lgb_kim" />
       </list>
     </recent_temporary>
   </component>
@@ -449,6 +477,7 @@
       <workItem from="1568016712921" duration="4144000" />
       <workItem from="1568039964360" duration="13640000" />
       <workItem from="1568109994090" duration="5102000" />
+      <workItem from="1568715140417" duration="9800000" />
     </task>
     <task id="LOCAL-00001" summary="README">
       <created>1556249780941</created>
@@ -493,19 +522,19 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="456855000" />
+    <option name="totallyTimeSpent" value="466655000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="-7" width="1415" height="878" extended-state="6" />
+    <frame x="-7" y="-7" width="1411" height="878" extended-state="7" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.80697054" visible="true" weight="0.21075903" />
-      <window_info id="Structure" order="1" sideWeight="0.1930295" side_tool="true" visible="true" weight="0.21075903" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.8029197" visible="true" weight="0.23577236" />
+      <window_info id="Structure" order="1" sideWeight="0.1970803" side_tool="true" visible="true" weight="0.23577236" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3297587" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.40884718" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.422252" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.40884718" />
+      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.44906166" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -521,7 +550,7 @@
       <window_info anchor="right" id="R Packages" order="3" />
       <window_info anchor="right" id="R Graphics" order="4" />
       <window_info anchor="right" id="Database" order="5" />
-      <window_info active="true" anchor="right" x="601" y="59" width="225" height="746" id="SciView" order="6" sideWeight="0.46989527" visible="true" weight="0.09064112" />
+      <window_info anchor="right" x="601" y="59" width="225" height="746" id="SciView" order="6" sideWeight="0.46989527" visible="true" weight="0.18551368" />
       <window_info anchor="right" x="0" y="0" width="314" height="678" id="Documentation" order="7" sideWeight="0.5301047" side_tool="true" visible="true" weight="0.1398892" />
     </layout>
   </component>
@@ -690,6 +719,11 @@
           <line>18</line>
           <option name="timeStamp" value="437" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/learn/sparsipy.py</url>
+          <line>113</line>
+          <option name="timeStamp" value="444" />
+        </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
@@ -710,6 +744,7 @@
     <SUITE FILE_PATH="coverage/LiteMORT$LiteMORT_preprocess.coverage" NAME="LiteMORT_preprocess Coverage Results" MODIFIED="1557816270058" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package/litemort" />
     <SUITE FILE_PATH="coverage/LiteMORT$lgb_kim.coverage" NAME="lgb_kim Coverage Results" MODIFIED="1564801856244" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
     <SUITE FILE_PATH="coverage/LiteMORT$case_poct.coverage" NAME="case_poct Coverage Results" MODIFIED="1566438871158" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
+    <SUITE FILE_PATH="coverage/LiteMORT$sparsipy.coverage" NAME="sparsipy Coverage Results" MODIFIED="1568795958856" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/learn" />
     <SUITE FILE_PATH="coverage/LiteMORT$pytest_in_pycharm_test_py.coverage" NAME="pytest in pycharm_test.py Coverage Results" MODIFIED="1564799919413" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
     <SUITE FILE_PATH="coverage/LiteMORT$LiteMORT.coverage" NAME="LiteMORT Coverage Results" MODIFIED="1567668032608" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package/litemort" />
     <SUITE FILE_PATH="coverage/LiteMORT$case_qq2019.coverage" NAME="case_qq2019 Coverage Results" MODIFIED="1564799379478" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
@@ -719,14 +754,6 @@
     <SUITE FILE_PATH="coverage/LiteMORT$geo_test.coverage" NAME="geo_test Coverage Results" MODIFIED="1564799540881" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://D:/Anaconda3/Lib/unittest/case.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="604" selection-start-line="604" selection-end-line="604" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://D:/Anaconda3/Lib/site-packages/LiteMORT/__init__.py" />
     <entry file="file://$PROJECT_DIR$/setup_000.py" />
     <entry file="file://$PROJECT_DIR$/setup.py" />
     <entry file="file://D:/Anaconda3/Lib/urllib/request.py">
@@ -1008,9 +1035,16 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/python-package/case_higgs.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-158">
+          <caret line="29" selection-start-line="29" selection-end-line="29" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/python-package/case_poct.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="779">
+        <state>
           <caret line="48" column="35" selection-start-line="48" selection-start-column="35" selection-end-line="48" selection-end-column="35" />
           <folding>
             <element signature="e#0#22#0" expanded="true" />
@@ -1018,16 +1052,16 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/case_higgs.py">
+    <entry file="file://$PROJECT_DIR$/python-package/case_earthquake.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="380">
-          <caret line="29" selection-start-line="29" selection-end-line="29" selection-end-column="1" />
+        <state relative-caret-position="342">
+          <caret line="56" column="31" selection-start-line="56" selection-start-column="24" selection-end-line="56" selection-end-column="31" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/python-package/litemort/LiteMORT.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="6042">
+        <state relative-caret-position="-1249">
           <caret line="328" selection-start-line="328" selection-end-line="328" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
@@ -1035,17 +1069,27 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/case_earthquake.py">
+    <entry file="file://D:/Anaconda3/Lib/site-packages/sklearn/metrics/ranking.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="950">
-          <caret line="56" column="31" selection-start-line="56" selection-start-column="24" selection-end-line="56" selection-end-column="31" />
+        <state relative-caret-position="128">
+          <caret line="242" column="4" selection-start-line="242" selection-start-column="4" selection-end-line="242" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/learn/sparsipy.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1615">
+          <caret line="85" selection-start-line="85" selection-end-line="85" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/python-package/case_ieee_fraud.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="323">
-          <caret line="17" column="13" selection-start-line="17" selection-start-column="13" selection-end-line="17" selection-end-column="13" />
+        <state relative-caret-position="19">
+          <caret line="20" selection-start-line="20" selection-end-line="20" selection-end-column="1" />
           <folding>
             <element signature="e#70#88#0" expanded="true" />
           </folding>

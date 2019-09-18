@@ -14,16 +14,64 @@
 using namespace Grusoft;
 using namespace std;
 
-EnsemblePruning::EnsemblePruning(int n, int m, int flag) : nSamp(n), nWeak(n) {
-	U = new float[nSamp*nWeak];
-	w_0 = new float[nWeak];
-	w = new float[nWeak];
+EnsemblePruning::EnsemblePruning(FeatsOnFold *hFold_, int mWeak_, int flag) : hFold(hFold_),nMostWeak(mWeak_) {
+	nSamp = hFold->nSample();
+	U = new float[nSamp*nMostWeak];
+	w_0 = new float[nMostWeak];
+	w = new float[nMostWeak];
+	nWeak = 0;
 }
 
-void EnsemblePruning::Pick(int T,int flag){
+/*
+*/
+void EnsemblePruning::OnStep(int noT_, tpDOWN*hWeak, int flag) {
+	tpMetricU *U_t = U + nWeak*nSamp;		//Construct margin matrix
+	assert(nWeak >= 0 && nWeak < nMostWeak);
+	for (size_t i = 0; i < nSamp; i++) {
+		U_t[i] = hWeak[i];
+	}
+	nWeak = nWeak + 1;
+}
+
+void EnsemblePruning::ToCSV(const string& sPath, int flag) {
+	FILE *fp = fopen(sPath.c_str(), "wt");
+	assert(fp != NULL);
+	size_t samp, h;
+	FeatVector *hY = hFold->GetY();
+	FeatVec_T<double> *hYd = dynamic_cast<FeatVec_T<double>*>(hY);
+	double *y = hYd==nullptr ? nullptr : hYd->arr();
+	for (samp = 0; samp < nSamp; samp++) {
+		tpMetricU *U_ = U+samp;
+		for (h = 0; h < nWeak; h++) {
+			fprintf(fp, "%g\t", U_[h*nSamp]);
+		}
+		if (y != nullptr) {
+			fprintf(fp, "%g\t", y[samp]);
+		}
+		fprintf(fp, "\n");
+	}
+	for (h = 0; h < nWeak; h++) {
+		fprintf(fp, "%g\t", w_0[h]);
+	}
+	if (y != nullptr) {		fprintf(fp, "%g\t", -666666.0);	}
+
+	fprintf(fp, "\n");
+	fclose(fp);
+	printf(">>>>>> Dump %s ...  OK", sPath.c_str() );
+}
+
+void EnsemblePruning::Pick(int tt, int T,int flag){
+	//nWeak = nWeak_;
 	int nPick = nWeak,nLarge=nSamp/3,i,no,k, nZero;
 	double sum = 0;
 	short sigma = 0;
+	plus_minus = new short[nWeak];
+	for (sum = 0, i = 0; i < nWeak; i++) {	sum += fabs(w_0[i]);	}
+	for (i = 0; i < nWeak; i++) { w_0[i] /= sum; }
+	ToCSV("E:\\EnsemblePruning_"+std::to_string(nSamp) + "_"+std::to_string(nWeak) +"_.csv",0x0);
+	return;
+
+	memcpy(w, w_0, sizeof(tpMetricU)*nWeak);
 	nPick = nSparsified();
 	while (nPick > T) {
 		vector<tpSAMP_ID> idx;
@@ -54,6 +102,5 @@ void EnsemblePruning::Pick(int T,int flag){
 		nPick = nSparsified();
 		
 	}
-
-
+	delete[] plus_minus;
 };

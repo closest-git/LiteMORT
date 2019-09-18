@@ -8,10 +8,12 @@
 
 
 namespace Grusoft{
+	typedef float tpMetricU;
+	class FeatsOnFold;
 	class EnsemblePruning{
 	protected:
-		size_t nSamp=0, nWeak=0;
-
+		size_t nSamp=0, nWeak=0,nMostWeak=0;
+		FeatsOnFold *hFold = nullptr;
 		int nSparsified() {
 			int nPick, i;
 			for (nPick = 0, i = 0; i < nWeak; i++) {
@@ -20,12 +22,13 @@ namespace Grusoft{
 			}
 			return nPick;
 		}
+		void ToCSV(const string& sPath, int flag);
 
 	public:
-		float *U = nullptr, *w_0 = nullptr, *w = nullptr;
+		tpMetricU *U = nullptr, *w_0 = nullptr, *w = nullptr;
 		short *plus_minus = nullptr;
 
-		EnsemblePruning(int n,int m,int flag=0x0);
+		EnsemblePruning(FeatsOnFold *hFold, int nWeak_,int flag=0x0);
 		virtual ~EnsemblePruning() {
 			if (U != nullptr)		
 				delete[] U;
@@ -36,8 +39,11 @@ namespace Grusoft{
 			if (plus_minus != nullptr)
 				delete[] plus_minus;
 		}
+		virtual bool isValid() { return true; }
 
-		virtual void Pick(int T, int flag);
+		virtual void Pick(int nWeak_,int T, int flag);
+
+		virtual void OnStep(int noT, tpDOWN*down, int flag = 0x0);
 	};
 
 };

@@ -606,7 +606,7 @@ void FeatVec_Q::UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst,
 			FeatVec_T<float> *hFeatFloat = dynamic_cast<FeatVec_T<float>*>(hFeatSource);
 			float *x = hFeatFloat->arr();
 			distri.ClearHisto();
-			distri.X2Histo_(hData_->config, nSamp, x, yDown);
+			distri.X2Histo_(hData_->config, nSamp, x, yDown);	
 		}
 
 		if(distri.histo!=nullptr)
@@ -772,6 +772,7 @@ void INIT_SCORE::Init(FeatsOnFold *hData_, int flag) {
 		step = score;
 		printf("---->%g", step);
 	}
+	printf("\n");
 }
 
 void INIT_SCORE::ToDownStep(int flag) {
@@ -793,6 +794,10 @@ FeatVector* FeatsOnFold::GetY() {
 tpDOWN *FeatsOnFold::GetDownDirection() const {
 	assert(lossy != nullptr);
 	return lossy->GetDownDirection();
+}
+tpDOWN *FeatsOnFold::GetDeltaStep() const {
+	assert(lossy != nullptr);
+	return lossy->GetDeltaStep();
 }
 tpDOWN *FeatsOnFold::GetHessian() const {
 	assert(lossy != nullptr);

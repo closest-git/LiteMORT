@@ -188,6 +188,11 @@ void FREE_a( T* &ptr ){
 	}
 }
 
+template<typename T>
+void VALID_HANDLE(T *obj) {
+	assert((obj) != nullptr && (obj)->isValid());
+}
+
 #ifdef HOPSCOTCH_MAP_LIB
 template<typename K,typename V>
 //V *HT_FIND( unordered_map<K,V*>&HT,K key){

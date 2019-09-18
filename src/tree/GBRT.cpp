@@ -5,6 +5,7 @@
 #include "../EDA/SA_salp.hpp"
 #include "../learn/Pruning.hpp"
 
+
 GBRT::GBRT(FeatsOnFold *hTrain, FeatsOnFold *hEval, double sOOB, MODEL mod_, int nTre_, int flag) : BoostingForest() {
 	double rou = 1.0;
 #ifdef _DEBUG
@@ -57,6 +58,9 @@ GBRT::GBRT(FeatsOnFold *hTrain, FeatsOnFold *hEval, double sOOB, MODEL mod_, int
 	}
 	nOOB = nTrain*sOOB;
 	histo_buffer = new HistoGRAM_BUFFER(hTrain);
+	if (hEval != nullptr) {
+		;// prune = new EnsemblePruning(hEval, nTree);
+	}
 	const char *mod = model==CLASIFY ? "CLASIFY" : "REGRESSION";
 	printf("\n\n********* GBRT[%s]\n\tnTrainSamp=%d,nTree=%d,maxDepth=%d regress@LEAF=%s thread=%d feat_quanti=%d...",
 		mod,nTrain, nTree, maxDepth, hTrain->config.leaf_regression.c_str(),nThread, hTrain->config.feat_quanti);
@@ -78,6 +82,7 @@ void GBRT::BeforeTrain(FeatsOnFold *hData_, int flag ) {
 		//assert(fabs(im0 - a - im1)<FLT_EPSILON*im0);
 	}
 }
+
 
 /*
 	如果y已知，就可以checkLossy
@@ -110,6 +115,8 @@ double GBRT::Predict(FeatsOnFold *hData_, bool isX,bool checkLossy, bool resumeL
 		assert(hTree!=nullptr);
 		if (lastTree != nullptr && hTree != lastTree)
 			continue;
+		//if (forest.size() == 9 && nSamp == 1250)
+		//	t = 0;
 
 		bool isNodeMajor = true;
 		if (true) {		//data-major	似乎快一些
@@ -346,6 +353,11 @@ int GBRT::Train(string sTitle, int x, int flag) {
 				if (hTrainData->feat_salps != nullptr && t>0) {
 					hTrainData->feat_salps->SetCost(1-err);
 				}
+				if (prune != nullptr) {
+					if (t > 1) {	//
+						prune->OnStep(t-2,hEvalData->GetDeltaStep());
+					}
+				}
 			}
 			if (isEvalTrain) {
 				err_0 = this->Predict(hTrainData, false, true, true);		//可以继续优化
@@ -359,6 +371,7 @@ int GBRT::Train(string sTitle, int x, int flag) {
 				}
 				if (hEvalData == nullptr)
 					stopping.Add(err_0, t, isLRjump);
+				
 			}
 		}		
 		if (stopping.isOK(t)) {
@@ -397,6 +410,9 @@ int GBRT::Train(string sTitle, int x, int flag) {
 		delete forest[i];
 	}
 	forest.resize(stopping.best_round + 1);
+	if (prune!=nullptr) {
+		this->Prune();
+	}
 	hTrainData->AfterTrain();
 	string sEval = hEvalData == nullptr ? (isEvalTrain ? hTrainData->nam : "None") : hEvalData->nam;
 	if (stopping.isOK(t)) {
@@ -432,18 +448,24 @@ int GBRT::Train(string sTitle, int x, int flag) {
 		9/17/2019
 */
 int GBRT::Prune(int flag) {
+	VALID_HANDLE(prune);
 	size_t nSamp = nSample();
-	int nTree = forest.size(),T = nTree /4,i;
-	EnsemblePruning prune(nSamp, nTree);
-	DForest ft_1;
-	prune.Pick(T,0x0);
+	int nTree = forest.size()-1,T = nTree /4,i;
 	for (i = 0; i < nTree; i++) {
-		if (prune.w[i] == 0) {
+		prune->w_0[i] = 1.0;
+	}
+	DForest ft_1;
+	prune->Pick(nTree,T,0x0);
+	for (i = 0; i < nTree; i++) {
+		if (prune->w[i] == 0) {
 			continue;
 		}
 		ft_1.push_back(forest[i]);
 	}
 	forest = ft_1;
+	string sEval,sLossE = hEvalData == nullptr ? "" : hEvalData->LOSSY_INFO(stopping.e_best), sLossT = "";// hTrainData->LOSSY_INFO(err_0);
+	printf("\n********* GBRT::Prune nTree=%d ERR@train=%s err@%s=%s thread=%d",
+		forest.size(),  sLossT.c_str(), sEval.c_str(), sLossE.c_str(), nThread );
 
 	return 0x0;
 }
