@@ -106,12 +106,7 @@ namespace Grusoft {
 		virtual void Dump(const char*, int type, int flag = 0x0);
 		static bool isBig(const MT_BiSplit *l, const MT_BiSplit *r) { return true; }/**/
 
-
-		virtual tpDOWN GetDownStep() {
-			assert(this->isLeaf());
-			
-			return down_step*lr_eta;
-		}
+		virtual tpDOWN GetDownStep();
 
 		virtual void Init_BFold(FeatsOnFold *hData_,int flag=0x0);
 

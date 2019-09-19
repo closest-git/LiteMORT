@@ -404,7 +404,7 @@ int GBRT::Train(string sTitle, int x, int flag) {
 		}
 	}
 	string sLossE = hEvalData==nullptr?"":hEvalData->LOSSY_INFO(stopping.e_best), sLossT = hTrainData->LOSSY_INFO(err_0);
-	//printf("\n====== %d: ERR@%s=%8.5g time=%.3g(%.3g) ======\n", skdu.noT, hTrainData->nam.c_str(), err_0,GST_TOC(tick), 0);
+	printf("\n====== %d: ERR@%s=%8.5g time=%.3g(%.3g) ======\n", skdu.noT, hTrainData->nam.c_str(), err_0,GST_TOC(tick), 0);
 	for (i = stopping.best_round + 1; i<forest.size(); i++) {
 		delete forest[i];
 	}

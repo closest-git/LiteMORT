@@ -620,7 +620,7 @@ namespace Grusoft {
 				return regress;
 
 			}*/
-		}
+		}		
 
 		/*
 			2/26/2019	Adaptive Learning_rate需要重新设计(用eval调整,会加大overfit)

@@ -56,7 +56,7 @@ def reduce_mem_usage(df, verbose=True):
                 elif c_min > np.iinfo(np.int64).min and c_max < np.iinfo(np.int64).max:
                     df[col] = df[col].astype(np.int64)
             else:
-                if False and c_min > np.finfo(np.float16).min and c_max < np.finfo(np.float16).max:
+                if c_min > np.finfo(np.float16).min and c_max < np.finfo(np.float16).max:
                     df[col] = df[col].astype(np.float16)
                 elif c_min > np.finfo(np.float32).min and c_max < np.finfo(np.float32).max:
                     df[col] = df[col].astype(np.float32)
@@ -146,7 +146,7 @@ lgb_params = {
                     'subsample':0.7,
                     'n_estimators':800,
                     'max_bin':255,
-                    'verbose':1,
+                    'verbose':666,
                     'seed': SEED,
                     'early_stopping_rounds':100,
                 }

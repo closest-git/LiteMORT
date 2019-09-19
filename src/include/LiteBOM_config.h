@@ -157,13 +157,13 @@ namespace Grusoft {
 		void dump(int type = 0x0) {
 			//string histo_alg = histo_algorithm==on_EDA ? "on_EDA" : histo_algorithm == on_subsample ? "on_subsample" : "on_Y";
 			string histo_alg = histo_bin_map == 0 ? "\"quantile\"" : (histo_bin_map == 1 ? "\"frequency\"" : histo_bin_map == 3 ? "\"Dcrimini on Y\"" : "XXX");
-			printf("\n\tlr=%g sample=[%g,%g] min@leaf=%d stop=%d drop=%g num_leaves=%d "
+			printf("\n\t%slr=%g sample=[%g,%g] min@leaf=%d stop=%d drop=%g num_leaves=%d "
 				"\n\tOBJECTIVE=\"%s\"\teval_metric=\"%s\"\tleaf_optimal=\"%s\" \n\t init=%s"
 				"\n\tImputation=%s\tNormal=%s"
-				"\n\tnElitism=%d,Iter_refine=%g \tRefine_split=%d"
+				"\n\tnElitism=%g,Iter_refine=%g \tRefine_split=%d"
 				"\n\tnode_task=%s"
 				"\n\tnMostSalp4Bins=%d histo_bin_::map=%s",
-				learning_rate, subsample, feature_fraction, min_data_in_leaf, early_stopping_round, drop_out, num_leaves,
+				lr_adptive_leaf?"a_":"",learning_rate, subsample, feature_fraction, min_data_in_leaf, early_stopping_round, drop_out, num_leaves,
 				objective.c_str(), eval_metric.c_str(), leaf_optimal.c_str(),
 				init_scor.c_str(),
 				eda_NA == -1 ? "OFF" : eda_NA == 0 ? "0" : "Other",
@@ -249,8 +249,8 @@ namespace Grusoft {
 		// desc = shrinkage rate
 		// desc = in ``dart``, it also affects on normalization weights of dropped trees
 		double learning_rate = 0.03;
-		bool lr_adptive_leaf = false;
-		bool useRandomSeed = false;	// true;
+		bool lr_adptive_leaf = true;
+		bool useRandomSeed = false;
 		std::string eda_nan = "zero";
 		int nMostSalp4bins = 0;
 		int nMostSalp4feats = 0;

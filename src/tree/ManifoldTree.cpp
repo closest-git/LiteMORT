@@ -534,6 +534,7 @@ void ManifoldTree::Train(int flag) {
 	for (auto node : nodes) {
 	//for each(hMTNode node in nodes) {
 		if (node->isLeaf()) {
+			
 			//node->Observation_AtLocalSamp(hData_);
 			nLeaf++;
 			size_t nSamp= node->nSample();
@@ -548,6 +549,9 @@ void ManifoldTree::Train(int flag) {
 				//注意 在Grow Leaf时，每个节点的impuri,fruit已被初始化
 				if( node->impuri>0 )
 					node->CheckGain(hData_, pick_feats, 0);
+			}else if (hData_->config.lr_adptive_leaf && nTree>1) {
+				//if(hForest->hEvalData!=nullptr)
+					hData_->lossy->Adaptive_LR<double>(node);
 			}
 		}
 	}

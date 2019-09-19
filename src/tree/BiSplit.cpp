@@ -554,6 +554,7 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 			hFeat->wBins[tic] += 1;
 			tic = fruit->bin_S1.tic;			hFeat->wBins[tic] += 1;
 		}
+		
 		/*if (hFeat->select_bins != nullptr) {
 			hFeat->select_bins->AddCandSalp();
 			hFeat->select_bins->SetCost(gain);
@@ -570,6 +571,13 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 		double purity = max(Y_mean, 1 - Y_mean);
 		gain_ *= (1 - purity);*/
 	return gain_;
+}
+
+
+tpDOWN MT_BiSplit::GetDownStep() {
+	assert(this->isLeaf());
+	//assert(lr_eta == 1.0);
+	return down_step*lr_eta;
 }
 
 void MT_BiSplit::Init_BFold(FeatsOnFold *hData_, int flag) {

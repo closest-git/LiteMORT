@@ -189,7 +189,7 @@ namespace Grusoft {
 			const string objective = hData_->config.objective, metric = hData_->config.eval_metric;
 			bool isOutlier = objective == "outlier";
 			Tx fuyi = -1, *y1 = ((FeatVec_T<Tx>*)predict)->arr(), *label = ((FeatVec_T<Tx>*)y)->arr(),a;
-			tpDOWN *vResi = VECTOR2ARR(resi), *pDown = GetDownDirection();
+			tpDOWN *vResi = VECTOR2ARR(resi), *pDown = GetDownDirection(),*delta = VECTOR2ARR(delta_step);
 			tpDOWN *vHess = VECTOR2ARR(hessian);
 			size_t dim = resi.size(), nSamp = hData_->nSample(), step = dim, start, end;
 			G_INT_64 i;
@@ -243,12 +243,7 @@ namespace Grusoft {
 						a2 += a*a;				sum += a;
 						//a = pDown[i]* pDown[i] / vHess[i];
 						//sumGH += a*a;		label_sum += label[i];
-						/*a = y1[i];if (label[i] == 0 && a > P_0) {	//很奇怪，这样就是不行
-							//pDown[i] *= 10;							
-						}
-						else if (label[i] == 1 && a < N_1) {
-							//pDown[i] *= 10;							
-						}*/
+						
 					}
 				}
 				DOWN_sum_2 = a2;	DOWN_sum_1 = sum;
@@ -398,6 +393,39 @@ namespace Grusoft {
 		virtual FeatVector * GetY() { return y; }
 
 		virtual void Update(FeatsOnFold *hData_,int round, int flag = 0x0);
+
+		template <typename Tx>
+		void Adaptive_LR(MT_BiSplit *hBlit, int flag = 0x0) {
+			assert(hBlit->lr_eta == 1.0 && hBaseData_->config.lr_adptive_leaf);
+			bool isTrain = BIT_TEST(hBaseData_->dType, FeatsOnFold::DF_TRAIN);
+			bool isEval = BIT_TEST(hBaseData_->dType, FeatsOnFold::DF_EVAL);
+			tpDOWN step_base = hBlit->GetDownStep();
+			double s[] = { -5,-2,-1,-0.5,-0.1,0.1,0.5,1,2,5,10 };
+			double err, min_err = DBL_MAX, eta_bst = 1.0, a;
+			//min_err = -DBL_MAX;
+			FeatVec_T<Tx> *hY = dynamic_cast<FeatVec_T<Tx>*>(y);		assert(hY != nullptr);
+			const Tx *pred = ((FeatVec_T<Tx>*)predict)->arr(), *label = ((FeatVec_T<Tx>*)y)->arr();
+			size_t i, loop, nLoop = sizeof(s) / sizeof(double), nSamp = hBlit->nSample();
+			tpSAMP_ID *samps = hBlit->samp_set.samps, samp;
+			for (loop = 0; loop < nLoop; loop++) {
+				double step = step_base*s[loop];
+				for (err = 0, i = 0; i<nSamp; i++) {
+					samp = samps[i];
+					a = pred[samp] + step;
+					err += a<EXP_UNDERFLOW ? 0 : a>EXP_OVERFLOW ? a : log(1 + std::exp(a));
+					if (label[samp] == 1)
+						err -= a;
+				}
+				assert(!IS_NAN_INF(err));
+				if (err < min_err) {
+				//if (err > min_err) {
+					min_err = err;		eta_bst = s[loop];
+				}
+			}
+			hBlit->lr_eta = eta_bst;
+			if (hBlit->lr_eta < 0)
+				printf("%.3g ", hBlit->lr_eta);
+		}
 
 		virtual double ERR(int flag = 0x0);
 
