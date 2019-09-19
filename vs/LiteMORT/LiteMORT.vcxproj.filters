@@ -176,5 +176,8 @@
     <ClInclude Include="..\..\src\learn\Pruning.hpp">
       <Filter>源文件\learn</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\util\PY_obj.hpp">
+      <Filter>源文件\util</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

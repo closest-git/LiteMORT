@@ -9,7 +9,7 @@
 #else
 #define PYMORT_DLL_API __declspec(dllimport)
 #endif
-#include "../util/GST_def.h"
+#include "../util/PY_obj.hpp"
 
 #define __API_BEGIN__() try {
 

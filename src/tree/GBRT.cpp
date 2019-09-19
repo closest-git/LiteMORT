@@ -5,7 +5,6 @@
 #include "../EDA/SA_salp.hpp"
 #include "../learn/Pruning.hpp"
 
-
 GBRT::GBRT(FeatsOnFold *hTrain, FeatsOnFold *hEval, double sOOB, MODEL mod_, int nTre_, int flag) : BoostingForest() {
 	double rou = 1.0;
 #ifdef _DEBUG

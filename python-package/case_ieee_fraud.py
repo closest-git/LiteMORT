@@ -56,7 +56,7 @@ def reduce_mem_usage(df, verbose=True):
                 elif c_min > np.iinfo(np.int64).min and c_max < np.iinfo(np.int64).max:
                     df[col] = df[col].astype(np.int64)
             else:
-                if c_min > np.finfo(np.float16).min and c_max < np.finfo(np.float16).max:
+                if False and c_min > np.finfo(np.float16).min and c_max < np.finfo(np.float16).max:
                     df[col] = df[col].astype(np.float16)
                 elif c_min > np.finfo(np.float32).min and c_max < np.finfo(np.float32).max:
                     df[col] = df[col].astype(np.float32)
@@ -73,17 +73,18 @@ def make_predictions(tr_df, tt_df, features_columns, target, lgb_params, NFOLDS=
     print(f'train_df={tr_df.shape} test_df={tt_df.shape} \nlgb_params={lgb_params}')
     folds = KFold(n_splits=NFOLDS, shuffle=True, random_state=SEED)
 
-    X, y = tr_df[features_columns], tr_df[target]
-    P, P_y = tt_df[features_columns], tt_df[target]
+    #X, y = tr_df[features_columns], tr_df[target]
+    #P, P_y = tt_df[features_columns], tt_df[target]
+    y, P_y = tr_df[target], tt_df[target]
 
-    tt_df = tt_df[['TransactionID', target]]
+
     predictions = np.zeros(len(tt_df))
 
-    for fold_, (trn_idx, val_idx) in enumerate(folds.split(X, y)):
+    for fold_, (trn_idx, val_idx) in enumerate(folds.split(tr_df[features_columns], y)):
         t0=time.time()
         print('Fold:', fold_)
-        tr_x, tr_y = X.iloc[trn_idx, :], y[trn_idx]
-        vl_x, vl_y = X.iloc[val_idx, :], y[val_idx]
+        tr_x, tr_y = tr_df[features_columns].iloc[trn_idx, :], y[trn_idx]
+        vl_x, vl_y = tr_df[features_columns].iloc[val_idx, :], y[val_idx]
         print(len(tr_x), len(vl_x))
 
         if isMORT:
@@ -93,11 +94,11 @@ def make_predictions(tr_df, tt_df, features_columns, target, lgb_params, NFOLDS=
             pred_raw = model.predict_raw(vl_x)
             # y_pred[val_idx] = pred_raw
             fold_score = metrics.roc_auc_score(vl_y, pred_raw)
-            pp_p = model.predict_raw(P)
+            pp_p = model.predict_raw(tt_df[features_columns])
         else:
             tr_data = lgb.Dataset(tr_x, label=tr_y)
             if LOCAL_TEST:
-                vl_data = lgb.Dataset(P, label=P_y)
+                vl_data = lgb.Dataset(tt_df[features_columns], label=P_y)
             else:
                 vl_data = lgb.Dataset(vl_x, label=vl_y)
             estimator = lgb.train(
@@ -108,7 +109,7 @@ def make_predictions(tr_df, tt_df, features_columns, target, lgb_params, NFOLDS=
             )
             pred_raw = estimator.predict(vl_x)
             fold_score = metrics.roc_auc_score(vl_y, pred_raw)
-            pp_p = estimator.predict(P)
+            pp_p = estimator.predict(tt_df[features_columns])
             del tr_data, vl_data
 
         predictions += pp_p / NFOLDS
@@ -120,8 +121,9 @@ def make_predictions(tr_df, tt_df, features_columns, target, lgb_params, NFOLDS=
         print(f'Fold:{fold_} score={fold_score} time={time.time() - t0:.4g} tr_x={tr_x.shape} val_x={vl_x.shape}')
         del tr_x, tr_y, vl_x, vl_y
         gc.collect()
-
+    tt_df = tt_df[['TransactionID', target]]
     tt_df['prediction'] = predictions
+    gc.collect()
 
     return tt_df,fold_score
 

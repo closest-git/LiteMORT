@@ -5,6 +5,7 @@
 #include "../util/GST_def.h"
 #include "../learn/DCRIMI_.hpp"
 #include "../util/GRander.hpp"
+#include "../util/PY_obj.hpp"
 
 using namespace std;
 #define ZERO_REGION 1.0e-16

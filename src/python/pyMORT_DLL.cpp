@@ -250,6 +250,7 @@ void FeatsOnFold::ExpandFeat(int flag) {
 	}
 }
 
+
 FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, string nam_, PY_COLUMN *cX_, PY_COLUMN *cY_, size_t nSamp_, size_t ldX_, size_t ldY_, int flag) {
 	clock_t t0 = clock();
 	assert(BIT_IS(flag, FeatsOnFold::DF_FLAG));
@@ -265,10 +266,12 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	if (config.useRandomSeed) {
 		hFold->rander_samp.Init(31415927 * rand());
 		hFold->rander_feat.Init(123456789 * rand());
+		hFold->rander_bins.Init(123456789 * rand());
 	}	else {
 		srand(42);
 		hFold->rander_samp.Init(31415927);
 		hFold->rander_feat.Init(123456789);
+		hFold->rander_bins.Init(20190826);
 	}
 
 
@@ -302,21 +305,21 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	//if (hFold->hMove != nullptr)
 	//	hFold->hMove->Init_T<Tx, Ty>(nSamp_);
 	hFold->importance = new Feat_Importance(hFold);
-
-	if (cY_->isFloat()) {
+	hFold->lossy->Init_T<tpDOWN>(hFold, nSamp_, 0x0, rnd_seed, flag);
+	/*if (cY_->isFloat()) {
 		hFold->lossy->Init_T<float>(hFold, nSamp_, 0x0, rnd_seed, flag);
 	}	else if (cY_->isInt()) {
 		hFold->lossy->Init_T<int32_t>(hFold, nSamp_, 0x0, rnd_seed, flag);
 	}	else if (cY_->isInt16()) {
 		hFold->lossy->Init_T<int16_t>(hFold, nSamp_, 0x0, rnd_seed, flag);
 	}	else if (cY_->isChar()) {
-		hFold->lossy->Init_T<int8_t>(hFold, nSamp_, 0x0, rnd_seed, flag);
+		hFold->lossy->Init_T<float>(hFold, nSamp_, 0x0, rnd_seed, flag);
 	}	else if (cY_->isInt64()) {
 		hFold->lossy->Init_T<int64_t>(hFold, nSamp_, 0x0, rnd_seed, flag);
 	}	else if (cY_->isDouble()) {
 		hFold->lossy->Init_T<double>(hFold, nSamp_, 0x0, rnd_seed, flag);
 	}	else
-		throw "FeatsOnFold_InitInstance col->dtype is XXX";
+		throw "FeatsOnFold_InitInstance col->dtype is XXX";*/
 
 	bool isTrain = BIT_TEST(flag, FeatsOnFold::DF_TRAIN);
 	bool isPredict = BIT_TEST(flag, FeatsOnFold::DF_PREDIC);
@@ -326,12 +329,16 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	else {
 		FeatVector *Y = hFold->GetY();
 		//Y->Set(nSamp_, (void*)(Y_));
-		Y->Set(nSamp_, cY_->data);
+		Y->Set(nSamp_, cY_);
+		float *samp_weight = hFold->lossy->GetSampWeight(0x0);
+		for (size_t i = 0; i < nSamp_; i++) {
+			samp_weight[i] = 1;	// Y_[i] == 0 ? 1 : 10;
+		}
 	}
 	hFold->lossy->EDA(nullptr, flag);
 
 	GST_TIC(t1);
-	//#pragma omp parallel for num_threads(nThread) schedule(dynamic) reduction(+ : sparse,nana,nConstFeat,nLocalConst,nQuant) 
+//#pragma omp parallel for num_threads(nThread) schedule(dynamic) reduction(+ : sparse,nana,nConstFeat,nLocalConst,nQuant) 
 	for (int feat = 0; feat < ldX_; feat++) {
 		FeatVec_Q *hFQ = nullptr;
 		FeatVector *hFeat = hFold->Feat(feat);
@@ -339,7 +346,8 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 		//	feat = 116;
 		PY_COLUMN *col = cX_ + feat;
 		//printf("\r\tfeat=%d\t......",feat);
-		hFeat->Set(nSamp_, col->data);
+		hFeat->Set(nSamp_, col);
+		//hFeat->Set(nSamp_, col->data);
 		if(isTrain)
 			hFeat->EDA(config,true, 0x0);		//EDA基于全局分析，而这里的是局部分析。分布确实会不一样
 		sparse += hFeat->hDistri->rSparse*nSamp_;
@@ -730,14 +738,14 @@ PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_COLUMN *train_data, PY_COLUM
 		FeatsOnFold *hFold = FeatsOnFold_InitInstance(config, hEDA, "train", train_data, train_target, nSamp, nFeat_0, 1, flag | f1);
 		FeatsOnFold *hEval = nullptr;
 		folds.push_back(hFold);
-		hFold->ExpandFeat();
+		//hFold->ExpandFeat();
 
 		//int nTree = 501;		//出现过拟合
 		int nTree = hFold->config.num_trees;
 		if (nEval > 0) {
 			ExploreDA *edaX_ = isDelEDA ? nullptr : hEDA;
 			hEval = FeatsOnFold_InitInstance(config, edaX_, "eval", eval_data, eval_target, nEval, nFeat_0, 1, flag | FeatsOnFold::DF_EVAL);
-			hEval->ExpandFeat();
+			//hEval->ExpandFeat();
 			folds.push_back(hEval);
 		}
 		mort->hGBRT = new GBRT(hFold, hEval, 0, flag == 0 ? BoostingForest::REGRESSION : BoostingForest::CLASIFY, nTree);
@@ -753,6 +761,7 @@ PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_COLUMN *train_data, PY_COLUM
 	}
 	catch (char * sInfo) {
 		printf("\n!!!!!! EXCEPTION@LiteMORT_fit \n!!!!!!\"%s\"\n\n", sInfo);
+		system("pause");
 		throw sInfo;
 	}
 	catch (...) {

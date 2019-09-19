@@ -41,40 +41,6 @@ typedef int (*ON_TRAVEL_wpath_)(void* user_data,const wchar_t *sPath,int flag);
 	//#define G_INT_64  long long 
 #endif
 
-struct PY_COLUMN {
-	char *name;
-	void *data;
-	char *dtype;
-	char *type_x;
-	double v_min;
-	double v_max;
-
-	bool isChar() {
-		std::string type = dtype;
-		return type == "char" || type == "int8";
-	}
-	bool isInt() {
-		std::string type = dtype;
-		return type == "int" || type == "int32";
-	}
-	bool isInt16() {
-		std::string type = dtype;
-		return type == "int16" ;
-	}
-	bool isInt64() {
-		std::string type = dtype;
-		return type == "int64";
-	}
-	bool isFloat() {
-		std::string type = dtype;
-		return type == "float32" ;
-	}
-	bool isDouble() {
-		std::string type = dtype;
-		return type == "float64" ;
-	}
-};
-
 
 //似乎比std::min std::max更适合比较不同的数据类型		7/11/2015	cys
 #undef MAX

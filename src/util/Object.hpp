@@ -84,6 +84,14 @@ std::string G_STR(const T& x){
 	return ss.str( );
 }
 
+template<typename Tx, typename Ty>
+void G_MEMCOPY_(size_t nSamp,Tx* dst,const Ty* src,int flag=0x0) {
+	for (size_t i = 0; i < nSamp; i++) {
+		dst[i] = src[i];
+	}
+}
+
+
 template<typename T>
 T G_S2T_(const string& s,T init){
 	std::stringstream ss(s);

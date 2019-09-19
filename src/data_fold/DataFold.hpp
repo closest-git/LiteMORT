@@ -529,6 +529,18 @@ namespace Grusoft {
 		//Tx* arr() { return VECTOR2ARR(val); }
 		Tx* arr()			{ return val;		}
 		size_t size()		{ return nSamp_;	}
+
+		virtual void Set(size_t len, PY_COLUMN *col, int flag = 0x0) { 
+			if (len != nSamp_)
+				throw "FeatVec_T::Set len mismatch!!!";
+			if (isReferVal()) {
+				val = (Tx*)(col->data);
+			}
+			else {
+				col->CopyTo_(len, val);
+			}
+		}
+
 		
 		virtual void Set(size_t len, void* src, int flag = 0x0) {
 			//assert(len == val.size());

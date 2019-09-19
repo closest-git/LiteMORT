@@ -70,8 +70,9 @@ namespace Grusoft {
 		virtual size_t nSamp() { throw"FeatVector::nSamp is ..."; }
 
 		virtual void Empty(int flag = 0x0) {		}
-		virtual void Set(size_t len, void* p, int flag = 0x0) { throw"FeatVector::SetY is ..."; }
-		virtual void Set(size_t pos, double a, int flag = 0x0) { throw"FeatVector::SetY is ..."; }
+		virtual void Set(size_t len, void* p, int flag = 0x0) { throw"FeatVector::Set_void_p is ..."; }
+		virtual void Set(size_t len, PY_COLUMN *col, int flag = 0x0) { throw"FeatVector::Set_PY_COLUMN is ..."; }
+		virtual void Set(size_t pos, double a, int flag = 0x0) { throw"FeatVector::Set_a is ..."; }
 
 		virtual void loc(vector<tpSAMP_ID>&poss, double target, int flag = 0x0) { throw"FeatVector::loc is ..."; }
 		virtual tpQUANTI *GetQuantiBins(int flag=0x0) { throw"FeatVector::GetQuantiBins is ..."; }
