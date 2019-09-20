@@ -171,6 +171,8 @@ namespace Grusoft{
 		hMTNode hRoot() {	assert(nodes.size()>0);	return nodes[0]; }
 
 		virtual void Train(int flag = 0x0);
+		virtual void Adpative_LR(int flag=0x0);
+
 		virtual void AddScore(INIT_SCORE *score,int flag=0x0);
 		virtual void Dump(int flag = 0x0);
 		virtual void DelChild(hMTNode hNode,int flag=0x0);

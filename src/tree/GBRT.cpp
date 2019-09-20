@@ -219,7 +219,14 @@ void EARLY_STOPPING::Add(double err,int best_tree, bool& isLRjump, int flag) {
 	}
 }
 
-
+bool EARLY_STOPPING::isOscillate(int nLast) {
+	double e_last = errors[errors.size() - 1];
+	if (best_no <= errors.size() - nLast-1) {
+		assert(e_last >= e_best);
+		return true;
+	}
+	return false;
+}
 
 bool EARLY_STOPPING::isOK(int cur_round) {
 	double e_last = errors[errors.size() - 1];
@@ -392,6 +399,7 @@ int GBRT::Train(string sTitle, int x, int flag) {
 		forest.push_back(hTree);
 		GST_TIC(t111);
 		hTree->Train(flag);				//
+		hTree->Adpative_LR(flag);
 		nzNode +=hTree->nodes.size();
 		hTree->ArrTree_quanti = hTree->To_ARR_Tree(hTrainData,true, false);
 		hTree->ArrTree_data = hTree->To_ARR_Tree(hTrainData, false,true);

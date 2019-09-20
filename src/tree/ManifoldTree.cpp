@@ -436,6 +436,41 @@ void ManifoldTree::BeforeEachBatch(size_t nMost, size_t rng_seed, int flag) {
 	}/**/
 }
 
+void ManifoldTree::Adpative_LR(int flag) {
+	int nTree = hForest->forest.size();
+	if (!(hData_->config.lr_adptive_leaf && nTree > 1 && !hForest->stopping.isOscillate()))
+		return;
+
+	FeatsOnFold *hLRData = hForest->hEvalData;
+	if (hLRData == nullptr)
+		return;
+	bool isSplit = hLRData == hForest->hEvalData;
+	hMTNode root = hRoot();
+	size_t nMost = hLRData->nSample(),nzS=root->nSample();
+	assert(nzS == 0);
+	if (isSplit) {
+		ClearSampSet();
+		root->samp_set.isRef = true;
+		root->samp_set.SampleFrom(hLRData, hForest, nullptr, nMost, -1);
+	}
+	for (auto node : nodes) {
+		//for each(hMTNode node in nodes) {
+		if (node->isLeaf()) {
+			size_t nS = node->nSample();	
+			if (nS > 32) {
+				hLRData->lossy->Adaptive_LR<double>(node);
+			}
+		}
+		else {
+			if(isSplit)
+				hLRData->SplitOn(node);
+		}
+	}
+	if (isSplit) {
+		ClearSampSet();
+	}
+}
+
 /*
 	注意：不管X,Y怎么变化，ManifoldTree的目标函数是negative_gradient!!!	
 	其数据类型始终是tpDOWN
@@ -549,10 +584,10 @@ void ManifoldTree::Train(int flag) {
 				//注意 在Grow Leaf时，每个节点的impuri,fruit已被初始化
 				if( node->impuri>0 )
 					node->CheckGain(hData_, pick_feats, 0);
-			}else if (hData_->config.lr_adptive_leaf && nTree>1) {
-				//if(hForest->hEvalData!=nullptr)
+			}/*else if (hData_->config.lr_adptive_leaf && nTree>1 && !hForest->stopping.isOscillate()) {
+				//if(nSamp%3==0)
 					hData_->lossy->Adaptive_LR<double>(node);
-			}
+			}*/
 		}
 	}
 	assert(nz + oob.size() <= hData_->nSample());

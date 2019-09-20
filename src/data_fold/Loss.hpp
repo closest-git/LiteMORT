@@ -400,7 +400,8 @@ namespace Grusoft {
 			bool isTrain = BIT_TEST(hBaseData_->dType, FeatsOnFold::DF_TRAIN);
 			bool isEval = BIT_TEST(hBaseData_->dType, FeatsOnFold::DF_EVAL);
 			tpDOWN step_base = hBlit->GetDownStep();
-			double s[] = { -5,-2,-1,-0.5,-0.1,0.1,0.5,1,2,5,10 };
+			double s[] = {-0.1,0.1,0.5,1,2,5,10 };
+			//double s[] = { 1 };
 			double err, min_err = DBL_MAX, eta_bst = 1.0, a;
 			//min_err = -DBL_MAX;
 			FeatVec_T<Tx> *hY = dynamic_cast<FeatVec_T<Tx>*>(y);		assert(hY != nullptr);
@@ -422,9 +423,9 @@ namespace Grusoft {
 					min_err = err;		eta_bst = s[loop];
 				}
 			}
+			if (eta_bst < 0)
+				;// printf("%.3g=>%.3g ", hBlit->lr_eta, eta_bst);
 			hBlit->lr_eta = eta_bst;
-			if (hBlit->lr_eta < 0)
-				printf("%.3g ", hBlit->lr_eta);
 		}
 
 		virtual double ERR(int flag = 0x0);

@@ -67,6 +67,8 @@ class LiteMORT_params(object):
             self.max_depth = dict_param['max_depth']
         if 'learning_rate' in dict_param:
             self.learning_rate = dict_param['learning_rate']
+        if 'learning_schedule' in dict_param:
+            self.learning_schedule = dict_param['learning_schedule']
         if 'bagging_fraction' in dict_param:
             self.subsample = dict_param['bagging_fraction']
         #if 'subsample' in dict_param:
@@ -89,8 +91,8 @@ class LiteMORT_params(object):
             self.boost_from_average = dict_param['boost_from_average']
         if 'iter_refine' in dict_param:
             self.iter_refine = dict_param['iter_refine']
-        if 'verbosity' in dict_param:
-            self.verbose = dict_param['verbosity']
+
+        self.verbose = self.alias_param('verbose',0,dict_param,['verbosity',"verbose"])
         #if 'early_stop' in dict_param:
         #    self.early_stopping_rounds = dict_param['early_stop']
         self.early_stopping_rounds = self.alias_param('early_stop',50,dict_param,['early_stop',"early_stopping_round", "early_stopping_rounds", "early_stopping"])
