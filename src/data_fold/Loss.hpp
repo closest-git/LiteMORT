@@ -400,7 +400,7 @@ namespace Grusoft {
 			bool isTrain = BIT_TEST(hBaseData_->dType, FeatsOnFold::DF_TRAIN);
 			bool isEval = BIT_TEST(hBaseData_->dType, FeatsOnFold::DF_EVAL);
 			tpDOWN step_base = hBlit->GetDownStep();
-			double s[] = {-0.1,0.1,0.5,1,2,5,10 };
+			double s[] = {-0.01,0.1,0.5,1,2,5,10 };
 			//double s[] = { 1 };
 			double err, min_err = DBL_MAX, eta_bst = 1.0, a;
 			//min_err = -DBL_MAX;

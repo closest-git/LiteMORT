@@ -2,14 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1f20a82c-2842-4728-bc01-7f01847a5972" name="Default" comment="README">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/python-package/case_ieee_fraud.py" beforeDir="false" afterPath="$PROJECT_DIR$/python-package/case_ieee_fraud.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/data_fold/Loss.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/Loss.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/python/pyMORT_DLL.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/python/pyMORT_DLL.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tree/BoostingForest.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/BoostingForest.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/tree/GBRT.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/GBRT.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/tree/ManifoldTree.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/ManifoldTree.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tree/ManifoldTree.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/ManifoldTree.hpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -100,8 +98,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/python-package/case_ieee_fraud.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="235">
-              <caret line="140" column="49" selection-start-line="140" selection-start-column="49" selection-end-line="140" selection-end-column="49" />
+            <state relative-caret-position="110">
+              <caret line="140" column="50" selection-start-line="140" selection-start-column="50" selection-end-line="140" selection-end-column="50" />
               <folding>
                 <element signature="e#70#88#0" expanded="true" />
               </folding>
@@ -499,7 +497,7 @@
       <workItem from="1568109994090" duration="5102000" />
       <workItem from="1568715140417" duration="14112000" />
       <workItem from="1568862016187" duration="7776000" />
-      <workItem from="1568887578499" duration="5038000" />
+      <workItem from="1568887578499" duration="7883000" />
     </task>
     <task id="LOCAL-00001" summary="README">
       <created>1556249780941</created>
@@ -544,7 +542,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="483781000" />
+    <option name="totallyTimeSpent" value="486626000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1913" y="-7" width="1434" height="878" extended-state="6" />
@@ -1110,8 +1108,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/python-package/case_ieee_fraud.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="235">
-          <caret line="140" column="49" selection-start-line="140" selection-start-column="49" selection-end-line="140" selection-end-column="49" />
+        <state relative-caret-position="110">
+          <caret line="140" column="50" selection-start-line="140" selection-start-column="50" selection-end-line="140" selection-end-column="50" />
           <folding>
             <element signature="e#70#88#0" expanded="true" />
           </folding>

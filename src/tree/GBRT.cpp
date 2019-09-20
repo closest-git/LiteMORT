@@ -400,6 +400,7 @@ int GBRT::Train(string sTitle, int x, int flag) {
 		GST_TIC(t111);
 		hTree->Train(flag);				//
 		hTree->Adpative_LR(flag);
+		hTree->ClearSampSet();
 		nzNode +=hTree->nodes.size();
 		hTree->ArrTree_quanti = hTree->To_ARR_Tree(hTrainData,true, false);
 		hTree->ArrTree_data = hTree->To_ARR_Tree(hTrainData, false,true);

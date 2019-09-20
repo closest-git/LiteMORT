@@ -190,6 +190,28 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 	assert(nPickFeat>0);
 }
 
+int *FeatsOnFold::Rank4Feat(int type, int flag) {
+	int i, nFeat = feats.size();
+	double *wFeat = new double[nFeat]();
+	int *rank = new int[nFeat]();
+	for (i = 0; i < nFeat; i++) {
+		FeatVector *hFeat = Feat(i);
+		wFeat[i] = hFeat->wSplit;
+	}
+	vector<tpSAMP_ID> idx;
+	sort_indexes(nFeat, wFeat, idx);
+	for (i = 0; i < nFeat; i++) {
+		rank[idx[nFeat-1-i]] = i;
+	}
+	for (i = 0; i < nFeat-1; i++) {
+		if(rank[i]<rank[i+1])
+			assert(wFeat[i]>= wFeat[i+1]);
+		else
+			assert(wFeat[i] <= wFeat[i + 1]);
+	}
+	return rank;
+}
+
 void FeatsOnFold::Feature_Bundling(int flag) {
 	size_t i,feat,next,nFeat=feats.size(),maxDup=0,dup;
 	if(edaX ==nullptr || edaX->bundle.buns.size()==0)

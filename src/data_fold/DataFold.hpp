@@ -248,6 +248,7 @@ namespace Grusoft {
 			if (no < -1 || no >= nFeat())	throw "Feat no is OUT OF RANGE!!!";
 			return feats[no];
 		}
+		virtual int *Rank4Feat(int type, int flag = 0x0);	
 		virtual void nPick4Split(vector<int>&picks, GRander&rander, BoostingForest *hForest,int flag = 0x0);
 
 		//ºËÐÄº¯Êý 
