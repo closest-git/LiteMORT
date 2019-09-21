@@ -138,7 +138,7 @@ lgb_params = {
                     'metric':'auc',
                     'n_jobs':-1,
                     'learning_rate':0.01,
-                    "learning_schedule":'adaptive1',
+                    "learning_schedule":'adaptive',
                     'num_leaves': 2**8,
                     'max_depth':-1,
                     'tree_learner':'serial',

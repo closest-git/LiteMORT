@@ -6,8 +6,11 @@
       <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/data_fold/Loss.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/Loss.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/python/pyMORT_DLL.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/python/pyMORT_DLL.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tree/BoostingForest.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/BoostingForest.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/tree/GBRT.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/GBRT.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/tree/ManifoldTree.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/ManifoldTree.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tree/ManifoldTree.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/ManifoldTree.hpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -98,8 +101,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/python-package/case_ieee_fraud.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="110">
-              <caret line="140" column="50" selection-start-line="140" selection-start-column="50" selection-end-line="140" selection-end-column="50" />
+            <state relative-caret-position="399">
+              <caret line="21" column="16" lean-forward="true" selection-start-line="21" selection-start-column="16" selection-end-line="21" selection-end-column="16" />
               <folding>
                 <element signature="e#70#88#0" expanded="true" />
               </folding>
@@ -209,9 +212,10 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="1910" />
-    <option name="width" value="2207" />
-    <option name="height" value="1360" />
+    <option name="x" value="2405" />
+    <option name="y" value="45" />
+    <option name="width" value="1411" />
+    <option name="height" value="870" />
   </component>
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="1" id="Add" />
@@ -497,7 +501,7 @@
       <workItem from="1568109994090" duration="5102000" />
       <workItem from="1568715140417" duration="14112000" />
       <workItem from="1568862016187" duration="7776000" />
-      <workItem from="1568887578499" duration="7883000" />
+      <workItem from="1568887578499" duration="17252000" />
     </task>
     <task id="LOCAL-00001" summary="README">
       <created>1556249780941</created>
@@ -542,19 +546,19 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="486626000" />
+    <option name="totallyTimeSpent" value="495995000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1913" y="-7" width="1434" height="878" extended-state="6" />
+    <frame x="1912" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.8023256" visible="true" weight="0.114825584" />
-      <window_info id="Structure" order="1" sideWeight="0.19767442" side_tool="true" visible="true" weight="0.114825584" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.80205655" visible="true" weight="0.08422175" />
+      <window_info id="Structure" order="1" sideWeight="0.19794345" side_tool="true" visible="true" weight="0.08422175" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3297587" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.40884718" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.1930295" />
+      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.15618221" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -570,7 +574,7 @@
       <window_info anchor="right" id="R Packages" order="3" />
       <window_info anchor="right" id="R Graphics" order="4" />
       <window_info anchor="right" id="Database" order="5" />
-      <window_info anchor="right" x="601" y="59" width="225" height="746" id="SciView" order="6" sideWeight="0.46989527" visible="true" weight="0.117732555" />
+      <window_info anchor="right" x="601" y="59" width="225" height="746" id="SciView" order="6" sideWeight="0.46989527" visible="true" weight="0.08635394" />
       <window_info anchor="right" x="0" y="0" width="314" height="678" id="Documentation" order="7" sideWeight="0.5301047" side_tool="true" visible="true" weight="0.1398892" />
     </layout>
   </component>
@@ -1108,8 +1112,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/python-package/case_ieee_fraud.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="110">
-          <caret line="140" column="50" selection-start-line="140" selection-start-column="50" selection-end-line="140" selection-end-column="50" />
+        <state relative-caret-position="399">
+          <caret line="21" column="16" lean-forward="true" selection-start-line="21" selection-start-column="16" selection-end-line="21" selection-end-column="16" />
           <folding>
             <element signature="e#70#88#0" expanded="true" />
           </folding>

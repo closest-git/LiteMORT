@@ -100,7 +100,7 @@ namespace Grusoft {
 		Feature_Selection *feat_salps = nullptr;
 		Feat_Importance *importance = nullptr;
 		Move_Accelerator *hMove = nullptr;
-		GRander rander_samp, rander_feat,rander_bins;
+		GRander rander_samp, rander_feat,rander_bins,rander_nodes;
 		INIT_SCORE init_score;
 		vector<FeatVector*> feats;				//featrue values of X
 		int nPickFeat = 0;
@@ -187,7 +187,7 @@ namespace Grusoft {
 		//tpDOWN *resi = nullptr, *move = nullptr;			//gradient boosting
 
 		FeatsOnFold(LiteBOM_Config confi_, ExploreDA *eda, string nam_, int dtype = 0x0);
-
+		virtual void InitRanders(int flag=0x0);
 		/*
 		template<typename Tx, typename Ty>
 		void Init_T(size_t nMost_, size_t ldX_, size_t ldY_, int flag) {

@@ -204,29 +204,42 @@ void  EARLY_STOPPING::CheckBrae(int flag) {
 }
 
 void EARLY_STOPPING::Add(double err,int best_tree, bool& isLRjump, int flag) {
+	nLeastOsci = max(1, early_round / 20);
 	isLRjump = false;
 	errors.push_back(err);
 	if (err <= e_best) {
 		e_best=err;		
 		best_no=errors.size()-1;
-		best_round = best_tree;
+		best_round = best_tree;		
 	}
-	else if(errors.size() - best_no>early_round/10 && LR_jump > 0){
-		printf("\n********* stopping JUMP e_best=%.6g@%d,cur=%.6g\t*********", e_best, best_no, err);
-		best_no = errors.size()-1;		e_best = err;	//有问题
-		LR_jump--;
-		isLRjump = true;
+	else {
+		if (isOscillate==false && best_no <= errors.size()- 1 - nLeastOsci ) {	//first isOscillate
+			printf("\n-------- Oscillate@(%d,%g) best=(%d,%g) -------- \n", errors.size(), err, best_no+1, e_best);
+			assert(err >= e_best);
+			isOscillate = true;
+		}
+		if (errors.size() - best_no > early_round / 10 && LR_jump > 0) {
+			printf("\n********* stopping JUMP e_best=%.6g@%d,cur=%.6g\t*********", e_best, best_no, err);
+			best_no = errors.size()-1;		e_best = err;	//有问题
+			LR_jump--;
+			isLRjump = true;
+		}
 	}
 }
 
+/*
 bool EARLY_STOPPING::isOscillate(int nLast) {
+	if (isOsci_)
+		return true;
 	double e_last = errors[errors.size() - 1];
 	if (best_no <= errors.size() - nLast-1) {
+		printf("\n======Oscillate@%d\n", errors.size());
 		assert(e_last >= e_best);
+		isOsci_ = true;
 		return true;
 	}
 	return false;
-}
+}*/
 
 bool EARLY_STOPPING::isOK(int cur_round) {
 	double e_last = errors[errors.size() - 1];
@@ -400,6 +413,10 @@ int GBRT::Train(string sTitle, int x, int flag) {
 		GST_TIC(t111);
 		hTree->Train(flag);				//
 		hTree->Adpative_LR(flag);
+		/*if (stopping.isOscillate) {		//9/21/2019	无效，难以理解
+		//if (forest.size()>50) {
+			hTree->DropNodes();
+		}*/
 		hTree->ClearSampSet();
 		nzNode +=hTree->nodes.size();
 		hTree->ArrTree_quanti = hTree->To_ARR_Tree(hTrainData,true, false);

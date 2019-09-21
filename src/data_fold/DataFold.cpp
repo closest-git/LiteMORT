@@ -27,7 +27,7 @@ FeatsOnFold::STAT FeatsOnFold::stat;
 每个样本有1到N个标签
 设计
 高效（时间，内存）第一
-优雅，易读		参考PYTHON,	没必要以来C++的莫名语法
+优雅，易读		参考PYTHON,	没必要依赖C++的莫名语法
 
 */
 FeatsOnFold::FeatsOnFold(LiteBOM_Config confi_, ExploreDA *eda_, string nam_, int dtype) :config(confi_), edaX(eda_), nam(nam_) {
@@ -46,6 +46,28 @@ FeatsOnFold::FeatsOnFold(LiteBOM_Config confi_, ExploreDA *eda_, string nam_, in
 
 	}
 
+}
+
+void FeatsOnFold::InitRanders(int flag) {
+	if (!isTrain())
+		return;
+
+	srand(time(0));
+	//x = rand();
+	if (config.useRandomSeed) {
+		rander_samp.Init(31415927 * rand());
+		rander_feat.Init(123456789 * rand());
+		rander_bins.Init(123456789 * rand());
+		rander_nodes.Init(123456789 * rand());
+
+	}
+	else {
+		srand(42);
+		rander_samp.Init(31415927);
+		rander_feat.Init(123456789);
+		rander_bins.Init(20190826);
+		rander_nodes.Init(42);
+	}
 }
 
 Feat_Importance::Feat_Importance(FeatsOnFold *hData_, int flag) {

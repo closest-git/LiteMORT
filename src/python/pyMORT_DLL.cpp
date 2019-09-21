@@ -265,19 +265,8 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	double sparse = 0, nana = 0;
 	size_t nTrain = nSamp_, nMostQ = config.feat_quanti, nConstFeat = 0, nLocalConst = 0, nQuant = 0;
 	FeatsOnFold *hFold = new FeatsOnFold(config, edaX, nam_, flag);
-	srand(time(0));
-	if (config.useRandomSeed) {
-		hFold->rander_samp.Init(31415927 * rand());
-		hFold->rander_feat.Init(123456789 * rand());
-		hFold->rander_bins.Init(123456789 * rand());
-	}	else {
-		srand(42);
-		hFold->rander_samp.Init(31415927);
-		hFold->rander_feat.Init(123456789);
-		hFold->rander_bins.Init(20190826);
-	}
-
-
+	hFold->InitRanders();
+	
 	hFold->InitMost(nSamp_);
 	//hFold->nMost = nSamp_;
 	int rnd_seed = 0, nThread = config.num_threads, flagF= flag|FeatVector::VAL_REFER;
@@ -401,18 +390,8 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	double sparse = 0, nana=0;
 	size_t nTrain = nSamp_, nMostQ = config.feat_quanti, nConstFeat = 0,nLocalConst=0, nQuant = 0;
 	FeatsOnFold *hFold = new FeatsOnFold(config, edaX, nam_, flag);
-	srand(time(0));
-	//x = rand();
-	if (config.useRandomSeed) {
-		hFold->rander_samp.Init(31415927 * rand());
-		hFold->rander_feat.Init(123456789 * rand());
-		hFold->rander_bins.Init(123456789 * rand());
-	}	else {
-		srand(42);
-		hFold->rander_samp.Init(31415927);
-		hFold->rander_feat.Init(123456789);
-		hFold->rander_bins.Init(20190826);
-	}
+	hFold->InitRanders();
+	
 
 	hFold->InitMost(nSamp_);
 	//hFold->nMost = nSamp_;

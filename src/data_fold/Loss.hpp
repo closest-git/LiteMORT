@@ -395,27 +395,43 @@ namespace Grusoft {
 		virtual void Update(FeatsOnFold *hData_,int round, int flag = 0x0);
 
 		template <typename Tx>
-		void Adaptive_LR(MT_BiSplit *hBlit, int flag = 0x0) {
-			assert(hBlit->lr_eta == 1.0 && hBaseData_->config.lr_adptive_leaf);
+		double Adaptive_LR(MT_BiSplit *hBlit,bool isDelta_, int flag = 0x0) {
+			assert(hBlit!=nullptr && hBaseData_->config.lr_adptive_leaf);
+			//double s[] = {-0.01,0.1,0.5,1,2,5,10 };
+			double s[] = { -0.01,0.1,0.5,1,2,5 };
+			size_t i, loop, nLoop = sizeof(s) / sizeof(double), nSamp = delta_step.size();
+			tpSAMP_ID *samps = nullptr, samp;
+			if (hBlit == nullptr) {
+			}	else {
+				nSamp = hBlit->nSample();		samps = hBlit->samp_set.samps;
+			}
+
 			bool isTrain = BIT_TEST(hBaseData_->dType, FeatsOnFold::DF_TRAIN);
 			bool isEval = BIT_TEST(hBaseData_->dType, FeatsOnFold::DF_EVAL);
-			tpDOWN step_base = hBlit->GetDownStep();
-			double s[] = {-0.01,0.1,0.5,1,2,5,10 };
-			//double s[] = { 1 };
+			tpDOWN *delta_=VECTOR2ARR(this->delta_step);
 			double err, min_err = DBL_MAX, eta_bst = 1.0, a;
 			//min_err = -DBL_MAX;
 			FeatVec_T<Tx> *hY = dynamic_cast<FeatVec_T<Tx>*>(y);		assert(hY != nullptr);
 			const Tx *pred = ((FeatVec_T<Tx>*)predict)->arr(), *label = ((FeatVec_T<Tx>*)y)->arr();
-			size_t i, loop, nLoop = sizeof(s) / sizeof(double), nSamp = hBlit->nSample();
-			tpSAMP_ID *samps = hBlit->samp_set.samps, samp;
 			for (loop = 0; loop < nLoop; loop++) {
-				double step = step_base*s[loop];
-				for (err = 0, i = 0; i<nSamp; i++) {
-					samp = samps[i];
-					a = pred[samp] + step;
-					err += a<EXP_UNDERFLOW ? 0 : a>EXP_OVERFLOW ? a : log(1 + std::exp(a));
-					if (label[samp] == 1)
-						err -= a;
+				if (isDelta_) {
+					for (err = 0, i = 0; i<nSamp; i++) {
+						samp = samps[i];
+						a = pred[samp] + delta_[samp]* s[loop];
+						err += a<EXP_UNDERFLOW ? 0 : a>EXP_OVERFLOW ? a : log(1 + std::exp(a));
+						if (label[i] == 1)
+							err -= a;
+					}
+				}	else {
+					tpDOWN step_base = hBlit->GetDownStep();
+					double step = step_base*s[loop];
+					for (err = 0, i = 0; i<nSamp; i++) {
+						samp = samps[i];
+						a = pred[samp] + step;
+						err += a<EXP_UNDERFLOW ? 0 : a>EXP_OVERFLOW ? a : log(1 + std::exp(a));
+						if (label[samp] == 1)
+							err -= a;
+					}
 				}
 				assert(!IS_NAN_INF(err));
 				if (err < min_err) {
@@ -425,7 +441,10 @@ namespace Grusoft {
 			}
 			if (eta_bst < 0)
 				;// printf("%.3g=>%.3g ", hBlit->lr_eta, eta_bst);
-			hBlit->lr_eta = eta_bst;
+			if(hBlit!=nullptr)
+				hBlit->lr_eta = eta_bst;
+				
+			return eta_bst;
 		}
 
 		virtual double ERR(int flag = 0x0);

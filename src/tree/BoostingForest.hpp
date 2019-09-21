@@ -18,11 +18,12 @@ namespace Grusoft{
 		vector<double> errors;
 		double e_best=DBL_MAX;
 		int best_no=-1,best_round=-1, nBraeStep=0;
-		int early_round = 10;
+		int early_round = 10, nLeastOsci=1;
 		int LR_jump = 0;
 		EARLY_STOPPING(){}
-		EARLY_STOPPING(int nEarly) : early_round(nEarly)
-		{	}
+		EARLY_STOPPING(int nEarly) : early_round(nEarly)		{
+			nLeastOsci = max(1, early_round / 20);
+		}
 		double curERR() {
 			if (errors.size() == 0)
 				return DBL_MAX;
@@ -31,8 +32,8 @@ namespace Grusoft{
 		}
 		void Add(double err, int best_round,bool& isLRjump, int flag=0x0);
 		bool isOK(int cur_round);
-		bool isOscillate(int nLast=1);
-
+		//bool isOscillate(int nLast=1);
+		bool isOscillate = false;
 		//Brae£∫À’∏Ò¿º«¡Í
 		void CheckBrae(int flag = 0);	
 	};

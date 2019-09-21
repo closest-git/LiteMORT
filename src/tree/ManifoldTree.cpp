@@ -437,82 +437,121 @@ void ManifoldTree::BeforeEachBatch(size_t nMost, size_t rng_seed, int flag) {
 	}/**/
 }
 
+void ManifoldTree::DropNodes(int flag) {
+	int nNode = nodes.size(), i, nLeaf = 0, nElite = 0, nDrop = 0,no, nTree = hForest->forest.size();
+	double *w = new double[nNode](),T_drop=0.1;
+	for (auto node : nodes) {
+		//for each(hMTNode node in nodes) {
+		if (!node->isLeaf()) continue;
+		w[node->id] = fabs(node->GetDownStep());
+		nLeaf++;
+	}
+	nElite = max(1, nLeaf / 2);
+	vector<tpSAMP_ID> idx;
+	sort_indexes(nNode, w, idx);
+	GRander&rander = hForest->hTrainData->rander_nodes;
+	//for (i = 0; i < nNode-nElite; i++) {
+	for (i = 0; i < nNode; i++) {
+		no = idx[i];
+		//assert(w[no]<=w[idx[i+1]]);
+		MT_BiSplit *hNode = nodes[no];
+		if (hNode->isLeaf()) {
+			if(rander.Uniform_(0,1)<T_drop){
+			//if (hNode->id % 10 == 0) {
+				nodes[i]->lr_eta=0;
+				nDrop++;
+			}
+		}
+		else {
+			assert(hNode->lr_eta==1);
+		}
+
+	}
+	delete[] w;
+	if (nTree % 50 == 0) {
+		printf("%d[%d] ",nDrop, nLeaf);
+	}
+}
 
 /*
-	hLRData->lossy->Adaptive_LR<double>(node)	非常明显的过拟合 IEEE_fraud(0.99665@F8, LB=0.9437)
+	1)hLRData->lossy->Adaptive_LR<double>(node)	非常明显的过拟合 IEEE_fraud(0.99665@F8, LB=0.9437)
+	2)Rank4Feat 不合理
+	3)isOneSetp 不合理
 */
 void ManifoldTree::Adpative_LR(int flag) {
 	int nTree = hForest->forest.size(),nFeat,i,*rank=nullptr, nEite=0;
-	if (!(hData_->config.lr_adptive_leaf && nTree > 1 && !hForest->stopping.isOscillate()))
+	if (!(hData_->config.lr_adptive_leaf && nTree > 1 ))//&& !hForest->stopping.isOscillate
 		return;
 
 	FeatsOnFold *hLRData = hForest->hEvalData;
 	hLRData = hForest->hTrainData;
 	nFeat = hLRData->feats.size();		nEite = nFeat/2;		// MIN(32, nFeat / 2);
-	rank = hLRData->Rank4Feat(0x0,0x0);	
 
 	if (hLRData == nullptr)
 		return;
 	bool isSplit = hLRData == hForest->hEvalData;
-	bool isOneSetp = false;
+	bool isOneSetp = false;	// rank == nullptr;
 	hMTNode root = hRoot();
-	size_t nMost = hLRData->nSample(),nzS=root->nSample();
+	size_t nMost = hLRData->nSample(),nzS=root->nSample(),nz=0;
 	//assert(nzS == 0);
-	if (isSplit) {
-		ClearSampSet();
-		root->samp_set.isRef = true;
-		root->samp_set.SampleFrom(hLRData, hForest, nullptr, nMost, -1);
-	}
-	for (auto node : nodes) {
-		//for each(hMTNode node in nodes) {
-		if (node->isLeaf()) {
-			size_t nS = node->nSample();	
-			int feat = node->parent->feat_id,isCheck=0;
-			FeatVector *hFeat = hLRData->Feat(feat);		assert(hFeat != nullptr);
-			if (rank[hFeat->id]<nEite || (feat+time(NULL))%10==0) {
-				isCheck = 1;
-			}
-			if (isCheck==1) {		hLRData->lossy->Adaptive_LR<double>(node);			}
-			//hLRData->lossy->UpdateStep();
-		}
-		else {
-			if (isSplit)	{
-				hLRData->SplitOn(node);
-			}
-		}
-	}
-	if (isOneSetp) {
-		/*tpDOWN step_base = hBlit->GetDownStep();
-		double s[] = { -0.01,0.1,0.5,1,2,5,10 };
-		//double s[] = { 1 };
-		double err, min_err = DBL_MAX, eta_bst = 1.0, a;
-		//min_err = -DBL_MAX;
-		FeatVec_T<Tx> *hY = dynamic_cast<FeatVec_T<Tx>*>(y);		assert(hY != nullptr);
-		const Tx *pred = ((FeatVec_T<Tx>*)predict)->arr(), *label = ((FeatVec_T<Tx>*)y)->arr();
-		size_t i, loop, nLoop = sizeof(s) / sizeof(double), nSamp = hBlit->nSample();
-		tpSAMP_ID *samps = hBlit->samp_set.samps, samp;
-		for (loop = 0; loop < nLoop; loop++) {
-			double step = step_base*s[loop];
-			for (err = 0, i = 0; i<nSamp; i++) {
-				samp = samps[i];
-				a = pred[samp] + step;
-				err += a<EXP_UNDERFLOW ? 0 : a>EXP_OVERFLOW ? a : log(1 + std::exp(a));
-				if (label[samp] == 1)
-					err -= a;
-			}
-			assert(!IS_NAN_INF(err));
-			if (err < min_err) {
-				//if (err > min_err) {
-				min_err = err;		eta_bst = s[loop];
-			}
-		}*/
-	}
 	
+	if (isOneSetp) {
+		tpDOWN  *delta_ = VECTOR2ARR(hLRData->lossy->delta_step);
+		for (auto node : nodes) {
+			//for each(hMTNode node in nodes) {
+			if (!node->isLeaf()) continue;
+			assert(node->lr_eta == 1.0);
+			tpDOWN step_base = node->GetDownStep();
+			size_t nS = node->nSample();
+			nz += nS;
+			tpSAMP_ID *samps = node->samp_set.samps;
+			for (i = 0; i < nS; i++) {
+				delta_[samps[i]] = step_base;
+			}
+		}
+		assert(nz==nzS);
+		double lr_eta = hLRData->lossy->Adaptive_LR<double>(root,true);
+		for (auto node : nodes) {
+			//for each(hMTNode node in nodes) {
+			if (!node->isLeaf()) continue;
+			node->lr_eta = lr_eta;
+		}
+	}	else {
+		//rank = hLRData->Rank4Feat(0x0,0x0);	
+		if (isSplit) {
+			ClearSampSet();
+			root->samp_set.isRef = true;
+			root->samp_set.SampleFrom(hLRData, hForest, nullptr, nMost, -1);
+		}
+		for (auto node : nodes) {
+			//for each(hMTNode node in nodes) {
+			if (node->isLeaf()) {
+				size_t nS = node->nSample();
+				int feat = node->parent->feat_id, isCheck = 1;
+				FeatVector *hFeat = hLRData->Feat(feat);		assert(hFeat != nullptr);
+				/*if (rank[hFeat->id]<nEite || (feat + time(NULL)) % 10 == 0) {
+					isCheck = 1;
+				}*/
+				if (isCheck == 1) 
+				{ hLRData->lossy->Adaptive_LR<double>(node,false); }
+				if (hForest->stopping.isOscillate) {
+					node->lr_eta = min(node->lr_eta,1);		//printf("0.5");
+				}
+				
+			}
+			else {
+				if (isSplit) {
+					hLRData->SplitOn(node);
+				}
+			}
+		}
+		//delete[] rank;
+	}	
 
 	if (isSplit) {
 		ClearSampSet();
 	}
-	delete[] rank;
+	DropNodes();
 }
 
 /*

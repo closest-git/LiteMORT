@@ -172,6 +172,7 @@ namespace Grusoft{
 
 		virtual void Train(int flag = 0x0);
 		virtual void Adpative_LR(int flag=0x0);
+		virtual void DropNodes(int flag = 0x0);
 
 		virtual void AddScore(INIT_SCORE *score,int flag=0x0);
 		virtual void Dump(int flag = 0x0);
