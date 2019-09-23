@@ -33,7 +33,8 @@ double Distribution::split_F(int no, int flag) const {
 	return a;
 }
 //
-void Distribution::UpdateHistoByW(const LiteBOM_Config&config, float *wBins, int flag) {
+void Distribution::UpdateHistoByW(const LiteBOM_Config&config, int nTree, float *wBins, int flag) {
+	//histo->nMostBins = config.feat_quanti;
 	size_t nBin_0 = histo->nBins, i,nMaxSplit=int((nBin_0-1) /10.0),nSplit=0,id,nDrop=0;
 	if (nMaxSplit == 0)
 		return;
@@ -85,6 +86,7 @@ void Distribution::UpdateHistoByW(const LiteBOM_Config&config, float *wBins, int
 
 	vector<HISTO_BIN> binX;
 	vector<BIN_FEATA> feataX;
+	assert(binFeatas.size() == histo->nBins);
 	for (i = 0; i < nBin_0-1; i++) {
 		HISTO_BIN bin0 = histo->bins[i];
 		//assert(bin0.split_F < vMax);
@@ -111,6 +113,9 @@ void Distribution::UpdateHistoByW(const LiteBOM_Config&config, float *wBins, int
 		}
 	}
 	binX.push_back(histo->bins[nBin_0 - 1]);
+	BIN_FEATA f_;
+	f_.split_F = binFeatas[nBin_0 - 1].split_F;
+	feataX.push_back(f_);
 	delete[] histo->bins;
 	binFeatas = feataX;
 	histo->nBins = binX.size();
@@ -129,7 +134,8 @@ void Distribution::UpdateHistoByW(const LiteBOM_Config&config, float *wBins, int
 	}
 	delete[] mask;
 	delete[] comp_;
-	//printf("[+%d,-%d,nBin=%d=>%d]\t", nSplit, nDrop, nBin_0, nBin);
+	if (nTree % 50 == 0)
+		 printf("[+%d,-%d,nBin=%d=>%d]\t", nSplit, nDrop, nBin_0, nBin);
 	assert(binFeatas.size() == histo->nBins);
 
 }

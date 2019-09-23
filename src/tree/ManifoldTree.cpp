@@ -473,6 +473,7 @@ void ManifoldTree::DropNodes(int flag) {
 	}
 }
 
+
 /*
 	1)hLRData->lossy->Adaptive_LR<double>(node)	非常明显的过拟合 IEEE_fraud(0.99665@F8, LB=0.9437)
 	2)Rank4Feat 不合理
@@ -526,7 +527,7 @@ void ManifoldTree::Adpative_LR(int flag) {
 		for (auto node : nodes) {
 			//for each(hMTNode node in nodes) {
 			if (node->isLeaf()) {
-				size_t nS = node->nSample();
+				size_t nS = node->nSample();		nz += nS;
 				int feat = node->parent->feat_id, isCheck = 1;
 				FeatVector *hFeat = hLRData->Feat(feat);		assert(hFeat != nullptr);
 				/*if (rank[hFeat->id]<nEite || (feat + time(NULL)) % 10 == 0) {
@@ -549,9 +550,11 @@ void ManifoldTree::Adpative_LR(int flag) {
 	}	
 
 	if (isSplit) {
+		assert(nz == hLRData->nSample());
 		ClearSampSet();
 	}
-	DropNodes();
+	//9/21/2019	cys		有一点点用0.97779/0.9488	=> 0.9762/0.9490	似乎没必要(会增加时间)
+	//DropNodes();
 }
 
 /*

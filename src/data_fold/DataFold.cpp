@@ -294,7 +294,6 @@ void FeatsOnFold::BeforeTrain(BoostingForest *hGBRT, int flag) {
 		if (hFeat->hDistri != nullptr) {
 			if (hFeat->hDistri->histo == nullptr)
 			{			continue;			}
-			nTotalBin1 += hFeat->hDistri->histo->nBins;
 			nValidFeat++;
 		}
 		FeatVec_Q *hFQ = dynamic_cast<FeatVec_Q *>(hFeat);
@@ -307,17 +306,19 @@ void FeatsOnFold::BeforeTrain(BoostingForest *hGBRT, int flag) {
 					//hFeat->distri.X2Histo_(config, nSamp_, x, Y_);
 					hFeat->UpdateHisto(this, true, isFirst, 0x0);
 				}
+				//else if (hGBRT->stopping.isOscillate && hFeat->wSplit_last>64 && !hFeat->hDistri->isUnique) {
 				else if(hFeat->wSplit_last>1024 && !hFeat->hDistri->isUnique){
-					hFeat->hDistri->UpdateHistoByW(this->config,hFeat->wBins);
+					hFeat->hDistri->UpdateHistoByW(this->config,hGBRT->forest.size(),hFeat->wBins);
 					//GST_TIC(t1);
 					hFeat->UpdateHisto(this, false,isFirst, 0x0);
 					//FeatsOnFold::stat.tX += GST_TOC(t1);
 				}
 			}
 		}
+		nTotalBin1 += hFQ->GetHisto()->nBins;
 		//hFeat->XY2Histo_(config, this->samp_set, x);
 	}
-	if(hGBRT->skdu.noT==0)
+	if(hGBRT->skdu.noT%50==0 && nTotalBin1!=nTotalBin0)
 		printf("Total Bins=[%d,%d,%.4g]\r\n", nTotalBin0, nTotalBin1, nTotalBin1*1.0/ nValidFeat);
 
 	

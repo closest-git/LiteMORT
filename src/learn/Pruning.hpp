@@ -23,6 +23,7 @@ namespace Grusoft{
 			return nPick;
 		}
 		void ToCSV(const string& sPath, int flag);
+		void LoadCSV(const string& sPath, int flag);
 
 	public:
 		tpMetricU *U = nullptr, *w_0 = nullptr, *w = nullptr;

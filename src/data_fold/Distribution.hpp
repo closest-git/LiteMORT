@@ -374,7 +374,7 @@ namespace Grusoft {
 		}
 
 		//只修改split_F
-		virtual void UpdateHistoByW(const LiteBOM_Config&config, float *wBins,int flag=0x0);
+		virtual void UpdateHistoByW(const LiteBOM_Config&config, int nTree,float *wBins,int flag=0x0);
 
 		/*
 		必须保证histo与vThrsh严格一致		需要重新设计histo与vThrsh		3/11/2019
@@ -400,7 +400,7 @@ namespace Grusoft {
 			histo = new HistoGRAM(nullptr,nSamp_);
 
 			int nMostBin = config.feat_quanti;		assert(nMostBin > 0);
-			
+			//nMostBin = max(1, config.feat_quanti / 4);
 			vector<tpSAMP_ID> idx;
 			if (sortedA.size() > 0)
 				idx = sortedA;

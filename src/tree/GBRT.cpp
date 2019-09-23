@@ -58,7 +58,7 @@ GBRT::GBRT(FeatsOnFold *hTrain, FeatsOnFold *hEval, double sOOB, MODEL mod_, int
 	nOOB = nTrain*sOOB;
 	histo_buffer = new HistoGRAM_BUFFER(hTrain);
 	if (hEval != nullptr) {
-		;// prune = new EnsemblePruning(hEval, nTree);
+		prune = new EnsemblePruning(hEval, nTree);
 	}
 	const char *mod = model==CLASIFY ? "CLASIFY" : "REGRESSION";
 	printf("\n\n********* GBRT[%s]\n\tnTrainSamp=%d,nTree=%d,maxDepth=%d regress@LEAF=%s thread=%d feat_quanti=%d...",
@@ -213,7 +213,7 @@ void EARLY_STOPPING::Add(double err,int best_tree, bool& isLRjump, int flag) {
 		best_round = best_tree;		
 	}
 	else {
-		if (isOscillate==false && best_no <= errors.size()- 1 - nLeastOsci ) {	//first isOscillate
+		if (isOscillate==false && best_no+ nLeastOsci <= errors.size()- 1 ) {	//first isOscillate
 			printf("\n-------- Oscillate@(%d,%g) best=(%d,%g) -------- \n", errors.size(), err, best_no+1, e_best);
 			assert(err >= e_best);
 			isOscillate = true;
@@ -481,6 +481,7 @@ int GBRT::Prune(int flag) {
 	}
 	DForest ft_1;
 	prune->Pick(nTree,T,0x0);
+	//return 0x0;
 	for (i = 0; i < nTree; i++) {
 		if (prune->w[i] == 0) {
 			continue;
