@@ -483,7 +483,7 @@ int GBRT::Prune(int flag) {
 	prune->Pick(nTree,T,0x0);
 	//return 0x0;
 	for (i = 0; i < nTree; i++) {
-		if (prune->w[i] == 0) {
+		if (prune->wx[i] == 0) {
 			continue;
 		}
 		ft_1.push_back(forest[i]);
