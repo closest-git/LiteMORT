@@ -44,9 +44,9 @@ double dot_(size_t nX, T *x, T *y, int flag = 0x0) {
 }
 
 template<typename T>
-void scale_(size_t nX, T *x, const T& s,int flag=0x0) {
+void scale_(size_t nX, T *x,int step, const T& s,int flag=0x0) {
 	for (size_t i = 0; i < nX; i++) {
-		x[i] *= s;
+		x[i*step] *= s;
 	}
 }
 
@@ -91,9 +91,9 @@ bool orthogonal_(double *orth, int ldO,int num_orth, Tx *x,size_t nX,int flag = 
 
 EnsemblePruning::EnsemblePruning(FeatsOnFold *hFold_, int mWeak_, int flag) : hFold(hFold_),nMostWeak(mWeak_) {
 	nSamp = hFold->nSample();
-	ldA = nMostWeak;	//ͳһΪrow_major
-	mA = new tpMetricU[nSamp*ldA];
-	mB = new tpMetricU[nSamp*ldA];
+	//ldA = nMostWeak;	//ͳһΪrow_major
+	mA = new tpMetricU[nSamp*nMostWeak];
+	mB = new tpMetricU[nSamp*nMostWeak];
 	ax_ = new tpMetricU[nSamp];
 	w_0 = new tpMetricU[nMostWeak];
 	wx = new tpMetricU[nMostWeak];
@@ -215,10 +215,10 @@ void EnsemblePruning::make_orthogonal(tpMetricU *B,int ldB,int &nRun,int nMost,i
 }
 
 void EnsemblePruning::sorted_ax(int flag) {
-	int ldU = nWeak;
+	int ldA = nWeak;
 	double a;
 	for (size_t i = 0; i < nSamp; i++) {
-		a = dot_(ldU,mA+i*nWeak,wx);
+		a = dot_(ldA,mA+i*nWeak,wx);
 		ax_[i] = -fabs(a);
 	}
 	sort_indexes(nSamp, ax_, sorted_indices);
@@ -248,7 +248,7 @@ double EnsemblePruning::UpateGamma(int *isLive,int nY,int flag) {
 		axbg += ax_[i] * bg;
 	}
 	if (axbg>0)	//if np.inner(ax,b @ gamma) > 0:
-		scale_(nY, gamma, -1.0);
+		scale_(nY, gamma,1, -1.0);
 
 	return g_Max;
 }
@@ -259,9 +259,11 @@ int EnsemblePruning::SubOnLive(int flag) {
 	for (i = 0; i < nWeak; i++) {
 		if (fabs(wx[i]) < 1 - delta) {
 			nLive++;
-		}
-		y2x[nY] = i;
-		wy[nY++] = wx[i];
+			isLive[nY] = 1;
+			y2x[nY] = i;
+			wy[nY++] = wx[i];
+		}	else
+			continue;
 	}
 	if (nY == nWeak) {
 		memcpy(mB, mA, sizeof(tpMetricU)*nWeak*nSamp);
@@ -351,6 +353,7 @@ bool EnsemblePruning::partial_infty_color(int nX,bool balance,int flag) {
 				isLive[i] = 1;	nLive++;
 			}
 		}
+		printf("");
 	}
 
 	return false;
@@ -366,15 +369,15 @@ void EnsemblePruning::Pick(int tt, int T,int flag){
 	for (sum = 0, i = 0; i < nWeak; i++) {	sum += fabs(w_0[i]);	}
 	for (i = 0; i < nWeak; i++) { 
 		w_0[i] /= sum; 
-		scale_(nWeak,mA+i*nWeak, w_0[i]);
+		scale_(nSamp,mA+i,nWeak, w_0[i]);
 	}
 	if (flag == 0) {
 		ToCSV("E:\\EnsemblePruning_"+std::to_string(nSamp) + "_"+std::to_string(nWeak) +"_.csv",0x0);
 		return;
 	}
+	memset(wx, 0x0, sizeof(tpMetricU)*nWeak);
 	while(!partial_infty_color(nWeak,false, 0x0))	;
 
-	memcpy(wx, w_0, sizeof(tpMetricU)*nWeak);
 	nPick = nSparsified();
 	while (nPick > T) {
 		vector<tpSAMP_ID> idx;

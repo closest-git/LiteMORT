@@ -18,7 +18,7 @@ namespace Grusoft{
 		//|wx|=1	|wy|=1 
 		tpMetricU *mA = nullptr, *ax_=nullptr;
 		tpMetricU *mB = nullptr, *wy=nullptr;		//live section of (A,x)
-		int ldA;	//ͳһΪrow_major
+		int ldA_;	//row_major
 		int *wasSmall=nullptr, *isLive = nullptr, *wasLive=nullptr,*y2x=nullptr;
 		std::vector<tpSAMP_ID> sorted_indices;
 		size_t nSamp=0, nWeak=0,nMostWeak=0;
