@@ -26,12 +26,21 @@ void RAND_normal(size_t nX, T *x, int flag = 0x0) {
 }
 
 template<typename T>
-double norm_2(size_t nX, T *x, int flag=0x0) {
+double norm_2(size_t nX, const T *x, int flag=0x0) {
 	double sum_2 = 0;
 	for (size_t i = 0; i < nX; i++) {
 		sum_2 += x[i] * x[i];
 	}
 	return sqrt(sum_2);
+}
+
+template<typename Tx>
+double norm_(size_t nX, const Tx* x, int flag = 0x0) {
+	double nrm = 0;
+	for (size_t i = 0; i < nX; i++) {
+		nrm = max(nrm, fabs(x[i]));
+	}
+	return nrm;
 }
 
 template<typename T>
@@ -219,9 +228,16 @@ void EnsemblePruning::sorted_ax(int flag) {
 	double a;
 	for (size_t i = 0; i < nSamp; i++) {
 		a = dot_(ldA,mA+i*nWeak,wx);
-		ax_[i] = -fabs(a);
+		ax_[i] = a;		// -fabs(a);
 	}
-	sort_indexes(nSamp, ax_, sorted_indices);
+	//sort_indexes(nSamp, ax_, sorted_indices);
+	size_t i;
+	sorted_indices.resize(nSamp);// initialize original index locations
+	iota(sorted_indices.begin(), sorted_indices.end(), 0);
+	// sort indexes based on comparing values in v
+	const tpMetricU*v = ax_;
+	std::sort(sorted_indices.begin(), sorted_indices.end(), [&v](size_t i1, size_t i2) {return -fabs(v[i1]) < -fabs(v[i2]); });
+	
 }
 
 double EnsemblePruning::UpateGamma(int *isLive,int nY,int flag) {
@@ -253,15 +269,16 @@ double EnsemblePruning::UpateGamma(int *isLive,int nY,int flag) {
 	return g_Max;
 }
 
-int EnsemblePruning::SubOnLive(int flag) {
-	double delta = 1.0e-5;
+//is_live=abs_x < 1.0-delta;	 mB = mA[:,is_live];		wy = wx[is_live]
+int EnsemblePruning::SubOnLive(double delta, bool update_orth, double *v_0, double *v_sub, int flag) {
+	//double delta = 1.0e-5;
 	int nY = 0, i, nLive=0;
 	for (i = 0; i < nWeak; i++) {
 		if (fabs(wx[i]) < 1 - delta) {
 			nLive++;
 			isLive[nY] = 1;
 			y2x[nY] = i;
-			wy[nY++] = wx[i];
+			v_sub[nY++] = v_0[i];
 		}	else
 			continue;
 	}
@@ -276,17 +293,21 @@ int EnsemblePruning::SubOnLive(int flag) {
 		}
 	}
 	
-	FREE_a(orth);
-	ldOrth = nY;	num_orth = 0, orth = new double[ldOrth*ldOrth]();
+	if (update_orth) {
+		FREE_a(orth);
+		ldOrth = nY;	num_orth = 0, orth = new double[ldOrth*ldOrth]();
+
+	}
 	return nY;
 }
 
 /*
 */
-bool EnsemblePruning::partial_infty_color(int nX,bool balance,int flag) {
-	int nY = SubOnLive(flag), ldB = nY;		
-	double delta = 1.0e-5,*e=new double[nY];
-	int nLive = nY, nLive_0=nY, i, nIter = 0,  num_big=0, num_initial=0, num_diff=0, num_iters = 0, num_frozen=0;
+bool EnsemblePruning::partial_infty_color(int nX,bool balanced,int flag) {
+	double delta = 1.0e-5;
+	int nY = SubOnLive(delta,true,wx,wy,flag), ldB = nY, i, nIter = 0,  num_big=0, num_initial=0, num_diff=0, num_iters = 0, num_frozen=0;
+	double  *e = new double[nY];
+	nLive = nY, nLive_0=nY;
 //y = x[initial_is_live]	b = a[:, initial_is_live]
 	if (nY < 8)
 		return true;
@@ -294,7 +315,7 @@ bool EnsemblePruning::partial_infty_color(int nX,bool balance,int flag) {
 	for (i = 0; i < nSamp; i++) {
 		wasSmall[i] = 1;
 	}
-	if (balance) {
+	if (balanced) {
 		/*ones = np.ones(initial_live)
 			ones = ones / np.sqrt(initial_live)
 			orth[0] = ones
@@ -360,12 +381,193 @@ bool EnsemblePruning::partial_infty_color(int nX,bool balance,int flag) {
 
 }
 
+
+
+void EnsemblePruning::basic_local_search(double *x_,  bool balanced, int flag){
+	size_t i,j;
+	for (i = 0; i < nSamp; i++) {
+		ax_[i] = dot_(nWeak,mA+i*nWeak, x_);
+	}
+	double best_norm = norm_(nSamp,ax_),nrm_,*flipped=new double[nSamp];
+	bool improved = true;
+	while (improved) {
+		improved = false;
+		for(i = 0; i < nWeak; i++ ){
+			double s = x_[i];
+			tpMetricU*col = mA + i;
+			for (j = 0; j < nSamp; j++, col+=nWeak) {
+				flipped[j] = ax_[j]-2*s*(*col);
+			}
+			nrm_ = norm_(nSamp, flipped);
+			if (nrm_ < best_norm) {
+				if (balanced) {
+					/*
+					for j in range(0,a.shape[1]):
+					if x[i]==x[j]:
+					continue
+					final_flipped = flipped - 2*x[j]*a[:,j]
+					if np.linalg.norm(final_flipped,ord=norm) < best_norm:
+					ax = final_flipped
+					x[i] = -x[i]
+					x[j] = -x[j]
+					best_norm = np.linalg.norm(final_flipped,ord=norm)
+					improved=True
+					break
+					*/
+				}
+				else {
+					memcpy(ax_, flipped, sizeof(tpMetricU)*nSamp);
+					x_[i] = -x_[i];
+					best_norm = norm_(nSamp,flipped);
+					improved = true;
+				}
+			}
+			
+		}
+	}
+	delete[] flipped;
+}
+
+void EnsemblePruning::greedy(bool balanced, int flag) {
+	double *x=new double[nWeak]();
+	size_t i,j;
+	if (balanced) {
+		/*
+		so_far = np.zeros(a.shape[0])
+		for i in range(0,a.shape[1]):
+		if i%2==1:
+		continue
+		test = so_far + a[:,i]
+		test_minus = so_far - a[:,i]
+		if i<a.shape[1]-1:
+		test = test - a[:,i+1]
+		test_minus = test_minus + a[:,i+1]
+		if np.linalg.norm(test,ord=norm) < np.linalg.norm(test_minus,ord=norm):
+		x[i] = 1
+		if i<a.shape[1]-1:
+		x[i+1]=-1
+		else:
+		x[i] = -1
+		if i<a.shape[1]-1:
+		x[i+1] = 1
+		*/
+	}
+	else {
+		x[0] = 1;
+		double*	so_far = mA,norm_1=0,norm_2=0,a1,a2,a;
+		for (i = 1; i < nWeak; i++) {
+			norm_1 = 0, norm_2 = 0;
+			for (j = 0; j < nSamp; j++) {
+				a = mA[i + j*nWeak];
+				a1 = so_far[j] + a;		a2 = so_far[j] - a;
+				norm_1 = max(norm_1, fabs(a1));
+				norm_2 = max(norm_1, fabs(a2));
+			}
+			x[i] = (norm_1 < norm_2) ? 1 : -1;
+			for (j = 0; j < nSamp; j++) {
+				a = mA[i + j*nWeak];
+				so_far[j] += x[i] * a;
+			}
+		}
+	}
+	delete[] x;
+}
+
+void EnsemblePruning::round_coloring(bool balanced,int flag) {
+	double *samps = new double[nWeak*6],*flips=samps+nWeak,*init_y=flips+nWeak,*sub_y= init_y+nWeak, *best_sub_y= sub_y+nWeak,*new_sub_y= best_sub_y +nWeak;
+	if (true) {		//仅用于调试
+		double samples_0[] = { 0.04892675, 0.85041767, 0.0882261, 0.00201122, 0.64102732, 0.26890527, 0.1720314, 0.76263232, 0.54824072, 0.14100026, 0.17752911, 0.09100698
+			,0.16327615, 0.34498547, 0.49066404, 0.44659881, 0.04286212, 0.94289195 };
+		memcpy(samps, samples_0, sizeof(double)*nWeak);
+	}
+	int *sign_flips = new int[nWeak],i,at=0,sign;
+	double a, new_norm, best_norm=0,*a_outside=new double[nSamp], ay, sub_ay, b_y,new_ay;
+	nLive = 0;
+	for (i = 0; i < nWeak; i++) {
+		sign_flips[i] = 1;
+		a = fabs(wx[i]);
+		if (a < 1.0 - 1e-4)	//live = (abs < 1.0-1e-4)
+			nLive++;
+		sign = samps[i] < (1 - a) / 2 ? -1 : 1;
+		flips[i] = wx[i] * sign;
+		init_y[i] = flips[i] < 0 ? -1 : 1;
+	}
+	if (nLive <= 10) {
+		int nY = SubOnLive(1e-4, false,init_y, sub_y,flag);
+		assert(nY == nLive);
+		for (best_norm=0,i = 0; i < nSamp; i++){
+			ay = dot_(nWeak,mA+i*nWeak, init_y);
+			best_norm = max(best_norm, fabs(ay));
+			sub_ay = dot_(nY,mB + i*nY, sub_y);
+			a_outside[i] = ay - sub_ay;
+		}
+		memcpy(best_sub_y, sub_y, sizeof(double)*nY);
+
+		while (true) {
+			at = 0;
+			while (at < nLive && sign_flips[at] == -1) {
+				sign_flips[at] = 1;		at++;
+			}
+			if (at == nLive)
+				break;
+			sign_flips[at] = -1;
+			for (i = 0; i < nY; i++) {
+				new_sub_y[i] = sub_y[i]*sign_flips[i];		//new_sub_y = np.multiply(sub_y, sign_flips)
+			}		
+			for (new_norm=0,i = 0; i < nSamp; i++) {
+				b_y = dot_(nY, mB + i*nY, new_sub_y);//new_sub_ay = sub_a @ new_sub_y
+				new_ay = a_outside[i] + b_y;//new_ay = a_outside + new_sub_ay
+				new_norm = max(new_norm, fabs(new_ay));
+			}	
+			if (new_norm < best_norm) {
+				best_norm = new_norm;
+				memcpy(best_sub_y, new_sub_y, sizeof(double)*nY);
+			}
+		}
+		for (i = 0; i < nY; i++) {		//y[live_indices] = best_sub_y
+			init_y[y2x[i]] = best_sub_y[i];
+		}
+	}
+	if (balanced) {
+/*
+		while True:
+		toFlip = 1
+		if sum(y==1) < n/2:
+		toFlip = -1
+		ofToFlip = sum(y==toFlip)
+		needToFlip = int(ofToFlip-n/2)
+		if needToFlip==0:
+		break
+		listOfToFlip = [i for i, x in enumerate(y) if x==toFlip]
+		ay = a @ y
+		best_norm = 1e27
+		#try all single flips
+		best_to_flip = 0
+		for i in listOfToFlip:
+		col = a[:,i]
+		new_ay = ay - (2*col*y[i])
+		new_norm = np.linalg.norm(new_ay,ord=norm)
+		if new_norm < best_norm:
+		best_norm = new_norm
+		best_to_flip = i
+		y[best_to_flip] = -y[best_to_flip]
+*/
+	}
+	for (i = 0; i < nWeak; i++) {
+		assert(init_y[i]==1 || init_y[i]==-1);
+		plus_minus[i] = init_y[i];
+	}
+	delete[] sign_flips;		delete[] samps;
+	delete[] a_outside;
+}
+
 void EnsemblePruning::Pick(int tt, int T,int flag){
 	//nWeak = nWeak_;
 	int nPick = nWeak,nLarge=nSamp/3,i,no,k, nZero;
 	double sum = 0;
 	short sigma = 0;
-	plus_minus = new short[nWeak];
+	bool balanced = false;
+	plus_minus = new double[nWeak];
 	for (sum = 0, i = 0; i < nWeak; i++) {	sum += fabs(w_0[i]);	}
 	for (i = 0; i < nWeak; i++) { 
 		w_0[i] /= sum; 
@@ -377,6 +579,14 @@ void EnsemblePruning::Pick(int tt, int T,int flag){
 	}
 	memset(wx, 0x0, sizeof(tpMetricU)*nWeak);
 	while(!partial_infty_color(nWeak,false, 0x0))	;
+	round_coloring(balanced);
+	basic_local_search(plus_minus,balanced);
+	greedy(balanced);
+	basic_local_search(plus_minus, balanced);
+	//if np.linalg.norm(a@g,ord = norm) < np.linalg.norm(a@y, ord = norm) :
+	//	y = g
+	//local_improvements(balanced);
+	basic_local_search(plus_minus, balanced);
 
 	nPick = nSparsified();
 	while (nPick > T) {
