@@ -146,6 +146,14 @@ namespace Grusoft {
 		virtual string LOSSY_INFO(double err, int flag = 0x0);
 		FeatVector* GetPrecict();
 		FeatVector* GetY();
+		template<typename T>
+		T* GetY_(int flag=0x0) {
+			FeatVector *hY = GetY();
+			assert(hY!=nullptr);
+			FeatVec_T<T> *hYd = dynamic_cast<FeatVec_T<T>*>(hY);
+			T *y = hYd == nullptr ? nullptr : hYd->arr();
+			return y;
+		}
 
 		//pDown=target-predict
 		tpDOWN *GetDownDirection()	const;

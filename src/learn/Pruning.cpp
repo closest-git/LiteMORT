@@ -105,6 +105,7 @@ EnsemblePruning::EnsemblePruning(FeatsOnFold *hFold_, int mWeak_, int flag) : hF
 	mB = new tpMetricU[nSamp*nMostWeak];
 	ax_ = new tpMetricU[nSamp];
 	w_0 = new tpMetricU[nMostWeak];
+	w_1 = new tpMetricU[nMostWeak];
 	wx = new tpMetricU[nMostWeak];
 	wy = new tpMetricU[nMostWeak];
 	gamma = new double[nMostWeak]();
@@ -116,10 +117,30 @@ EnsemblePruning::EnsemblePruning(FeatsOnFold *hFold_, int mWeak_, int flag) : hF
 	isLive = new int[nSamp]();
 	wasLive = new int[nSamp]();
 	nWeak = 0;
-	if (1) {
+	if (0) {
 		LoadCSV("e:/EnsemblePruning_1250_18_.csv",0x0);
+		//isDebug = true;
 		Pick(0, 0, 1);
 	}
+}
+/*
+	测试集（"e:/EnsemblePruning_1250_18_.csv"）	score_1=0.8554443415875955，score_2=0.8521175653783847
+*/
+bool EnsemblePruning::Compare(int flag) {
+	double err_1 = 0, err_2 = 0, *pred_1 = new double[nSamp], *pred_2 = new double[nSamp];
+	double *y = hFold->GetY_<double>();
+	DCRIMI_2 decrimi_2;
+	size_t i;
+	for (i = 0; i < nSamp; i++) {
+		pred_1[i] = dot_(nWeak, mA + i*nWeak, w_0);
+		pred_2[i] = dot_(nWeak, mA + i*nWeak, w_1);
+	}
+	double score_1 = decrimi_2.AUC_Jonson(nSamp, y, pred_1);
+	double score_2 = decrimi_2.AUC_Jonson(nSamp, y, pred_2);
+	err_1 = 1 - score_1;
+	err_2 = 1 - score_2;
+	delete[] pred_1;		delete[] pred_2;
+	return err_1 < err_2;
 }
 
 EnsemblePruning::~EnsemblePruning() {
@@ -129,7 +150,7 @@ EnsemblePruning::~EnsemblePruning() {
 	FREE_a(isLive);		 FREE_a(wasLive);
 	FREE_a(y2x);
 
-	FREE_a(w_0);
+	FREE_a(w_0);		FREE_a(w_1);
 	FREE_a(wasSmall);
 
 	if (plus_minus != nullptr)
@@ -142,7 +163,7 @@ EnsemblePruning::~EnsemblePruning() {
 */
 void EnsemblePruning::OnStep(int noT_, tpDOWN*hWeak, int flag) {
 	tpMetricU *U_t = mA + nWeak*nSamp;		//Construct margin matrix
-	assert(nWeak >= 0 && nWeak < nMostWeak);
+	assert(nWeak >= 0 && nWeak <= nMostWeak);
 	for (size_t i = 0; i < nSamp; i++) {
 		U_t[i] = hWeak[i];
 	}
@@ -242,8 +263,8 @@ void EnsemblePruning::sorted_ax(int flag) {
 
 double EnsemblePruning::UpateGamma(int *isLive,int nY,int flag) {
 	double g_Max = 0;// , *gamma = new double[nY]();
-					 //RAND_normal(nY, gamma);		// np.random.randn(nLive);
-	if (true) {//仅用于调试
+	RAND_normal(nY, gamma);		// np.random.randn(nLive);
+	if (isDebug && nY<=18) {//仅用于调试
 		double gamma_0[] = { -1.95880275, 0.03199851, 2.31866016, 1.13076601,-0.47713595, 1.10638398,-0.16743563, 0.016846, -0.63711211,-0.77417962,-0.46160502, 0.24628335,
 		-0.00904039,-0.39995661, 0.69108282,-1.26731069,-2.25347049, 1.29984439 };	
 		memcpy(gamma, gamma_0, sizeof(double)*nY);
@@ -381,8 +402,6 @@ bool EnsemblePruning::partial_infty_color(int nX,bool balanced,int flag) {
 
 }
 
-
-
 void EnsemblePruning::basic_local_search(double *x_,  bool balanced, int flag){
 	size_t i,j;
 	for (i = 0; i < nSamp; i++) {
@@ -428,8 +447,45 @@ void EnsemblePruning::basic_local_search(double *x_,  bool balanced, int flag){
 	delete[] flipped;
 }
 
-void EnsemblePruning::greedy(bool balanced, int flag) {
-	double *x=new double[nWeak]();
+/*
+*/
+void EnsemblePruning::local_improvements(double *x_, bool balanced, int flag) {
+	assert(0);
+	size_t i, j;
+	for (i = 0; i < nSamp; i++) {
+		ax_[i] = dot_(nWeak, mA + i*nWeak, x_);
+	}
+	double best_norm = norm_(nSamp, ax_), nrm_, *flipped = new double[nSamp];
+	int num_flip = min(7, nWeak), iters = 0,iter=0;
+	if (balanced && num_flip % 2 == 1)
+		num_flip = num_flip + 1;
+
+	while (true) {
+		iters = iters + 1;
+		for (iter = 0; iter < nWeak; iter++) {
+			int sampled_coords[] = { 0, 1, 5, 6, 9, 15, 16 };
+			bool allDistinct = true;
+			for (i = 0; i < num_flip - 1; i++) {
+				if (sampled_coords[i] == sampled_coords[i + 1])
+					allDistinct = false;
+			}
+			if (!allDistinct)		continue;
+			if (balanced) {
+				/*sum_is=0
+                for i in range(0,num_flip):
+                    sum_is = sum_is + x[sampled_coords[i]]
+                if sum_is!=0:
+                    continue*/
+			}
+
+
+		}
+	}
+	delete[] flipped;
+}
+
+void EnsemblePruning::greedy(double *grad,bool balanced, int flag) {
+	double *x= grad,*so_far=new double[nSamp],*col;
 	size_t i,j;
 	if (balanced) {
 		/*
@@ -454,28 +510,31 @@ void EnsemblePruning::greedy(bool balanced, int flag) {
 	}
 	else {
 		x[0] = 1;
-		double*	so_far = mA,norm_1=0,norm_2=0,a1,a2,a;
+		double norm_1=0,norm_2=0,a1,a2,a;
+		for (col=mA,j = 0; j < nSamp; j++,col+=nWeak) {
+			so_far[j] = *col;
+		}
 		for (i = 1; i < nWeak; i++) {
 			norm_1 = 0, norm_2 = 0;
-			for (j = 0; j < nSamp; j++) {
-				a = mA[i + j*nWeak];
+			for (col = mA+i,j = 0; j < nSamp; j++, col += nWeak) {
+				a = *col;
 				a1 = so_far[j] + a;		a2 = so_far[j] - a;
 				norm_1 = max(norm_1, fabs(a1));
-				norm_2 = max(norm_1, fabs(a2));
+				norm_2 = max(norm_2, fabs(a2));
 			}
 			x[i] = (norm_1 < norm_2) ? 1 : -1;
-			for (j = 0; j < nSamp; j++) {
-				a = mA[i + j*nWeak];
-				so_far[j] += x[i] * a;
+			for (col = mA + i, j = 0; j < nSamp; j++, col += nWeak) {
+				so_far[j] += x[i] * (*col);
 			}
 		}
 	}
-	delete[] x;
+	delete[] so_far;
 }
 
 void EnsemblePruning::round_coloring(bool balanced,int flag) {
 	double *samps = new double[nWeak*6],*flips=samps+nWeak,*init_y=flips+nWeak,*sub_y= init_y+nWeak, *best_sub_y= sub_y+nWeak,*new_sub_y= best_sub_y +nWeak;
-	if (true) {		//仅用于调试
+	RAND_normal(nWeak, samps);
+	if (isDebug && nWeak <=18) {		//仅用于调试
 		double samples_0[] = { 0.04892675, 0.85041767, 0.0882261, 0.00201122, 0.64102732, 0.26890527, 0.1720314, 0.76263232, 0.54824072, 0.14100026, 0.17752911, 0.09100698
 			,0.16327615, 0.34498547, 0.49066404, 0.44659881, 0.04286212, 0.94289195 };
 		memcpy(samps, samples_0, sizeof(double)*nWeak);
@@ -561,62 +620,92 @@ void EnsemblePruning::round_coloring(bool balanced,int flag) {
 	delete[] a_outside;
 }
 
-void EnsemblePruning::Pick(int tt, int T,int flag){
+
+
+bool EnsemblePruning::Pick(int tt, int T,int flag){
 	//nWeak = nWeak_;
-	int nPick = nWeak,nLarge=nSamp/3,i,no,k, nZero;
+	int nPick = nWeak,nLarge=nSamp/3,i,no,k, nZero, num_ones=0;
 	double sum = 0;
 	short sigma = 0;
 	bool balanced = false;
 	plus_minus = new double[nWeak];
+	double *grad=new double[nWeak];
 	for (sum = 0, i = 0; i < nWeak; i++) {	sum += fabs(w_0[i]);	}
 	for (i = 0; i < nWeak; i++) { 
 		w_0[i] /= sum; 
 		scale_(nSamp,mA+i,nWeak, w_0[i]);
 	}
-	if (flag == 0) {
+	if (isDebug) {
 		ToCSV("E:\\EnsemblePruning_"+std::to_string(nSamp) + "_"+std::to_string(nWeak) +"_.csv",0x0);
-		return;
+		return false;
 	}
+	memcpy(w_1, w_0, sizeof(tpMetricU)*nWeak);
 	memset(wx, 0x0, sizeof(tpMetricU)*nWeak);
 	while(!partial_infty_color(nWeak,false, 0x0))	;
 	round_coloring(balanced);
 	basic_local_search(plus_minus,balanced);
-	greedy(balanced);
-	basic_local_search(plus_minus, balanced);
-	//if np.linalg.norm(a@g,ord = norm) < np.linalg.norm(a@y, ord = norm) :
-	//	y = g
+	greedy(grad,balanced);
+	basic_local_search(grad, balanced);
+	double nrm_g = 0, nrm_y = 0,a;
+	for (i = 0; i < nSamp; i++) {
+		a = dot_(nWeak, mA + i*nWeak, grad);
+		nrm_g = max(nrm_g, fabs(a));
+		a = dot_(nWeak, mA + i*nWeak, plus_minus);
+		nrm_y = max(nrm_y, fabs(a));
+	}
+	if (nrm_g < nrm_y) {
+		memcpy(plus_minus, grad, sizeof(double)*nWeak);
+	}
 	//local_improvements(balanced);
 	basic_local_search(plus_minus, balanced);
-
-	nPick = nSparsified();
-	while (nPick > T) {
-		vector<tpSAMP_ID> idx;
-		sort_indexes(nWeak, wx, idx);
-		nZero = 0;
-		k = nWeak-nLarge-nZero;		//non-zero entries in w	that are not in R.
-		float omiga = w_0[nLarge];
-		//Aij
-		//Spencer’s Theorem
-
-		for (sum = 0, i = 0; i < nWeak; i++) {
-			sum += plus_minus[i - nLarge];
+	for (num_ones=0,i = 0; i < nWeak; i++) {
+		if (plus_minus[i] != -1) {
+			plus_minus[i] =  1;
+			num_ones++;
 		}
-		sigma = sum>=0 ? -1 : 1;
-		for (i = 0; i < nWeak; i++) {
-			no = idx[i];
-			if (no < nLarge) {
-
-			}	else {
-				if (plus_minus[i- nLarge]==sigma )
-					wx[i] *= 2;
-				else  {
-					wx[i] = 0;
-				}
-			}
-			
-		}
-		nPick = nSparsified();
-		
 	}
-	delete[] plus_minus;
-};
+	int t = num_ones <= nWeak / 2 ? 1 : -1;
+	for ( i = 0; i < nWeak; i++) {
+		if (plus_minus[i] == t)
+			w_1[i] *= 2;
+		else
+			w_1[i] = 0;
+	}	
+	printf("");
+
+	return Compare(flag);
+}
+
+/*
+nPick = nSparsified();
+while (nPick > T) {
+vector<tpSAMP_ID> idx;
+sort_indexes(nWeak, wx, idx);
+nZero = 0;
+k = nWeak-nLarge-nZero;		//non-zero entries in w	that are not in R.
+float omiga = w_0[nLarge];
+//Aij
+//Spencer’s Theorem
+
+for (sum = 0, i = 0; i < nWeak; i++) {
+sum += plus_minus[i - nLarge];
+}
+sigma = sum>=0 ? -1 : 1;
+for (i = 0; i < nWeak; i++) {
+no = idx[i];
+if (no < nLarge) {
+
+}	else {
+if (plus_minus[i- nLarge]==sigma )
+wx[i] *= 2;
+else  {
+wx[i] = 0;
+}
+}
+
+}
+nPick = nSparsified();
+
+}
+delete[] plus_minus;
+*/

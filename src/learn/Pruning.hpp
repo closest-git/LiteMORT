@@ -15,6 +15,7 @@ namespace Grusoft{
 		double *gamma = nullptr;
 		int num_orth=0,ldOrth=0;
 	protected:
+		bool isDebug = false;
 		//|wx|=1	|wy|=1 
 		tpMetricU *mA = nullptr, *ax_=nullptr;
 		tpMetricU *mB = nullptr, *wy=nullptr;		//live section of (A,x)
@@ -42,18 +43,20 @@ namespace Grusoft{
 		void sorted_ax(int flag=0x0);
 		void make_orthogonal(tpMetricU *b, int ldB, int &nRun, int nMost, int nLive_0, int *isSmall, int flag=0x0);
 		void basic_local_search(double *,bool balanced = false, int flag = 0x0);
-		void greedy(bool balanced = false, int flag = 0x0);
+		void local_improvements(double *, bool balanced = false, int flag = 0x0);
+		void greedy(double*,bool balanced = false, int flag = 0x0);
 		void round_coloring(bool balanced = false, int flag=0x0);
 
 	public:
 		double *plus_minus = nullptr;
-		tpMetricU *w_0 = nullptr, *wx = nullptr;
+		tpMetricU *w_0 = nullptr, *w_1 = nullptr, *wx = nullptr;
 
 		EnsemblePruning(FeatsOnFold *hFold, int nWeak_,int flag=0x0);
 		virtual ~EnsemblePruning();
 		virtual bool isValid() { return true; }
 
-		virtual void Pick(int nWeak_,int T, int flag);
+		virtual bool Pick(int nWeak_,int T, int flag);
+		virtual bool Compare( int flag);
 
 		virtual void OnStep(int noT, tpDOWN*down, int flag = 0x0);
 	};
