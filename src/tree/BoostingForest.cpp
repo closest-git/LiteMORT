@@ -168,8 +168,8 @@ void BoostingForest::ClearData( )	{
 	if (hEvalData != nullptr)			delete hEvalData;
 	//for each( CASE* hCase in SamplSet )		delete hCase;
 	//SamplSet.clear( );
-
 }
+
 void BoostingForest::Clear( ){
 	if (prune != nullptr) 
 		delete prune;

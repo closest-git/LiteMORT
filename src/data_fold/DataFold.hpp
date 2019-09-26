@@ -275,7 +275,7 @@ namespace Grusoft {
 			FeatVec_T<Ty> *predict = dynamic_cast<FeatVec_T<Ty>*>(GetPrecict());
 			if (predict == nullptr)
 				return false;
-			tpDOWN *delta_step = GetDeltaStep();			assert(delta_step != nullptr);
+			tpDOWN *delta_step = GetDeltaStep();			//assert(delta_step != nullptr);
 			Ty *pred = predict->arr();
 			int *feat_ids = tree.feat_ids, *left = tree.left, *rigt = tree.rigt;
 			
@@ -289,7 +289,8 @@ namespace Grusoft {
 					while (no != -1) {
 						if (left[no] == -1) {
 							pred[t] += thrsh_step[no];
-							delta_step[t] = thrsh_step[no];		//Adpative_LR也需要该信息
+							if(delta_step != nullptr)
+								delta_step[t] = thrsh_step[no];		//Adpative_LR也需要该信息
 							//samp_at_leaf[t] = no;
 							break;
 						}

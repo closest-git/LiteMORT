@@ -32,7 +32,6 @@ namespace Grusoft{
 		}
 		void Add(double err, int best_round,bool& isLRjump, int flag=0x0);
 		bool isOK(int cur_round);
-		//bool isOscillate(int nLast=1);
 		bool isOscillate = false;
 		//Brae£∫À’∏Ò¿º«¡Í
 		void CheckBrae(int flag = 0);	

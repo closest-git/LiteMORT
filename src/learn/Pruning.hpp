@@ -15,7 +15,7 @@ namespace Grusoft{
 		double *gamma = nullptr;
 		int num_orth=0,ldOrth=0;
 	protected:
-		static bool isDebug;
+		static bool isDebug,isRand;
 		FeatsOnFold *hFold = nullptr;
 		BoostingForest *hBoost = nullptr;
 
@@ -26,7 +26,6 @@ namespace Grusoft{
 		int nLive = 0, nLive_0 = 0;
 		int *wasSmall=nullptr, *isLive = nullptr, *wasLive=nullptr,*y2x=nullptr;
 		std::vector<tpSAMP_ID> sorted_indices;
-		size_t nSamp=0, nWeak=0,nMostWeak=0;
 		int nSparsified() {
 			int nPick, i;
 			for (nPick = 0, i = 0; i < nWeak; i++) {
@@ -50,6 +49,7 @@ namespace Grusoft{
 		void round_coloring(bool balanced = false, int flag=0x0);
 		virtual void Prepare(int flag = 0x0);
 	public:
+		size_t nSamp = 0, nWeak = 0, nMostWeak = 0;
 		double *plus_minus = nullptr;
 		//combination coefficient
 		tpMetricU *cc_0 = nullptr, *cc_1 = nullptr,cc_0_sum=0, *wx = nullptr;
@@ -58,7 +58,7 @@ namespace Grusoft{
 		virtual ~EnsemblePruning();
 		virtual bool isValid() { return true; }
 
-		virtual bool Pick(int nWeak_,int T, int flag);
+		virtual bool Pick(int nWeak_,int isToCSV, int flag);
 		virtual bool Compare( int flag);
 
 		virtual void OnStep(int noT, tpDOWN*down, int flag = 0x0);

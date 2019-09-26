@@ -5,11 +5,10 @@
 #include "../EDA/SA_salp.hpp"
 #include "../learn/Pruning.hpp"
 
+
 GBRT::GBRT(FeatsOnFold *hTrain, FeatsOnFold *hEval, double sOOB, MODEL mod_, int nTre_, int flag) : BoostingForest() {
 	double rou = 1.0;
-#ifdef _DEBUG
-#else
-#endif
+
 	model = mod_;	
 	skdu.cascad = 0;			//skdu.nStep = nStep_;
 	int seed = skdu.cascad + 31415927, nTrain = hTrain->nSample(), i, cls, nMostThread;
@@ -58,7 +57,7 @@ GBRT::GBRT(FeatsOnFold *hTrain, FeatsOnFold *hEval, double sOOB, MODEL mod_, int
 	nOOB = nTrain*sOOB;
 	histo_buffer = new HistoGRAM_BUFFER(hTrain);
 	if (hEval != nullptr) {
-		prune = new EnsemblePruning(this,hEval, nTree);
+		//prune = new EnsemblePruning(this,hEval, nTree);
 	}
 	const char *mod = model==CLASIFY ? "CLASIFY" : "REGRESSION";
 	printf("\n\n********* GBRT[%s]\n\tnTrainSamp=%d,nTree=%d,maxDepth=%d regress@LEAF=%s thread=%d feat_quanti=%d...",
@@ -476,11 +475,11 @@ int GBRT::Prune(int flag) {
 	VALID_HANDLE(prune);
 	size_t nSamp = nSample();
 	int nTree = forest.size()-1,T = nTree /4,i;
-	for (i = 0; i < nTree; i++) {
+	for (i = 0; i < prune->nWeak; i++) {
 		prune->cc_0[i] = 1.0;
 	}
 	DForest ft_1;
-	prune->Pick(nTree,T,0x0);
+	prune->Pick(nTree,1,0x0);
 	//return 0x0;
 	for (i = 0; i < nTree; i++) {
 		if (prune->wx[i] == 0) {
@@ -488,10 +487,10 @@ int GBRT::Prune(int flag) {
 		}
 		ft_1.push_back(forest[i]);
 	}
-	forest = ft_1;
+	/*forest = ft_1;
 	string sEval,sLossE = hEvalData == nullptr ? "" : hEvalData->LOSSY_INFO(stopping.e_best), sLossT = "";// hTrainData->LOSSY_INFO(err_0);
 	printf("\n********* GBRT::Prune nTree=%d ERR@train=%s err@%s=%s thread=%d",
-		forest.size(),  sLossT.c_str(), sEval.c_str(), sLossE.c_str(), nThread );
+		forest.size(),  sLossT.c_str(), sEval.c_str(), sLossE.c_str(), nThread );*/
 
 	return 0x0;
 }

@@ -1,7 +1,6 @@
 #include "ManifoldTree.hpp"
 #include "BoostingForest.hpp"
 #include "BiSplit.hpp"
-#include <random>
 #include <thread>
 #include <time.h>
 #include <thread>
@@ -481,7 +480,7 @@ void ManifoldTree::DropNodes(int flag) {
 */
 void ManifoldTree::Adpative_LR(int flag) {
 	int nTree = hForest->forest.size(),nFeat,i,*rank=nullptr, nEite=0;
-	if (!(hData_->config.lr_adptive_leaf && nTree > 1 ))//&& !hForest->stopping.isOscillate
+	if (!(hData_->config.lr_adptive_leaf && nTree > 1 ))
 		return;
 
 	FeatsOnFold *hLRData = hForest->hEvalData;

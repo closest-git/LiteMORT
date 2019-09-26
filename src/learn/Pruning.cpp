@@ -16,6 +16,7 @@ using namespace Grusoft;
 using namespace std;
 
 bool EnsemblePruning::isDebug = false;
+bool EnsemblePruning::isRand = false;
 
 template <typename T>
 void RAND_normal(size_t nX, T *x, int flag = 0x0) {
@@ -104,7 +105,7 @@ bool orthogonal_(double *orth, int ldO,int num_orth, Tx *x,size_t nX,int flag = 
 EnsemblePruning::EnsemblePruning(BoostingForest *hBoost_, FeatsOnFold *hFold_, int mWeak_, int flag) : hBoost(hBoost_),hFold(hFold_),nMostWeak(mWeak_) {
 	nSamp = hFold->nSample();
 	if (isDebug) {
-		nMostWeak = 18;
+		nMostWeak = 98;
 	}
 	//ldA = nMostWeak;	//统一为row_major
 	mA = new tpMetricU[nSamp*nMostWeak];
@@ -126,8 +127,7 @@ EnsemblePruning::EnsemblePruning(BoostingForest *hBoost_, FeatsOnFold *hFold_, i
 	wasLive = new int[nSamp]();
 	nWeak = 0;
 	if (isDebug) {
-		LoadCSV("e:/EnsemblePruning_1250_18_.csv",0x0);
-		//isDebug = true;
+		nWeak = 98;		 LoadCSV("e:/EnsemblePruning_625_98_.csv", 0x0);
 		Pick(0, 0, 1);
 	}
 }
@@ -165,13 +165,13 @@ bool EnsemblePruning::Compare(int flag) {
 	err_1 = 1 - score_1;
 	err_2 = 1 - score_2;
 	printf("\n======EnsemblePruning::nWeak=%d=>%d err_0=%.5g score=%.4g=>=%.4g", nz_0, nz_1, err_0, err_1, err_2);
+	//assert(err_0== err_1);
 	delete[] pred_1;		delete[] pred_2;
-	assert(err_0== err_1);
 	return err_1 < err_2;
 }
 
 EnsemblePruning::~EnsemblePruning() {
-	FREE_a(mA);			FREE_a(mB);
+/*	FREE_a(mA);			FREE_a(mB);
 	FREE_a(wx);			FREE_a(wy);
 	FREE_a(ax_);
 	FREE_a(isLive);		 FREE_a(wasLive);
@@ -185,7 +185,7 @@ EnsemblePruning::~EnsemblePruning() {
 	if (plus_minus != nullptr)
 		delete[] plus_minus;
 	if (gamma != nullptr)
-		delete[] gamma;
+		delete[] gamma;*/
 }
 
 /*
@@ -206,8 +206,6 @@ void EnsemblePruning::OnStep(int noT_, tpDOWN*hWeak, int flag) {
 }
 
 void EnsemblePruning::LoadCSV(const string& sPath, int flag) {
-	nWeak = 18;
-
 	FILE *fp = fopen(sPath.c_str(), "rt");
 	assert(fp != NULL);
 	FeatVector *hY = hFold->GetY();
@@ -230,6 +228,9 @@ void EnsemblePruning::LoadCSV(const string& sPath, int flag) {
 	for (h = 0; h < nWeak; h++) {
 		fscanf(fp, "%f\t", &a);			cc_0[h] = a;
 	}
+	fscanf(fp, "%f\t", &a);			
+	assert( nWeak == (int)a);
+
 	fclose(fp);
 	printf("<<<<<< Load from %s ...  OK", sPath.c_str() );
 }
@@ -250,12 +251,16 @@ void EnsemblePruning::ToCSV(const string& sPath, int flag) {
 		if (y != nullptr) {
 			fprintf(fp, "%lf\t", y[samp]);
 		}
+		fprintf(fp, "%lf\t", init_score[samp]);
 		fprintf(fp, "\n");
 	}
 	for (h = 0; h < nWeak; h++) {
+		assert(!IS_NAN_INF(cc_0[h]));
 		fprintf(fp, "%lf\t", cc_0[h]);
 	}
-	if (y != nullptr) { fprintf(fp, "%lf\t", -666666.0); }
+	if (y != nullptr) 	{ 
+		fprintf(fp, "%lf\t", nWeak*1.0);	fprintf(fp, "%lf\t",-6666.0);
+	}
 
 	fprintf(fp, "\n");
 	fclose(fp);
@@ -299,10 +304,10 @@ void EnsemblePruning::sorted_ax(int flag) {
 double EnsemblePruning::UpateGamma(int *isLive,int nY,int flag) {
 	double g_Max = 0;// , *gamma = new double[nY]();
 	RAND_normal(nY, gamma);		// np.random.randn(nLive);
-	if (isDebug && nY<=18) {//仅用于调试
+	if (!isRand) {//仅用于调试
 		double gamma_0[] = { -1.95880275, 0.03199851, 2.31866016, 1.13076601,-0.47713595, 1.10638398,-0.16743563, 0.016846, -0.63711211,-0.77417962,-0.46160502, 0.24628335,
 		-0.00904039,-0.39995661, 0.69108282,-1.26731069,-2.25347049, 1.29984439 };	
-		memcpy(gamma, gamma_0, sizeof(double)*nY);
+		for (int i = 0; i < nY; i++)		gamma[i] = 1;	//memcpy(gamma, gamma_0, sizeof(double)*nY);
 	}
 	if (!orthogonal_(orth, ldOrth, num_orth, gamma, nY, 1))
 		return 0;
@@ -569,10 +574,10 @@ void EnsemblePruning::greedy(double *grad,bool balanced, int flag) {
 void EnsemblePruning::round_coloring(bool balanced,int flag) {
 	double *samps = new double[nWeak*6],*flips=samps+nWeak,*init_y=flips+nWeak,*sub_y= init_y+nWeak, *best_sub_y= sub_y+nWeak,*new_sub_y= best_sub_y +nWeak;
 	RAND_normal(nWeak, samps);
-	if (isDebug && nWeak <=18) {		//仅用于调试
-		double samples_0[] = { 0.04892675, 0.85041767, 0.0882261, 0.00201122, 0.64102732, 0.26890527, 0.1720314, 0.76263232, 0.54824072, 0.14100026, 0.17752911, 0.09100698
-			,0.16327615, 0.34498547, 0.49066404, 0.44659881, 0.04286212, 0.94289195 };
-		memcpy(samps, samples_0, sizeof(double)*nWeak);
+	if (!isRand) {		//仅用于调试
+		//double samples_0[] = { 0.04892675, 0.85041767, 0.0882261, 0.00201122, 0.64102732, 0.26890527, 0.1720314, 0.76263232, 0.54824072, 0.14100026, 0.17752911, 0.09100698
+		//	,0.16327615, 0.34498547, 0.49066404, 0.44659881, 0.04286212, 0.94289195 };
+		for (int i = 0; i < nWeak; i++)		samps[i] = 1;	//	memcpy(samps, samples_0, sizeof(double)*nWeak);
 	}
 	int *sign_flips = new int[nWeak],i,at=0,sign;
 	double a, new_norm, best_norm=0,*a_outside=new double[nSamp], ay, sub_ay, b_y,new_ay;
@@ -667,24 +672,25 @@ void EnsemblePruning::Prepare(int flag) {
 	memcpy(mA, mB, sizeof(tpMetricU)*nWeak*nSamp);
 }
 
-bool EnsemblePruning::Pick(int tt, int T,int flag){
+bool EnsemblePruning::Pick(int nTree, int isToCSV,int flag){
+	//assert(nWeak<= nTree);
+	int nPick = nWeak,nLarge=nSamp/3,i,no,k, nZero, num_ones=0;	
+	for (cc_0_sum = 0, i = 0; i < nWeak; i++) { cc_0_sum += fabs(cc_0[i]);	}
+	assert(cc_0_sum>0 && cc_0_sum<nWeak*10);
+	if (isToCSV) {
+		ToCSV("E:\\EnsemblePruning_"+std::to_string(nSamp) + "__.csv",0x0);
+	}/**/	
+	GST_TIC(tic);	
 	Prepare();
 	//nWeak = nWeak_;
-	int nPick = nWeak,nLarge=nSamp/3,i,no,k, nZero, num_ones=0;
-	short sigma = 0;
 	bool balanced = false;
 	double *grad=new double[nWeak];
-	for (cc_0_sum = 0, i = 0; i < nWeak; i++) { cc_0_sum += fabs(cc_0[i]);	}
-	assert(!IS_NAN_INF(cc_0_sum));
 	for (i = 0; i < nWeak; i++) { 
 		cc_0[i] /= cc_0_sum;
 		scale_(nSamp,mA+i,nWeak, cc_0[i]);	//scaled_a = np.multiply(sub_a,sub_x)	discrepancy_minimize的输入
 	}
 	//Compare(0x0);
-	/*if (isDebug) {
-		ToCSV("E:\\EnsemblePruning_"+std::to_string(nSamp) + "_"+std::to_string(nWeak) +"_.csv",0x0);
-		return false;
-	}*/
+
 	memcpy(cc_1, cc_0, sizeof(tpMetricU)*nWeak);
 	memset(wx, 0x0, sizeof(tpMetricU)*nWeak);
 	while(!partial_infty_color(nWeak,false, 0x0))	;
@@ -721,8 +727,9 @@ bool EnsemblePruning::Pick(int tt, int T,int flag){
 	delete[] grad;
 	for (i = 0; i < nWeak; i++) {
 		scale_(nSamp, mA + i, nWeak, 1.0/cc_0[i]);	//Compare的输入
-		cc_0[i] *= cc_0_sum;
+		cc_0[i] *= cc_0_sum;		cc_1[i] *= cc_0_sum;
 	}
+	printf("\n====== EnsemblePruning::Pick time=%.4g", GST_TOC(tic));
 	return Compare(flag);
 }
 
