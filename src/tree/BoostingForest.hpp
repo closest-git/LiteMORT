@@ -40,7 +40,7 @@ namespace Grusoft{
 
 	typedef bool (*isTrueObj)(void* user_data,int flag);
 	/*
-		提升算法与maniflod-tree的结合
+		Boosting method on manifold-tree(杂然赋流形)
 
 		建议从"../learn/LMachine.hpp"派生
 		v0.1	cys

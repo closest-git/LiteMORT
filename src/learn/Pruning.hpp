@@ -15,16 +15,18 @@ namespace Grusoft{
 		double *gamma = nullptr;
 		int num_orth=0,ldOrth=0;
 	protected:
-		bool isDebug = false;
+		static bool isDebug;
+		FeatsOnFold *hFold = nullptr;
+		BoostingForest *hBoost = nullptr;
+
 		//|wx|=1	|wy|=1 
-		tpMetricU *mA = nullptr, *ax_=nullptr;
+		tpMetricU *mA = nullptr, *ax_=nullptr, *init_score=nullptr;
 		tpMetricU *mB = nullptr, *wy=nullptr;		//live section of (A,x)
 		int ldA_;	//row_major
 		int nLive = 0, nLive_0 = 0;
 		int *wasSmall=nullptr, *isLive = nullptr, *wasLive=nullptr,*y2x=nullptr;
 		std::vector<tpSAMP_ID> sorted_indices;
 		size_t nSamp=0, nWeak=0,nMostWeak=0;
-		FeatsOnFold *hFold = nullptr;
 		int nSparsified() {
 			int nPick, i;
 			for (nPick = 0, i = 0; i < nWeak; i++) {
@@ -46,12 +48,13 @@ namespace Grusoft{
 		void local_improvements(double *, bool balanced = false, int flag = 0x0);
 		void greedy(double*,bool balanced = false, int flag = 0x0);
 		void round_coloring(bool balanced = false, int flag=0x0);
-
+		virtual void Prepare(int flag = 0x0);
 	public:
 		double *plus_minus = nullptr;
-		tpMetricU *w_0 = nullptr, *w_1 = nullptr, *wx = nullptr;
+		//combination coefficient
+		tpMetricU *cc_0 = nullptr, *cc_1 = nullptr,cc_0_sum=0, *wx = nullptr;
 
-		EnsemblePruning(FeatsOnFold *hFold, int nWeak_,int flag=0x0);
+		EnsemblePruning(BoostingForest *hBoost,FeatsOnFold *hFold, int nWeak_,int flag=0x0);
 		virtual ~EnsemblePruning();
 		virtual bool isValid() { return true; }
 

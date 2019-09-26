@@ -10,9 +10,12 @@
 #include "../util/GST_def.h"
 #include "Pruning.hpp"
 #include "../data_fold/DataFold.hpp"
+#include "../tree/BoostingForest.hpp"
 
 using namespace Grusoft;
 using namespace std;
+
+bool EnsemblePruning::isDebug = false;
 
 template <typename T>
 void RAND_normal(size_t nX, T *x, int flag = 0x0) {
@@ -98,48 +101,72 @@ bool orthogonal_(double *orth, int ldO,int num_orth, Tx *x,size_t nX,int flag = 
 	return true;
 }
 
-EnsemblePruning::EnsemblePruning(FeatsOnFold *hFold_, int mWeak_, int flag) : hFold(hFold_),nMostWeak(mWeak_) {
+EnsemblePruning::EnsemblePruning(BoostingForest *hBoost_, FeatsOnFold *hFold_, int mWeak_, int flag) : hBoost(hBoost_),hFold(hFold_),nMostWeak(mWeak_) {
 	nSamp = hFold->nSample();
+	if (isDebug) {
+		nMostWeak = 18;
+	}
 	//ldA = nMostWeak;	//统一为row_major
 	mA = new tpMetricU[nSamp*nMostWeak];
 	mB = new tpMetricU[nSamp*nMostWeak];
 	ax_ = new tpMetricU[nSamp];
-	w_0 = new tpMetricU[nMostWeak];
-	w_1 = new tpMetricU[nMostWeak];
+	cc_0 = new tpMetricU[nMostWeak];
+	cc_1 = new tpMetricU[nMostWeak];
+	plus_minus = new double[nWeak];
 	wx = new tpMetricU[nMostWeak];
 	wy = new tpMetricU[nMostWeak];
 	gamma = new double[nMostWeak]();
 	wasSmall = new int[nSamp];
 	y2x = new int[nSamp];
+	init_score = new double[nSamp]();
 	for (size_t i = 0; i < nSamp; i++)
 		wasSmall[i] = 1;
 
 	isLive = new int[nSamp]();
 	wasLive = new int[nSamp]();
 	nWeak = 0;
-	if (0) {
+	if (isDebug) {
 		LoadCSV("e:/EnsemblePruning_1250_18_.csv",0x0);
 		//isDebug = true;
 		Pick(0, 0, 1);
 	}
 }
+
 /*
-	测试集（"e:/EnsemblePruning_1250_18_.csv"）	score_1=0.8554443415875955，score_2=0.8521175653783847
+	测试集（"e:/EnsemblePruning_1250_18_.csv"）	score_1=0.8564785350613284，score_2=0.8487257000694284
 */
 bool EnsemblePruning::Compare(int flag) {
-	double err_1 = 0, err_2 = 0, *pred_1 = new double[nSamp], *pred_2 = new double[nSamp];
+	//printf("\n======EnsemblePruning::nWeak=%d=>%d err_0=%.5g score=%.4g=>=%.4g", 0, 0, 1., 1., 1.);
+	EARLY_STOPPING& stop = hBoost->stopping;
+	double err_0 = 0;
+	int nz_0 = nWeak, nz_1 = nWeak;
+	if (isDebug) {
+	}	else {
+		assert(nWeak + 1 < stop.errors.size());
+		err_0 = stop.errors[nWeak + 1];
+	}
+
+	double err_1 = 0, err_2 = 0, *pred_1 = new double[nSamp], *pred_2 = new double[nSamp],s;
+	//memcpy()
 	double *y = hFold->GetY_<double>();
 	DCRIMI_2 decrimi_2;
 	size_t i;
+	for (i = 0; i < nWeak; i++) {
+		if (fabs(cc_0[i]) == 0)	nz_0--;
+		if (fabs(cc_1[i]) == 0)	nz_1--;
+	}
 	for (i = 0; i < nSamp; i++) {
-		pred_1[i] = dot_(nWeak, mA + i*nWeak, w_0);
-		pred_2[i] = dot_(nWeak, mA + i*nWeak, w_1);
+		s = init_score[i];
+		pred_1[i] = dot_(nWeak, mA + i*nWeak, cc_0) + s;
+		pred_2[i] = dot_(nWeak, mA + i*nWeak, cc_1) + s;
 	}
 	double score_1 = decrimi_2.AUC_Jonson(nSamp, y, pred_1);
 	double score_2 = decrimi_2.AUC_Jonson(nSamp, y, pred_2);
 	err_1 = 1 - score_1;
 	err_2 = 1 - score_2;
+	printf("\n======EnsemblePruning::nWeak=%d=>%d err_0=%.5g score=%.4g=>=%.4g", nz_0, nz_1, err_0, err_1, err_2);
 	delete[] pred_1;		delete[] pred_2;
+	assert(err_0== err_1);
 	return err_1 < err_2;
 }
 
@@ -150,7 +177,9 @@ EnsemblePruning::~EnsemblePruning() {
 	FREE_a(isLive);		 FREE_a(wasLive);
 	FREE_a(y2x);
 
-	FREE_a(w_0);		FREE_a(w_1);
+	FREE_a(init_score);
+
+	FREE_a(cc_0);		FREE_a(cc_1);
 	FREE_a(wasSmall);
 
 	if (plus_minus != nullptr)
@@ -162,12 +191,18 @@ EnsemblePruning::~EnsemblePruning() {
 /*
 */
 void EnsemblePruning::OnStep(int noT_, tpDOWN*hWeak, int flag) {
-	tpMetricU *U_t = mA + nWeak*nSamp;		//Construct margin matrix
-	assert(nWeak >= 0 && nWeak <= nMostWeak);
-	for (size_t i = 0; i < nSamp; i++) {
-		U_t[i] = hWeak[i];
+	if (noT_ == 0) {	//很妙的解释	https://towardsdatascience.com/demystifying-maths-of-gradient-boosting-bd5715e82b7c
+		for (size_t i = 0; i < nSamp; i++) {
+			init_score[i] = hWeak[i];
+		}
+	}	else {
+		tpMetricU *U_t = mA + nWeak*nSamp;		//Construct margin matrix
+		assert(nWeak >= 0 && nWeak < nMostWeak);
+		for (size_t i = 0; i < nSamp; i++) {
+			U_t[i] = hWeak[i];
+		}
+		nWeak = nWeak + 1;
 	}
-	nWeak = nWeak + 1;
 }
 
 void EnsemblePruning::LoadCSV(const string& sPath, int flag) {
@@ -181,10 +216,10 @@ void EnsemblePruning::LoadCSV(const string& sPath, int flag) {
 	float a;
 	size_t samp, h,nz=0;
 	for (samp = 0; samp < nSamp; samp++) {
-		//tpMetricU *U_ = mA+samp;
 		for (h = 0; h < nWeak; h++) {
 			//fscanf(fp, "%f\t", U_+h*nSamp);
-			fscanf(fp, "%f\t", &a);		mA[nz++]=a;
+			fscanf(fp, "%f\t", &a);		
+			mA[h*nSamp+samp] = a;//mA[nz++]=a;
 		}
 		if (y != nullptr) {
 			fscanf(fp, "%f", &a);
@@ -193,7 +228,7 @@ void EnsemblePruning::LoadCSV(const string& sPath, int flag) {
 		fscanf(fp, "\n");
 	}
 	for (h = 0; h < nWeak; h++) {
-		fscanf(fp, "%f\t", &a);			w_0[h] = a;
+		fscanf(fp, "%f\t", &a);			cc_0[h] = a;
 	}
 	fclose(fp);
 	printf("<<<<<< Load from %s ...  OK", sPath.c_str() );
@@ -218,7 +253,7 @@ void EnsemblePruning::ToCSV(const string& sPath, int flag) {
 		fprintf(fp, "\n");
 	}
 	for (h = 0; h < nWeak; h++) {
-		fprintf(fp, "%lf\t", w_0[h]);
+		fprintf(fp, "%lf\t", cc_0[h]);
 	}
 	if (y != nullptr) { fprintf(fp, "%lf\t", -666666.0); }
 
@@ -620,26 +655,37 @@ void EnsemblePruning::round_coloring(bool balanced,int flag) {
 	delete[] a_outside;
 }
 
-
+void EnsemblePruning::Prepare(int flag) {
+	size_t i, j;
+	tpMetricU *src=nullptr, *target = nullptr;
+	for (i = 0; i < nWeak; i++) {	//transpose
+		src = mA + i*nSamp;	target = mB + i;
+		for (j = 0; j < nSamp; j++, target+=nWeak, src++) {
+			*target = *src;
+		}
+	}
+	memcpy(mA, mB, sizeof(tpMetricU)*nWeak*nSamp);
+}
 
 bool EnsemblePruning::Pick(int tt, int T,int flag){
+	Prepare();
 	//nWeak = nWeak_;
 	int nPick = nWeak,nLarge=nSamp/3,i,no,k, nZero, num_ones=0;
-	double sum = 0;
 	short sigma = 0;
 	bool balanced = false;
-	plus_minus = new double[nWeak];
 	double *grad=new double[nWeak];
-	for (sum = 0, i = 0; i < nWeak; i++) {	sum += fabs(w_0[i]);	}
+	for (cc_0_sum = 0, i = 0; i < nWeak; i++) { cc_0_sum += fabs(cc_0[i]);	}
+	assert(!IS_NAN_INF(cc_0_sum));
 	for (i = 0; i < nWeak; i++) { 
-		w_0[i] /= sum; 
-		scale_(nSamp,mA+i,nWeak, w_0[i]);
+		cc_0[i] /= cc_0_sum;
+		scale_(nSamp,mA+i,nWeak, cc_0[i]);	//scaled_a = np.multiply(sub_a,sub_x)	discrepancy_minimize的输入
 	}
-	if (isDebug) {
+	//Compare(0x0);
+	/*if (isDebug) {
 		ToCSV("E:\\EnsemblePruning_"+std::to_string(nSamp) + "_"+std::to_string(nWeak) +"_.csv",0x0);
 		return false;
-	}
-	memcpy(w_1, w_0, sizeof(tpMetricU)*nWeak);
+	}*/
+	memcpy(cc_1, cc_0, sizeof(tpMetricU)*nWeak);
 	memset(wx, 0x0, sizeof(tpMetricU)*nWeak);
 	while(!partial_infty_color(nWeak,false, 0x0))	;
 	round_coloring(balanced);
@@ -667,12 +713,16 @@ bool EnsemblePruning::Pick(int tt, int T,int flag){
 	int t = num_ones <= nWeak / 2 ? 1 : -1;
 	for ( i = 0; i < nWeak; i++) {
 		if (plus_minus[i] == t)
-			w_1[i] *= 2;
+			cc_1[i] *= 2;
 		else
-			w_1[i] = 0;
+			cc_1[i] = 0;
 	}	
 	printf("");
-
+	delete[] grad;
+	for (i = 0; i < nWeak; i++) {
+		scale_(nSamp, mA + i, nWeak, 1.0/cc_0[i]);	//Compare的输入
+		cc_0[i] *= cc_0_sum;
+	}
 	return Compare(flag);
 }
 
@@ -683,7 +733,7 @@ vector<tpSAMP_ID> idx;
 sort_indexes(nWeak, wx, idx);
 nZero = 0;
 k = nWeak-nLarge-nZero;		//non-zero entries in w	that are not in R.
-float omiga = w_0[nLarge];
+float omiga = cc_0[nLarge];
 //Aij
 //Spencer’s Theorem
 

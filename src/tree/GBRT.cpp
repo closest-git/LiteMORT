@@ -58,7 +58,7 @@ GBRT::GBRT(FeatsOnFold *hTrain, FeatsOnFold *hEval, double sOOB, MODEL mod_, int
 	nOOB = nTrain*sOOB;
 	histo_buffer = new HistoGRAM_BUFFER(hTrain);
 	if (hEval != nullptr) {
-		prune = new EnsemblePruning(hEval, nTree);
+		prune = new EnsemblePruning(this,hEval, nTree);
 	}
 	const char *mod = model==CLASIFY ? "CLASIFY" : "REGRESSION";
 	printf("\n\n********* GBRT[%s]\n\tnTrainSamp=%d,nTree=%d,maxDepth=%d regress@LEAF=%s thread=%d feat_quanti=%d...",
@@ -373,8 +373,8 @@ int GBRT::Train(string sTitle, int x, int flag) {
 					hTrainData->feat_salps->SetCost(1-err);
 				}
 				if (prune != nullptr) {
-					if (t > 1) {	//
-						prune->OnStep(t-2,hEvalData->GetDeltaStep());
+					if (t > 0) {	//
+						prune->OnStep(t-1,hEvalData->GetDeltaStep());
 					}
 				}
 			}
@@ -385,7 +385,7 @@ int GBRT::Train(string sTitle, int x, int flag) {
 				}
 				if (skdu.noT % 500 == 0 && hTrainData->config.verbose==666) {
 					a = forest.size() == 0 ? 0 : nzNode*1.0 / forest.size();
-					printf("\n====== %d: ERR@%s=%8.5g nNode=%g nPick=[%d,%lld] time=%.5g======\n", skdu.noT, hTrainData->nam.c_str(), err_0,
+					printf("\n\t%d: ERR@%s=%8.5g nNode=%g nPick=[%d,%lld] time=%.5g======\n", skdu.noT, hTrainData->nam.c_str(), err_0,
 						a, hTrainData->nPickFeat, nPickSamp, GST_TOC(tick));
 				}
 				if (hEvalData == nullptr)
@@ -429,8 +429,9 @@ int GBRT::Train(string sTitle, int x, int flag) {
 			//printf("\t%4d: train=%g sec\r\n\n", t+1, GST_TOC(tick));
 		}
 	}
+	string sEval = hEvalData == nullptr ? (isEvalTrain ? hTrainData->nam : "None") : hEvalData->nam;
 	string sLossE = hEvalData==nullptr?"":hEvalData->LOSSY_INFO(stopping.e_best), sLossT = hTrainData->LOSSY_INFO(err_0);
-	printf("\n====== %d: ERR@%s=%8.5g time=%.3g(%.3g) ======\n", skdu.noT, hTrainData->nam.c_str(), err_0,GST_TOC(tick), 0);
+	printf("\n====== LOOP=%d: ERR@%s=%s ERR@%s=%s time=%.3g(%.3g) ======\n", skdu.noT, hTrainData->nam.c_str(), sLossT.c_str(), sEval.c_str(), sLossE.c_str(),GST_TOC(tick), 0);
 	for (i = stopping.best_round + 1; i<forest.size(); i++) {
 		delete forest[i];
 	}
@@ -439,7 +440,6 @@ int GBRT::Train(string sTitle, int x, int flag) {
 		this->Prune();
 	}
 	hTrainData->AfterTrain();
-	string sEval = hEvalData == nullptr ? (isEvalTrain ? hTrainData->nam : "None") : hEvalData->nam;
 	if (stopping.isOK(t)) {
 		printf("\n********* early_stopping@[%d,%d]!!!", stopping.best_no, stopping.best_round);
 	}	else {
@@ -477,7 +477,7 @@ int GBRT::Prune(int flag) {
 	size_t nSamp = nSample();
 	int nTree = forest.size()-1,T = nTree /4,i;
 	for (i = 0; i < nTree; i++) {
-		prune->w_0[i] = 1.0;
+		prune->cc_0[i] = 1.0;
 	}
 	DForest ft_1;
 	prune->Pick(nTree,T,0x0);

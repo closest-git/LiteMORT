@@ -171,6 +171,8 @@ void BoostingForest::ClearData( )	{
 
 }
 void BoostingForest::Clear( ){
+	if (prune != nullptr) 
+		delete prune;
 	if (histo_buffer != nullptr)
 		delete histo_buffer;
 	ClearData( );
