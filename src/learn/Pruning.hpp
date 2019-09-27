@@ -9,6 +9,7 @@
 
 namespace Grusoft{
 	typedef double tpMetricU;
+	class ManifoldTree;
 	class FeatsOnFold;
 	class EnsemblePruning{
 		double *orth=nullptr;
@@ -20,7 +21,7 @@ namespace Grusoft{
 		BoostingForest *hBoost = nullptr;
 
 		//|wx|=1	|wy|=1 
-		tpMetricU *mA = nullptr, *ax_=nullptr, *init_score=nullptr;
+		tpMetricU *mA = nullptr, *ax_=nullptr;
 		tpMetricU *mB = nullptr, *wy=nullptr;		//live section of (A,x)
 		int ldA_;	//row_major
 		int nLive = 0, nLive_0 = 0;
@@ -50,6 +51,8 @@ namespace Grusoft{
 		virtual void Prepare(int flag = 0x0);
 	public:
 		size_t nSamp = 0, nWeak = 0, nMostWeak = 0;
+		tpMetricU *init_score = nullptr;
+		std::vector<ManifoldTree*>forest;
 		double *plus_minus = nullptr;
 		//combination coefficient
 		tpMetricU *cc_0 = nullptr, *cc_1 = nullptr,cc_0_sum=0, *wx = nullptr;
@@ -58,10 +61,11 @@ namespace Grusoft{
 		virtual ~EnsemblePruning();
 		virtual bool isValid() { return true; }
 
+		virtual void Reset4Pick(int flag);
 		virtual bool Pick(int nWeak_,int isToCSV, int flag);
 		virtual bool Compare( int flag);
 
-		virtual void OnStep(int noT, tpDOWN*down, int flag = 0x0);
+		virtual void OnStep(ManifoldTree *hTree, tpDOWN*down, int flag = 0x0);
 	};
 
 };

@@ -38,7 +38,7 @@ namespace Grusoft {
 
 	struct ARR_TREE {
 		int nNode = 0;
-		double *thrsh_step = nullptr;
+		double *thrsh_step = nullptr,weight=1.0;
 		int *feat_ids = nullptr, *left = nullptr, *rigt = nullptr, *info = nullptr;
 
 		virtual void Init(int nNode, int flag = 0x0) {
@@ -152,6 +152,14 @@ namespace Grusoft {
 			assert(hY!=nullptr);
 			FeatVec_T<T> *hYd = dynamic_cast<FeatVec_T<T>*>(hY);
 			T *y = hYd == nullptr ? nullptr : hYd->arr();
+			return y;
+		}
+		template<typename T>
+		T* GetPredict_(int flag = 0x0) {
+			FeatVector *pred = GetPrecict();
+			assert(pred != nullptr);
+			FeatVec_T<T> *pred_ = dynamic_cast<FeatVec_T<T>*>(pred);
+			T *y = pred_ == nullptr ? nullptr : pred_->arr();
 			return y;
 		}
 
@@ -269,6 +277,9 @@ namespace Grusoft {
 		//int  OMP_FOR_STATIC_1(const size_t nSamp, size_t& step, int flag = 0x0);
 		template<typename Ty>
 		bool PredictOnTree(const ARR_TREE&tree, int flag) {
+			if (tree.weight == 0) {
+				return true;	//pass
+			}
 			size_t nSamp = nSample(), nNode = tree.nNode, no, nFeat = feats.size(), step = nSamp;
 			G_INT_64 t;
 			double *thrsh_step = tree.thrsh_step;
@@ -288,7 +299,7 @@ namespace Grusoft {
 					int no = 0, feat;
 					while (no != -1) {
 						if (left[no] == -1) {
-							pred[t] += thrsh_step[no];
+							pred[t] += thrsh_step[no]* tree.weight;
 							if(delta_step != nullptr)
 								delta_step[t] = thrsh_step[no];		//Adpative_LR也需要该信息
 							//samp_at_leaf[t] = no;

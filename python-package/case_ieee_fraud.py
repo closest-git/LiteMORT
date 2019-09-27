@@ -18,7 +18,7 @@ isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 isMORT = True
 model='MORT' if isMORT else 'LGB'
 NFOLDS = 8
-some_rows = 1000
+some_rows = 50000
 #some_rows = None
 data_root = 'E:/Kaggle/ieee_fraud/input/'
 #data_root = '../input/'
@@ -121,6 +121,7 @@ def make_predictions(tr_df, tt_df, features_columns, target, lgb_params, NFOLDS=
         print(f'Fold:{fold_} score={fold_score} time={time.time() - t0:.4g} tr_x={tr_x.shape} val_x={vl_x.shape}')
         del tr_x, tr_y, vl_x, vl_y
         gc.collect()
+        break
     tt_df = tt_df[['TransactionID', target]]
     tt_df['prediction'] = predictions
     gc.collect()
@@ -192,7 +193,7 @@ if LOCAL_TEST:
     print(metrics.roc_auc_score(test_predictions[TARGET], test_predictions['prediction']))
 else:
     lgb_params['learning_rate'] = 0.005
-    lgb_params['n_estimators'] = 15
+    lgb_params['n_estimators'] = 5120
     lgb_params['early_stopping_rounds'] = 100
     test_predictions,fold_score = make_predictions(train_df, test_df, features_columns, TARGET, lgb_params, NFOLDS=NFOLDS)
     test_predictions['isFraud'] = test_predictions['prediction']

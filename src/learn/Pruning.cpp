@@ -113,13 +113,13 @@ EnsemblePruning::EnsemblePruning(BoostingForest *hBoost_, FeatsOnFold *hFold_, i
 	ax_ = new tpMetricU[nSamp];
 	cc_0 = new tpMetricU[nMostWeak];
 	cc_1 = new tpMetricU[nMostWeak];
-	plus_minus = new double[nWeak];
+	plus_minus = new double[nMostWeak];
 	wx = new tpMetricU[nMostWeak];
 	wy = new tpMetricU[nMostWeak];
 	gamma = new double[nMostWeak]();
 	wasSmall = new int[nSamp];
 	y2x = new int[nSamp];
-	init_score = new double[nSamp]();
+	//init_score = new double[nSamp]();
 	for (size_t i = 0; i < nSamp; i++)
 		wasSmall[i] = 1;
 
@@ -164,14 +164,14 @@ bool EnsemblePruning::Compare(int flag) {
 	double score_2 = decrimi_2.AUC_Jonson(nSamp, y, pred_2);
 	err_1 = 1 - score_1;
 	err_2 = 1 - score_2;
-	printf("\n======EnsemblePruning::nWeak=%d=>%d err_0=%.5g score=%.4g=>=%.4g", nz_0, nz_1, err_0, err_1, err_2);
+	printf("\n======EnsemblePruning::nWeak=%d=>%d err_0=%.5g score=%.4g=>=%.4g\n", nz_0, nz_1, err_0, err_1, err_2);
 	//assert(err_0== err_1);
 	delete[] pred_1;		delete[] pred_2;
 	return err_1 < err_2;
 }
 
 EnsemblePruning::~EnsemblePruning() {
-/*	FREE_a(mA);			FREE_a(mB);
+	FREE_a(mA);			FREE_a(mB);
 	FREE_a(wx);			FREE_a(wy);
 	FREE_a(ax_);
 	FREE_a(isLive);		 FREE_a(wasLive);
@@ -185,17 +185,20 @@ EnsemblePruning::~EnsemblePruning() {
 	if (plus_minus != nullptr)
 		delete[] plus_minus;
 	if (gamma != nullptr)
-		delete[] gamma;*/
+		delete[] gamma;/**/
 }
 
 /*
 */
-void EnsemblePruning::OnStep(int noT_, tpDOWN*hWeak, int flag) {
-	if (noT_ == 0) {	//很妙的解释	https://towardsdatascience.com/demystifying-maths-of-gradient-boosting-bd5715e82b7c
+void EnsemblePruning::OnStep(ManifoldTree *hTree, tpDOWN*hWeak, int flag) {
+	if (init_score == nullptr) {	//很妙的解释	https://towardsdatascience.com/demystifying-maths-of-gradient-boosting-bd5715e82b7c
+		assert(hWeak!=nullptr);
+		init_score = new double[nSamp];
 		for (size_t i = 0; i < nSamp; i++) {
 			init_score[i] = hWeak[i];
 		}
 	}	else {
+		forest.push_back(hTree);
 		tpMetricU *U_t = mA + nWeak*nSamp;		//Construct margin matrix
 		assert(nWeak >= 0 && nWeak < nMostWeak);
 		for (size_t i = 0; i < nSamp; i++) {
@@ -672,14 +675,20 @@ void EnsemblePruning::Prepare(int flag) {
 	memcpy(mA, mB, sizeof(tpMetricU)*nWeak*nSamp);
 }
 
+void EnsemblePruning::Reset4Pick(int flag) {
+	FREE_a(init_score);
+	nWeak = 0;
+	forest.clear();
+}
+
 bool EnsemblePruning::Pick(int nTree, int isToCSV,int flag){
 	//assert(nWeak<= nTree);
 	int nPick = nWeak,nLarge=nSamp/3,i,no,k, nZero, num_ones=0;	
 	for (cc_0_sum = 0, i = 0; i < nWeak; i++) { cc_0_sum += fabs(cc_0[i]);	}
 	assert(cc_0_sum>0 && cc_0_sum<nWeak*10);
-	if (isToCSV) {
+	/*if (isToCSV) {
 		ToCSV("E:\\EnsemblePruning_"+std::to_string(nSamp) + "__.csv",0x0);
-	}/**/	
+	}*/	
 	GST_TIC(tic);	
 	Prepare();
 	//nWeak = nWeak_;

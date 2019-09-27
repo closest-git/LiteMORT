@@ -121,8 +121,13 @@ namespace Grusoft{
 		void BootSample( arrPFNO &boot,arrPFNO &oob,FeatsOnFold *,int flag=0x0 );
 	public:
 		arrPFNO oob;
+		//对应量化空间
+		ARR_TREE *ArrTree_quanti = nullptr;
+		//对应数据空间
+		ARR_TREE *ArrTree_data = nullptr;
 
 		string name;			//only for debug
+		double weight = 1;
 		DecisionTree( )	{}
 		DecisionTree(BoostingForest *hF, FeatsOnFold *hD,int flag=0x0);
 		virtual ~DecisionTree( );
@@ -176,10 +181,6 @@ namespace Grusoft{
 		virtual void AddScore(INIT_SCORE *score,int flag=0x0);
 		virtual void Dump(int flag = 0x0);
 		virtual void DelChild(hMTNode hNode,int flag=0x0);
-		//对应量化空间
-		ARR_TREE *ArrTree_quanti = nullptr;
-		//对应数据空间
-		ARR_TREE *ArrTree_data = nullptr;
 		virtual ARR_TREE *To_ARR_Tree(FeatsOnFold *hData_,bool isQuanti,bool isClear , int flag = 0x0);
 		//virtual void Predict(int flag = 0x0);
 

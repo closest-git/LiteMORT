@@ -116,6 +116,7 @@ namespace Grusoft{
 		FeatsOnFold *hTrainData=nullptr;
 		FeatsOnFold *hTestData = nullptr;
 		FeatsOnFold *hEvalData = nullptr;
+		FeatsOnFold *hPruneData = nullptr;
 		//FeatsOnFold at current stage(Train,test...)
 		//vector<F4NO>ginii;	//gini importance
 		

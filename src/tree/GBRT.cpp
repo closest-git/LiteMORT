@@ -56,9 +56,11 @@ GBRT::GBRT(FeatsOnFold *hTrain, FeatsOnFold *hEval, double sOOB, MODEL mod_, int
 	}
 	nOOB = nTrain*sOOB;
 	histo_buffer = new HistoGRAM_BUFFER(hTrain);
+	FeatsOnFold *hPruneData = hTrainData;	
 	if (hEval != nullptr) {
-		//prune = new EnsemblePruning(this,hEval, nTree);
+		//hPruneData = hEvalData;
 	}
+	prune = new EnsemblePruning(this, hPruneData, 32);
 	const char *mod = model==CLASIFY ? "CLASIFY" : "REGRESSION";
 	printf("\n\n********* GBRT[%s]\n\tnTrainSamp=%d,nTree=%d,maxDepth=%d regress@LEAF=%s thread=%d feat_quanti=%d...",
 		mod,nTrain, nTree, maxDepth, hTrain->config.leaf_regression.c_str(),nThread, hTrain->config.feat_quanti);
@@ -371,11 +373,7 @@ int GBRT::Train(string sTitle, int x, int flag) {
 				if (hTrainData->feat_salps != nullptr && t>0) {
 					hTrainData->feat_salps->SetCost(1-err);
 				}
-				if (prune != nullptr) {
-					if (t > 0) {	//
-						prune->OnStep(t-1,hEvalData->GetDeltaStep());
-					}
-				}
+				if (prune != nullptr) {		this->Prune();		}
 			}
 			if (isEvalTrain) {
 				err_0 = this->Predict(hTrainData, false, true, true);		//可以继续优化
@@ -435,9 +433,8 @@ int GBRT::Train(string sTitle, int x, int flag) {
 		delete forest[i];
 	}
 	forest.resize(stopping.best_round + 1);
-	if (prune!=nullptr) {
-		this->Prune();
-	}
+	//if (prune!=nullptr) {		this->Prune();	}
+
 	hTrainData->AfterTrain();
 	if (stopping.isOK(t)) {
 		printf("\n********* early_stopping@[%d,%d]!!!", stopping.best_no, stopping.best_round);
@@ -473,24 +470,46 @@ int GBRT::Train(string sTitle, int x, int flag) {
 */
 int GBRT::Prune(int flag) {
 	VALID_HANDLE(prune);
-	size_t nSamp = nSample();
-	int nTree = forest.size()-1,T = nTree /4,i;
-	for (i = 0; i < prune->nWeak; i++) {
-		prune->cc_0[i] = 1.0;
+	int nTree = forest.size();
+	//if (nTree<5)
+	if (!stopping.isOscillate)
+		return 0;//
+	if (prune->nWeak == prune->nMostWeak) {
+		return 0;
 	}
-	DForest ft_1;
-	prune->Pick(nTree,1,0x0);
-	//return 0x0;
-	for (i = 0; i < nTree; i++) {
-		if (prune->wx[i] == 0) {
-			continue;
+	ManifoldTree *lastTree = (ManifoldTree*)forest[forest.size() - 1];
+	if (prune->init_score == nullptr) {
+		prune->OnStep(lastTree, hPruneData->GetPredict_<double>());
+	}
+	else
+		prune->OnStep(lastTree, hPruneData->GetDeltaStep());
+	double errT, errE = 0;
+	if (prune->nWeak == prune->nMostWeak) {
+		size_t nSamp = nSample();
+		int T = nTree /4,i;
+		for (i = 0; i < prune->nWeak; i++) {
+			prune->cc_0[i] = 1.0;
 		}
-		ft_1.push_back(forest[i]);
+		prune->Pick(nTree,1,0x0);
+		//delete prune;		prune = nullptr;	return 0;
+		for (i = 0; i < prune->nWeak; i++) {
+			double w = prune->cc_1[i];			
+
+			ManifoldTree *hMT=dynamic_cast<ManifoldTree *>(prune->forest[i]);
+			hMT->weight= w;
+			hMT->ArrTree_quanti->weight= w;
+			hMT->ArrTree_data->weight = w;
+		}
+		if(hEvalData!=nullptr)
+			errE = this->Predict(hEvalData, true, true, false);
+		errT = this->Predict(hTrainData, true, true, false);
+		prune->Reset4Pick(0x0);
+		/*
+		string sEval,sLossE = hEvalData == nullptr ? "" : hEvalData->LOSSY_INFO(stopping.e_best), sLossT = "";// hTrainData->LOSSY_INFO(err_0);
+		printf("\n********* GBRT::Prune nTree=%d ERR@train=%s err@%s=%s thread=%d",
+			forest.size(),  sLossT.c_str(), sEval.c_str(), sLossE.c_str(), nThread );*/
 	}
-	/*forest = ft_1;
-	string sEval,sLossE = hEvalData == nullptr ? "" : hEvalData->LOSSY_INFO(stopping.e_best), sLossT = "";// hTrainData->LOSSY_INFO(err_0);
-	printf("\n********* GBRT::Prune nTree=%d ERR@train=%s err@%s=%s thread=%d",
-		forest.size(),  sLossT.c_str(), sEval.c_str(), sLossE.c_str(), nThread );*/
+	
 
 	return 0x0;
 }
