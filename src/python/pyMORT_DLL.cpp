@@ -130,6 +130,9 @@ void OnUserParams(LiteBOM_Config&config, PY_ITEM* params, int nParam, int flag =
 		if (strcmp(params[i].Keys, "feature_sample") == 0) {
 			config.feature_fraction = params[i].Values;
 		}
+		if (strcmp(params[i].Keys, "prune") == 0) {
+			config.nMostPrune = params[i].Values;
+		}
 		/*if (strcmp(params[i].Keys, "histo_algorithm") == 0) {
 			config.histo_algorithm = (LiteBOM_Config::HISTO_ALGORITHM)(int)(params[i].Values);
 		}*/

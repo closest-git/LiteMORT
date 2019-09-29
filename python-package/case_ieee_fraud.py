@@ -18,7 +18,7 @@ isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 isMORT = True
 model='MORT' if isMORT else 'LGB'
 NFOLDS = 8
-some_rows = 50000
+some_rows = 5000
 #some_rows = None
 data_root = 'E:/Kaggle/ieee_fraud/input/'
 #data_root = '../input/'
@@ -140,6 +140,7 @@ lgb_params = {
                     'n_jobs':-1,
                     'learning_rate':0.01,
                     "learning_schedule":'adaptive1',
+                    "prune":512,
                     'num_leaves': 2**8,
                     'max_depth':-1,
                     'tree_learner':'serial',
@@ -193,7 +194,7 @@ if LOCAL_TEST:
     print(metrics.roc_auc_score(test_predictions[TARGET], test_predictions['prediction']))
 else:
     lgb_params['learning_rate'] = 0.005
-    lgb_params['n_estimators'] = 5120
+    lgb_params['n_estimators'] = 10
     lgb_params['early_stopping_rounds'] = 100
     test_predictions,fold_score = make_predictions(train_df, test_df, features_columns, TARGET, lgb_params, NFOLDS=NFOLDS)
     test_predictions['isFraud'] = test_predictions['prediction']

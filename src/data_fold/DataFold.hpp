@@ -274,6 +274,35 @@ namespace Grusoft {
 
 		}
 
+		template<typename Ty>
+		bool DeltastepOnTree(const ARR_TREE&tree, int flag) {
+			size_t nSamp = nSample(), nNode = tree.nNode, no, nFeat = feats.size(), step = nSamp;
+			G_INT_64 t;
+			double *thrsh_step = tree.thrsh_step;
+			tpDOWN *delta_step = GetDeltaStep();			assert(delta_step != nullptr);
+			int *feat_ids = tree.feat_ids, *left = tree.left, *rigt = tree.rigt;
+			int num_threads = OMP_FOR_STATIC_1(nSamp, step);
+#pragma omp parallel for schedule(static,1)
+			for (int thread = 0; thread < num_threads; thread++) {
+				size_t start = thread*step, end = min(start + step, nSamp), t;
+				for (t = start; t < end; t++) {
+					int no = 0, feat;
+					while (no != -1) {
+						if (left[no] == -1) {
+							delta_step[t] = thrsh_step[no];		//Adpative_LR也需要该信息
+							break;
+						}
+						else {
+							assert(rigt[no] != -1);
+							FeatVector *hFT = feats[feat_ids[no]];
+							no = hFT->left_rigt(t, thrsh_step[no], left[no], rigt[no]);
+						}
+					}
+				}
+			}
+			return true;
+		}
+
 		//int  OMP_FOR_STATIC_1(const size_t nSamp, size_t& step, int flag = 0x0);
 		template<typename Ty>
 		bool PredictOnTree(const ARR_TREE&tree, int flag) {
@@ -308,19 +337,7 @@ namespace Grusoft {
 						else {
 							assert(rigt[no] != -1);
 							FeatVector *hFT = feats[feat_ids[no]];
-							no = hFT->left_rigt(t,thrsh_step[no], left[no], rigt[no]);
-							/*Tx *feat = arrFeat[feat_ids[no]];
-							if (IS_NAN_INF(feat[t])) {
-								no = rigt[no];
-							}
-							else {
-								if (feat[t] < thrsh_step[no]) {
-									no = left[no];
-								}
-								else {
-									no = rigt[no];
-								}
-							}*/
+							no = hFT->left_rigt(t,thrsh_step[no], left[no], rigt[no]);							
 						}
 					}
 				}

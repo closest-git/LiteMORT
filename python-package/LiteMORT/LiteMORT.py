@@ -67,6 +67,8 @@ class LiteMORT_params(object):
             self.max_depth = dict_param['max_depth']
         if 'learning_rate' in dict_param:
             self.learning_rate = dict_param['learning_rate']
+        if 'prune' in dict_param:
+            self.prune = dict_param['prune']
         if 'learning_schedule' in dict_param:
             self.learning_schedule = dict_param['learning_schedule']
         if 'bagging_fraction' in dict_param:

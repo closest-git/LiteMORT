@@ -161,7 +161,7 @@ namespace Grusoft {
 				"\n\tOBJECTIVE=\"%s\"\teval_metric=\"%s\"\tleaf_optimal=\"%s\" \n\t init=%s"
 				"\n\tImputation=%s\tNormal=%s"
 				"\n\tnElitism=%g,Iter_refine=%g \tRefine_split=%d"
-				"\n\tnode_task=%s"
+				"\n\tnMostPrune=%d node_task=%s"
 				"\n\tnMostSalp4Bins=%d histo_bin_::map=%s",
 				lr_adptive_leaf?"a_":"",learning_rate, subsample, feature_fraction, min_data_in_leaf, early_stopping_round, drop_out, num_leaves,
 				objective.c_str(), eval_metric.c_str(), leaf_optimal.c_str(),
@@ -169,7 +169,7 @@ namespace Grusoft {
 				eda_NA == -1 ? "OFF" : eda_NA == 0 ? "0" : "Other",
 				eda_Normal == 0 ? "OFF" : "Gaussian", 
 				rElitism,T_iterrefine,split_refine,
-				node_task==0 ? "split_X" : node_task == 1 ? "split_Y" : "REGRESS_X",
+				nMostPrune,node_task==0 ? "split_X" : node_task == 1 ? "split_Y" : "REGRESS_X",
 				nMostSalp4bins,histo_alg.c_str()
 				);
 		}
@@ -254,6 +254,7 @@ namespace Grusoft {
 		std::string eda_nan = "zero";
 		int nMostSalp4bins = 0;
 		int nMostSalp4feats = 0;
+		int nMostPrune = 0;
 		double rElitism = 0.05;
 
 		//gradient variance

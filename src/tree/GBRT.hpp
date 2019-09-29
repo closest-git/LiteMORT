@@ -55,7 +55,7 @@ namespace Grusoft{
 		virtual int Train(string sTitle, int cas, int flag=0x0);
 		virtual int Prune(int flag = 0x0);
 		virtual int IterTrain(int round,int flag);
-		virtual double Predict(FeatsOnFold *hData,bool scan_nodes=true,bool checkLossy=false,bool resumeLast=false, int flag=0x0);
+		virtual double Predict(FeatsOnFold *hData,bool updateStopping=false,bool checkLossy=false,bool resumeLast=false, int flag=0x0);
 		virtual int Test(string sTitle, BoostingForest::CASEs& TestSet, int nCls, int flag);
 		virtual bool isPass(hMTNode hNode, int flag = 0x0);
 

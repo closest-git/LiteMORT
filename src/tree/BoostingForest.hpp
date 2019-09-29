@@ -24,6 +24,8 @@ namespace Grusoft{
 		EARLY_STOPPING(int nEarly) : early_round(nEarly)		{
 			nLeastOsci = max(1, early_round / 20);
 		}
+		virtual void Reset();
+
 		double curERR() {
 			if (errors.size() == 0)
 				return DBL_MAX;

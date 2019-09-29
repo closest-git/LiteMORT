@@ -16,7 +16,7 @@ using namespace Grusoft;
 using namespace std;
 
 bool EnsemblePruning::isDebug = false;
-bool EnsemblePruning::isRand = false;
+bool EnsemblePruning::isRand = true;
 
 template <typename T>
 void RAND_normal(size_t nX, T *x, int flag = 0x0) {
