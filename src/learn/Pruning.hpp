@@ -51,6 +51,7 @@ namespace Grusoft{
 		virtual void Prepare(int flag = 0x0);
 	public:
 		size_t nSamp = 0, nWeak = 0, nMostWeak = 0;
+		int nPruneOperation = 0;
 		tpMetricU *init_score = nullptr;
 		std::vector<ManifoldTree*>forest;
 		double *plus_minus = nullptr;

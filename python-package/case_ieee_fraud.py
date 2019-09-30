@@ -18,8 +18,8 @@ isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 isMORT = True
 model='MORT' if isMORT else 'LGB'
 NFOLDS = 8
-some_rows = 5000
-#some_rows = None
+#some_rows = 50000
+some_rows = None
 data_root = 'E:/Kaggle/ieee_fraud/input/'
 #data_root = '../input/'
 pkl_path = f'{data_root}/_kyakovlev_{some_rows}.pickle'
@@ -121,7 +121,7 @@ def make_predictions(tr_df, tt_df, features_columns, target, lgb_params, NFOLDS=
         print(f'Fold:{fold_} score={fold_score} time={time.time() - t0:.4g} tr_x={tr_x.shape} val_x={vl_x.shape}')
         del tr_x, tr_y, vl_x, vl_y
         gc.collect()
-        break
+        #break
     tt_df = tt_df[['TransactionID', target]]
     tt_df['prediction'] = predictions
     gc.collect()
@@ -140,7 +140,7 @@ lgb_params = {
                     'n_jobs':-1,
                     'learning_rate':0.01,
                     "learning_schedule":'adaptive1',
-                    "prune":512,
+                    "prune":0,
                     'num_leaves': 2**8,
                     'max_depth':-1,
                     'tree_learner':'serial',
@@ -194,12 +194,13 @@ if LOCAL_TEST:
     print(metrics.roc_auc_score(test_predictions[TARGET], test_predictions['prediction']))
 else:
     lgb_params['learning_rate'] = 0.005
-    lgb_params['n_estimators'] = 10
+    lgb_params['n_estimators'] = 5000
     lgb_params['early_stopping_rounds'] = 100
     test_predictions,fold_score = make_predictions(train_df, test_df, features_columns, TARGET, lgb_params, NFOLDS=NFOLDS)
     test_predictions['isFraud'] = test_predictions['prediction']
-    # test_predictions[['TransactionID', 'isFraud']].to_csv(f'submit_{some_rows}_{0.5}.csv', index=False,compression='gzip')
-    path = f'E:/Kaggle/ieee_fraud/result/[{model}]_{some_rows}_{fold_score:.5f}_F{NFOLDS}_.csv'
-    test_predictions[['TransactionID', 'isFraud']].to_csv(path, index=False)  # ,compression='gzip'
-    print(f"test_predictions[['TransactionID', 'isFraud']] to_csv @{path}")
+    if some_rows is None:
+        # test_predictions[['TransactionID', 'isFraud']].to_csv(f'submit_{some_rows}_{0.5}.csv', index=False,compression='gzip')
+        path = f'E:/Kaggle/ieee_fraud/result/[{model}]_{some_rows}_{fold_score:.5f}_F{NFOLDS}_.csv'
+        test_predictions[['TransactionID', 'isFraud']].to_csv(path, index=False)  # ,compression='gzip'
+        print(f"test_predictions[['TransactionID', 'isFraud']] to_csv @{path}")
     input("Press Enter to exit...")

@@ -420,7 +420,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 		Y->Set(nSamp_, (void*)(Y_));	
 		float *samp_weight = hFold->lossy->GetSampWeight(0x0);
 		for (size_t i = 0; i < nSamp_; i++) {
-			samp_weight[i] = Y_[i] == 0 ? 1 : 10;
+			samp_weight[i] = 1;	// Y_[i] == 0 ? 1 : 10;
 		}
 
 		//hFold->lossy->decrimi_2.InitAtLabel(nSamp_,  flag);

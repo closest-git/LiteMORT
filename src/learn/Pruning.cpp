@@ -164,7 +164,7 @@ bool EnsemblePruning::Compare(int flag) {
 	double score_2 = decrimi_2.AUC_Jonson(nSamp, y, pred_2);
 	err_1 = 1 - score_1;
 	err_2 = 1 - score_2;
-	printf("\n======EnsemblePruning::nWeak=%d=>%d err_0=%.5g score=%.4g=>=%.4g\n", nz_0, nz_1, err_0, err_1, err_2);
+	printf("\n\tnWeak=%d=>%d err_0=%.5g score=%.4g=>=%.4g\n", nz_0, nz_1, err_0, err_1, err_2);
 	//assert(err_0== err_1);
 	delete[] pred_1;		delete[] pred_2;
 	return err_1 < err_2;
@@ -738,7 +738,7 @@ bool EnsemblePruning::Pick(int nTree, int isToCSV,int flag){
 		scale_(nSamp, mA + i, nWeak, 1.0/cc_0[i]);	//CompareµÄÊäÈë
 		cc_0[i] *= cc_0_sum;		cc_1[i] *= cc_0_sum;
 	}
-	printf("\n====== EnsemblePruning::Pick time=%.4g", GST_TOC(tic));
+	//printf("\n====== EnsemblePruning::Pick time=%.4g", GST_TOC(tic));
 	return Compare(flag);
 }
 

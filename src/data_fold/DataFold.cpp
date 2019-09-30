@@ -188,6 +188,7 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 			assert(mask[no] == 1);
 			FeatVector *hFeat = Feat(no);
 			w[no] = -hFeat->wSplit;
+			w[no] = -hFeat->wGain;
 		}
 		picks = pick_1;		
 		nPick = picks.size();

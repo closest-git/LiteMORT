@@ -188,7 +188,7 @@ namespace Grusoft {
 		void UpdateResi_binary(FeatsOnFold *hData_, int round, int flag) {
 			const string objective = hData_->config.objective, metric = hData_->config.eval_metric;
 			bool isOutlier = objective == "outlier";
-			Tx fuyi = -1, *y1 = ((FeatVec_T<Tx>*)predict)->arr(), *label = ((FeatVec_T<Tx>*)y)->arr(),a;
+			Tx fuyi = -1, *y1 = ((FeatVec_T<Tx>*)predict)->arr(), *label = ((FeatVec_T<Tx>*)y)->arr();
 			tpDOWN *vResi = VECTOR2ARR(resi), *pDown = GetDownDirection(),*delta = VECTOR2ARR(delta_step);
 			tpDOWN *vHess = VECTOR2ARR(hessian);
 			size_t dim = resi.size(), nSamp = hData_->nSample(), step = dim, start, end;
@@ -212,11 +212,12 @@ namespace Grusoft {
 				for (int thread = 0; thread < num_threads; thread++) {
 					size_t start = thread*step, end = min(start + step, dim), i;
 					for (i = start; i < end; i++) {
-						a_logloss += y1[i]<EXP_UNDERFLOW ? 0 : y1[i]>EXP_OVERFLOW ? y1[i] : log(1 + std::exp(y1[i]));
-						//a_logloss += log(1 + y_exp[i]);
-						//assert(!IS_NAN_INF(a_logloss));
+						double a =  (2*y1[i] -1);
+						samp_weight[i] = label[i] == 1 ?exp(-a) : exp(a);
+						a = y1[i]<EXP_UNDERFLOW ? 0 : y1[i]>EXP_OVERFLOW ? y1[i] : log(1 + std::exp(y1[i]));
 						if (label[i] == 1)
-							a_logloss -= y1[i];
+							a -= y1[i];
+						a_logloss += a*samp_weight[i];
 					};
 				}
 				assert(!IS_NAN_INF(a_logloss));
@@ -228,6 +229,20 @@ namespace Grusoft {
 					err_auc = decrimi_2.AUC_Jonson(dim, label,y1);
 				else
 					err_auc = decrimi_2.AUC_cys(dim, label, y1);
+				if (samp_weight != nullptr && round>0) {
+#pragma omp parallel for schedule(static,1)
+					for (int thread = 0; thread < num_threads; thread++) {
+						size_t start = thread*step, end = min(start + step, dim), i;
+						for (i = start; i < end; i++) {
+							double sig = exp(y1[i]), a;
+							sig = sig / (1 + sig);		//[0-1]				
+							a = (2 * sig - 1);
+							//a = max(-2, a);		a = min(2, a);
+							samp_weight[i] = label[i] == 1 ? exp(-a) : exp(a);				
+						};
+					}
+				}/**/
+
 			}
 			if (pDown != nullptr) {
 				Tx P_0 = decrimi_2.P_0, P_1 = decrimi_2.P_1, N_0 = decrimi_2.N_0, N_1 = decrimi_2.N_1;
@@ -236,14 +251,13 @@ namespace Grusoft {
 					size_t start = thread*step, end = min(start + step, dim), i;
 					for (i = start; i < end; i++) {				
 						//double sig = y_exp[i] / (1 + y_exp[i]);
-						double sig = y1[i]<EXP_UNDERFLOW ? 0 : y1[i]>EXP_OVERFLOW ? 1 : exp(y1[i]) / (1 + exp(y1[i]));
+						double sig = y1[i]<EXP_UNDERFLOW ? 0 : y1[i]>EXP_OVERFLOW ? 1 : exp(y1[i]) / (1 + exp(y1[i])),a;
 						//assert(!IS_NAN_INF(sig));
 						pDown[i] = a = -(sig - label[i]);								vHess[i] = sig*(1 - sig);
-						//pDown[i] *= samp_weight[i];		//思路有问题
+						pDown[i] *= samp_weight[i];								vHess[i] *= samp_weight[i];
 						a2 += a*a;				sum += a;
 						//a = pDown[i]* pDown[i] / vHess[i];
-						//sumGH += a*a;		label_sum += label[i];
-						
+						//sumGH += a*a;		label_sum += label[i];						
 					}
 				}
 				DOWN_sum_2 = a2;	DOWN_sum_1 = sum;
