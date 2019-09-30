@@ -205,6 +205,18 @@ namespace Grusoft {
 					for (i = start; i < end; i++) {y_exp[i] = exp(y1[i]);}
 				}
 			}*/
+			if (samp_weight != nullptr && round>0) {	//初步测试，配合adaptive lr 还是有效果的
+#pragma omp parallel for schedule(static,1)
+				for (int thread = 0; thread < num_threads; thread++) {
+					size_t start = thread*step, end = min(start + step, dim), i;
+					for (i = start; i < end; i++) {
+						double sig = exp(y1[i]), a;
+						sig = sig / (1 + sig);					//[0-1]				
+						a = (2 * sig - 1);						//a = max(-2, a);		a = min(2, a);
+						samp_weight[i] = label[i] == 1 ? exp(-a) : exp(a);
+					};
+				}
+			}/**/
 			if (metric == "logloss") {	//binary cross entropy
 				err_logloss = 0;		//-np.mean(true_y*np.log(pred_h) + (1 - true_y)*np.log(1 - pred_h))
 				//vEXP(dim, y_exp);
@@ -212,9 +224,9 @@ namespace Grusoft {
 				for (int thread = 0; thread < num_threads; thread++) {
 					size_t start = thread*step, end = min(start + step, dim), i;
 					for (i = start; i < end; i++) {
-						double a =  (2*y1[i] -1);
-						samp_weight[i] = label[i] == 1 ?exp(-a) : exp(a);
-						a = y1[i]<EXP_UNDERFLOW ? 0 : y1[i]>EXP_OVERFLOW ? y1[i] : log(1 + std::exp(y1[i]));
+						//double a =  (2*y1[i] -1);
+						//samp_weight[i] = label[i] == 1 ?exp(-a) : exp(a);
+						double a = y1[i]<EXP_UNDERFLOW ? 0 : y1[i]>EXP_OVERFLOW ? y1[i] : log(1 + std::exp(y1[i]));
 						if (label[i] == 1)
 							a -= y1[i];
 						a_logloss += a*samp_weight[i];
@@ -229,20 +241,6 @@ namespace Grusoft {
 					err_auc = decrimi_2.AUC_Jonson(dim, label,y1);
 				else
 					err_auc = decrimi_2.AUC_cys(dim, label, y1);
-				if (samp_weight != nullptr && round>0) {
-#pragma omp parallel for schedule(static,1)
-					for (int thread = 0; thread < num_threads; thread++) {
-						size_t start = thread*step, end = min(start + step, dim), i;
-						for (i = start; i < end; i++) {
-							double sig = exp(y1[i]), a;
-							sig = sig / (1 + sig);		//[0-1]				
-							a = (2 * sig - 1);
-							//a = max(-2, a);		a = min(2, a);
-							samp_weight[i] = label[i] == 1 ? exp(-a) : exp(a);				
-						};
-					}
-				}/**/
-
 			}
 			if (pDown != nullptr) {
 				Tx P_0 = decrimi_2.P_0, P_1 = decrimi_2.P_1, N_0 = decrimi_2.N_0, N_1 = decrimi_2.N_1;
@@ -253,7 +251,7 @@ namespace Grusoft {
 						//double sig = y_exp[i] / (1 + y_exp[i]);
 						double sig = y1[i]<EXP_UNDERFLOW ? 0 : y1[i]>EXP_OVERFLOW ? 1 : exp(y1[i]) / (1 + exp(y1[i])),a;
 						//assert(!IS_NAN_INF(sig));
-						pDown[i] = a = -(sig - label[i]);								vHess[i] = sig*(1 - sig);
+						pDown[i] = a = -(sig - label[i]);						vHess[i] = sig*(1 - sig);
 						pDown[i] *= samp_weight[i];								vHess[i] *= samp_weight[i];
 						a2 += a*a;				sum += a;
 						//a = pDown[i]* pDown[i] / vHess[i];
@@ -353,6 +351,8 @@ namespace Grusoft {
 			return resi.size();
 		}
 
+		virtual void InitSampWeight(int flag=0x0);
+
 		template<typename Ty>
 		void Init_T(const FeatsOnFold *hData_, int _len, size_t x, int rnd_seed, int flag) {
 			hBaseData_ = hData_;
@@ -368,24 +368,28 @@ namespace Grusoft {
 
 			y = new FeatVec_T<Ty>(_len, 0, "loss");			predict = new FeatVec_T<Ty>(_len, 0, "predict");
 			
+			resi.clear();			resi.resize(_len, 0);
 			//predict.resize(_len, 0);
-			if (isTrain || isEval ) {
-				down.resize(_len, 0);		sample_down.resize(_len, 0);
-				delta_step.resize(_len, 0);
-				resi.clear();				
-				hessian.clear();			sample_hessian.clear();
-			}
-			resi.resize(_len, 0);
-			if (hData_->config.objective == "binary") {
-				hessian.resize(_len, 0);	sample_hessian.resize(_len, 0);
-				samp_weight = new float[_len]();
-			}else	if (hData_->config.objective == "outlier") {
-				if (isTrain) {
-					hessian.resize(_len, 0);		sample_hessian.resize(_len, 0);
-					HT_lambda_.Init(10000,-1, 1, 10000);
-				}	else {
-					hessian.clear();		sample_hessian.clear();
+			if (isTrain) {
+				if (isTrain || isEval ) {
+					down.resize(_len, 0);		sample_down.resize(_len, 0);
+					delta_step.resize(_len, 0);
+					hessian.clear();			sample_hessian.clear();
 				}
+				if (hData_->config.objective == "binary") {
+					hessian.resize(_len, 0);	sample_hessian.resize(_len, 0);
+				}else	if (hData_->config.objective == "outlier") {
+					if (isTrain) {
+						hessian.resize(_len, 0);		sample_hessian.resize(_len, 0);
+						HT_lambda_.Init(10000,-1, 1, 10000);
+					}	else {
+						hessian.clear();		sample_hessian.clear();
+					}
+				}
+				InitSampWeight(flag);
+			}
+			if (isEval) {
+				delta_step.resize(_len, 0);
 			}
 		}
 		virtual void EDA(ExploreDA *edaX, int flag);

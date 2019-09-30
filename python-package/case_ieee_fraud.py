@@ -18,7 +18,7 @@ isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 isMORT = True
 model='MORT' if isMORT else 'LGB'
 NFOLDS = 8
-#some_rows = 50000
+#some_rows = 5000
 some_rows = None
 data_root = 'E:/Kaggle/ieee_fraud/input/'
 #data_root = '../input/'
@@ -139,7 +139,7 @@ lgb_params = {
                     'metric':'auc',
                     'n_jobs':-1,
                     'learning_rate':0.01,
-                    "learning_schedule":'adaptive1',
+                    "learning_schedule":'adaptive',
                     "prune":0,
                     'num_leaves': 2**8,
                     'max_depth':-1,

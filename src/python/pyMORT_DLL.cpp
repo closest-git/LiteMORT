@@ -324,11 +324,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	else {
 		FeatVector *Y = hFold->GetY();
 		//Y->Set(nSamp_, (void*)(Y_));
-		Y->Set(nSamp_, cY_);
-		float *samp_weight = hFold->lossy->GetSampWeight(0x0);
-		for (size_t i = 0; i < nSamp_; i++) {
-			samp_weight[i] = 1;	// Y_[i] == 0 ? 1 : 10;
-		}
+		Y->Set(nSamp_, cY_);		
 	}
 	hFold->lossy->EDA(nullptr, flag);
 
@@ -395,7 +391,6 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	FeatsOnFold *hFold = new FeatsOnFold(config, edaX, nam_, flag);
 	hFold->InitRanders();
 	
-
 	hFold->InitMost(nSamp_);
 	//hFold->nMost = nSamp_;
 	for (size_t i = 0; i < ldX_; i++) {
@@ -417,12 +412,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 
 	}	else {
 		FeatVector *Y = hFold->GetY();
-		Y->Set(nSamp_, (void*)(Y_));	
-		float *samp_weight = hFold->lossy->GetSampWeight(0x0);
-		for (size_t i = 0; i < nSamp_; i++) {
-			samp_weight[i] = 1;	// Y_[i] == 0 ? 1 : 10;
-		}
-
+		Y->Set(nSamp_, (void*)(Y_));		
 		//hFold->lossy->decrimi_2.InitAtLabel(nSamp_,  flag);
 	}
 	hFold->lossy->EDA(nullptr, flag);

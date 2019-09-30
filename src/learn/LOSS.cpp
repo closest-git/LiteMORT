@@ -24,6 +24,19 @@ void FeatVec_LOSS::Update(FeatsOnFold *hData_,int round, int flag) {
 	return;
 }
 
+void FeatVec_LOSS::InitSampWeight(int flag) {
+	bool isTrain = BIT_TEST(flag, FeatsOnFold::DF_TRAIN);
+	bool isEval = BIT_TEST(flag, FeatsOnFold::DF_EVAL);
+	bool isPredict = BIT_TEST(flag, FeatsOnFold::DF_PREDIC);
+	size_t nSamp = size();
+	if (isTrain) {
+		samp_weight = new float[nSamp]();
+		for (size_t i = 0; i < nSamp; i++) {
+			samp_weight[i] = 1;	// Y_[i] == 0 ? 1 : 10;
+		}
+	}
+}
+
 string FeatsOnFold::LOSSY_INFO(double err, int flag) {
 	char tmp[1000];
 	if (config.eval_metric == "auc") {
@@ -69,7 +82,7 @@ void FeatVec_LOSS::EDA( ExploreDA *edaX, int flag) {
 	bool isPredict = BIT_TEST(flag, FeatsOnFold::DF_PREDIC);
 	bool isEval = BIT_TEST(flag, FeatsOnFold::DF_EVAL);
 	bool isTrain = BIT_TEST(flag, FeatsOnFold::DF_TRAIN);
-	printf("********* FeatVec_LOSS::EDA@\"%s\"...\n",hBaseData_->nam.c_str());
+	printf("********* FeatVec_LOSS::EDA@\"%s\"\tsamp_weight=%p...\n",hBaseData_->nam.c_str(),samp_weight);
 	if (isPredict) {
 
 	}	else {
@@ -96,7 +109,7 @@ void FeatVec_LOSS::EDA( ExploreDA *edaX, int flag) {
 				printf("\tNumber of positive : %lld, number of negative : %lld\n", nPosi, nNega);
 			}
 		}
-		printf("********* EDA::Analysis......OK\n");
+		//printf("********* EDA::Analysis......OK\n");
 
 	}
 	//hFold->lossy.InitScore_(config);
