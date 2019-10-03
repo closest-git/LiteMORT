@@ -71,6 +71,9 @@ class LiteMORT_params(object):
             self.prune = dict_param['prune']
         if 'learning_schedule' in dict_param:
             self.learning_schedule = dict_param['learning_schedule']
+        if 'adaptive' in dict_param:
+            self.adaptive = dict_param['adaptive']
+
         if 'bagging_fraction' in dict_param:
             self.subsample = dict_param['bagging_fraction']
         #if 'subsample' in dict_param:

@@ -33,7 +33,6 @@ namespace Grusoft {
 		IS_TYPE tpResi = is_XXX;
 		FeatVector *y = nullptr, *predict = nullptr;
 		vector<tpSAMP_ID> outliers;
-		float *samp_weight = nullptr;
 		//Average Precision (AP) 确实有问题
 		template <typename Tx>
 		void Down_AP() {
@@ -185,13 +184,46 @@ namespace Grusoft {
 		}
 
 		template <typename Tx>
+		void WeightOnMarginal(FeatsOnFold *hData_, int round, int flag) {//初步测试，配合adaptive lr 还是有效果的
+			size_t dim = resi.size(), nSamp = hData_->nSample(), step = dim;
+			assert(dim == nSamp);
+			Tx fuyi = -1, *y1 = ((FeatVec_T<Tx>*)predict)->arr(), *label = ((FeatVec_T<Tx>*)y)->arr();
+			int num_threads = OMP_FOR_STATIC_1(dim, step);
+			if (samp_weight == nullptr || round <10)
+				return;
+			double w0 = DBL_MAX, w1 = -DBL_MAX;
+			decrimi_2.StatAtLabel(dim, label, y1, flag);
+			double N_1= exp(decrimi_2.N_1);	 N_1 = N_1 / (1 + N_1);
+			double P_0 = exp(decrimi_2.P_0);	 P_0 = P_0 / (1 + P_0);
+//#pragma omp parallel for schedule(static,1)
+			for (int thread = 0; thread < num_threads; thread++) {
+				size_t start = thread*step, end = min(start + step, dim), i;
+				for (i = start; i < end; i++) {
+					double sig, a,off= label[i] == 1? sig - N_1: P_0 - sig;
+					sig = exp(y1[i]);	 sig = sig / (1 + sig);					//[0-1]				
+					a = (2 * sig - 1);						//a = max(-2, a);		a = min(2, a);
+					samp_weight[i] = label[i] == 1 ? exp(-a) : exp(a);		
+					if(off<0) {
+						//off = min(1, off);		off = max(-1, off);
+						//samp_weight[i] = exp(-off);
+						//samp_weight[i] *= exp(-off);
+					}
+					w0 = min(w0, samp_weight[i]);		w1 = max(w1, samp_weight[i]);
+				};
+			}
+			if (round % 100 == 0) {
+				printf("w(%.4g,%.4g)\t", w0,w1);
+			}
+		}
+
+		template <typename Tx>
 		void UpdateResi_binary(FeatsOnFold *hData_, int round, int flag) {
 			const string objective = hData_->config.objective, metric = hData_->config.eval_metric;
 			bool isOutlier = objective == "outlier";
 			Tx fuyi = -1, *y1 = ((FeatVec_T<Tx>*)predict)->arr(), *label = ((FeatVec_T<Tx>*)y)->arr();
 			tpDOWN *vResi = VECTOR2ARR(resi), *pDown = GetDownDirection(),*delta = VECTOR2ARR(delta_step);
 			tpDOWN *vHess = VECTOR2ARR(hessian);
-			size_t dim = resi.size(), nSamp = hData_->nSample(), step = dim, start, end;
+			size_t dim = resi.size(), nSamp = hData_->nSample(), step = dim;
 			G_INT_64 i;
 			double a2 = 0, sum = 0,sumGH=0, label_sum=0,*y_exp = nullptr, a_logloss = 0;
 
@@ -205,18 +237,9 @@ namespace Grusoft {
 					for (i = start; i < end; i++) {y_exp[i] = exp(y1[i]);}
 				}
 			}*/
-			if (samp_weight != nullptr && round>0) {	//初步测试，配合adaptive lr 还是有效果的
-#pragma omp parallel for schedule(static,1)
-				for (int thread = 0; thread < num_threads; thread++) {
-					size_t start = thread*step, end = min(start + step, dim), i;
-					for (i = start; i < end; i++) {
-						double sig = exp(y1[i]), a;
-						sig = sig / (1 + sig);					//[0-1]				
-						a = (2 * sig - 1);						//a = max(-2, a);		a = min(2, a);
-						samp_weight[i] = label[i] == 1 ? exp(-a) : exp(a);
-					};
-				}
-			}/**/
+			if(samp_weight!=nullptr)
+				WeightOnMarginal<Tx>(hData_,round,flag);
+			
 			if (metric == "logloss") {	//binary cross entropy
 				err_logloss = 0;		//-np.mean(true_y*np.log(pred_h) + (1 - true_y)*np.log(1 - pred_h))
 				//vEXP(dim, y_exp);
@@ -252,7 +275,8 @@ namespace Grusoft {
 						double sig = y1[i]<EXP_UNDERFLOW ? 0 : y1[i]>EXP_OVERFLOW ? 1 : exp(y1[i]) / (1 + exp(y1[i])),a;
 						//assert(!IS_NAN_INF(sig));
 						pDown[i] = a = -(sig - label[i]);						vHess[i] = sig*(1 - sig);
-						pDown[i] *= samp_weight[i];								vHess[i] *= samp_weight[i];
+						if (samp_weight != nullptr)
+						{		pDown[i] *= samp_weight[i];			vHess[i] *= samp_weight[i];		}
 						a2 += a*a;				sum += a;
 						//a = pDown[i]* pDown[i] / vHess[i];
 						//sumGH += a*a;		label_sum += label[i];						
@@ -326,6 +350,7 @@ namespace Grusoft {
 	public:
 		std::vector<tpDOWN> down, resi, hessian,sample_down,sample_hessian;		//negative_gradient,是否下降由LOSS判定		
 		std::vector<tpDOWN> delta_step;
+		float *samp_weight = nullptr;
 		//参见samp_set之相关定义
 		double DOWN_sum_1 = 0, DOWN_sum_2 = 0, DOWN_GH_2 = 0, LABEL_mean = 0, DOWN_0 = DBL_MAX, DOWN_1 = -DBL_MAX;
 		
@@ -386,7 +411,8 @@ namespace Grusoft {
 						hessian.clear();		sample_hessian.clear();
 					}
 				}
-				InitSampWeight(flag);
+				if(hData_->config.adaptive_sample_weight>0)
+					InitSampWeight(flag);
 			}
 			if (isEval) {
 				delta_step.resize(_len, 0);

@@ -249,7 +249,8 @@ namespace Grusoft {
 		// desc = shrinkage rate
 		// desc = in ``dart``, it also affects on normalization weights of dropped trees
 		double learning_rate = 0.03;
-		bool lr_adptive_leaf = true;
+		bool lr_adptive_leaf = false;
+		int adaptive_sample_weight = 0;
 		bool useRandomSeed = false;
 		std::string eda_nan = "zero";
 		int nMostSalp4bins = 0;

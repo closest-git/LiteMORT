@@ -55,6 +55,7 @@ void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const BoostingForest *hBoosting, 
 	Alloc(hData_,nMost);
 	size_t i, nFrom = hData_->nSample(),nz=0,pos,nSmall=0;
 	double T_grad = DBL_MAX,b;
+	float *samp_weight = hData_->lossy->samp_weight;	//assert(samp_weight!=nullptr);
 	if (hData_->isTrain()) {	
 		T_grad = hData_->lossy->DOWN_sum_2;
 		//T_grad = hData_->lossy->DOWN_GH_2;
@@ -98,12 +99,19 @@ void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const BoostingForest *hBoosting, 
 				i = nFrom - 1;
 			double prob = min(0.9999,(nMost - nz)*1.0/(nFrom - i));
 			if (nElitism > 0 ) {
-				//b = weight==nullptr ? fabs(down[i]) : fabs(down[i])*weight[i];
-				b = fabs(down[i]);
-				//b = down[i] * down[i] / hessian[i];
-				//if (b < T_grad/100) continue;
-				if (b<T_grad) {
-					prob /= 10.0;		//nSmall++;
+				if (samp_weight != nullptr) {
+					if (samp_weight[i]<0.5) {
+						prob /= 10.0;		//nSmall++;
+					}/**/
+					//prob *= samp_weight[i] / 5;	//效果不好，难以理解		
+				}
+				else {
+					//b = weight==nullptr ? fabs(down[i]) : fabs(down[i])*weight[i];
+					b = fabs(down[i]);
+					//b = down[i] * down[i] / hessian[i];
+					if (b<T_grad) {
+						prob /= 10.0;		//nSmall++;
+					}
 				}
 			}
 			double c = hData_->rander_samp.Uniform_(0, 1);
