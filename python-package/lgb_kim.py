@@ -1,5 +1,6 @@
 #很好的测试算例     X_train_0=(159999, 200) y_train=(159999,)......
 #https://www.kaggle.com/chocozzz/santander-lightgbm-baseline-lb-0-899
+#http://www.stat.ucdavis.edu/~chohsieh/teaching/STA141C_Spring2017/final_project_proposal.pdf
 
 import numpy as np
 import pandas as pd
@@ -81,10 +82,10 @@ start = time.time()
 param = {
         'num_leaves': nLeaves,
         'num_round':n_round,
-        'salp_bins':0,
         #'num_leaves': 32,
         #'max_bin': 119,
         'max_bin': max_bin,
+        #"adaptive":'weight',
         'min_data_in_leaf': min_child,
         'learning_rate': lr,
         #'learning_rate': 0.5,
@@ -106,7 +107,6 @@ param = {
         'boosting_type': 'gbdt',
         'verbose': 1,
         'metric': 'auc',
-        'iter_refine':0,
         #'metric': 'auc',
         'is_unbalance': True,
         'boost_from_average': False,

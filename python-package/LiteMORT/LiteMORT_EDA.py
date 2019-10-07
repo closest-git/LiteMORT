@@ -17,7 +17,7 @@ def Unique_Expand(df):
         for feature in (range(ndf.shape[1])):
             _,index_, count_ = np.unique(ndf[:, feature], return_counts=True, return_index=True)
             unique_count[index_[count_ == 1], feature] += 1
-        real_samples_indexes = np.argwhere(np.sum(unique_count, axis=1) 2)[:, 0]
+        real_samples_indexes = np.argwhere(np.sum(unique_count, axis=1) ==2)[:, 0]
         synthetic_samples_indexes = np.argwhere(np.sum(unique_count, axis=1) == 0)[:, 0]
         df['unique']=0
         df['unique'].iloc[real_samples_indexes]=1

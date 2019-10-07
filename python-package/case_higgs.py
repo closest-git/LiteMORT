@@ -27,9 +27,9 @@ from litemort import *
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 #isMORT = True
 model_type = 'mort' if isMORT else 'lgb'
-#some_rows=      20000
-some_rows=      2000000
-#some_rows=      10500000
+#some_rows=      200000
+#some_rows=      2000000
+some_rows=      10500000
 nTotal =        11000000
 nLastForTest =    500000       #The last 500,000 examples are used as a test set.
 
@@ -66,8 +66,7 @@ num_rounds = 10001
 params = {
         "objective": "binary",
         "metric": "auc",        #"binary_logloss"
-        #'salp_bins':0,
-        #'elitism': 4,
+        "adaptive":'weight',
             'max_bin': 256,
           'num_leaves': 64,
           'learning_rate': 0.1,
@@ -83,7 +82,6 @@ params = {
           #'sparse_threshold': 1.0,
             'n_estimators':num_rounds,
             'early_stopping_rounds': 500,
-            'iter_refine':0
           #'device': 'cpu'
            #'device': 'gpu',
           #'gpu_platform_id': 0,

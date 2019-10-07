@@ -80,6 +80,7 @@ void LiteBOM_Config::OnObjective() {
 	//nBlitThread = 8;	//并行导致结果不再可重复
 }
 
+
 void OnUserParams(LiteBOM_Config&config, PY_ITEM* params, int nParam, int flag = 0x0) {
 	char sERR[10000];
 	int i,err=0;

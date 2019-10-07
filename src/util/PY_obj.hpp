@@ -48,7 +48,37 @@ struct PY_COLUMN {
 	template<typename Tx>
 	void CopyTo_(size_t nSamp, Tx* dst, int flag = 0x0) {
 		if (isChar()) {
-			G_MEMCOPY_(nSamp, dst, (int8_t*)data, flag);
+			//assert(typeof(Tx) == typeof(int8_t));
+			//G_MEMCOPY_(nSamp, dst, (int8_t*)data, flag);
+			int8_t *i8_ = (int8_t*)data;
+			for (size_t i = 0; i < nSamp; i++) {
+				dst[i] = i8_[i];
+			}
+		}
+		else if (isDouble()){
+			double *dbl = (double*)data;
+			for (size_t i = 0; i < nSamp; i++) {
+				dst[i] = dbl[i];
+			}
+		}	else if (isFloat()) {
+			float *flt = (float*)data;
+			for (size_t i = 0; i < nSamp; i++) {
+				dst[i] = flt[i];
+			}
+		}	else if (isInt64()) {
+			int64_t *i64 = (int64_t*)data;
+			for (size_t i = 0; i < nSamp; i++) {
+				dst[i] = i64[i];
+			}
+		}
+		else if (isInt()) {
+			int32_t *i32 = (int32_t*)data;
+			for (size_t i = 0; i < nSamp; i++) {
+				dst[i] = i32[i];
+			}
+		}
+		else {
+			throw "PY_COLUMN::CopyTo_ is mismatch!!!";
 		}
 	}
 };
