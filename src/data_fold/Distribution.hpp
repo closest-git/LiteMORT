@@ -180,9 +180,9 @@ namespace Grusoft {
 				}/**/
 				a = vec[i];
 				a2 += a*a;				sum += a;
-				x_0 = MIN(x_0, a);		x_1 = MAX(x_1, a);
+				x_0 = MIN2(x_0, a);		x_1 = MAX2(x_1, a);
 			}
-			vMax = MAX(vMax, x_1);				vMin = MIN(vMin, x_0);
+			vMax = MAX2(vMax, x_1);				vMin = MIN2(vMin, x_0);
 		END:
 			if (1) {
 				rNA = nNA*1.0 / N;					rSparse = nZERO*1.0 / N;
@@ -286,7 +286,7 @@ namespace Grusoft {
 				}
 				HISTO_BIN& bin = histo->bins[noBin];
 				bin.tic = noBin;	//tic split_F必须一致
-				bin.split_F = i_0 > 0 ? (v0 + val[sort_ids[i_0 - 1]]) / 2 : v0;
+				//bin.split_F = i_0 > 0 ? (v0 + val[sort_ids[i_0 - 1]]) / 2 : v0;
 				/*//vThrsh.push_back(v1_last);
 				if (i_0 > 0)
 					vThrsh.push_back((v0 + val[sort_ids[i_0 - 1]]) / 2);
@@ -310,10 +310,11 @@ namespace Grusoft {
 				i_0 = i_1;		
 				noBin = noBin + 1;
 			}
-			histo->bins.resize(noBin+1);
+			//histo->bins.resize(noBin+1);
+			histo->nBins = noBin + 1;
 			assert(i_0 == nA);
 			double delta = double(fabs(a1 - a0)) / nMostBin / 100.0;
-			histo->bins[noBin].split_F = a1 + delta;		//上界,为了QuantiAtEDA等
+			//histo->bins[noBin].split_F = a1 + delta;		//上界,为了QuantiAtEDA等
 			//assert(histo->bins[histo->bins.size()-1].split_F>a1);
 			//vThrsh.push_back(a1 + delta);
 		}
@@ -410,7 +411,7 @@ namespace Grusoft {
 			Tx a0 = val[idx[0]], a1 = val[idx[nA - 1]], v0 = a0, v1, v2;
 			if (nA > 4 && a1>a0) {
 				q1 = val[idx[nA / 4]], q2 = val[idx[nA / 2]], q3 = val[idx[nA*3/4]];
-				//nMostBin = MIN(nMostBin,Freedman_Diaconis_(val, idx));
+				//nMostBin = MIN2(nMostBin,Freedman_Diaconis_(val, idx));
 			}	else {
 				q1 = q2 = q3 = a0;
 			}

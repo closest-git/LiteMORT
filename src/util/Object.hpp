@@ -177,12 +177,12 @@ void MIN_MAX( size_t len,T *arr,double&a_0,double&a_1,int flag=0x0 ){
 		for( a_0=DBL_MAX,a_1=-DBL_MAX,i=0;i<len;i++ ){
 			COMPLEXd z=arr[i];
 			a = z.real( );
-			a_0=MIN(a_0,a);		a_1=MAX(a_1,a);
+			a_0=MIN2(a_0,a);		a_1=MAX2(a_1,a);
 		}
 	}else{
 		for( a_0=DBL_MAX,a_1=-DBL_MAX,i=0;i<len;i++ ){
 			a = ABS_1(arr[i]);
-			a_0=MIN(a_0,a);		a_1=MAX(a_1,a);
+			a_0=MIN2(a_0,a);		a_1=MAX2(a_1,a);
 		}
 	}
 }

@@ -77,11 +77,11 @@ void DCRIMI_::Analyze(const string &sTitle, int flag) {
 	for (i = 0; i <= D_span; i++) {
 		mean_a += i*D_intra[i];		nz_a += D_intra[i];
 		if (D_intra[i]>0) {
-			max_a = MAX(max_a, i*D_s);		min_a = MIN(min_a, i*D_s);
+			max_a = MAX2(max_a, i*D_s);		min_a = MIN2(min_a, i*D_s);
 		}
 		mean_r += i*D_inter[i];		nz_r += D_inter[i];
 		if (D_inter[i]>0) {
-			max_r = MAX(max_r, i*D_s);		min_r = MIN(min_r, i*D_s);
+			max_r = MAX2(max_r, i*D_s);		min_r = MIN2(min_r, i*D_s);
 		}
 	}
 	//	nz_a = nz_a;				nz_r = nz_r;

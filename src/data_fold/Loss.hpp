@@ -75,7 +75,7 @@ namespace Grusoft {
 		*/
 		template <typename Tx>
 		void Lambda_0(int flag = 0x0) {
-			size_t dim = resi.size(), i, nOutlier = outliers.size(), nMost = MIN(dim - nOutlier, 200);
+			size_t dim = resi.size(), i, nOutlier = outliers.size(), nMost = MIN2(dim - nOutlier, 200);
 			double sigma = dim, off, rou, grad, a;
 			tpDOWN *vResi = VECTOR2ARR(resi), *pDown = GetDownDirection();
 			tpDOWN *vHess = VECTOR2ARR(hessian);
@@ -104,7 +104,7 @@ namespace Grusoft {
 		//”≈ªØ∞Ê±æ
 		template <typename Tx>
 		void Lambda_1(int flag=0x0) {
-			size_t dim = resi.size(), i, nOutlier = outliers.size(), nMost = MIN((dim - nOutlier)/ nOutlier, 1000),nz=0;
+			size_t dim = resi.size(), i, nOutlier = outliers.size(), nMost = MIN2((dim - nOutlier)/ nOutlier, 1000),nz=0;
 			double sigma = dim, off, rou,rou_1, grad, a;
 			tpDOWN *vResi = VECTOR2ARR(resi), *pDown = GetDownDirection();
 			tpDOWN *vHess = VECTOR2ARR(hessian);
@@ -121,7 +121,7 @@ namespace Grusoft {
 			}
 			assert(nz == dim);
 			std::random_shuffle(ids + nOutlier, ids + dim);
-			nMost = MIN((dim - nOutlier) / nOutlier, 1000);		nz = nOutlier;
+			nMost = MIN2((dim - nOutlier) / nOutlier, 1000);		nz = nOutlier;
 			for (auto samp : outliers) {
 				for (i = nz; i < nz +nMost; i++) {
 					id = ids[i];
@@ -161,7 +161,7 @@ namespace Grusoft {
 				Tx P_0 = decrimi_2.P_0, P_1 = decrimi_2.P_1, N_0= decrimi_2.N_0, N_1 = decrimi_2.N_1;
 //#pragma omp parallel for schedule(static,1)
 				for (int thread = 0; thread < num_threads; thread++) {
-					size_t start = thread*step, end = min(start + step, dim), i;
+					size_t start = thread*step, end = MIN2(start + step, dim), i;
 					for (i = start; i < end; i++) {
 						a = y1[i];
 						if (label[i] == 0) {
@@ -197,7 +197,7 @@ namespace Grusoft {
 			double P_0 = exp(decrimi_2.P_0);	 P_0 = P_0 / (1 + P_0);
 //#pragma omp parallel for schedule(static,1)
 			for (int thread = 0; thread < num_threads; thread++) {
-				size_t start = thread*step, end = min(start + step, dim), i;
+				size_t start = thread*step, end = MIN2(start + step, dim), i;
 				for (i = start; i < end; i++) {
 					double sig, a,off= label[i] == 1? sig - N_1: P_0 - sig;
 					sig = exp(y1[i]);	 sig = sig / (1 + sig);					//[0-1]				
@@ -208,7 +208,7 @@ namespace Grusoft {
 						//samp_weight[i] = exp(-off);
 						//samp_weight[i] *= exp(-off);
 					}
-					w0 = min(w0, samp_weight[i]);		w1 = max(w1, samp_weight[i]);
+					w0 = MIN2(w0, samp_weight[i]);		w1 = MAX2(w1, samp_weight[i]);
 				};
 			}
 			if (round % 100 == 0) {
@@ -245,7 +245,7 @@ namespace Grusoft {
 				//vEXP(dim, y_exp);
 #pragma omp parallel for reduction( + : a_logloss )  schedule(static,1)
 				for (int thread = 0; thread < num_threads; thread++) {
-					size_t start = thread*step, end = min(start + step, dim), i;
+					size_t start = thread*step, end = MIN2(start + step, dim), i;
 					for (i = start; i < end; i++) {
 						//double a =  (2*y1[i] -1);
 						//samp_weight[i] = label[i] == 1 ?exp(-a) : exp(a);
@@ -269,7 +269,7 @@ namespace Grusoft {
 				Tx P_0 = decrimi_2.P_0, P_1 = decrimi_2.P_1, N_0 = decrimi_2.N_0, N_1 = decrimi_2.N_1;
 #pragma omp parallel for schedule(static,1) reduction(+ : a2,sum,label_sum,sumGH)
 				for (int thread = 0; thread < num_threads; thread++) {
-					size_t start = thread*step, end = min(start + step, dim), i;
+					size_t start = thread*step, end = MIN2(start + step, dim), i;
 					for (i = start; i < end; i++) {				
 						//double sig = y_exp[i] / (1 + y_exp[i]);
 						double sig = y1[i]<EXP_UNDERFLOW ? 0 : y1[i]>EXP_OVERFLOW ? 1 : exp(y1[i]) / (1 + exp(y1[i])),a;

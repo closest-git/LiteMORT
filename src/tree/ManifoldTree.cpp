@@ -75,7 +75,7 @@ double WeakLearner::s_plit( int cur,int *nEachCls,int *nos,double &thrsh,int fla
 	for( j=0; j<nSamp;j++ )	{
 		no = nos[j];			cls=hData->tag[no];
 		a=feat[no];			//hfn->val=a=dat[no*ldX];			
-		a1=MAX(a1,a);			a0=MIN(a0,a);
+		a1=MAX2(a1,a);			a0=MIN2(a0,a);
 		nEachCls[cls]++;
 	}
 	if( a1==a0 )
@@ -190,8 +190,8 @@ DecisionTree::DecisionTree( BoostingForest *hF,FeatsOnFold *hD,int flag ):hFores
 		root=new RandClasify( this,boot );
 		break;
 	}
-	//WeakLearner::minGain=MIN(WeakLearner::minGain,root->impuri*0.001);
-	//WeakLearner::minGain=MIN(WeakLearner::minGain,root->impuri*0.00001);
+	//WeakLearner::minGain=MIN2(WeakLearner::minGain,root->impuri*0.001);
+	//WeakLearner::minGain=MIN2(WeakLearner::minGain,root->impuri*0.00001);
 	GST_VERIFY(root!=nullptr,"DecisionTree has no root!" );
 
 	ginii.clear( );
@@ -445,7 +445,7 @@ void ManifoldTree::DropNodes(int flag) {
 		w[node->id] = fabs(node->GetDownStep());
 		nLeaf++;
 	}
-	nElite = max(1, nLeaf / 2);
+	nElite = MAX2(1, nLeaf / 2);
 	vector<tpSAMP_ID> idx;
 	sort_indexes(nNode, w, idx);
 	GRander&rander = hForest->hTrainData->rander_nodes;
@@ -485,7 +485,7 @@ void ManifoldTree::Adpative_LR(int flag) {
 
 	FeatsOnFold *hLRData = hForest->hEvalData;
 	hLRData = hForest->hTrainData;
-	nFeat = hLRData->feats.size();		nEite = nFeat/2;		// MIN(32, nFeat / 2);
+	nFeat = hLRData->feats.size();		nEite = nFeat/2;		// MIN2(32, nFeat / 2);
 
 	if (hLRData == nullptr)
 		return;
@@ -535,7 +535,7 @@ void ManifoldTree::Adpative_LR(int flag) {
 				if (isCheck == 1) 
 				{ hLRData->lossy->Adaptive_LR<double>(node,false); }
 				if (hForest->stopping.isOscillate) {
-					node->lr_eta = min(node->lr_eta,1);		//printf("0.5");
+					node->lr_eta = MIN2(node->lr_eta,1);		//printf("0.5");
 				}
 				
 			}
@@ -748,8 +748,9 @@ ARR_TREE *ManifoldTree::To_ARR_Tree(FeatsOnFold *hData_, bool isQuant_, bool isC
 		arrTree.feat_ids[no] = -1;
 		arrTree.left[no] = -1;		arrTree.rigt[no] = -1;
 		if (node->left != nullptr) {	//²Î¼ûvoid SplitOn(...
-			if (node->fruit->isY)
-				return false;
+			if (node->fruit->isY)			{
+				delete harrTree;	return nullptr;
+			}
 			arrTree.feat_ids[no] = node->feat_id;
 			arrTree.left[no] = node->left->id;
 			assert(node->right != nullptr);
@@ -940,7 +941,7 @@ void DecisionTree::BootSample( arrPFNO &boot,arrPFNO &oob,FeatsOnFold *hDat,int 
 		for( i=0;i<nCls;i++ ){
 			if( hDat->nEach[i]==0 )
 				continue;
-			nSample=MIN(nSample,hDat->nEach[i]);
+			nSample=MIN2(nSample,hDat->nEach[i]);
 		}
 		nSample*=sBalance;
 	}

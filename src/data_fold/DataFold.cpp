@@ -179,7 +179,7 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 	}
 	assert(picks.size()>0);
 	if (config.feature_fraction<1) {	//for random forest
-		nPick = MAX(1,picks.size()*config.feature_fraction);
+		nPick = MAX2(1,picks.size()*config.feature_fraction);
 		hForest->stopping.CheckBrae();
 		vector<int> no_k = rander.kSampleInN(nPick, picks.size()),pick_1;
 		double *w = new double[nFeat]();
@@ -198,11 +198,11 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 				assert(w[picks[i]] <= w[picks[i + 1]]);
 				assert(mask[picks[i]] == 1);
 			}
-			int nElitism = max(16, nFeat*config.rElitism);
-			nElitism = min(nPick, nElitism);
-			int nExp = nElitism + min(nElitism * 3,  nFeat / 3);
+			int nElitism = MAX2(16, nFeat*config.rElitism);
+			nElitism = MIN2(nPick, nElitism);
+			int nExp = nElitism + MIN2(nElitism * 3,  nFeat / 3);
 			std::random_shuffle(picks.begin()+ nElitism, picks.end());
-			picks.resize(min(nPick, nExp));
+			picks.resize(MIN2(nPick, nExp));
 		}
 		delete[] w;
 
@@ -867,16 +867,6 @@ tpDOWN *FeatsOnFold::GetSampleHessian() const {
 
 
 int *FeatsOnFold::Tag() { return lossy->Tag(); }
-/*
-int  FeatsOnFold::OMP_FOR_STATIC_1(const size_t nSamp, size_t& step, int flag) {
-	int num_threads = 1;
-	step = nSamp;
-#pragma omp parallel	
-#pragma omp master											
-	{	num_threads = omp_get_num_threads();	}
-	step = (nSamp + num_threads - 1) / num_threads;
-	return num_threads;
-}*/
 
 /*
 https://ask.julyedu.com/question/7603

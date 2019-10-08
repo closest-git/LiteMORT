@@ -45,17 +45,18 @@ SET(some_COMPILE_FLAGS "-std=c++11 -pthread -O3 -I${cLIB}" )
 
 SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${some_COMPILE_FLAGS}")
 
-SET(SOURCE_DIR "src/LiteMORT")
+SET(SOURCE_DIR "src")
 # Tell cmake that headers are in alse in source_dir
 include_directories(${SOURCE_DIR})
-SET(SOURCE_FILES "${SOURCE_DIR}/LiteMORT.cpp")
-add_subdirectory(src/LiteMORT/data_fold)
-add_subdirectory(src/LiteMORT/tree)
-add_subdirectory(src/LiteMORT/util)
-add_subdirectory(src/LiteMORT/learn)
+SET(SOURCE_FILES "${SOURCE_DIR}/LiteMORT.cpp ${SOURCE_DIR}/python/pyMORT_DLL.cpp")
+add_subdirectory(${SOURCE_DIR}/data_fold)
+add_subdirectory(${SOURCE_DIR}/tree)
+add_subdirectory(${SOURCE_DIR}/util)
+add_subdirectory(${SOURCE_DIR}/learn)
+add_subdirectory(${SOURCE_DIR}/EDA)
 
 add_executable("${PROJECT_NAME}" ${SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME} data_fold_ tree_ util_ learn_)
+target_link_libraries(${PROJECT_NAME} data_fold_ tree_ util_ learn_ eda_)
 # SET(TEST_DIR "tests")
 # SET(TESTS ${SOURCES}
 #     "${TEST_DIR}/test_main.cpp"

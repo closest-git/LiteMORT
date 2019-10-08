@@ -3,6 +3,7 @@
 #include <map>  
 #include <algorithm>
 #include <cmath>
+#include <numeric>  
 #include "../util/samp_set.hpp"
 #include "../include/LiteBOM_config.h"
 

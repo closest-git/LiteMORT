@@ -225,7 +225,7 @@ void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTIN
 	}
 	//if (BIG_bins > 0)	while会自动更新
 	//	T_avg = SMALL_na*1.0 / (nMostBin - BIG_bins);
-	size_t T_avg_small = max(config.min_data_in_bin, SMALL_na / (nMostBin - BIG_bins)/ 10);
+	size_t T_avg_small = MAX2(config.min_data_in_bin, SMALL_na / (nMostBin - BIG_bins)/ 10);
 	T_avg_small = config.min_data_in_bin;
 
 	histo->nBigBins = BIG_bins;
@@ -235,7 +235,7 @@ void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTIN
 	double T_min_decrimi = 0, crimi = 0;
 	bool isDcrimi = corr.dcrimi != nullptr;
 	if (isDcrimi) {
-		T_avg = max(1, T_avg / 2);  T_min_decrimi = corr.D_sum / nMostBin;
+		T_avg = MAX2(1, T_avg / 2);  T_min_decrimi = corr.D_sum / nMostBin;
 	}
 	while (++i_0 < nUnique) {
 		v0 = vUnique[i_0].val;	nz = 0;		nDistinc = 0;
@@ -245,8 +245,8 @@ void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTIN
 		//bin.split_F = i_0 > 0 ? (v0 + vUnique[i_0 - 1].val) / 2 : v0;
 		feata.split_F = i_0 > 0 ? (v0 + vUnique[i_0 - 1].val) / 2 : v0;
 		//bin.split_F =  v0;
-		T_avg = nMostBin - noBin > BIG_bins ? max(config.min_data_in_bin, SMALL_na / (nMostBin- noBin- BIG_bins)) : config.min_data_in_bin;
-		T_avg = max(T_avg, T_avg_small) ;	//T_avg会越来越小
+		T_avg = nMostBin - noBin > BIG_bins ? MAX2(config.min_data_in_bin, SMALL_na / (nMostBin- noBin- BIG_bins)) : config.min_data_in_bin;
+		T_avg = MAX2(T_avg, T_avg_small) ;	//T_avg会越来越小
 		if (isDcrimi) {
 			crimi = corr.dcrimi[i_0];
 		}

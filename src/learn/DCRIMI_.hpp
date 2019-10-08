@@ -114,7 +114,7 @@ namespace Grusoft{
 		}
 
 		
-
+		/*
 		template<typename Tx>
 		double AUC_cys_1(size_t dim, const Tx *label, const Tx *y1, int flag = 0x0) {	//Ê§°ÜµÄ³¢ÊÔ£¬ÔÎ
 			clock_t t1 = clock();
@@ -173,8 +173,7 @@ namespace Grusoft{
 			delete[] idx;
 			tX += ((clock() - (t1))*1.0f / CLOCKS_PER_SEC);
 			return auc;
-
-		}
+		}*/
 
 
 		template<typename Tx>

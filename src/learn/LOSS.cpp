@@ -134,7 +134,7 @@ void LambdaRank::Init(double sigma_, double a_0_, double a_1_, size_t nMost_, in
 	for (i = 0; i < nMost; i++) {
 		a= a_0+grid*i;
 		rou = 1 / (1 + exp(sigma*a));
-		fMin = MIN(rou, fMin);			fMax = MAX(rou, fMax);
+		fMin = MIN2(rou, fMin);			fMax = MAX2(rou, fMax);
 		tables[i] = rou;
 	}
 	printf("\n---- LambdaRank::Init sigma=%g a=[%.3g:-%.3g] rou=[%.3g:-%.3g]\n", sigma,a_0, a_1, fMin, fMax);

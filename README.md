@@ -8,9 +8,9 @@ For example , in the latest Kaggle competition  [IEEE-CIS Fraud Detection compet
 
 2）**LiteMORT has higher auc than LightGBM**. 
 
-![](./auc_8_fold.jpg)
+![auc_8_fold](https://github.com/closest-git/ieee_fraud/raw/master/auc_8_fold.jpg)
 
-![time_8_fold](./time_8_fold.jpg)
+![time_8_fold](https://github.com/closest-git/ieee_fraud/raw/master/time_8_fold.jpg)
 
 For the detail comparison of this competition, please see https://github.com/closest-git/ieee_fraud.
 

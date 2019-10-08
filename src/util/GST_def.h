@@ -43,10 +43,10 @@ typedef int (*ON_TRAVEL_wpath_)(void* user_data,const wchar_t *sPath,int flag);
 
 
 //似乎比std::min std::max更适合比较不同的数据类型		7/11/2015	cys
-#undef MAX
-#undef MIN
-#define MAX(a, b)    ( (a)>(b)?(a):(b) )
-#define MIN(a, b)    ( (a)<(b)?(a):(b) )
+//#undef MAX2
+//#undef MIN2
+#define MAX2(a, b)    ( (a)>(b)?(a):(b) )
+#define MIN2(a, b)    ( (a)<(b)?(a):(b) )
 
 #define ZERO_DEVIA(y_0,y_1)	( (y_0) == (y_1) || fabs((y_0)-(y_1))<1.0e-6*(fabs(y_0)+fabs(y_1)) ) 
 //#define ZERO_DEVIA(y_0,y_1)	( (y_0) == (y_1) ) 
@@ -103,9 +103,9 @@ typedef int (*ON_TRAVEL_wpath_)(void* user_data,const wchar_t *sPath,int flag);
 #define G_POS2R( pos,ld )		((pos)/(ld))
 #define G_POS2C( pos,ld )		((pos)%(ld))
 #define G_RC_VALID( r,r_0,r_1 )	((r)>=(r_0) && (r)<=(r_1) )
-#define G_RC_NORMAL( r,r_0,r_1 )	{(r)=MAX((r),(r_0));(r)=MIN((r),(r_1)); }
+#define G_RC_NORMAL( r,r_0,r_1 )	{(r)=MAX2((r),(r_0));(r)=MIN2((r),(r_1)); }
 
-#define G_MINMAX(y,y0,y1)			{(y1)=MAX((y),(y1));(y0)=MIN((y),(y0)); }
+#define G_MINMAX(y,y0,y1)			{(y1)=MAX2((y),(y1));(y0)=MIN2((y),(y0)); }
 
 //返回距a最近的整数，采用(int)操作(舍去小数部分)		2/11/2010	cys
 //#define G_DOUBLE2INT(a)			(int)( (a)+0.5 )

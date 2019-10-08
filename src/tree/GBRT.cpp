@@ -20,7 +20,7 @@ GBRT::GBRT(FeatsOnFold *hTrain, FeatsOnFold *hEval, double sOOB, MODEL mod_, int
 	size_t nSamp = hTrainData->nSample( );
 	//InitRander(seed);
 	
-	//lenda = 10;	//MAX(1.0,10-cas*0.5);			
+	//lenda = 10;	//MAX2(1.0,10-cas*0.5);			
 #pragma omp parallel
 	nMostThread = omp_get_num_threads();
 	//eta = 0.1;
@@ -36,7 +36,7 @@ GBRT::GBRT(FeatsOnFold *hTrain, FeatsOnFold *hEval, double sOOB, MODEL mod_, int
 	nThread = omp_get_num_threads();
 
 	sBalance = 1.0;
-	//min_set = MAX(min_set, nSamp / 1000);		hTrain->config.min_data_in_leaf = min_set;
+	//min_set = MAX2(min_set, nSamp / 1000);		hTrain->config.min_data_in_leaf = min_set;
 	nPickWeak = INT_MAX;
 	if (regular == MULTI_TREE) {		//multi_tree改变了很多
 		//eta = 1;		//需要adaptive learning rate,参见multi_1_23_2016.dat

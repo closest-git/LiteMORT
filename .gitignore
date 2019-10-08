@@ -297,3 +297,4 @@ ModelManifest.xml
 *.jpg
 /src/learn/discpy.py
 /src/learn/sparsipy.py
+/doc/Gradient boosting on adpative distrubutions.docx

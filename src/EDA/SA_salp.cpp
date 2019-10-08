@@ -4,7 +4,7 @@
 using namespace Grusoft;
 
 GRander BinSalp::rander_(2019);
-GRander BSA_salp::rander_(2020);
+GRander BinarySwarm_GBDT::rander_(2020);
 
 BinSalp::BinSalp(int dim, int flag) {
 	position.resize(dim);

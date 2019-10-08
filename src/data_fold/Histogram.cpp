@@ -113,7 +113,7 @@ void HistoGRAM_2D::GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp
 
 
 		if (g>g1 || gL>g1) {
-			g1 = MAX(g, gL);
+			g1 = MAX2(g, gL);
 			UpdateBestGain(item.tic,g1,nLeft,nRight);
 			/*fruit->mxmxN = g1;			fruit->tic_left = item.tic;
 			fruit->nLeft = nLeft;		fruit->nRight = nRight;
@@ -355,7 +355,7 @@ void HistoGRAM::UpdateBestGain(int item_tic,double g1,size_t nLef,size_t nRight,
 	fruit->split_by = this->split_by;
 	fruit->bin_S0 = bins[i-1];		fruit->bin_S1 = item;
 	//assert(fruit->bin_S0.nz>0);
-	g1 = MAX(g, gainL);
+	g1 = MAX2(g, gainL);
 	fruit->mxmxN = g1;			fruit->tic_left = item.tic;
 	fruit->nLeft = nLeft;		fruit->nRight = nRight;
 	//fruit->thrshold = item.tic;
@@ -431,7 +431,7 @@ void HistoGRAM::GreedySplit_X(FeatsOnFold *hData_, const SAMP_SET& samp_set, int
 		if (g>g1 || gainL>g1) {
 			if (i == nBins - 1)		//½öÓÃÓÚ²âÊÔ
 				i = nBins - 1;
-			g1 = MAX(g, gainL);
+			g1 = MAX2(g, gainL);
 			UpdateBestGain(i, g1, nLeft, nRight);
 			/*fruit->best_feat_id = hFeat->id;
 			fruit->split_by = this->split_by;

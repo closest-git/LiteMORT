@@ -127,10 +127,10 @@ public:
 				//if(IS_NAN_INF(a))
 				//{	continue;	}
 				a2 += a*a;				sum += a;
-				local_0 = MIN(local_0, a);		local_1 = MAX(local_1, a);
+				local_0 = MIN2(local_0, a);		local_1 = MAX2(local_1, a);
 			}
 #pragma omp critical
-			{	x_0 = MIN(local_0, x_0);			x_1 = MAX(local_1, x_1);	}
+			{	x_0 = MIN2(local_0, x_0);			x_1 = MAX2(local_1, x_1);	}
 		}
 		a2_ = a2;	sum_ = sum;
 		//记录统计信息
