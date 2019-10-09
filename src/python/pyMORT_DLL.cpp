@@ -171,7 +171,7 @@ void OnUserParams(LiteBOM_Config&config, PY_ITEM* params, int nParam, int flag =
 				config.eval_metric = "logloss";
 			else {
 				config.eval_metric = params[i].text;
-				if (config.eval_metric!="auc" && config.eval_metric!="mse" && config.eval_metric != "mae") {
+				if (config.eval_metric!="auc" && config.eval_metric!="mse" && config.eval_metric != "rmse" && config.eval_metric != "mae") {
 					sprintf(sERR, "This version does not support the following eval_metric {\"%s\"}", config.eval_metric.c_str());
 					throw sERR;
 				}

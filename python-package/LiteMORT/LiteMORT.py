@@ -252,6 +252,8 @@ class LiteMORT(object):
         for k, v in self.params.__dict__.items():
             ca = M_argument()
             ca.Keys = k.encode('utf8')  # Python 3 strings are Unicode, char* needs a byte string
+            if isinstance(v, set):
+                v=list(v)[0]
             if isinstance(v, str):
                 ca.text = v.encode('utf8')
             elif isinstance(v, bool):

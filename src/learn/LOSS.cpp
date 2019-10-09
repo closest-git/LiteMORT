@@ -53,8 +53,9 @@ double FeatVec_LOSS::ERR(int flag) {
 	if (hBaseData_->config.eval_metric == "mse") {
 		err = hBaseData_->lossy->err_rmse;
 		err = err*err;
-	}
-	else if (hBaseData_->config.eval_metric == "mae") {
+	}	else if (hBaseData_->config.eval_metric == "rmse") {
+		err = hBaseData_->lossy->err_rmse;
+	}	else if (hBaseData_->config.eval_metric == "mae") {
 		err = hBaseData_->lossy->err_mae;
 	}
 	else if (hBaseData_->config.eval_metric == "logloss") {

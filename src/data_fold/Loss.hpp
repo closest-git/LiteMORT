@@ -323,7 +323,8 @@ namespace Grusoft {
 						Lambda_0<Tx>();
 						//Lambda_1<Tx>();
 					}	else {	//MSE loss
-						if (metric == "mse") {
+						double a2 = 0, a1 = 0;
+						if (metric == "mse" || metric == "rmse") {
 							for (i = 0; i < dim; i++) {
 								pDown[i] = -vResi[i];
 							}
@@ -334,6 +335,10 @@ namespace Grusoft {
 						}	else {
 							throw "UpdateResi metric is XXX for regression!!!";
 						}
+						for (i = 0; i < dim; i++) {
+							a2 += pDown[i] * pDown[i];		a1 += pDown[i];
+						}
+						DOWN_sum_2 = a2;	DOWN_sum_1 = a1;
 					}					
 				}
 				//sum = NRM2(dim, vResi);
