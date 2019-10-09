@@ -773,18 +773,31 @@ void GRUS_LITEMORT_VERSION(char * str) {
 	);	
 }
 
-BOOL APIENTRY DllMain(HANDLE hModule,DWORD  ul_reason_for_call,	LPVOID lpReserved){
-	char str_version[1000];
-	switch (ul_reason_for_call) {
-	case DLL_PROCESS_ATTACH:		
+#if (defined _WINDOWS) || (defined WIN32)
+	BOOL APIENTRY DllMain(HANDLE hModule,DWORD  ul_reason_for_call,	LPVOID lpReserved){
+		char str_version[1000];
+		switch (ul_reason_for_call) {
+		case DLL_PROCESS_ATTACH:		
+			GRUS_LITEMORT_VERSION(str_version);
+			printf("%s", str_version);
+			break;
+		case DLL_THREAD_ATTACH:
+			break;
+		default:
+			break;
+		}
+
+		return TRUE;
+	}
+#else
+//https://stackoverflow.com/questions/22763945/dll-main-on-windows-vs-attribute-constructor-entry-points-on-linux
+	__attribute__((constructor)) void dllLoad() {
+		char str_version[1000];
 		GRUS_LITEMORT_VERSION(str_version);
 		printf("%s", str_version);
-		break;
-	case DLL_THREAD_ATTACH:
-		break;
-	default:
-		break;
 	}
 
-	return TRUE;
-}
+	__attribute__((destructor)) void dllUnload() {
+
+	}
+#endif

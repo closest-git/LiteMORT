@@ -7,5 +7,4 @@ project(util_)
 # in the source tree
 add_library(util_
 	./GRander.cpp
-	./pcg_oneil/pcg_basic
 	)

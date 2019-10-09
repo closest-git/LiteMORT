@@ -6,7 +6,7 @@
 #include <set>
 #include <assert.h>
 #include <stdint.h>
-#include "pcg_oneil/pcg_basic.h"
+//#include "pcg_oneil/pcg_basic.h"
 
 #define rotl(r,n) (((r)<<(n)) | ((r)>>((8*sizeof(r))-(n))))
 
@@ -29,7 +29,7 @@ namespace Grusoft{
 		}
 
 	protected:
-		pcg32_random_t rng_neil;
+		//pcg32_random_t rng_neil;
 		std::random_device device;
 		uint32_t seed;
 
@@ -40,7 +40,7 @@ namespace Grusoft{
 			std::uniform_int_distribution<int> distribution(0, x);
 			x = distribution(genrator);
 
-			pcg32_srandom_r(&rng_neil, 42u, 54u);
+			//pcg32_srandom_r(&rng_neil, 42u, 54u);
 		}
 		GRander(uint32_t seed_) { Init(seed_);	 }
 

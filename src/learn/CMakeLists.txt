@@ -7,4 +7,6 @@ project(learn_)
 # in the source tree
 add_library(learn_
 	./LOSS.cpp
+	./DCRIMI_.cpp
+	./Pruning.cpp
 	)

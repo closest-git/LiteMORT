@@ -1,7 +1,7 @@
 #include <memory>
 #include <iostream>
 #include <algorithm>
-#include <tchar.h>
+//#include <tchar.h>
 #include <time.h>
 #define _USE_MATH_DEFINES
 #include <math.h>

@@ -1,7 +1,6 @@
 #include <memory>
 #include <iostream>
 #include <algorithm>
-#include <tchar.h>
 #include <time.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -493,19 +492,19 @@ void EnsemblePruning::basic_local_search(double *x_,  bool balanced, int flag){
 /*
 */
 void EnsemblePruning::local_improvements(double *x_, bool balanced, int flag) {
-	assert(0);
+	/*assert(0);
 	size_t i, j;
 	for (i = 0; i < nSamp; i++) {
 		ax_[i] = dot_(nWeak, mA + i*nWeak, x_);
 	}
 	double best_norm = norm_(nSamp, ax_), nrm_, *flipped = new double[nSamp];
-	int num_flip = min(7, nWeak), iters = 0,iter=0;
+	int num_flip = min(7, nWeak), loop = 0,ii=0;
 	if (balanced && num_flip % 2 == 1)
 		num_flip = num_flip + 1;
 
 	while (true) {
-		iters = iters + 1;
-		for (iter = 0; iter < nWeak; iter++) {
+		loop = loop + 1;
+		for (ii = 0; ii < nWeak; ii++) {
 			int sampled_coords[] = { 0, 1, 5, 6, 9, 15, 16 };
 			bool allDistinct = true;
 			for (i = 0; i < num_flip - 1; i++) {
@@ -514,17 +513,13 @@ void EnsemblePruning::local_improvements(double *x_, bool balanced, int flag) {
 			}
 			if (!allDistinct)		continue;
 			if (balanced) {
-				/*sum_is=0
-                for i in range(0,num_flip):
-                    sum_is = sum_is + x[sampled_coords[i]]
-                if sum_is!=0:
-                    continue*/
+				
 			}
 
 
 		}
 	}
-	delete[] flipped;
+	delete[] flipped;*/
 }
 
 void EnsemblePruning::greedy(double *grad,bool balanced, int flag) {

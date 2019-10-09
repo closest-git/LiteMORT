@@ -81,9 +81,6 @@
     <ClCompile Include="..\..\src\util\GRander.cpp">
       <Filter>源文件\util</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\util\pcg_oneil\pcg_basic.c">
-      <Filter>源文件\util</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\util\pcg_oneil\xoshiro256plusplus.c">
       <Filter>源文件\util</Filter>
     </ClCompile>
@@ -168,9 +165,6 @@
       <Filter>源文件\EDA</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\util\GRander.hpp">
-      <Filter>源文件\util</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\util\pcg_oneil\pcg_basic.h">
       <Filter>源文件\util</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\learn\Pruning.hpp">

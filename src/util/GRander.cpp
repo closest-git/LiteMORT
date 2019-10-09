@@ -8,7 +8,7 @@ uint64_t GRander::RandRersResrResdra() {  // Combined period = 2^116.23
 	int alg = 2;
 	switch (alg) {
 	case 0:
-		return pcg32_random_r(&rng_neil);		//32-bit unsigned int   -  period:      2^64
+		break;	//return pcg32_random_r(&rng_neil);		//32-bit unsigned int   -  period:      2^64
 	case 1:
 		return xoroshiro_next();
 	default:

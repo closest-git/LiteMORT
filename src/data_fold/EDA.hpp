@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <numeric> 
 #include "../util/GST_def.h"
 #include "../include/LiteBOM_config.h"
 #include "./Histogram.hpp"
@@ -63,7 +64,7 @@ namespace Grusoft {
 		template<typename Tx, typename Ty>
 		void Analysis(LiteBOM_Config config, Tx *X_, Ty *Y_, size_t nSamp_, size_t ldX_, size_t ldY_, int flag) {
 			clock_t t0=clock();
-			printf("********* EDA::Analysis nSamp=%lld nFeat=%d........\n", nSamp_, nFeat);
+			printf("********* EDA::Analysis nSamp=%ld nFeat=%d........\n", nSamp_, nFeat);
 			assert(ldX_==nFeat);
 			size_t feat,i, nConstFeat=0;
 			double sparse=0, nana=0;
@@ -78,7 +79,7 @@ namespace Grusoft {
 				sparse+= distri.rSparse*nSamp_;
 				nana += distri.rNA*nSamp_;
 				if (distri.rNA == 1.0) {
-					printf("---EDA---\t!!!Feat_%d is NAN!!!\n", feat);
+					printf("---EDA---\t!!!Feat_%ld is NAN!!!\n", feat);
 				}
 				if(ZERO_DEVIA(distri.vMin, distri.vMax) )
 				{	nConstFeat++;	}				
@@ -101,7 +102,7 @@ namespace Grusoft {
 				}
 			}
 			sparse/=(nSamp_*ldX_);		nana /= (nSamp_*ldX_);
-			printf("\n********* EDA::Analysis const=%lld sparse=%g NAN=%g T=%.3g........OK\n",  nConstFeat, sparse, nana, (clock() - t0) / 1000.0);
+			printf("\n********* EDA::Analysis const=%ld sparse=%g NAN=%g T=%.3g........OK\n",  nConstFeat, sparse, nana, (clock() - t0) / 1000.0);
 		}
 		
 

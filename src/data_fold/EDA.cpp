@@ -165,7 +165,7 @@ void Distribution::Dump(int feat, bool isQuanti, int flag) {
 		HISTO_BIN&b0 = histo->bins[0], &b1 = histo->bins[n1], &b2 = histo->bins[n2], &b3 = histo->bins[n3], &b4 = histo->bins[nBin-1];
 		if(b4.nz==0)	//最后一个BIN是冗余的
 			b4= histo->bins[nBin - 2];
-		printf("%4d %c%12s nBin=%d[%.3g(%d),%.3g(%ld),%.3g(%ld),%.3g(%ld),%.3g(%ld)]%s \n", feat, typ, nam.c_str(), 
+		printf("%4d %c%12s nBin=%d[%d(%ld),%d(%ld),%d(%ld),%d(%ld),%d(%ld)]%s \n", feat, typ, nam.c_str(), 
 			histo == nullptr ? 0 : histo->nBins,
 			b0.tic,b0.nz, b1.tic, b1.nz, b2.tic, b2.nz, b3.tic, b3.nz, b4.tic, b4.nz,tmp);
 	}	else {

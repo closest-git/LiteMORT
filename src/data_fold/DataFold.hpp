@@ -555,7 +555,7 @@ namespace Grusoft {
 
 		virtual ~FeatVec_T() {
 			if (isReferVal()) {
-				printf("");
+				;// printf("");
 			}	else if (val != nullptr)
 				delete[] val;
 			//val.clear();

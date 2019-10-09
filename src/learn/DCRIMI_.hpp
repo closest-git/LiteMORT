@@ -4,6 +4,7 @@
 #include <vector>
 #include <time.h>
 #include <omp.h>
+#include <numeric> 
 #include "../util/samp_set.hpp"
 
 struct DataSample;

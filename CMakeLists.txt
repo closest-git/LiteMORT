@@ -55,7 +55,7 @@ add_subdirectory(${SOURCE_DIR}/util)
 add_subdirectory(${SOURCE_DIR}/learn)
 add_subdirectory(${SOURCE_DIR}/EDA)
 
-add_executable("${PROJECT_NAME}" ${SOURCE_FILES})
+ADD_LIBRARY("${PROJECT_NAME}" SHARED ${SOURCE_FILES})
 target_link_libraries(${PROJECT_NAME} data_fold_ tree_ util_ learn_ eda_)
 # SET(TEST_DIR "tests")
 # SET(TESTS ${SOURCES}
