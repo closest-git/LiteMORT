@@ -724,7 +724,13 @@ void ManifoldTree::ClearSampSet() {
 	}*/
 }
 
-
+int ManifoldTree::maxDepth() { 
+	int maxDep = 0;
+	for (auto node : nodes) {
+		maxDep = MAX2(maxDep, node->depth);
+	}
+	return maxDep;
+}
 
 /*
 	v0.1	cys

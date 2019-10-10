@@ -101,6 +101,9 @@ void OnUserParams(LiteBOM_Config&config, PY_ITEM* params, int nParam, int flag =
 		if (strcmp(params[i].Keys, "verbose_eval") == 0) {
 			config.verbose_eval = params[i].Values;
 		}
+		if (strcmp(params[i].Keys, "max_depth") == 0) {
+			config.max_depth = params[i].Values;
+		}
 		if (strcmp(params[i].Keys, "elitism") == 0) {
 			config.rElitism = params[i].Values;
 		}

@@ -141,6 +141,7 @@ namespace Grusoft{
 		virtual void Train( int flag=0x0 );
 		virtual void Clasify( FeatsOnFold *hSamp,arrPFNO &points,float *distri,int flag=0x0 );
 		virtual void Regress( arrPFNO &points,int flag=0x0 );
+		virtual int maxDepth() { return 0; }
 	friend class WeakLearner;
 	friend class RandClasify;
 	friend class RandRegress;
@@ -173,6 +174,7 @@ namespace Grusoft{
 		//virtual void ClearHisto();
 		virtual ~ManifoldTree();
 		hMTNode hRoot() {	assert(nodes.size()>0);	return nodes[0]; }
+		virtual int maxDepth();
 
 		virtual void Train(int flag = 0x0);
 		virtual void Adpative_LR(int flag=0x0);

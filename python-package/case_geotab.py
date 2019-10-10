@@ -188,12 +188,14 @@ dtrain = lgb.Dataset(data=train, label=target1)
 
 param={'num_leaves': 230,   'n_estimators':10000,'early_stopping_rounds':200,
      'feature_fraction': 0.9,
-     'bagging_fraction': 1.0,
+     'bagging_fraction': 1,#"adaptive":'weight1',   无效，晕
+    #"learning_schedule":"adaptive",
      'max_depth': 19,
      'lambda_l1': 0.0,
      'lambda_l2': 0.0,
      'min_split_gain': 0.1,
      'min_child_weight': 20.0,
+    #'min_data_in_leaf': 10,
      'learning_rate': 0.05,
      'objective': 'regression',
      'boosting_type': 'gbdt',
@@ -207,7 +209,7 @@ for i in range(len(all_preds)):
     all_preds[i] = np.zeros(len(test))
     n =1
     for train_index, valid_index in kf.split(all_target[i]):
-        print("fold {}".format(n))
+        print("TARGET_{} fold {}".format(i,n))
         y_train,y_valid = all_target[i][train_index],all_target[i][valid_index]
         if isMORT:
             mort = LiteMORT(param).fit(train.iloc[train_index], y_train, eval_set=[(train.iloc[valid_index], y_valid)])
@@ -229,7 +231,7 @@ for i in range(len(all_preds)):
         n = n + 1
         #break
     fold_score = np.sqrt(mean_squared_error(all_target[i], oof))
-    print("\n\nCV RMSE: {:<0.4f}".format(np.sqrt(mean_squared_error(all_target[i], oof))))
+    print("\n\nTARGET_{} CV RMSE: {:<0.4f}".format(i,np.sqrt(mean_squared_error(all_target[i], oof))))
 
 if some_rows is None:
     # test_predictions[['TransactionID', 'isFraud']].to_csv(f'submit_{some_rows}_{0.5}.csv', index=False,compression='gzip')

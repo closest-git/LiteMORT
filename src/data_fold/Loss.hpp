@@ -2,9 +2,9 @@
 
 #include "DataFold.hpp"
 #include "../learn/DCRIMI_.hpp"
-
+#include "loss_binary.hpp"
 namespace Grusoft {
-	class LambdaRank {
+	/*class LambdaRank {
 	protected:
 		size_t nUnderFlow = 0, nOverFlow = 0;
 		double a_0, a_1, grid;
@@ -20,7 +20,7 @@ namespace Grusoft {
 		virtual void Init(double sigma,double a_0,double a_1, size_t nMost, int flag = 0x0);
 		virtual double At(double a);
 
-	};
+	};*/
 	/*
 		v0.1	cys
 			1/17/2019
@@ -181,10 +181,10 @@ namespace Grusoft {
 			}
 			if (y_exp != nullptr)
 				delete[] y_exp;
-		}
+		}		
 
 		template <typename Tx>
-		void WeightOnMarginal(FeatsOnFold *hData_, int round, int flag) {//初步测试，配合adaptive lr 还是有效果的
+		void WeightOnMarginal_2(FeatsOnFold *hData_, int round, int flag) {//初步测试，配合adaptive lr 还是有效果的
 			size_t dim = resi.size(), nSamp = hData_->nSample(), step = dim;
 			assert(dim == nSamp);
 			Tx fuyi = -1, *y1 = ((FeatVec_T<Tx>*)predict)->arr(), *label = ((FeatVec_T<Tx>*)y)->arr();
@@ -238,7 +238,7 @@ namespace Grusoft {
 				}
 			}*/
 			if(samp_weight!=nullptr)
-				WeightOnMarginal<Tx>(hData_,round,flag);
+				WeightOnMarginal_2<Tx>(hData_,round,flag);
 			
 			if (metric == "logloss") {	//binary cross entropy
 				err_logloss = 0;		//-np.mean(true_y*np.log(pred_h) + (1 - true_y)*np.log(1 - pred_h))
@@ -290,6 +290,33 @@ namespace Grusoft {
 			//	delete[] y_exp;
 		}
 
+		template <typename Tx>
+		void WeightOnMarginal_r(FeatsOnFold *hData_, int round,double off_average, int flag) {//初步测试，配合adaptive lr 还是有效果的
+			size_t dim = resi.size(), nSamp = hData_->nSample(), step = dim;
+			assert(dim == nSamp);
+			tpDOWN *vResi = VECTOR2ARR(resi);
+			int num_threads = OMP_FOR_STATIC_1(dim, step);
+			if (samp_weight == nullptr || round <10)
+				return;
+			double w0 = DBL_MAX, w1 = -DBL_MAX;
+
+			//#pragma omp parallel for schedule(static,1)
+			for (int thread = 0; thread < num_threads; thread++) {
+				size_t start = thread*step, end = MIN2(start + step, dim), i;
+				for (i = start; i < end; i++) {
+					double a = fabs(vResi[i])/off_average;		
+					a = exp(a);
+					a = min(2, a);
+					samp_weight[i] = a;
+					
+					w0 = MIN2(w0, samp_weight[i]);		w1 = MAX2(w1, samp_weight[i]);
+				};
+			}
+			if (round % 100 == 0) {
+				printf("w(%.4g,%.4g)\t", w0, w1);
+			}
+		}
+
 		//vResi=predict-target		pDown=target-predict
 		template <typename Tx>
 		void UpdateResi(FeatsOnFold *hData_, int round, int flag = 0x0) {
@@ -336,10 +363,12 @@ namespace Grusoft {
 							throw "UpdateResi metric is XXX for regression!!!";
 						}
 						for (i = 0; i < dim; i++) {
-							a2 += pDown[i] * pDown[i];		a1 += pDown[i];
+							a2 += pDown[i] * pDown[i];		a1 += fabs(pDown[i]);
 						}
 						DOWN_sum_2 = a2;	DOWN_sum_1 = a1;
-					}					
+					}		
+					if (samp_weight != nullptr)
+						WeightOnMarginal_r<Tx>(hData_, round, DOWN_sum_1/dim, flag);
 				}
 				//sum = NRM2(dim, vResi);
 				//参见loss = PointWiseLossCalculator::AverageLoss(sum_loss, sum_weights_)及L2Metric设计

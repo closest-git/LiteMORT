@@ -194,6 +194,7 @@ copy $(OutDir)$(TargetName)$(TargetExt) D:\Anaconda3\Lib\site-packages\litemort<
     <ClInclude Include="..\..\src\data_fold\Histogram.hpp" />
     <ClInclude Include="..\..\src\data_fold\Imputer.hpp" />
     <ClInclude Include="..\..\src\data_fold\Loss.hpp" />
+    <ClInclude Include="..\..\src\data_fold\Loss_binary.hpp" />
     <ClInclude Include="..\..\src\data_fold\Move.hpp" />
     <ClInclude Include="..\..\src\EDA\Feat_Selection.hpp" />
     <ClInclude Include="..\..\src\EDA\SA_salp.hpp" />
