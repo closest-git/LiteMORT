@@ -15,7 +15,7 @@ import lightgbm as lgb
 from litemort import *
 import os, sys
 import pickle
-
+import time
 
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 isMORT = True
@@ -188,7 +188,8 @@ dtrain = lgb.Dataset(data=train, label=target1)
 
 param={'num_leaves': 230,   'n_estimators':10000,'early_stopping_rounds':200,
      'feature_fraction': 0.9,
-     'bagging_fraction': 1,#"adaptive":'weight1',   无效，晕
+     'bagging_fraction': 1,#"adaptive":'DISTRIBUTION',   无效，晕
+    'max_bin': 512,
     #"learning_schedule":"adaptive",
      'max_depth': 19,
      'lambda_l1': 0.0,
@@ -204,6 +205,7 @@ param={'num_leaves': 230,   'n_estimators':10000,'early_stopping_rounds':200,
 nfold = 5
 kf = KFold(n_splits=nfold, random_state =127, shuffle =True)
 for i in range(len(all_preds)):
+    t0=time.time()
     print('Training and predicting for target {}'.format(i+1))
     oof = np.zeros(len(train))
     all_preds[i] = np.zeros(len(test))
@@ -212,7 +214,7 @@ for i in range(len(all_preds)):
         print("TARGET_{} fold {}".format(i,n))
         y_train,y_valid = all_target[i][train_index],all_target[i][valid_index]
         if isMORT:
-            mort = LiteMORT(param).fit(train.iloc[train_index], y_train, eval_set=[(train.iloc[valid_index], y_valid)])
+            mort = LiteMORT(param).fit_1(train.iloc[train_index], y_train, eval_set=[(train.iloc[valid_index], y_valid)])
             oof[valid_index] = mort.predict(train.iloc[valid_index])
             all_preds[i] += mort.predict(test) / nfold
         else:
@@ -231,8 +233,8 @@ for i in range(len(all_preds)):
         n = n + 1
         #break
     fold_score = np.sqrt(mean_squared_error(all_target[i], oof))
-    print("\n\nTARGET_{} CV RMSE: {:<0.4f}".format(i,np.sqrt(mean_squared_error(all_target[i], oof))))
-
+    print("\n\nTARGET_{} CV RMSE: {:<0.4f} time={:.4g}".format(i,np.sqrt(mean_squared_error(all_target[i], oof)),time.time()-t0))
+path=""
 if some_rows is None:
     # test_predictions[['TransactionID', 'isFraud']].to_csv(f'submit_{some_rows}_{0.5}.csv', index=False,compression='gzip')
     path = f'{data_root}/[{model}]_{some_rows}_{fold_score:.5f}_F{nfold}_.csv'
@@ -240,4 +242,5 @@ if some_rows is None:
     data2 = pd.DataFrame(data2)
     submission = pd.read_csv(f'{data_root}/sample_submission.csv')
     submission['Target'] = data2[0].values
-    submission.to_csv(path, index=False)
+    submission.to_csv(path, index=False,float_format='%.4f',compression='gzip' )
+input(f"......Save submit @{path}......")

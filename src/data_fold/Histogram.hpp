@@ -172,15 +172,18 @@ namespace Grusoft {
 		int nBigBins = 0,nMostBins=0,nBins=0;
 		//bool isFilled = false;
 		size_t nSamp, nLeft = 0, nRight=0;
-		struct {	//为了并行诶
+		typedef struct {	//为了并行诶
 			double mxmxN = -1;		//mean*mean*N
 			size_t nLeft = 0, nRight = 0;
 			int tic=-1;
+			bool isY = false;
+			double adaptive_thrsh = 0;
 
 			void Clear() {
 				mxmxN = -1;		nLeft = 0,	nRight = 0;		tic = -1;
 			}
-		}fruit_info;
+		}FRUIT_INFO;
+		FRUIT_INFO	fruit_info;
 		FeatVector *hFeat = nullptr;	//仅仅指向
 		//vector<HISTO_BIN> bins;
 		HistoGRAM_BUFFER *buffer = nullptr;

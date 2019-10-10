@@ -470,12 +470,13 @@ void HistoGRAM::GreedySplit_X(FeatsOnFold *hData_, const SAMP_SET& samp_set, int
 		3/11/2019
 */
 void HistoGRAM::GreedySplit_Y(FeatsOnFold *hData_, const SAMP_SET& samp_set, bool tryX, int flag) {
-	/*char temp[2000];
-	FRUIT fruitX;
+	char temp[2000];
+	//FRUIT fruitX;
+	FRUIT_INFO fruitX;
 	HISTO_BIN*binNA = this->hBinNA();
 	if (tryX) {
 		GreedySplit_X(hData_, samp_set, flag);
-		fruitX = *fruit;
+		fruitX = fruit_info;	// *fruit;
 	}
 	else {
 		fruitX.mxmxN = -DBL_MAX;
@@ -487,25 +488,25 @@ void HistoGRAM::GreedySplit_Y(FeatsOnFold *hData_, const SAMP_SET& samp_set, boo
 	nLeft = 0;	nRight = nSamp;
 	double gSum = binNA->G_sum, hSum = binNA->H_sum;
 	double gainL = 0;		//对应于isNanaLeft
-	for (auto item : bins) {
-	//for each(HISTO_BIN item in bins) {
-		gSum += item.G_sum, hSum += item.H_sum;
+	size_t i, nY_l = 0, nY_r = 0;
+	for (i = 0; i < nBins - 1; i++){
+	//for (auto item : bins) {
+		gSum += bins[i].G_sum, hSum += bins[i].H_sum;
 	}
 	vector<tpSAMP_ID> idx;
 	vector<double> Y_means;
-	for (auto item : bins) {
-	//for each(HISTO_BIN item in bins) {
-		if (item.nz == 0) {
+	for (i = 0; i < nBins - 1; i++) {
+	//for (auto item : bins) {
+		if (bins[i].nz == 0) {
 			Y_means.push_back(DBL_MAX);	continue;
 		}
 		//a = item.G_sum / item.nz;
-		a = item.G_sum / item.H_sum;
+		a = bins[i].G_sum / bins[i].H_sum;
 		Y_means.push_back(a);
 	}
 	sort_indexes(Y_means, idx);
-	size_t nBin = bins.size(), i, nY_l = 0, nY_r = 0;
-	for (i = 0; i < nBin-1; i++) {		assert(Y_means[idx[i]]<= Y_means[idx[i+1]]);	}
-	for (i = 0; i < nBin; i++) {
+	for (i = 0; i < nBins-1; i++) {		assert(Y_means[idx[i]]<= Y_means[idx[i+1]]);	}
+	for (i = 0; i < nBins; i++) {
 		const HISTO_BIN& item = bins[idx[i]];
 		double gR = gSum - gL, hR = hSum - hL;
 		if (nLeft<minSet || nRight<minSet) {
@@ -524,13 +525,13 @@ void HistoGRAM::GreedySplit_Y(FeatsOnFold *hData_, const SAMP_SET& samp_set, boo
 		g = gL*gL / hL + gR*gR / hR;
 		if (g>g1) {
 			g1 = g;
-			fruit->mxmxN = g1;
-			fruit->tic_left = Y_means[idx[i]];	// item.G_sum / item.nz;		assert(fruit->tic_left == Y_means[idx[i]]);
-			fruit->nLeft = nLeft;		fruit->nRight = nRight;
+			fruit_info.mxmxN = g1;
+			//fruit_info.tic_left = Y_means[idx[i]];	// item.G_sum / item.nz;		assert(fruit->tic_left == Y_means[idx[i]]);
+			fruit_info.nLeft = nLeft;		fruit_info.nRight = nRight;
 			//fruit->thrshold = Y_means[idx[i]];
-			fruit->adaptive_thrsh = Y_means[idx[i]];
+			fruit_info.adaptive_thrsh = Y_means[idx[i]];
 			sprintf(temp, "L(%g/%g %d) R(%g/%g %d)", gL, hL, nLeft, gR, hR, nRight );
-			fruit->sX = temp;
+			//fruit->sX = temp;
 		}
 	LOOP:
 		//errL += item.G_sum;		a = item.tic;
@@ -538,17 +539,19 @@ void HistoGRAM::GreedySplit_Y(FeatsOnFold *hData_, const SAMP_SET& samp_set, boo
 		assert(nRight >= item.nz);
 		nLeft += item.nz;			nRight -= item.nz;
 	}
-	if (g1 == 0)	//Y的分布不一样，可能找不到split(例如minSet不符合)
-	{		fruitX.histo = nullptr;	return;	}
+	if (g1 == 0){	//Y的分布不一样，可能找不到split(例如minSet不符合)
+			//fruitX.histo = nullptr;	
+		return;	
+	}
 
 	double aX = fruitX.mxmxN - fabs(fruitX.mxmxN)*1.0e-4;		//浮点误差真麻烦
 	//assert(fruit->mxmxN>= aX);
-	if (fruit->mxmxN>aX) {	//确实有可能
-		fruit->isY = true;
-		for (i = 0; i < nBin; i++) {
+	if (fruit_info.mxmxN>aX) {	//确实有可能
+	//	if (fruit->mxmxN>aX) {	//确实有可能
+		fruit_info.isY = true;
+		for (i = 0; i < nBins; i++) {
 			HISTO_BIN& item = bins[idx[i]];
-			if (Y_means[idx[i]] < fruit->adaptive_thrsh) {
-			//if (item.G_sum / item.nz < fruit->thrshold) {
+			if (Y_means[idx[i]] < fruit_info.adaptive_thrsh) {
 				item.fold = 0;
 				nY_l += item.nz;
 			}
@@ -557,14 +560,14 @@ void HistoGRAM::GreedySplit_Y(FeatsOnFold *hData_, const SAMP_SET& samp_set, boo
 				nY_r += item.nz;
 			}
 		}
-		assert(nY_l== fruit->nLeft && nY_r== fruit->nRight);
+		assert(nY_l== fruit_info.nLeft && nY_r== fruit_info.nRight);
 	}
 	else {
-		if (fruit->mxmxN < fruitX.mxmxN)
+		if (fruit_info.mxmxN < fruitX.mxmxN)
 			;// printf("!!!Split_X(%g)>Split_Y(%g)!!!", fruitX.mxmxN, fruit->mxmxN);
-		*fruit = fruitX;
+		fruit_info = fruitX;
 	}
-	fruitX.histo = nullptr;*/
+	//fruitX.histo = nullptr;/**/
 	return;
 }
 

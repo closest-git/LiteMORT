@@ -321,6 +321,8 @@ namespace Grusoft {
 
 		/*
 			v0.1
+			v0.2	cys	
+				10/10/2019
 		*/
 		template<typename Tx>
 		void HistoOnUnique(const LiteBOM_Config&config, Tx *val, const vector<tpSAMP_ID>& sort_ids, vector<vDISTINCT>&uniques, int flag = 0x0) {
@@ -329,12 +331,15 @@ namespace Grusoft {
 			size_t i, i_0 = 0, i_1, noBin = -1, pos, nA = sort_ids.size(), T_min = int(nA / nMostBin) + 1;
 			Tx a0 = val[sort_ids[0]], a1 = val[sort_ids[nA - 1]], v0;
 			//vThrsh.clear();		
+			binFeatas.resize(nMostBin);
 			mapCategory.clear();		
 			while (i_0 < nA) {
 				v0 = val[sort_ids[i_0]];			i_1 = i_0;
 				HISTO_BIN& bin = histo->bins[++noBin];
+				BIN_FEATA& feata = binFeatas[noBin];
 				bin.tic = noBin;
 				mapCategory.insert(pair<int, int>((int)(v0), noBin));
+				feata.split_F = noBin > 0 ? (v0 + uniques[noBin - 1].val) / 2 : v0;
 				while (++i_1 < nA) {
 					pos = sort_ids[i_1];
 					assert(!IS_NAN_INF(val[pos]));
@@ -348,9 +353,12 @@ namespace Grusoft {
 			}
 			assert(i_0 == nA);
 			assert(noBin== nMostBin-1);
+			binFeatas[noBin].split_F = DBL_MAX;
+			histo->nBins = noBin + 1;
 			size_t n1 = ceil(noBin / 4.0), n2 = ceil(noBin / 2.0), n3 = ceil(noBin *3.0 / 4);
 			H_q0 = uniques[0].val,			H_q4 = uniques[noBin].val;
 			H_q1 = q1 = uniques[n1].val,	H_q2 = q2 = uniques[n2].val;		H_q3 = q3 = uniques[n3].val;/**/
+
 		}
 
 		/*可以减少histo的bin数，但对准确率似乎没啥影响

@@ -303,6 +303,10 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 		FeatVector *hFeat = hFold->feats[hFold->feats.size() - 1];
 		hFeat->nam = col->type_x;		hFeat->nam += col->name;
 		hFeat->hDistri = &(hFold->edaX->arrDistri[i]);
+		if (col->isCategory()) {
+			hFeat->hDistri->type =  Distribution::CATEGORY ;
+			BIT_SET(hFeat->type, Distribution::CATEGORY);
+		}
 	}
 	//if (hFold->hMove != nullptr)
 	//	hFold->hMove->Init_T<Tx, Ty>(nSamp_);

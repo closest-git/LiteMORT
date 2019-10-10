@@ -29,7 +29,7 @@ class Mort_Preprocess(object):
     #categorical_feature=[]
     #train_X,    train_y=None,None
     #eval_X,     eval_y = None, None
-    def column_info(self,feat,X):
+    def column_info(self,feat,X,categorical_feature=None):
         col = M_COLUMN()
         col.name = str(feat).encode('utf8')
         col.data = None
@@ -37,9 +37,11 @@ class Mort_Preprocess(object):
         x_info,type_x = '',''
         if isinstance(X, pd.DataFrame):
             narr = None
-            if X[feat].dtype.name == 'category':
+            isCat =(categorical_feature is not None) and (feat in categorical_feature)
+            if isCat or X[feat].dtype.name == 'category':
                 x_info = 'category'
                 type_x = '*'
+            if X[feat].dtype.name == 'category':
                 narr = X[feat].cat.codes.values
             elif is_numeric_dtype(X[feat]):
                 narr = X[feat].values
@@ -84,10 +86,10 @@ class Mort_Preprocess(object):
             self.features = features
         if cXcY:       #v0.2
             for feat in self.features:
-                col = self.column_info(feat,X)
+                col = self.column_info(feat,X,categorical_feature)
                 if col.data is not None:
                     self.col_X.append(col)
-            col=self.column_info('target',y)
+            col=self.column_info('target',y,categorical_feature)
             if col.data is None:
                 raise( "Mort_Preprocess: col_Y is NONE!!! " )
             self.col_Y=[col]

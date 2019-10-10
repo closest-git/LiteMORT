@@ -430,10 +430,9 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 			continue;
 		FeatVector *hFeat = hData_->Feat(picks[i]);
 		if (hFeat->isCategory()) {
-			histo->GreedySplit_Y(hData_, samp_set, false);
-			//continue;
-		}
-		else {
+			histo->GreedySplit_X(hData_, samp_set);
+			//histo->GreedySplit_Y(hData_, samp_set, false);
+		}	else {
 			if (node_task == LiteBOM_Config::split_X)
 				histo->GreedySplit_X(hData_, samp_set);
 			else if (node_task == LiteBOM_Config::histo_X_split_G)

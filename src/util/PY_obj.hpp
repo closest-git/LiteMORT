@@ -19,9 +19,12 @@ struct PY_COLUMN {
 	double v_min;
 	double v_max;
 
+	bool isCategory() {
+		return type_x!=NULL && strcmp(type_x,"*")==0;
+	}
 	bool isChar() {
 		std::string type = dtype;
-		return type == "char" || type == "int8";
+		return type == "char" || type == "int8" || type == "uint8";
 	}
 	bool isInt() {
 		std::string type = dtype;

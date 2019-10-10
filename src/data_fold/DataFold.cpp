@@ -308,7 +308,7 @@ void FeatsOnFold::BeforeTrain(BoostingForest *hGBRT, int flag) {
 					hFeat->UpdateHisto(this, true, isFirst, 0x0);
 				}
 				//else if (hGBRT->stopping.isOscillate && hFeat->wSplit_last>64 && !hFeat->hDistri->isUnique) {
-				else if(hFeat->wSplit_last>1024 && !hFeat->hDistri->isUnique){
+				else if(hFeat->wSplit_last>1024 && !hFeat->hDistri->isUnique && !BIT_TEST(hFeat->hDistri->type, Distribution::CATEGORY)){
 					hFeat->hDistri->UpdateHistoByW(this->config,hGBRT->forest.size(),hFeat->wBins);
 					//GST_TIC(t1);
 					hFeat->UpdateHisto(this, false,isFirst, 0x0);
