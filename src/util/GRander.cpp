@@ -17,9 +17,7 @@ uint64_t GRander::RandRersResrResdra() {  // Combined period = 2^116.23
 		zz = rotl(zz, 42) - zz;  zz = zz + rotl(zz, 14); //RESDRA, period = 5345004409 (prime)
 		return xx ^ yy ^ zz;
 	}
-	//
-	//
-	/**/
+	return 0;
 }
 
 /*

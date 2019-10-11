@@ -10,6 +10,7 @@
 #include <cstring>
 #include <stdio.h>  
 #include "Object.hpp"
+#include "Float16.hpp"
 
 struct PY_COLUMN {
 	char *name;
@@ -44,7 +45,10 @@ struct PY_COLUMN {
 	bool isFloat() {
 		std::string type = dtype;
 		return type == "float32";
-			/*|| type == "float16";	c++不支持，真可惜*/
+	}
+	bool isFloat16() {
+		std::string type = dtype;
+		return type == "float16";	
 	}
 	bool isDouble() {
 		std::string type = dtype;
@@ -81,6 +85,17 @@ struct PY_COLUMN {
 			int32_t *i32 = (int32_t*)data;
 			for (size_t i = 0; i < nSamp; i++) {
 				dst[i] = i32[i];
+			}
+		}
+		else if (isFloat16()) {		//https://stackoverflow.com/questions/22210684/16-bit-floats-and-gl-half-float
+			int16_t *flt16= (int16_t*)data;
+			float fRet;
+			for (size_t i = 0; i < nSamp; i++, flt16++) {
+				dst[i] = Float16::GLM_toFloat32(*flt16);
+				/*int fltInt32 = (((*flt16) & 0x8000) << 16);
+				fltInt32 |= (((*flt16) & 0x7fff) << 13) + 0x38000000;
+				memcpy(&fRet, &fltInt32, sizeof(float));
+				dst[i] = fRet;*/
 			}
 		}
 		else {

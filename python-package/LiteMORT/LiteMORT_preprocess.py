@@ -41,7 +41,7 @@ class Mort_Preprocess(object):
             if isCat or X[feat].dtype.name == 'category':
                 x_info = 'category'
                 type_x = '*'
-            isDiscrete = (feat in discrete_feature)
+            isDiscrete = (discrete_feature is not None) and (feat in discrete_feature)
             if isDiscrete:
                 x_info = 'discrete'
                 type_x = '#'

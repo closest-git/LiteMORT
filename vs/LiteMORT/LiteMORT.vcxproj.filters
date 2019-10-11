@@ -176,5 +176,8 @@
     <ClInclude Include="..\..\src\data_fold\Loss_binary.hpp">
       <Filter>源文件\data_fold</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\util\Float16.hpp">
+      <Filter>源文件\util</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

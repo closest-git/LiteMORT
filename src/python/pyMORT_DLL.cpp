@@ -285,8 +285,10 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 		PY_COLUMN *col = cX_ + i;//唯一的dtype处理
 		if (i == 9)
 			i = 9;
-		if (col->isFloat()) {
+		if (col->isFloat() ) {
 			hFold->feats.push_back(new FeatVec_T<float>(nSamp_, i, desc + std::to_string(i),flagF));		
+		}	else if (col->isFloat16()) {	//NO REFER!!!
+			hFold->feats.push_back(new FeatVec_T<float>(nSamp_, i, desc + std::to_string(i), flag));
 		}	else if (col->isInt()) {
 			hFold->feats.push_back(new FeatVec_T<int32_t>(nSamp_, i, desc + std::to_string(i), flagF));
 		}	else if (col->isInt16()) {

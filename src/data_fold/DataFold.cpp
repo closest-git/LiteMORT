@@ -794,6 +794,7 @@ FeatVec_Q::FeatVec_Q(const FeatsOnFold *hData_, FeatVector *hFeat,int nMostBin, 
 	hDistri = hFeatSource->hDistri;
 }
 
+
 /*
 	²Î¼ûlightGBM::BoostFromScore
 	v0.1	cys

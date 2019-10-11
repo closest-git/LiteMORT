@@ -206,6 +206,7 @@ copy $(OutDir)$(TargetName)$(TargetExt) D:\Anaconda3\Lib\site-packages\litemort<
     <ClInclude Include="..\..\src\tree\BoostingForest.hpp" />
     <ClInclude Include="..\..\src\tree\GBRT.hpp" />
     <ClInclude Include="..\..\src\tree\ManifoldTree.hpp" />
+    <ClInclude Include="..\..\src\util\Float16.hpp" />
     <ClInclude Include="..\..\src\util\GRander.hpp" />
     <ClInclude Include="..\..\src\util\GST_def.h" />
     <ClInclude Include="..\..\src\util\Object.hpp" />
