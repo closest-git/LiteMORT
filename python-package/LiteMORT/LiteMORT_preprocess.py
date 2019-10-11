@@ -29,7 +29,7 @@ class Mort_Preprocess(object):
     #categorical_feature=[]
     #train_X,    train_y=None,None
     #eval_X,     eval_y = None, None
-    def column_info(self,feat,X,categorical_feature=None):
+    def column_info(self,feat,X,categorical_feature=None,discrete_feature=None):
         col = M_COLUMN()
         col.name = str(feat).encode('utf8')
         col.data = None
@@ -41,6 +41,10 @@ class Mort_Preprocess(object):
             if isCat or X[feat].dtype.name == 'category':
                 x_info = 'category'
                 type_x = '*'
+            isDiscrete = (feat in discrete_feature)
+            if isDiscrete:
+                x_info = 'discrete'
+                type_x = '#'
             if X[feat].dtype.name == 'category':
                 narr = X[feat].cat.codes.values
             elif is_numeric_dtype(X[feat]):
@@ -62,7 +66,7 @@ class Mort_Preprocess(object):
             #print("\"{}\":\t{}\ttype={},data={},name={}".format(feat, x_info, col.dtype, col.data, col.name))
         return col
 
-    def __init__(self,X,y,features=None,categorical_feature=None,cXcY=False,  **kwargs):
+    def __init__(self,X,y,features=None,categorical_feature=None,discrete_feature=None,cXcY=False,  **kwargs):
         '''
         :param X:
         :param y:
@@ -86,10 +90,10 @@ class Mort_Preprocess(object):
             self.features = features
         if cXcY:       #v0.2
             for feat in self.features:
-                col = self.column_info(feat,X,categorical_feature)
+                col = self.column_info(feat,X,categorical_feature,discrete_feature)
                 if col.data is not None:
                     self.col_X.append(col)
-            col=self.column_info('target',y,categorical_feature)
+            col=self.column_info('target',y,categorical_feature,discrete_feature)
             if col.data is None:
                 raise( "Mort_Preprocess: col_Y is NONE!!! " )
             self.col_Y=[col]

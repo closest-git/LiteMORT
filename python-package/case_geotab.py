@@ -41,7 +41,6 @@ else:
     "Street":0, "St":0, "Avenue":1, "Ave":1, "Boulevard":2, "Road":3, "Drive":4, "Lane":5, "Tunnel":6,
      "Highway":7, "Way":8, "Parkway":9, "Parking":10, "Oval":11, "Square":12, "Place":13, "Bridge":14}
 
-
     def encode(x):
         if pd.isna(x):
             return 0
@@ -188,7 +187,8 @@ dtrain = lgb.Dataset(data=train, label=target1)
 
 param={'num_leaves': 230,   'n_estimators':10000,'early_stopping_rounds':200,
      'feature_fraction': 0.9,
-     'bagging_fraction': 1,#"adaptive":'DISTRIBUTION',   无效，晕
+     'bagging_fraction': 1,
+       "adaptive":'weight1',   #无效，晕
     'max_bin': 512,
     #"learning_schedule":"adaptive",
      'max_depth': 19,
@@ -200,8 +200,10 @@ param={'num_leaves': 230,   'n_estimators':10000,'early_stopping_rounds':200,
      'learning_rate': 0.05,
      'objective': 'regression',
      'boosting_type': 'gbdt',
-     'verbose': 1,
-     'metric': {'rmse'}}
+     'verbose': 666,
+     'metric': {'rmse'}
+}
+
 nfold = 5
 kf = KFold(n_splits=nfold, random_state =127, shuffle =True)
 for i in range(len(all_preds)):
@@ -214,7 +216,7 @@ for i in range(len(all_preds)):
         print("TARGET_{} fold {}".format(i,n))
         y_train,y_valid = all_target[i][train_index],all_target[i][valid_index]
         if isMORT:
-            mort = LiteMORT(param).fit_1(train.iloc[train_index], y_train, eval_set=[(train.iloc[valid_index], y_valid)])
+            mort = LiteMORT(param).fit_1(train.iloc[train_index], y_train, eval_set=[(train.iloc[valid_index], y_valid)],discrete_feature=['Intersection','IntersectionId'])
             oof[valid_index] = mort.predict(train.iloc[valid_index])
             all_preds[i] += mort.predict(test) / nfold
         else:
@@ -237,7 +239,7 @@ for i in range(len(all_preds)):
 path=""
 if some_rows is None:
     # test_predictions[['TransactionID', 'isFraud']].to_csv(f'submit_{some_rows}_{0.5}.csv', index=False,compression='gzip')
-    path = f'{data_root}/[{model}]_{some_rows}_{fold_score:.5f}_F{nfold}_.csv'
+    path = f'{data_root}/[{model}]_{some_rows}_{fold_score:.5f}_F{nfold}_.csv.gz'
     data2 = pd.DataFrame(all_preds).stack()
     data2 = pd.DataFrame(data2)
     submission = pd.read_csv(f'{data_root}/sample_submission.csv')

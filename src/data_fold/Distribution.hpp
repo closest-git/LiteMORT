@@ -82,7 +82,7 @@ namespace Grusoft {
 	struct Distribution {
 		static GRander rander_;
 		enum {
-			CATEGORY = 0x100,
+			CATEGORY = 0x100, DISCRETE = 0x200,
 			V_ZERO_DEVIA = 0x10000,	//常值，一般可忽略
 			DISTRI_OUTSIDE = 0x40000,
 		};
@@ -157,12 +157,9 @@ namespace Grusoft {
 			double a, a2 = 0, sum = 0, x_0, x_1;
 			size_t i = 0, i_0 = 0, nA = 0;
 			while (i_0 < N) {
-				if (IS_NAN_INF(vec[i_0]))
-				{
+				if (IS_NAN_INF(vec[i_0]))		{
 					nNA++;	i_0++;
-				}
-				else
-				{
+				}	else	{
 					break;
 				}
 			}
@@ -408,7 +405,9 @@ namespace Grusoft {
 			//histo = optimal == "grad_variance" ? new HistoGRAM(nSamp_) : new Histo_CTQ(nSamp_);
 			histo = new HistoGRAM(nullptr,nSamp_);
 
-			int nMostBin = config.feat_quanti;		assert(nMostBin > 0);
+			int nMostBin = config.feat_quanti;		
+			//if(BIT_TEST(type,Distribution::DISCRETE))
+			assert(nMostBin > 0);
 			//nMostBin = max(1, config.feat_quanti / 4);
 			vector<tpSAMP_ID> idx;
 			if (sortedA.size() > 0)
@@ -428,6 +427,8 @@ namespace Grusoft {
 			if (a0 == a1) { return; }/**/
 			Tx step = (a1 - a0) / nMostBin, v1_last = a0;
 			CheckUnique(config, nSamp_, val, idx, vUnique, nMostBin*10);
+			if (BIT_TEST(type, Distribution::DISCRETE))
+				nMostBin = vUnique.size() + 3;
 			if (BIT_TEST(type, Distribution::CATEGORY)) {
 				if (vUnique.size() > 0) {
 					assert(config.feat_quanti > 1);

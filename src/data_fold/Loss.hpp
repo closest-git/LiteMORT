@@ -30,6 +30,7 @@ namespace Grusoft {
 		const FeatsOnFold *hBaseData_=nullptr;
 		LambdaRank HT_lambda_;
 		DCRIMI_2 decrimi_2;
+		Distribution dist_resi;
 		IS_TYPE tpResi = is_XXX;
 		FeatVector *y = nullptr, *predict = nullptr;
 		vector<tpSAMP_ID> outliers;
@@ -290,26 +291,28 @@ namespace Grusoft {
 			//	delete[] y_exp;
 		}
 
+		//初步测试，无效
 		template <typename Tx>
-		void WeightOnMarginal_r(FeatsOnFold *hData_, int round,double off_average, int flag) {//初步测试，配合adaptive lr 还是有效果的
+		void WeightOnMarginal_r(FeatsOnFold *hData_, int round, int flag) {
 			size_t dim = resi.size(), nSamp = hData_->nSample(), step = dim;
 			assert(dim == nSamp);
-			tpDOWN *vResi = VECTOR2ARR(resi);
+			tpDOWN *vResi = VECTOR2ARR(resi), *pDown = GetDownDirection();
 			int num_threads = OMP_FOR_STATIC_1(dim, step);
 			if (samp_weight == nullptr || round <10)
 				return;
-			double w0 = DBL_MAX, w1 = -DBL_MAX;
-
+			dist_resi.STA_at(resi, false, 0x0);
+			assert(dist_resi.nNA==0);
+			double w0 = DBL_MAX, w1 = -DBL_MAX,devia= dist_resi.devia,a_1= (dist_resi.vMax- dist_resi.mean) / devia;
+			// s = off_1 == off_0 ? 1 : 2.0 / (off_1 - off_0), T_off = off_0 + (off_1 - off_0)*0.9;
 			//#pragma omp parallel for schedule(static,1)
 			for (int thread = 0; thread < num_threads; thread++) {
 				size_t start = thread*step, end = MIN2(start + step, dim), i;
 				for (i = start; i < end; i++) {
-					double a = fabs(vResi[i])/off_average;		
-					a = exp(a);
-					a = min(2, a);
-					samp_weight[i] = a;
-					
-					w0 = MIN2(w0, samp_weight[i]);		w1 = MAX2(w1, samp_weight[i]);
+					//double off =fabs(vResi[i]), a = off<T_off ? 1 : MIN2(2, exp(off- T_off));
+					double a = fabs(vResi[i] - dist_resi.mean) / devia;
+					a = a<3 ? 1 : MIN2(4, exp(a-3));
+					samp_weight[i] = a;			pDown[i] *= sqrt(a);		//变通之举
+					w0 = MIN2(w0, a);			w1 = MAX2(w1, a);
 				};
 			}
 			if (round % 100 == 0) {
@@ -337,13 +340,14 @@ namespace Grusoft {
 			}	else if (objective == "multiclass") {	//MSE loss
 				throw "Loss::multiclass is ...";
 			}	else if (objective == "regression" || objective == "outlier") {
-				
 				err_rmse = 0.0;		err_mae = 0;
 				for (i = 0; i < dim; i++) {
 					vResi[i] = y1[i] - y0[i];
-					err_rmse += vResi[i] * vResi[i];
-					err_mae += fabs(vResi[i]);
+					//double s = samp_weight != nullptr ? samp_weight[i] : 1;
+					//err_rmse += s*vResi[i] * vResi[i];
+					//err_mae += s*fabs(vResi[i]);
 				}
+
 				if (pDown != nullptr) {
 					if (isOutlier) {		//Average Precision
 						//Down_AP<Tx>();
@@ -366,9 +370,15 @@ namespace Grusoft {
 							a2 += pDown[i] * pDown[i];		a1 += fabs(pDown[i]);
 						}
 						DOWN_sum_2 = a2;	DOWN_sum_1 = a1;
-					}		
-					if (samp_weight != nullptr)
-						WeightOnMarginal_r<Tx>(hData_, round, DOWN_sum_1/dim, flag);
+						if (samp_weight != nullptr && pDown != nullptr) {	//测试集无需加权
+							WeightOnMarginal_r<Tx>(hData_, round, flag);
+						}
+					}					
+				}
+				for (i = 0; i < dim; i++) {
+					double s = samp_weight != nullptr ? samp_weight[i] : 1;
+					err_rmse += s*vResi[i] * vResi[i];
+					err_mae += s*fabs(vResi[i]);
 				}
 				//sum = NRM2(dim, vResi);
 				//参见loss = PointWiseLossCalculator::AverageLoss(sum_loss, sum_weights_)及L2Metric设计

@@ -22,6 +22,9 @@ struct PY_COLUMN {
 	bool isCategory() {
 		return type_x!=NULL && strcmp(type_x,"*")==0;
 	}
+	bool isDiscrete() {
+		return type_x != NULL && strcmp(type_x, "#") == 0;
+	}
 	bool isChar() {
 		std::string type = dtype;
 		return type == "char" || type == "int8" || type == "uint8";

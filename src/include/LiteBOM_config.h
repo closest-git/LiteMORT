@@ -265,7 +265,7 @@ namespace Grusoft {
 		//std::string leaf_optimal = "lambda_0";
 
 		std::string init_scor = "mean";		//or path of .init file
-		//std::string init_scor = "0";		//binary classification 确实会更好一些
+		//std::string init_scor = "0";		
 
 		std::string leaf_regression = "none";
 		//std::string leaf_regression = "linear";

@@ -458,9 +458,9 @@ int GBRT::Train(string sTitle, int x, int flag) {
 		printf("\n********* best_@[%d,%d]!!!", stopping.best_no, stopping.best_round);
 	}
 
-	printf("\n********* GBRT::Train nTree=%d aNode=%.6g maxDepth=%d ERR@train=%s err@%s=%s thread=%d" 
+	printf("\n********* GBRT::Train ERR@train=%s err@%s=%s nTree=%d aNode=%.6g maxDepth=%d thread=%d" 
 		"\n********* train=%g(hTree->Train=%g,tCheckGain=%g,tHisto=%g(%d,%g),tX=%g) sec\r\n", 
-		forest.size(), nzNode*1.0/forest.size(), maxDepth, sLossT.c_str(), sEval.c_str(), sLossE.c_str(),nThread,
+		sLossT.c_str(), sEval.c_str(), sLossE.c_str(),forest.size(), nzNode*1.0/forest.size(), maxDepth, nThread,
 		GST_TOC(tick), t_train,FeatsOnFold::stat.tCheckGain, FeatsOnFold::stat.tHisto, HistoGRAM::nAlloc, FeatsOnFold::stat.tSamp2Histo, FeatsOnFold::stat.tX);
 
 	if (nOOB>0)

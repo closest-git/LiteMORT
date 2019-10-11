@@ -45,12 +45,12 @@ namespace Grusoft {
 		double wSplit=0, wSplit_last=0;		//"split", result contains numbers of times the feature is used in a model.
 		double wGain=0;			//"gain", result contains total gains of splits which use the feature.
 		float *wBins = nullptr;
-		enum {
-			//CATEGORY = 0x100,
-			AGGREGATE = 0x200,
+		enum {		//需要和Distribution合并
+			//CATEGORY = 0x100,		DISCRETE = 0x200,
 			VAL_REFER = 0x1000,
 			//V_ZERO_DEVIA = 0x10000,	//常值，一般可忽略
 			IS_BUNDLE = 0x20000,	//in Feature Bundle	参见FeatsOnFold::nPick4Split
+			AGGREGATE = 0x80000,
 		};
 		size_t type = 0x0;
 		bool isCategory()	{ return	BIT_TEST(type, Distribution::CATEGORY); }

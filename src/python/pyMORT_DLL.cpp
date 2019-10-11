@@ -304,8 +304,12 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 		hFeat->nam = col->type_x;		hFeat->nam += col->name;
 		hFeat->hDistri = &(hFold->edaX->arrDistri[i]);
 		if (col->isCategory()) {
-			hFeat->hDistri->type =  Distribution::CATEGORY ;
+			BIT_SET(hFeat->hDistri->type,Distribution::CATEGORY) ;
 			BIT_SET(hFeat->type, Distribution::CATEGORY);
+		}
+		if (col->isDiscrete()) {
+			BIT_SET(hFeat->hDistri->type,Distribution::DISCRETE);
+			BIT_SET(hFeat->type, Distribution::DISCRETE);
 		}
 	}
 	//if (hFold->hMove != nullptr)
@@ -371,6 +375,13 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	//FeatsOnFold::stat.tX += GST_TOC(t1);
 	if (hFold->isQuanti) {
 		hFold->Feature_Bundling();
+	}
+	if (hFold->config.verbose==666) {
+		for (int feat = 0; feat < ldX_; feat++) {
+			FeatVector *hFeat = hFold->Feat(feat);
+			hFeat->hDistri->Dump(feat, false, flag);					//Êä³ödistributionÐÅÏ¢
+		}
+
 	}
 	/*if (hFold->isQuanti) {
 	printf("\n********* FeatsOnFold::QUANTI nMostQ=%d\r\n", nMostQ);

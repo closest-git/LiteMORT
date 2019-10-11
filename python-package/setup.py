@@ -13,7 +13,7 @@ from setuptools import find_packages, setup, Command
 
 # Package meta-data.
 NAME = 'litemort'
-DESCRIPTION = 'Fastest gradient boosting library.'
+DESCRIPTION = 'Fastest gradient boosting library with higher accuracy'
 URL = 'https://github.com/closest-git/LiteMORT'
 EMAIL = 'gsp.cys@gmail.com'
 AUTHOR = 'Yingshi Chen'
@@ -124,6 +124,7 @@ setup(
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Operating System :: Microsoft :: Windows',
+        'Operating System :: Unix',
     ],
     # $ setup.py publish support.
     cmdclass={

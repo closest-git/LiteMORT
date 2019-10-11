@@ -356,13 +356,13 @@ class LiteMORT(object):
             # v0.3
                 feat_dict   cys@1/10/2019
     '''
-    def fit_1(self,X_train_0, y_train,eval_set=None,  feat_dict=None,categorical_feature=None, params=None,flag=0x0):
+    def fit_1(self,X_train_0, y_train,eval_set=None,  feat_dict=None,categorical_feature=None,discrete_feature=None, params=None,flag=0x0):
         print("====== LiteMORT_fit X_train_0={} y_train={}......".format(X_train_0.shape, y_train.shape))
         gc.collect()
-        self.train_set = Mort_Preprocess( X_train_0,y_train,categorical_feature=categorical_feature,cXcY=True)
+        self.train_set = Mort_Preprocess( X_train_0,y_train,categorical_feature=categorical_feature,discrete_feature=discrete_feature,cXcY=True)
         if(eval_set is not None and len(eval_set)>0):
             X_test, y_test=eval_set[0]
-            self.eval_set = Mort_Preprocess(X_test, y_test, categorical_feature=categorical_feature,cXcY=True)
+            self.eval_set = Mort_Preprocess(X_test, y_test, categorical_feature=categorical_feature,discrete_feature=discrete_feature,cXcY=True)
         #self.EDA(flag)
 
         nTrain, nFeat, nTest = self.train_set.nSample,self.train_set.nFeature, self.eval_set.nSample
