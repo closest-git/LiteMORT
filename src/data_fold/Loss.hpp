@@ -200,15 +200,16 @@ namespace Grusoft {
 			for (int thread = 0; thread < num_threads; thread++) {
 				size_t start = thread*step, end = MIN2(start + step, dim), i;
 				for (i = start; i < end; i++) {
-					double sig, a,off= label[i] == 1? sig - N_1: P_0 - sig;
+					double sig, a;
 					sig = exp(y1[i]);	 sig = sig / (1 + sig);					//[0-1]				
 					a = (2 * sig - 1);						//a = max(-2, a);		a = min(2, a);
-					samp_weight[i] = label[i] == 1 ? exp(-a) : exp(a);		
+					samp_weight[i] = label[i] == 1 ? exp(-a) : exp(a);	
+					/*,off= label[i] == 1? sig - N_1: P_0 - sig	
 					if(off<0) {
 						//off = min(1, off);		off = max(-1, off);
 						//samp_weight[i] = exp(-off);
 						//samp_weight[i] *= exp(-off);
-					}
+					}*/
 					w0 = MIN2(w0, samp_weight[i]);		w1 = MAX2(w1, samp_weight[i]);
 				};
 			}
@@ -294,7 +295,7 @@ namespace Grusoft {
 		//初步测试，无效
 		template <typename Tx>
 		void WeightOnMarginal_r(FeatsOnFold *hData_, int round, int flag) {
-			size_t dim = resi.size(), nSamp = hData_->nSample(), step = dim;
+			size_t dim = resi.size(), nSamp = hData_->nSample(), step = dim,nzW=0;
 			assert(dim == nSamp);
 			tpDOWN *vResi = VECTOR2ARR(resi), *pDown = GetDownDirection();
 			int num_threads = OMP_FOR_STATIC_1(dim, step);
@@ -302,7 +303,7 @@ namespace Grusoft {
 				return;
 			dist_resi.STA_at(resi, false, 0x0);
 			assert(dist_resi.nNA==0);
-			double w0 = DBL_MAX, w1 = -DBL_MAX,devia= dist_resi.devia,a_1= (dist_resi.vMax- dist_resi.mean) / devia;
+			double w0 = DBL_MAX, w1 = -DBL_MAX,devia= dist_resi.devia,a_1= (dist_resi.vMax- dist_resi.mean) / devia,T_w=2;
 			// s = off_1 == off_0 ? 1 : 2.0 / (off_1 - off_0), T_off = off_0 + (off_1 - off_0)*0.9;
 			//#pragma omp parallel for schedule(static,1)
 			for (int thread = 0; thread < num_threads; thread++) {
@@ -310,13 +311,19 @@ namespace Grusoft {
 				for (i = start; i < end; i++) {
 					//double off =fabs(vResi[i]), a = off<T_off ? 1 : MIN2(2, exp(off- T_off));
 					double a = fabs(vResi[i] - dist_resi.mean) / devia;
-					a = a<3 ? 1 : MIN2(4, exp(a-3));
+					//a = a<3 ? 1 : MIN2(2, exp(a-3));
+					if (a <= T_w) {
+						a = 1;
+					}	else {
+						a = MIN2(2, exp(a - T_w)); //a = MIN2(2, a - 2);
+						nzW = nzW + 1;
+					}
 					samp_weight[i] = a;			pDown[i] *= sqrt(a);		//变通之举
 					w0 = MIN2(w0, a);			w1 = MAX2(w1, a);
 				};
 			}
 			if (round % 100 == 0) {
-				printf("w(%.4g,%.4g)\t", w0, w1);
+				printf("w(%.3g%%:%.4g,%.4g)\t", nzW*100.0/nSamp,w0, w1);
 			}
 		}
 

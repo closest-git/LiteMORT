@@ -47,7 +47,8 @@ class LiteMORT_params(object):
             if alias not in dict_param:
                 continue
             if alias!=key:
-                warnings.warn("Found `{}`(alias of {}) in params. Will use it instead of argument".format(alias,key))
+                print(f"Found `{alias}`(alias of {key}) in params. Will use it instead of argument")
+                #warnings.warn("Found `{}`(alias of {}) in params. Will use it instead of argument".format(alias,key))
             value = (type(default_value))(dict_param[alias])
             return value
         return default_value

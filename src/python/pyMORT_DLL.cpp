@@ -288,6 +288,8 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 		if (col->isFloat() ) {
 			hFold->feats.push_back(new FeatVec_T<float>(nSamp_, i, desc + std::to_string(i),flagF));		
 		}	else if (col->isFloat16()) {	//NO REFER!!!
+			if(hFold->config.verbose==666)
+				printf("----%d\t \"%s\" is Float16\n", i,col->name);
 			hFold->feats.push_back(new FeatVec_T<float>(nSamp_, i, desc + std::to_string(i), flag));
 		}	else if (col->isInt()) {
 			hFold->feats.push_back(new FeatVec_T<int32_t>(nSamp_, i, desc + std::to_string(i), flagF));

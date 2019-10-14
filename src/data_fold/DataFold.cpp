@@ -741,6 +741,7 @@ FeatVec_Bundle::FeatVec_Bundle(FeatsOnFold *hData_,int id_, const vector<int>&bu
 		throw("!!!FeatVec_Bundle nDup > nMostDup*nMerge!!!");*/
 }
 
+
 void FeatVec_Bundle::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* hParent, HistoGRAM* histo, int nMostBin,  int flag0) {
 	if (qHisto->nBins == 0) {
 		histo->ReSet(0);

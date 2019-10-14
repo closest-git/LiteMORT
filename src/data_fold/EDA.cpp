@@ -172,7 +172,7 @@ void Distribution::Dump(int feat, bool isQuanti, int flag) {
 		//printf("%4d %c%12s [%.3g,%.3g,%.3g,%.3g,%.3g]\tnBin=%d[%.3g,%.3g,%.3g,%.3g,%.3g]%s \n", feat, typ, nam.c_str(), 
 		//	vMin, q1, q2, q3, vMax,
 		//需要输出中位数
-		printf("%4d %c%12s [%.4g-%.4g]\tBIG=%d\tnBin=%d[%.4g,%.4g,%.4g,%.4g,%.4g]%s \n", feat, typ, nam.c_str(),
+		printf("%4d %c%12s [%.4g-%.8g]\tBIG=%d\tnBin=%d[%.4g,%.4g,%.4g,%.4g,%.4g]%s \n", feat, typ, nam.c_str(),
 			vMin, vMax, histo == nullptr ? 0 : histo->nBigBins /*corr.D_sum*/,
 			 histo == nullptr ? 0 : histo->nBins,
 			H_q0, H_q1, H_q2, H_q3, H_q4, tmp);
