@@ -1,10 +1,9 @@
 import gc
 import numpy as np
 import pandas as pd
-from ctypes import *
-from sklearn import preprocessing
 from sklearn.preprocessing import LabelEncoder
-
+from sklearn.linear_model import Lasso
+from sklearn.linear_model import Ridge,ElasticNet
 from .compat import (_MortModelBase,_MortClassifierBase,_MortRegressorBase)
 
 
@@ -36,6 +35,13 @@ class Mort_Problems(_MortModelBase):
         else:
             np_target = y_train.astype(np_type)
         return np_target
+
+    def BeforeFit(self,train_set,eval_set):
+        return False,None,None
+
+    def AfterPredict(self, X_, Y_):
+        return Y_
+
 
     def OnResult(self,result_,pred_leaf=False, pred_contrib=False,raw_score=False):
         return result_
@@ -80,7 +86,36 @@ class Mort_MultiClass(Mort_Problems, _MortClassifierBase):
 
 class Mort_Regressor(Mort_Problems, _MortRegressorBase):
     """LiteMORT regressor."""
-    pass
+    def __init__(self,  **kwargs):
+        super(Mort_Regressor, self).__init__()
+        self.gressor=None
+        self.mse = 0
+
+    def BeforeFit(self,train_set,eval_set):
+        alpha = 1
+        self.gressor = Lasso(alpha=alpha, normalize=True)
+        #self.gressor = Ridge(alpha=0.05, normalize=True)
+        #self.gressor = ElasticNet(alpha=1, l1_ratio=0.5, normalize=False)
+        print(f"====== Mort_Regressor::BeforeFit@{self.gressor} alpha={alpha}")
+        x_train, y_train = train_set
+        self.gressor.fit(x_train, y_train)
+        pred = self.gressor.predict(x_train)
+        self.mse = np.mean((pred - y_train)**2)
+        y_train = y_train - pred
+
+        y_eval = None
+        if (eval_set is not None and len(eval_set) > 0):
+            X_eval, y_eval = eval_set[0]
+            y_pred = self.gressor.predict(X_eval)
+            y_eval = y_eval-y_pred
+        return True,y_train,[y_eval]
+
+    def AfterPredict(self,X_,Y_):
+        if self.gressor is not None:
+            y_pred = self.gressor.predict(X_)
+            Y_= Y_+y_pred
+        return Y_
+
 
 
 

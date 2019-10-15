@@ -308,7 +308,7 @@ class LiteMORT(object):
                       self.preprocess.eval_X, self.preprocess.eval_y, nTest, 0)  # 1 : classification
         return self
 
-    def fit(self, X_train_0, y_train, eval_set=None, feat_dict=None, categorical_feature=None, params=None, flag=0x0):
+    def fit_v0(self, X_train_0, y_train, eval_set=None, feat_dict=None, categorical_feature=None, params=None, flag=0x0):
         gc.collect()
         # self.preprocess.fit(X_train_0, y_train)
         # self.preprocess.transform(eval_set)
@@ -357,17 +357,21 @@ class LiteMORT(object):
             # v0.3
                 feat_dict   cys@1/10/2019
     '''
-    def fit_1(self,X_train_0, y_train,eval_set=None,  feat_dict=None,categorical_feature=None,discrete_feature=None, params=None,flag=0x0):
+    def fit(self,X_train_0, y_train,eval_set=None,  feat_dict=None,categorical_feature=None,discrete_feature=None, params=None,flag=0x0):
         print("====== LiteMORT_fit X_train_0={} y_train={}......".format(X_train_0.shape, y_train.shape))
         gc.collect()
+        isUpdate,y_train,y_eval_update = self.problem.BeforeFit([X_train_0, y_train], eval_set)
+
         self.train_set = Mort_Preprocess( X_train_0,y_train,categorical_feature=categorical_feature,discrete_feature=discrete_feature,cXcY=True)
         if(eval_set is not None and len(eval_set)>0):
             X_test, y_test=eval_set[0]
+            if isUpdate:
+                y_test = y_eval_update[0]
             self.eval_set = Mort_Preprocess(X_test, y_test, categorical_feature=categorical_feature,discrete_feature=discrete_feature,cXcY=True)
         #self.EDA(flag)
 
         nTrain, nFeat, nTest = self.train_set.nSample,self.train_set.nFeature, self.eval_set.nSample
-        #self.mort_fit(self.hLIB,self.preprocess.train_X,self.preprocess.train_y, nFeat, nTrain,self.preprocess.eval_X, self.preprocess.eval_y, nTest,0)  # 1 : classification
+
         self.mort_fit_1(self.hLIB,self.train_set.cX,self.train_set.cY, nFeat,nTrain,self.eval_set.cX, self.eval_set.cY, nTest,0)  # 1 : classification
         return self
 
@@ -389,6 +393,7 @@ class LiteMORT(object):
         """
         # print("====== LiteMORT_predict X_={} ......".format(X_.shape))
         Y_ = self.predict_raw(X_,pred_leaf, pred_contrib,raw_score, flag)
+        Y_ = self.problem.AfterPredict(X_,Y_)
         Y_ = self.problem.OnResult(Y_,pred_leaf,pred_contrib,raw_score)
         return Y_
 

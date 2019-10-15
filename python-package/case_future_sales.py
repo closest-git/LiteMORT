@@ -96,10 +96,10 @@ print(f"X_test={X_test.shape} ")
 del data
 gc.collect();
 
-params={'num_leaves': 550,   'n_estimators':1000,'early_stopping_rounds':100,
+params={'num_leaves': 550,   'n_estimators':1000,'early_stopping_rounds':20,
         'feature_fraction': 1,     'bagging_fraction': 1,
-        'max_bin': 1024,
-       "adaptive":'weight'
+        'max_bin': 512,
+       "adaptive":'weight1'
                   '',   #无效，晕
     #"learning_schedule":"adaptive",
      'max_depth': 10,
@@ -123,7 +123,7 @@ def hyparam_core(num_leaves, feature_fraction, bagging_fraction, max_depth, lear
     param_1['min_data_in_leaf'] = int(round(min_data_in_leaf))
     param_1['max_bin'] = int(round(max_bin))
 
-    model = LiteMORT(param_1).fit_1(X_train, Y_train, eval_set=[(X_valid, Y_valid)])
+    model = LiteMORT(param_1).fit(X_train, Y_train, eval_set=[(X_valid, Y_valid)])
     Y_pred = model.predict(X_valid).clip(0, 20)
     score = np.sqrt(mean_squared_error(Y_pred, Y_valid))
     return -score
@@ -146,7 +146,7 @@ if isMORT:
             print("Iteration {}: \n\t{}".format(i, res))
         input(f"......BayesianOptimization is OK......")
 
-    model = LiteMORT(params).fit_1(X_train,Y_train,eval_set=[(X_valid, Y_valid)])
+    model = LiteMORT(params).fit(X_train,Y_train,eval_set=[(X_valid, Y_valid)])
 else:
     model = XGBRegressor(
         max_depth=8,

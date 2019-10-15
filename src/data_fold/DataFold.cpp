@@ -259,7 +259,6 @@ void FeatsOnFold::Feature_Bundling(int flag) {
 
 void FeatsOnFold::BeforePredict(int flag) {
 	config.task = LiteBOM_Config::kPredict;
-
 }
 
 /*
@@ -308,12 +307,17 @@ void FeatsOnFold::BeforeTrain(BoostingForest *hGBRT, int flag) {
 					hFeat->UpdateHisto(this, true, isFirst, 0x0);
 				}
 				//else if (hGBRT->stopping.isOscillate && hFeat->wSplit_last>64 && !hFeat->hDistri->isUnique) {
-				else if(hFeat->wSplit_last>1024 && !hFeat->hDistri->isUnique && !BIT_TEST(hFeat->hDistri->type, Distribution::CATEGORY)){
-					hFeat->hDistri->UpdateHistoByW(this->config,hGBRT->forest.size(),hFeat->wBins);
-					//GST_TIC(t1);
-					hFeat->UpdateHisto(this, false,isFirst, 0x0);
-					//FeatsOnFold::stat.tX += GST_TOC(t1);
-				}/**/
+				else {
+					//if (/*hFeat->wSplit_last>1024 &&*/ !hFeat->hDistri->isUnique && !BIT_TEST(hFeat->hDistri->type, Distribution::CATEGORY)) {					
+					bool isDiscrete = hFeat->hDistri->isUnique || BIT_TEST(hFeat->hDistri->type, Distribution::CATEGORY);
+					bool isUpdate = hFeat->wSplit_last > 1024;//future-sales比赛验证，确实有效诶
+					if (isUpdate && !isDiscrete) {
+						hFeat->hDistri->UpdateHistoByW(this->config, hGBRT->forest.size(), hFeat->wBins);
+						//GST_TIC(t1);
+						hFeat->UpdateHisto(this, false, isFirst, 0x0);
+						//FeatsOnFold::stat.tX += GST_TOC(t1);
+					}/**/
+				}
 			}
 		}
 		nTotalBin1 += hFQ->GetHisto()->nBins;

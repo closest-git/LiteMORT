@@ -2,7 +2,7 @@
 
 #include "DataFold.hpp"
 #include "../learn/DCRIMI_.hpp"
-#include "loss_binary.hpp"
+#include "Loss_binary.hpp"
 namespace Grusoft {
 	/*class LambdaRank {
 	protected:
