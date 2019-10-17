@@ -87,6 +87,9 @@
     <ClCompile Include="..\..\src\learn\Pruning.cpp">
       <Filter>源文件\learn</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\util\FastExpLog.c">
+      <Filter>源文件\util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\data_fold\Loss.hpp">

@@ -180,6 +180,7 @@ copy $(OutDir)$(TargetName)$(TargetExt) D:\Anaconda3\Lib\site-packages\litemort<
     <ClCompile Include="..\..\src\tree\BoostingForest.cpp" />
     <ClCompile Include="..\..\src\tree\GBRT.cpp" />
     <ClCompile Include="..\..\src\tree\ManifoldTree.cpp" />
+    <ClCompile Include="..\..\src\util\FastExpLog.c" />
     <ClCompile Include="..\..\src\util\GRander.cpp" />
     <ClCompile Include="..\..\src\util\pcg_oneil\xoshiro256plusplus.c" />
   </ItemGroup>

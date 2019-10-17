@@ -50,7 +50,7 @@ class Mort_BinaryClass(Mort_Problems):
     '''
         or LogisticRegression
     '''
-    def __init__(self,  **kwargs):
+    def __init__(self,params,  **kwargs):
         super(Mort_BinaryClass, self).__init__()
         self._labelOfY=None
 
@@ -86,17 +86,22 @@ class Mort_MultiClass(Mort_Problems, _MortClassifierBase):
 
 class Mort_Regressor(Mort_Problems, _MortRegressorBase):
     """LiteMORT regressor."""
-    def __init__(self,  **kwargs):
+    def __init__(self,params,  **kwargs):
         super(Mort_Regressor, self).__init__()
-        self.gressor=None
-        self.mse = 0
-
-    def BeforeFit(self,train_set,eval_set):
-        alpha = 1
-        self.gressor = Lasso(alpha=alpha, normalize=True)
+        self.alpha = 1
+        self.gressor = None
+        if params.cascade=="lasso":
+            self.gressor = Lasso(alpha=self.alpha, normalize=True)
         #self.gressor = Ridge(alpha=0.05, normalize=True)
         #self.gressor = ElasticNet(alpha=1, l1_ratio=0.5, normalize=False)
-        print(f"====== Mort_Regressor::BeforeFit@{self.gressor} alpha={alpha}")
+        self.mse = 0
+        self.alg="None"
+
+    def BeforeFit(self,train_set,eval_set):
+        if self.gressor is None:
+            return False,None,None
+
+        print(f"====== Mort_Regressor::BeforeFit@{self.gressor} alpha={self.alpha}")
         x_train, y_train = train_set
         self.gressor.fit(x_train, y_train)
         pred = self.gressor.predict(x_train)

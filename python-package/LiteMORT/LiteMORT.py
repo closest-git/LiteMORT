@@ -85,6 +85,8 @@ class LiteMORT_params(object):
         self.feature_sample = self.alias_param('sub_feature', 1.0, dict_param, ['feature_sample', 'feature_fraction', 'sub_feature', 'colsample_bytree'])
         if 'max_bin' in dict_param:
             self.feature_quanti = dict_param['max_bin']
+        if 'cascade' in dict_param:
+            self.cascade = dict_param['cascade']
         if 'salp_bins' in dict_param:
             self.salp_bins = dict_param['salp_bins']
         if 'elitism' in dict_param:
@@ -196,9 +198,9 @@ class LiteMORT(object):
         self._n_classes = None
         self.init(params)
         if self.params.objective == "binary":
-            self.problem = Mort_BinaryClass()
+            self.problem = Mort_BinaryClass(self.params)
         elif self.params.objective == "regression":
-            self.problem = Mort_Regressor()
+            self.problem = Mort_Regressor(self.params)
 
     def __del__(self):
         try:
@@ -239,13 +241,17 @@ class LiteMORT(object):
                 pass
             else:
                 return
-            self.objective = params["objective"]
+            #self.objective = params["objective"]
+            self.objective = LiteMORT_params.alias_param(None,'objective','XXX',params,['objective',"application"])
             self.params = LiteMORT_params(self.objective,argv=params)
         else:
             self.params = params
 
-        if self.params.objective=="binary":
+        if self.objective=="binary":
             self._n_classes = 2
+        elif self.objective=="XXX":
+            print(f"objective is \"XXX\". Please check the parameters!!!")
+            exit(-666)
         else:
             pass
 
@@ -360,8 +366,9 @@ class LiteMORT(object):
     def fit(self,X_train_0, y_train,eval_set=None,  feat_dict=None,categorical_feature=None,discrete_feature=None, params=None,flag=0x0):
         print("====== LiteMORT_fit X_train_0={} y_train={}......".format(X_train_0.shape, y_train.shape))
         gc.collect()
-        isUpdate,y_train,y_eval_update = self.problem.BeforeFit([X_train_0, y_train], eval_set)
-
+        isUpdate,y_train_1,y_eval_update = self.problem.BeforeFit([X_train_0, y_train], eval_set)
+        if isUpdate:
+            y_train=y_train_1
         self.train_set = Mort_Preprocess( X_train_0,y_train,categorical_feature=categorical_feature,discrete_feature=discrete_feature,cXcY=True)
         if(eval_set is not None and len(eval_set)>0):
             X_test, y_test=eval_set[0]
@@ -376,7 +383,7 @@ class LiteMORT(object):
         return self
 
 
-    def predict(self, X_,pred_leaf=False, pred_contrib=False,raw_score=False, flag=0x0):
+    def predict(self, X_,pred_leaf=False, pred_contrib=False,raw_score=False,num_iteration=-1, flag=0x0):
         """Predict class or regression target for X.
 
         Parameters

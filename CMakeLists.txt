@@ -41,7 +41,7 @@ endif()
 
 set (cLIB "../../lib/")
 #set (PYTHON_INC "../../lib/")
-SET(some_COMPILE_FLAGS "-std=c++11 -pthread -O3 -I${cLIB}" )
+SET(some_COMPILE_FLAGS "-static -std=c++11 -pthread -O3 -I${cLIB}" )
 
 SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${some_COMPILE_FLAGS}")
 
