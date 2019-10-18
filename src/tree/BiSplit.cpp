@@ -193,7 +193,7 @@ void MT_BiSplit::Observation_AtLocalSamp(FeatsOnFold *hData_, int flag) {
 	samp_set.ClearStat();
 	//double a, x_0 = DBL_MAX, x_1 = -DBL_MAX;
 	tpDOWN a, a2 = 0.0, mean = 0, y_0, y_1;
-	double DOWN_sum = 0;
+	double DOWN_sum = 0,lambda_l2 = hData_->config.lambda_l2;
 	samp_set.STA_at_<tpDOWN>(down, a2, DOWN_sum, y_0, y_1,true);
 	mean = DOWN_sum / dim;
 	G_sum = -DOWN_sum;		//很重要 gradient方向和down正好相反
@@ -225,8 +225,8 @@ void MT_BiSplit::Observation_AtLocalSamp(FeatsOnFold *hData_, int flag) {
 		if (H_sum == 0) {
 			throw "Observation_AtLocalSamp:H_sum = 0!!!";
 		}
-		impuri = G_sum*G_sum / H_sum;		//已略去常数
-		down_step = -G_sum / H_sum;
+		impuri = G_sum*G_sum / (H_sum+ lambda_l2);		//已略去常数
+		down_step = -G_sum / (H_sum + lambda_l2);
 		//assert(!IS_NAN_INF(down_step));
 		if (false) {	//hess[samp]会变得很小
 			double sum = 0;
@@ -243,7 +243,7 @@ void MT_BiSplit::Observation_AtLocalSamp(FeatsOnFold *hData_, int flag) {
 		down_step = mean;
 		//down_step = sqrt(a2/dim);		 为啥这样不行，有意思
 	}
-	assert(fabs(down_step)<1000);
+	assert(fabs(down_step)<10000);
 	assert(!IS_NAN_INF(down_step));
 	//printf("%.4g ", down_step);
 	double shrink = hData_->config.learning_rate;
@@ -413,7 +413,7 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 		arrFruit.resize(picks.size());
 	tpDOWN *yDown = hData_->GetDownDirection();
 	//picks.clear();		picks.push_back(7);		//仅用于调试
-	int num_threads = OMP_FOR_STATIC_1(picks.size(), step);
+	int num_threads = OMP_FOR_STATIC_1(picks.size(), step),nNewPick=0,nMostNewPick=(int)(sqrt(picks.size()*1.0));
 	if (false) {
 		BinFold bf(hData_,picks, samp_set);
 		//bf.GreedySplit(hData_, picks ,0x0 );
@@ -449,7 +449,8 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 	arrFruit.push_back(fruit);
 	//GST_TIC(t1);
 	feat_id = -1;
-	double mxmxN = 0;
+	double lambda_mxmxN = 0;
+	nNewPick = 0;
 	for (int i = start; i < end; i++) {
 		int pick = picks[i];
 		if (i == 0 && this->id == 1) {	//仅用于测试
@@ -458,8 +459,16 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 		FeatVector *hFeat = hData_->Feat(pick);
 		//HistoGRAM *histo = optimal=="grad_variance" ? new HistoGRAM(nSamp) : new Histo_CTQ(nSamp);
 		HistoGRAM *histo = GetHistogram(hData_,pick,true), *histoSwarm=nullptr;
-		if (histo->fruit_info.mxmxN > mxmxN) {
-			mxmxN = histo->fruit_info.mxmxN;		feat_id = pick;
+		double a = histo->fruit_info.mxmxN ;
+		if (hFeat->isSelect == false && hData_->config.lambda_Feat < 1) {
+			a = histo->fruit_info.mxmxN*hData_->config.lambda_Feat;
+			nNewPick = nNewPick + 1;
+			if (nNewPick > nMostNewPick) {
+				a = 0;
+			}
+		}
+		if (a > lambda_mxmxN) {
+			lambda_mxmxN = a;		feat_id = pick;
 		}
 		if (hFeat->select_bins != nullptr) {			//基于case_poct测试，似乎可以通过遍历更多的空间来提高准确率
 			bool isSwarm = hFeat->select_bins->isFull();
@@ -499,11 +508,13 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 	else {
 		feat_id = fruit->best_feat_id;
 	}*/
+	double mxmxN = 0;
 	if (feat_id >= 0) {
-		fruit->Set(GetHistogram(hData_, feat_id, false));
+		FeatVector *hFeat = hData_->Feat(feat_id);
+		hFeat->isSelect = true;
+		fruit->Set(GetHistogram(hData_, feat_id, false));		mxmxN = fruit->mxmxN;
 		feat_regress = -1;
 		assert( mxmxN == fruit->mxmxN );
-		FeatVector *hFeat = hData_->Feat(feat_id);
 		hFeat->UpdateFruit(hData_,this);
 		if (hFeat->hDistri != nullptr && hFeat->hDistri->rNA > 0) {			
 			//fruit->isNanaLeft = hFeat->hDistri;
@@ -536,8 +547,13 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 		if (optimal == "lambda_0") {
 			gain = FLOAT_ZERO(mxmxN-impuri, mxmxN);
 			if (gain < 0) {
-				//Observation_AtSamp(hData_);
-				assert(gain>=0);
+				if (hData_->config.lambda_l2 > 0) {
+					;// printf("\tgain(%d:%.8g)N=%d!!!", this->id, gain, nSamp);
+				}	else {
+					//Observation_AtSamp(hData_);
+					printf("\tgain(%d:%.8g)N=%d!!!", this->id, gain, nSamp);
+					assert(gain>=0);
+				}
 			}
 			//return gMax;
 		}	else {

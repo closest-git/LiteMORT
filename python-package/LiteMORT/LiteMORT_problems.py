@@ -89,13 +89,14 @@ class Mort_Regressor(Mort_Problems, _MortRegressorBase):
     def __init__(self,params,  **kwargs):
         super(Mort_Regressor, self).__init__()
         self.alpha = 1
-        self.gressor = None
-        if params.cascade=="lasso":
+        self.gressor = None;        self.alg="None"
+        if 'cascade' in params and params['cascade']=="lasso":
             self.gressor = Lasso(alpha=self.alpha, normalize=True)
+            self.alg = params['cascade']
         #self.gressor = Ridge(alpha=0.05, normalize=True)
         #self.gressor = ElasticNet(alpha=1, l1_ratio=0.5, normalize=False)
         self.mse = 0
-        self.alg="None"
+
 
     def BeforeFit(self,train_set,eval_set):
         if self.gressor is None:

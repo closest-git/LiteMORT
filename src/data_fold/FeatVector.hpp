@@ -53,6 +53,7 @@ namespace Grusoft {
 			AGGREGATE = 0x80000,
 		};
 		size_t type = 0x0;
+		bool isSelect = false;
 		bool isCategory()	{ return	BIT_TEST(type, Distribution::CATEGORY); }
 		bool isReferVal()	{ return	BIT_TEST(type, VAL_REFER); }
 		typedef enum {

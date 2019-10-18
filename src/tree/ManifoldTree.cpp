@@ -699,20 +699,34 @@ void ManifoldTree::ClearSampSet() {
 	if (nodes.size() == 0)
 		return;
 
-	double d_sum = 0;
+	double d_sum = 0,step_0=DBL_MAX,step_1=0;
 	size_t nLeaf = 0;
 	size_t nzRoot = hRoot()->nSample();
 	if (nzRoot == 0)
 		return;
 
 	for (auto node : nodes) {
-	//for each(hMTNode node in nodes) {		
 		node->samp_set.ClearInfo();
 		if (node->isLeaf()) {
-			d_sum+=node->down_step*node->down_step;
+			double a = fabs(node->down_step);
+			d_sum+= a*a;
+			step_0 = MIN2(step_0, a);		step_1 = MAX2(step_1, a);
 			nLeaf++;
 		}
 	}
+	if (step_1 > 1000 /*|| step_1 / step_0 > 10000*/) {
+		printf("\tstep(%.6g-%.6g)!!!", step_0, step_1);
+	}
+	/*for (auto node : nodes) {
+		node->samp_set.ClearInfo();
+		if (node->isLeaf()) {
+			double a = fabs(node->down_step);
+			if (a > step_0 * 1000) {
+				node->down_step = node->down_step < 0 ? step_0*(-1000.0) : step_0*1000;
+			}
+			nLeaf++;
+		}
+	}*/
 	double T_down = sqrt(d_sum/ nLeaf);
 	/*for (auto node : nodes) {	//ÓÐÎÊÌâ
 		if (node->isLeaf()) {

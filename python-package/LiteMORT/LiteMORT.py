@@ -74,6 +74,7 @@ class LiteMORT_params(object):
             self.learning_schedule = dict_param['learning_schedule']
         if 'adaptive' in dict_param:
             self.adaptive = dict_param['adaptive']
+        self.lambda_l2 = self.alias_param('lambda_l2', 0.0, dict_param, ['lambda_l2', 'reg_lambda'])
 
         if 'bagging_fraction' in dict_param:
             self.subsample = dict_param['bagging_fraction']
@@ -198,9 +199,9 @@ class LiteMORT(object):
         self._n_classes = None
         self.init(params)
         if self.params.objective == "binary":
-            self.problem = Mort_BinaryClass(self.params)
+            self.problem = Mort_BinaryClass(self.params.__dict__)
         elif self.params.objective == "regression":
-            self.problem = Mort_Regressor(self.params)
+            self.problem = Mort_Regressor(self.params.__dict__)
 
     def __del__(self):
         try:

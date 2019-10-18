@@ -162,6 +162,7 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 	//picks.resize(nFeat);
 	for (i = 0; i<nFeat; i++)	{
 		FeatVector *hFeat = Feat(i);
+		hFeat->isSelect = false;
 		if(i==116)
 			i = 116;
 		if (hFeat->hDistri!=nullptr && hFeat->hDistri->isPass())
@@ -310,7 +311,7 @@ void FeatsOnFold::BeforeTrain(BoostingForest *hGBRT, int flag) {
 				else {
 					//if (/*hFeat->wSplit_last>1024 &&*/ !hFeat->hDistri->isUnique && !BIT_TEST(hFeat->hDistri->type, Distribution::CATEGORY)) {					
 					bool isDiscrete = hFeat->hDistri->isUnique || BIT_TEST(hFeat->hDistri->type, Distribution::CATEGORY);
-					bool isUpdate = hFeat->wSplit_last > 1024;//future-sales比赛验证，确实有效诶
+					bool isUpdate = hFeat->wSplit_last > 1024;//future-sales,geotab等比赛验证，确实有效诶，但是。。。
 					if (isUpdate && !isDiscrete) {
 						hFeat->hDistri->UpdateHistoByW(this->config, hGBRT->forest.size(), hFeat->wBins);
 						//GST_TIC(t1);

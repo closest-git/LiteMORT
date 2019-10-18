@@ -16,6 +16,7 @@ import os
 import sys
 import pickle
 from litemort import *
+from LiteMORT_hyppo import *
 import time
 
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
@@ -316,16 +317,13 @@ param = {'application': 'regression','n_estimators':100000,'early_stopping_round
          'min_child_weight': 50.0,
          'min_split_gain': 0.1,
          'num_leaves': 230}
-param_mort = {'objective': 'regression','num_leaves': 230,   'n_estimators':100000,'early_stopping_rounds':100,
-     'feature_fraction': 0.9,
-     'bagging_fraction': 1,
-       "adaptive":'weight1',   #无效，晕
+param_mort = {'objective': 'regression','num_leaves': 512,   'n_estimators':100000,'early_stopping_rounds':100,
+     'feature_fraction': 0.9,     'bagging_fraction': 1,
+    "adaptive":'weight1',   #无效，晕
     'max_bin': 512,
-    'cascade':'lasso',
+    #'cascade':'lasso',
     #"learning_schedule":"adaptive",
-     'max_depth': 19,
-     'lambda_l1': 0.0,
-     'lambda_l2': 0.0,
+     'max_depth': 30,
      'min_split_gain': 0.1,
      'min_child_weight': 20.0,
     #'min_data_in_leaf': 10,
@@ -340,6 +338,8 @@ def run_lgb_f(train, test,all_target):
     nfold = 5
     kf = KFold(n_splits=nfold, random_state=228, shuffle=True)
     for i in range(len(all_preds)):
+        if i<len(all_preds)-1:
+            continue
         print('Training and predicting for target {}'.format(i+1))
         t0 = time.time()
         oof = np.zeros(len(train))
@@ -366,16 +366,43 @@ def run_lgb_f(train, test,all_target):
                 oof[valid_index] = clf.predict(train.iloc[valid_index], num_iteration=clf.best_iteration)
 
                 all_preds[i] += clf.predict(test, num_iteration=clf.best_iteration) / nfold
+            score = np.sqrt(mean_squared_error(oof[valid_index], y_valid))
+            print(f"------{n}:\tRMSE: {score:0.4f} time={time.time() - t0:.4g}")
             n = n + 1
         fold_score = np.sqrt(mean_squared_error(all_target[i], oof))
-        print("\n\nTARGET_{} CV RMSE: {:<0.4f} time={:.4g}".format(i, fold_score,time.time() - t0))
-        print("\n\nCV RMSE: {:<0.4f}".format(np.sqrt(mean_squared_error(all_target[i], oof))))
-        #input("......")
+        print("\n\nTARGET_{} CV RMSE: {:0.4f} time={:.4g}".format(i, fold_score,time.time() - t0))
+        #print("\n\nCV RMSE: {:<0.4f}".format(np.sqrt(mean_squared_error(all_target[i], oof))))
     return all_preds,fold_score
 
+if False:       #hyparam_search
+    def MortOnParam(num_leaves, feature_fraction, bagging_fraction, max_depth, learning_rate, min_data_in_leaf,max_bin):
+        param_mort['verbose']=0
+        param_mort['early_stopping_rounds']=1   #Oscillate
+        param_mort["num_leaves"] = int(round(num_leaves))
+        param_mort['feature_fraction'] = max(min(feature_fraction, 1), 0)
+        param_mort['bagging_fraction'] = max(min(bagging_fraction, 1), 0)
+        param_mort['max_depth'] = int(round(max_depth))
+        param_mort['learning_rate'] = learning_rate
+        param_mort['min_data_in_leaf'] = int(round(min_data_in_leaf))
+        param_mort['max_bin'] = int(round(max_bin))
+
+        _,fold_score = run_lgb_f(train[final_features], test[final_features],all_target)
+        return -fold_score
+
+    pds = {'num_leaves': (230, 230),
+           'feature_fraction': (1, 1),
+           'bagging_fraction': (1, 1),
+           'max_depth': (10,50),
+           'learning_rate': (0.05, 0.05),
+           'min_data_in_leaf': (20, 20),
+           'max_bin': (512, 512),
+           }
+    hyparam_search(MortOnParam,pds,n_init=5, n_iter=12)
+    input("......")
 
 nfold=5
 all_preds,fold_score = run_lgb_f(train[final_features], test[final_features],all_target)
+input("......")
 
 submission = pd.read_csv(f'{data_root}/sample_submission.csv')
 data2 = pd.DataFrame(all_preds).stack()

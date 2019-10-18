@@ -256,9 +256,9 @@ void EARLY_STOPPING::Reset() {
 bool EARLY_STOPPING::isOK(int cur_round) {
 	double e_last = errors[errors.size() - 1];
 	if (true) {
-		if( errors.size()<early_round && e_best>0)
+		if( errors.size()<=early_round && e_best>0)
 			return false;
-		if (best_no<= errors.size()- early_round) {
+		if (best_no<= errors.size()-1- early_round) {
 			assert(e_last>=e_best);
 			return true;
 		}

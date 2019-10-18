@@ -111,10 +111,13 @@ void OnUserParams(LiteBOM_Config&config, PY_ITEM* params, int nParam, int flag =
 			config.learning_rate = params[i].Values;
 		}
 		if (strcmp(params[i].Keys, "learning_schedule") == 0) {
-			config.lr_adptive_leaf = strcmp(params[i].text, "adaptive") == 0;;
+			config.lr_adptive_leaf = strcmp(params[i].text, "adaptive") == 0;
+		}
+		if (strcmp(params[i].Keys, "lambda_l2") == 0) {
+			config.lambda_l2 = params[i].Values;
 		}
 		if (strcmp(params[i].Keys, "adaptive") == 0) {
-			config.adaptive_sample_weight = strcmp(params[i].text, "weight") == 0;;
+			config.adaptive_sample_weight = strcmp(params[i].text, "weight") == 0;
 		}
 		if (strcmp(params[i].Keys, "n_estimators") == 0) {
 			config.num_trees = params[i].Values;

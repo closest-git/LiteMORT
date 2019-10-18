@@ -386,7 +386,7 @@ void HistoGRAM::GreedySplit_X(FeatsOnFold *hData_, const SAMP_SET& samp_set, int
 	double gL = 0, gR0, hL = 0, hR = 0, a = -DBL_MAX, g, g1 = 0, split_0= -DBL_MAX;	//g1 = fruit->mxmxN
 	nLeft = 0;				nRight = nSamp;		assert(nRight >= 0);
 	HISTO_BIN*binNA = this->hBinNA();
-	double gSum = 0, hSum = 0;	// binNA->G_sum, hSum = binNA->H_sum;
+	double gSum = 0, hSum = 0, lambda_l2= hData_->config.lambda_l2;
 	double gainL = 0;		//对应于isNanaLeft
 	//for (auto item : bins) {
 	for (i = 0; i < nBins;i++) {
@@ -417,11 +417,11 @@ void HistoGRAM::GreedySplit_X(FeatsOnFold *hData_, const SAMP_SET& samp_set, int
 		//double errR = sum - errL;
 		//Regression trees in CART have a constant numerical value in the leaves and use the variance as a measure of impurity
 		//g = errL*errL / nLeft + errR*errR / nRight;
-		g = gL*gL / hL + gR*gR / hR;
+		g = gL*gL / (hL+lambda_l2) + gR*gR / (hR+ lambda_l2);
 		if (false) {	//似乎并没有使结果更好 难以理解	 10/29/2018
 			if (binNA->nz > 0 && nRight - binNA->nz >= minSet) {
 				double eL = gL + binNA->G_sum, eR = gR - binNA->G_sum;
-				gainL = eL*eL / (hL + binNA->H_sum) + eR*eR / (hR - binNA->H_sum);
+				gainL = eL*eL / (hL + lambda_l2 + binNA->H_sum) + eR*eR / (hR + lambda_l2 - binNA->H_sum);
 			}
 			else
 				gainL = 0;
@@ -432,24 +432,7 @@ void HistoGRAM::GreedySplit_X(FeatsOnFold *hData_, const SAMP_SET& samp_set, int
 			if (i == nBins - 1)		//仅用于测试
 				i = nBins - 1;
 			g1 = MAX2(g, gainL);
-			UpdateBestGain(i, g1, nLeft, nRight);
-			/*fruit->best_feat_id = hFeat->id;
-			fruit->split_by = this->split_by;
-			fruit->bin_S0 = bins[i-1];		fruit->bin_S1 = item;
-			//assert(fruit->bin_S0.nz>0);
-			fruit->mxmxN = g1;			fruit->tic_left = item.tic;
-			fruit->nLeft = nLeft;		fruit->nRight = nRight;
-			//fruit->thrshold = item.tic;
-			fruit->adaptive_thrsh = item.split_F;
-			//assert(fruit->adaptive_thrsh!= DBL_MAX);
-			fruit->isNanaLeft = false;
-			if (gainL > g) {
-				fruit->isNanaLeft = true;
-				fruit->nLeft += binNA->nz;		fruit->nRight -= binNA->nz;
-				assert(bins[(int)(item.tic) - 1].nz>0);
-
-			}
-			//fruit->lft_impuri = nLeft*lft*lft;		fruit->rgt_impuri = nRight*rgt*rgt;*/
+			UpdateBestGain(i, g1, nLeft, nRight);			
 		}
 	LOOP:
 		//errL += item.Y_sum;		

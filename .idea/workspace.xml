@@ -2,14 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1f20a82c-2842-4728-bc01-7f01847a5972" name="Default" comment="README">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/python-package/LiteMORT/LiteMORT.py" beforeDir="false" afterPath="$PROJECT_DIR$/python-package/LiteMORT/LiteMORT.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/python-package/LiteMORT/__version__.py" beforeDir="false" afterPath="$PROJECT_DIR$/python-package/LiteMORT/__version__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/python-package/case_geotab.py" beforeDir="false" afterPath="$PROJECT_DIR$/python-package/case_geotab.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vs/LiteMORT/LiteMORT.vcxproj" beforeDir="false" afterPath="$PROJECT_DIR$/vs/LiteMORT/LiteMORT.vcxproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vs/LiteMORT/LiteMORT.vcxproj.filters" beforeDir="false" afterPath="$PROJECT_DIR$/vs/LiteMORT/LiteMORT.vcxproj.filters" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_fold/FeatVector.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/FeatVector.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_fold/Histogram.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/Histogram.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/include/LiteBOM_config.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/include/LiteBOM_config.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/python/pyMORT_DLL.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/python/pyMORT_DLL.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tree/BiSplit.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/BiSplit.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tree/GBRT.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/GBRT.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tree/ManifoldTree.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/ManifoldTree.cpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -32,13 +33,49 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/python-package/case_future_sales.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="168">
+              <caret line="119" column="35" selection-start-line="119" selection-start-column="35" selection-end-line="119" selection-end-column="35" />
+              <folding>
+                <element signature="e#67#85#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/python-package/case_geotab.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="268">
-              <caret line="323" column="22" lean-forward="true" selection-start-line="323" selection-start-column="22" selection-end-line="323" selection-end-column="22" />
-              <folding>
-                <element signature="e#921#17818#0" />
-              </folding>
+            <state relative-caret-position="207">
+              <caret line="323" column="5" selection-start-line="323" selection-start-column="5" selection-end-line="323" selection-end-column="5" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/python-package/LiteMORT_hyppo.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="133">
+              <caret line="7" column="22" selection-start-line="7" selection-start-column="14" selection-end-line="7" selection-end-column="22" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://D:/Anaconda3/Lib/site-packages/bayes_opt/bayesian_optimization.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="172">
+              <caret line="152" column="28" selection-start-line="152" selection-start-column="17" selection-end-line="152" selection-end-column="28" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/Downloads/ID_photo.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="172">
+              <caret line="114" column="22" selection-start-line="114" selection-start-column="22" selection-end-line="114" selection-end-column="22" />
             </state>
           </provider>
         </entry>
@@ -46,17 +83,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://D:/Anaconda3/Lib/site-packages/pandas/core/frame.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="117">
-              <caret line="2933" selection-start-line="2933" selection-end-line="2933" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/python-package/case_houseprice.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="228">
-              <caret line="12" column="45" selection-start-line="12" selection-start-column="45" selection-end-line="12" selection-end-column="45" />
+            <state relative-caret-position="118">
+              <caret line="2893" selection-start-line="2893" selection-end-line="2893" />
             </state>
           </provider>
         </entry>
@@ -64,8 +92,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/python-package/litemort/LiteMORT.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="361">
-              <caret line="202" column="54" lean-forward="true" selection-start-line="202" selection-start-column="54" selection-end-line="202" selection-end-column="54" />
+            <state relative-caret-position="293">
+              <caret line="432" selection-start-line="432" selection-end-line="432" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
                 <element signature="e#12681#14716#0" />
@@ -74,11 +102,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/python-package/litemort/LiteMORT_problems.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="207">
-              <caret line="89" column="36" lean-forward="true" selection-start-line="89" selection-start-column="36" selection-end-line="89" selection-end-column="36" />
+            <state relative-caret-position="244">
+              <caret line="98" selection-start-line="98" selection-end-line="98" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -146,8 +174,8 @@
       <find>alias_param</find>
       <find>application</find>
       <find>applicatoin</find>
-      <find>model</find>
       <find>problem</find>
+      <find>model</find>
     </findStrings>
     <replaceStrings>
       <replace />
@@ -204,15 +232,17 @@
         <option value="$PROJECT_DIR$/python-package/litemort/LiteMORT_regression.py" />
         <option value="$PROJECT_DIR$/python-package/case_future_sales.py" />
         <option value="$PROJECT_DIR$/CMakeLists.txt" />
-        <option value="$PROJECT_DIR$/python-package/case_geotab.py" />
-        <option value="$PROJECT_DIR$/python-package/litemort/LiteMORT.py" />
         <option value="$PROJECT_DIR$/python-package/litemort/LiteMORT_problems.py" />
+        <option value="$PROJECT_DIR$/python-package/litemort/LiteMORT.py" />
+        <option value="$PROJECT_DIR$/python-package/litemort/LiteMORT_hyppo.py" />
+        <option value="$USER_HOME$/Downloads/ID_photo.py" />
+        <option value="$PROJECT_DIR$/python-package/case_geotab.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-143" />
-    <option name="y" value="126" />
+    <option name="x" value="67" />
+    <option name="y" value="248" />
     <option name="width" value="1735" />
     <option name="height" value="1100" />
   </component>
@@ -236,12 +266,6 @@
               <item name="LiteMORT" type="b2602c69:ProjectViewProjectNode" />
               <item name="LiteMORT" type="462c0819:PsiDirectoryNode" />
               <item name="python-package" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="LiteMORT" type="b2602c69:ProjectViewProjectNode" />
-              <item name="LiteMORT" type="462c0819:PsiDirectoryNode" />
-              <item name="python-package" type="462c0819:PsiDirectoryNode" />
-              <item name="litemort" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="LiteMORT" type="b2602c69:ProjectViewProjectNode" />
@@ -274,7 +298,51 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.case_geotab">
+  <component name="RunManager" selected="Python.ID_photo">
+    <configuration name="ID_photo" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="LiteMORT" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$USER_HOME$/Downloads" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$USER_HOME$/Downloads/ID_photo.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="LiteMORT_problems" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="LiteMORT" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/python-package/litemort" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/python-package/litemort/LiteMORT_problems.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="case_future_sales" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="LiteMORT" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -319,28 +387,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="case_houseprice" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="LiteMORT" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/python-package" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/python-package/case_houseprice.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="case_nfl" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="LiteMORT" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -363,42 +409,20 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="case_zillow" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="LiteMORT" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/python-package" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/python-package/case_zillow.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <list>
-      <item itemvalue="Python.case_zillow" />
-      <item itemvalue="Python.case_houseprice" />
       <item itemvalue="Python.case_geotab" />
       <item itemvalue="Python.case_nfl" />
       <item itemvalue="Python.case_future_sales" />
+      <item itemvalue="Python.LiteMORT_problems" />
+      <item itemvalue="Python.ID_photo" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.ID_photo" />
         <item itemvalue="Python.case_geotab" />
+        <item itemvalue="Python.LiteMORT_problems" />
         <item itemvalue="Python.case_future_sales" />
         <item itemvalue="Python.case_nfl" />
-        <item itemvalue="Python.case_houseprice" />
-        <item itemvalue="Python.case_zillow" />
       </list>
     </recent_temporary>
   </component>
@@ -516,7 +540,7 @@
       <workItem from="1571032085073" duration="18101000" />
       <workItem from="1571196479923" duration="358000" />
       <workItem from="1571204698594" duration="1991000" />
-      <workItem from="1571275487032" duration="11818000" />
+      <workItem from="1571275487032" duration="26782000" />
     </task>
     <task id="LOCAL-00001" summary="README">
       <created>1556249780941</created>
@@ -561,19 +585,19 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="712933000" />
+    <option name="totallyTimeSpent" value="727897000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="-7" width="1386" height="878" extended-state="6" />
+    <frame x="-7" y="-7" width="1390" height="878" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.7007299" visible="true" weight="0.2379518" />
-      <window_info id="Structure" order="1" sideWeight="0.29927006" side_tool="true" visible="true" weight="0.2379518" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.7006079" visible="true" weight="0.24924925" />
+      <window_info id="Structure" order="1" sideWeight="0.2993921" side_tool="true" visible="true" weight="0.24924925" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3297587" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.47184986" />
-      <window_info anchor="bottom" id="Debug" order="3" visible="true" weight="0.26541555" />
+      <window_info anchor="bottom" id="Debug" order="3" visible="true" weight="0.117962465" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -589,7 +613,7 @@
       <window_info anchor="right" id="R Packages" order="3" />
       <window_info anchor="right" id="R Graphics" order="4" />
       <window_info anchor="right" id="Database" order="5" />
-      <window_info anchor="right" x="601" y="59" width="225" height="746" id="SciView" order="6" sideWeight="0.46989527" visible="true" weight="0.19352409" />
+      <window_info anchor="right" x="601" y="59" width="225" height="746" id="SciView" order="6" sideWeight="0.46989527" visible="true" weight="0.036786787" />
       <window_info anchor="right" x="0" y="0" width="314" height="678" id="Documentation" order="7" sideWeight="0.5301047" side_tool="true" visible="true" weight="0.1398892" />
     </layout>
   </component>
@@ -775,12 +799,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/python-package/litemort/LiteMORT.py</url>
-          <line>328</line>
+          <line>329</line>
           <option name="timeStamp" value="538" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/python-package/litemort/LiteMORT.py</url>
-          <line>283</line>
+          <line>284</line>
           <option name="timeStamp" value="542" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -795,8 +819,28 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/python-package/litemort/LiteMORT.py</url>
-          <line>253</line>
+          <line>254</line>
           <option name="timeStamp" value="588" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/python-package/case_geotab.py</url>
+          <line>356</line>
+          <option name="timeStamp" value="603" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/python-package/case_geotab.py</url>
+          <line>368</line>
+          <option name="timeStamp" value="604" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/python-package/litemort/LiteMORT.py</url>
+          <line>432</line>
+          <option name="timeStamp" value="605" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/python-package/litemort/LiteMORT.py</url>
+          <line>433</line>
+          <option name="timeStamp" value="606" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -821,13 +865,15 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/LiteMORT$pycharm_test.coverage" NAME="pycharm_test Coverage Results" MODIFIED="1557050214018" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
+    <SUITE FILE_PATH="coverage/LiteMORT$ID_photo.coverage" NAME="ID_photo Coverage Results" MODIFIED="1571366013749" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$USER_HOME$/Downloads" />
     <SUITE FILE_PATH="coverage/LiteMORT$case_future_sales.coverage" NAME="case_future_sales Coverage Results" MODIFIED="1571109032132" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
+    <SUITE FILE_PATH="coverage/LiteMORT$LiteMORT_problems.coverage" NAME="LiteMORT_problems Coverage Results" MODIFIED="1571308687253" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package/litemort" />
     <SUITE FILE_PATH="coverage/LiteMORT$lgb_kim.coverage" NAME="lgb_kim Coverage Results" MODIFIED="1564801856244" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
     <SUITE FILE_PATH="coverage/LiteMORT$sparsipy.coverage" NAME="sparsipy Coverage Results" MODIFIED="1569571613830" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/learn" />
     <SUITE FILE_PATH="coverage/LiteMORT$case_houseprice.coverage" NAME="case_houseprice Coverage Results" MODIFIED="1570606165493" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
     <SUITE FILE_PATH="coverage/LiteMORT$pytest_in_pycharm_test_py.coverage" NAME="pytest in pycharm_test.py Coverage Results" MODIFIED="1564799919413" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
     <SUITE FILE_PATH="coverage/LiteMORT$LiteMORT.coverage" NAME="LiteMORT Coverage Results" MODIFIED="1567668032608" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package/litemort" />
-    <SUITE FILE_PATH="coverage/LiteMORT$case_geotab.coverage" NAME="case_geotab Coverage Results" MODIFIED="1571304186057" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
+    <SUITE FILE_PATH="coverage/LiteMORT$case_geotab.coverage" NAME="case_geotab Coverage Results" MODIFIED="1571363908558" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
     <SUITE FILE_PATH="coverage/LiteMORT$case_ieee_fraud.coverage" NAME="case_ieee_fraud Coverage Results" MODIFIED="1569722594836" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
     <SUITE FILE_PATH="coverage/LiteMORT$geo_test.coverage" NAME="geo_test Coverage Results" MODIFIED="1564799540881" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
     <SUITE FILE_PATH="coverage/LiteMORT$case_nfl.coverage" NAME="case_nfl Coverage Results" MODIFIED="1570774425327" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
@@ -848,28 +894,6 @@
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/_pydev_bundle/pydev_umd.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3629">
-          <caret line="196" selection-start-line="196" selection-end-line="196" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/learn/LOSS.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2736">
-          <caret line="144" column="5" selection-start-line="144" selection-start-column="5" selection-end-line="144" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://D:/Anaconda3/Lib/site-packages/pandas/io/parsers.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="31616">
-          <caret line="1707" selection-start-line="1707" selection-end-line="1707" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/geo_test.py" />
     <entry file="file://$PROJECT_DIR$/python-package/build/lib/LiteMORT/LiteMORT.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1748">
@@ -1130,23 +1154,6 @@
     <entry file="file://$PROJECT_DIR$/python-package/litemort/LiteMORT_regression.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/case_future_sales.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1368">
-          <caret column="65" selection-start-column="1" selection-end-column="65" />
-          <folding>
-            <element signature="e#67#85#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/case_houseprice.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="228">
-          <caret line="12" column="45" selection-start-line="12" selection-start-column="45" selection-end-line="12" selection-end-column="45" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://D:/Anaconda3/Lib/site-packages/sklearn/linear_model/coordinate_descent.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="17157">
@@ -1161,13 +1168,6 @@
           <folding>
             <element signature="e#62#100#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://D:/Anaconda3/Lib/site-packages/pandas/core/frame.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="117">
-          <caret line="2933" selection-start-line="2933" selection-end-line="2933" />
         </state>
       </provider>
     </entry>
@@ -1188,20 +1188,27 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/case_geotab.py">
+    <entry file="file://$PROJECT_DIR$/python-package/litemort/LiteMORT_problems.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="268">
-          <caret line="323" column="22" lean-forward="true" selection-start-line="323" selection-start-column="22" selection-end-line="323" selection-end-column="22" />
+        <state relative-caret-position="244">
+          <caret line="98" selection-start-line="98" selection-end-line="98" />
           <folding>
-            <element signature="e#921#17818#0" />
+            <element signature="e#0#9#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python-package/litemort/LiteMORT_hyppo.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="209">
+          <caret line="11" column="52" lean-forward="true" selection-start-line="11" selection-start-column="52" selection-end-line="11" selection-end-column="52" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/python-package/litemort/LiteMORT.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="361">
-          <caret line="202" column="54" lean-forward="true" selection-start-line="202" selection-start-column="54" selection-end-line="202" selection-end-column="54" />
+        <state relative-caret-position="293">
+          <caret line="432" selection-start-line="432" selection-end-line="432" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
             <element signature="e#12681#14716#0" />
@@ -1209,13 +1216,55 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/litemort/LiteMORT_problems.py">
+    <entry file="file://$USER_HOME$/Downloads/ID_photo.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="172">
+          <caret line="114" column="22" selection-start-line="114" selection-start-column="22" selection-end-line="114" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python-package/LiteMORT_hyppo.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="133">
+          <caret line="7" column="22" selection-start-line="7" selection-start-column="14" selection-end-line="7" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://D:/Anaconda3/Lib/site-packages/bayes_opt/bayesian_optimization.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="172">
+          <caret line="152" column="28" selection-start-line="152" selection-start-column="17" selection-end-line="152" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python-package/case_future_sales.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="168">
+          <caret line="119" column="35" selection-start-line="119" selection-start-column="35" selection-end-line="119" selection-end-column="35" />
+          <folding>
+            <element signature="e#67#85#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python-package/case_houseprice.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="228">
+          <caret line="12" column="45" selection-start-line="12" selection-start-column="45" selection-end-line="12" selection-end-column="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://D:/Anaconda3/Lib/site-packages/pandas/core/frame.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="118">
+          <caret line="2893" selection-start-line="2893" selection-end-line="2893" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python-package/case_geotab.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="207">
-          <caret line="89" column="36" lean-forward="true" selection-start-line="89" selection-start-column="36" selection-end-line="89" selection-end-column="36" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
+          <caret line="323" column="5" selection-start-line="323" selection-start-column="5" selection-end-line="323" selection-end-column="5" />
         </state>
       </provider>
     </entry>
