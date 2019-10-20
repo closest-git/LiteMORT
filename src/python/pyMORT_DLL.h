@@ -23,7 +23,7 @@ struct PY_ITEM {
 	char *Keys;
 	float Values;
 	char *text;
-	//int Index;
+	void *arr;
 };
 
 

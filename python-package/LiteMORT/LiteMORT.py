@@ -64,6 +64,8 @@ class LiteMORT_params(object):
                 self.metric = dict_param['metric']
         if 'num_leaves' in dict_param:
             self.num_leaves = dict_param['num_leaves']
+        if 'feat_factor' in dict_param:
+            self.feat_factor = dict_param['feat_factor']
         if 'max_depth' in dict_param:
             self.max_depth = dict_param['max_depth']
         if 'learning_rate' in dict_param:
@@ -140,6 +142,7 @@ class M_argument(Structure):
     _fields_ = [    ('Keys',c_char_p),
                     ('Values',c_float),
                     ('text', c_char_p),
+                    ('array', c_void_p),
                ]
 
 
@@ -266,6 +269,8 @@ class LiteMORT(object):
                 ca.text = v.encode('utf8')
             elif isinstance(v, bool):
                 ca.Values = (c_float)(v==True)
+            elif isinstance(v, np.ndarray):
+                ca.array = v.ctypes.data_as(c_void_p)
             else:
                 ca.Values = (c_float)(v)  # Interface unclear, how would target function know how many floats?
 

@@ -80,7 +80,6 @@ void LiteBOM_Config::OnObjective() {
 	//nBlitThread = 8;	//并行导致结果不再可重复
 }
 
-
 void OnUserParams(LiteBOM_Config&config, PY_ITEM* params, int nParam, int flag = 0x0) {
 	char sERR[10000];
 	int i,err=0;
@@ -118,6 +117,10 @@ void OnUserParams(LiteBOM_Config&config, PY_ITEM* params, int nParam, int flag =
 		}
 		if (strcmp(params[i].Keys, "adaptive") == 0) {
 			config.adaptive_sample_weight = strcmp(params[i].text, "weight") == 0;
+		}
+		if (strcmp(params[i].Keys, "feat_factor") == 0) {
+			float *factor = (float*)params[i].arr;
+			config.feat_factor = factor;
 		}
 		if (strcmp(params[i].Keys, "n_estimators") == 0) {
 			config.num_trees = params[i].Values;
@@ -383,12 +386,15 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	if (hFold->isQuanti) {
 		hFold->Feature_Bundling();
 	}
-	if (hFold->config.verbose==666) {
-		for (int feat = 0; feat < ldX_; feat++) {
-			FeatVector *hFeat = hFold->Feat(feat);
+	for (int feat = 0; feat < ldX_; feat++) {
+		FeatVector *hFeat = hFold->Feat(feat);
+		if (config.feat_factor != nullptr) {
+			hFeat->select_factor = config.feat_factor[feat];
+			printf("%d(%.3g)\t", feat, hFeat->select_factor);
+		}
+		if (hFold->config.verbose==666) {
 			hFeat->hDistri->Dump(feat, false, flag);					//输出distribution信息
 		}
-
 	}
 	/*if (hFold->isQuanti) {
 	printf("\n********* FeatsOnFold::QUANTI nMostQ=%d\r\n", nMostQ);

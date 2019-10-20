@@ -257,6 +257,7 @@ namespace Grusoft {
 		int nMostSalp4feats = 0;
 		int nMostPrune = 0;
 		double rElitism = 0.05;
+		float *feat_factor = nullptr;
 
 		//gradient variance
 		//std::string leaf_optimal = "taylor_2";		//似乎有问题，grad_variance收敛速度明显更快
@@ -400,7 +401,7 @@ namespace Grusoft {
 		// check = >=0.0
 		// desc = L1 regularization
 		double lambda_l1 = 0.0;
-		double lambda_Feat = 0.5;
+		double lambda_Feat = 1;	// 0.5;
 
 		// alias = reg_lambda
 		// check = >=0.0

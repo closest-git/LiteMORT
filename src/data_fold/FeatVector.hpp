@@ -54,6 +54,7 @@ namespace Grusoft {
 		};
 		size_t type = 0x0;
 		bool isSelect = false;
+		float select_factor = 1;
 		bool isCategory()	{ return	BIT_TEST(type, Distribution::CATEGORY); }
 		bool isReferVal()	{ return	BIT_TEST(type, VAL_REFER); }
 		typedef enum {

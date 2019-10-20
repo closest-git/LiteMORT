@@ -18,15 +18,16 @@ import pickle
 from litemort import *
 from LiteMORT_hyppo import *
 import time
-
+import random
+import gc
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 isMORT = True
 gbm='MORT' if isMORT else 'LGB'
-#some_rows = 5000
-some_rows = None
+some_rows = 50000
+#some_rows = None
 #data_root = '../input/'
 data_root = "F:/Datasets/geotab"
-pkl_path = f'{data_root}/_geotab_{some_rows}.pickle'
+pkl_path = f'{data_root}/_geotab___.pickle'
 
 if os.path.isfile(pkl_path):
     print("====== Load pickle @{} ......".format(pkl_path))
@@ -303,8 +304,29 @@ else:
     with open(pkl_path, "wb") as fp:  # Pickling
         pickle.dump([train, test,final_features, all_target], fp)
         print("====== Dump pickle @{} ......OK".format(pkl_path))
+    input("......")
+
+if some_rows is not None:
+    nMost=train.shape[0]
+    random.seed(42)
+    subset = random.sample(range(nMost), some_rows)
+    train = train.iloc[subset, :].reset_index(drop=True)
+    all_=[]
+    for target in all_target:
+        target = target.iloc[subset].reset_index(drop=True)
+        all_.append(target)
+    all_target=all_
+    gc.collect()
+    print('====== Some Samples ... data={}'.format(train.shape))
 
 print(f"train={train.shape} test={test.shape}\n final_features={final_features}")
+feat_fix = ['IntersectionId', 'Latitude', 'Longitude', 'EntryStreetName','ExitStreetName', 'EntryHeading',
+     'ExitHeading', 'Hour', 'Weekend', 'Month', 'City', 'EntryType', 'ExitType']
+feat_select = train.columns
+feat_select = list(set(feat_select)-set(feat_fix))
+MORT_feat_search(train,all_target[2],feat_fix,feat_select,n_init=5, n_iter=12)
+input("......MORT_feat_search......")
+
 param = {'application': 'regression','n_estimators':100000,'early_stopping_rounds':100,
          'learning_rate': 0.05,
          'metric': 'rmse',
@@ -321,7 +343,7 @@ param_mort = {'objective': 'regression','num_leaves': 512,   'n_estimators':1000
      'feature_fraction': 0.9,     'bagging_fraction': 1,
     "adaptive":'weight1',   #无效，晕
     'max_bin': 512,
-    #'cascade':'lasso',
+    #'cascade':'lasso', 64.409->64.392 作用不大
     #"learning_schedule":"adaptive",
      'max_depth': 30,
      'min_split_gain': 0.1,
@@ -338,8 +360,7 @@ def run_lgb_f(train, test,all_target):
     nfold = 5
     kf = KFold(n_splits=nfold, random_state=228, shuffle=True)
     for i in range(len(all_preds)):
-        if i<len(all_preds)-1:
-            continue
+        #if i<len(all_preds)-1:            continue
         print('Training and predicting for target {}'.format(i+1))
         t0 = time.time()
         oof = np.zeros(len(train))
@@ -402,7 +423,7 @@ if False:       #hyparam_search
 
 nfold=5
 all_preds,fold_score = run_lgb_f(train[final_features], test[final_features],all_target)
-input("......")
+#input("......")
 
 submission = pd.read_csv(f'{data_root}/sample_submission.csv')
 data2 = pd.DataFrame(all_preds).stack()
