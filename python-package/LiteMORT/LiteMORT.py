@@ -66,6 +66,7 @@ class LiteMORT_params(object):
             self.num_leaves = dict_param['num_leaves']
         if 'feat_factor' in dict_param:
             self.feat_factor = dict_param['feat_factor']
+            self.feat_factor = self.feat_factor.astype(np.float32)
         if 'max_depth' in dict_param:
             self.max_depth = dict_param['max_depth']
         if 'learning_rate' in dict_param:

@@ -120,7 +120,7 @@ void OnUserParams(LiteBOM_Config&config, PY_ITEM* params, int nParam, int flag =
 		}
 		if (strcmp(params[i].Keys, "feat_factor") == 0) {
 			float *factor = (float*)params[i].arr;
-			config.feat_factor = factor;
+			config.feat_selector = factor;
 		}
 		if (strcmp(params[i].Keys, "n_estimators") == 0) {
 			config.num_trees = params[i].Values;
@@ -388,8 +388,8 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	}
 	for (int feat = 0; feat < ldX_; feat++) {
 		FeatVector *hFeat = hFold->Feat(feat);
-		if (config.feat_factor != nullptr) {
-			hFeat->select_factor = config.feat_factor[feat];
+		if (config.feat_selector != nullptr) {
+			hFeat->select_factor = config.feat_selector[feat];
 			printf("%d(%.3g)\t", feat, hFeat->select_factor);
 		}
 		if (hFold->config.verbose==666) {
@@ -724,6 +724,50 @@ PYMORT_DLL_API void LiteMORT_fit(void *mort_0, float *train_data, tpY *train_tar
 }
 
 /*
+*/
+void Feats_one_by_one(FeatsOnFold *hTrain, FeatsOnFold *hEval, BoostingForest::MODEL mod_, int nTre_, int flag) {
+	LiteBOM_Config config_0 = hTrain->config;
+	GBRT *hGBRT_0 = new GBRT(hTrain, hEval, 0, flag == 0 ? BoostingForest::REGRESSION : BoostingForest::CLASIFY, nTre_), *hGBRT=nullptr;
+	int nFeat = hTrain->nFeat(), i, nSelect = 0, cand,x=0;
+	size_t nTrain = hTrain->nSample(), nEval = hEval->nSample();
+	vector<int> cands;
+	FeatVector *T_y = hTrain->GetY(), *E_y = hEval->GetY();
+	hGBRT_0->Train("", x, flag);
+	hGBRT_0->Predict(hTrain, false, true, false);				hGBRT_0->Predict(hEval, false, true, false);
+	std::vector<tpDOWN> T_resi = hTrain->lossy->resi , E_resi = hEval->lossy->resi, *hY_best = nullptr;
+	double loss = hEval->lossy->ERR(), loss_best = loss;
+	float *selector = hTrain->config.feat_selector;		//返回值
+	for (i = 0; i < nFeat; i++) {
+		if (selector[i] != 1) {
+			selector[i] = 0;	nSelect++;
+			cands.push_back(i);
+		}
+	}
+	hTrain->config.init_scor = "0";
+	hEval->config.init_scor = "0";
+	for (i = 0; i < nSelect; i++) {
+		cand = cands[i];
+		selector[cand] = 1;
+		hGBRT = new GBRT(hTrain, hEval, 0, flag == 0 ? BoostingForest::REGRESSION : BoostingForest::CLASIFY, nTre_);		
+		T_y->Set(nTrain, VECTOR2ARR(T_resi), 0x0);			E_y->Set(nEval, VECTOR2ARR(E_resi), 0x0);
+		//update train and eval'y
+		hGBRT->Train("", x, flag);
+		loss = hEval->lossy->ERR();
+		if (loss < loss_best) {
+			loss_best = loss;
+			hGBRT->Predict(hTrain, false, true, false);				hGBRT->Predict(hEval,false,true,false);
+			T_resi = hTrain->lossy->resi, E_resi = hEval->lossy->resi;
+		}
+		else {
+			selector[cand] = 0;
+		}
+		delete hGBRT;
+	}
+	T_resi.clear();				E_resi.clear();
+	delete hGBRT_0;
+}
+
+/*
 	v0.2
 */
 PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_COLUMN *train_data, PY_COLUMN *train_target, size_t nFeat_0, size_t nSamp, PY_COLUMN *eval_data, PY_COLUMN *eval_target, size_t nEval, size_t flag) {
@@ -758,9 +802,14 @@ PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_COLUMN *train_data, PY_COLUM
 			//hEval->ExpandFeat();
 			folds.push_back(hEval);
 		}
-		mort->hGBRT = new GBRT(hFold, hEval, 0, flag == 0 ? BoostingForest::REGRESSION : BoostingForest::CLASIFY, nTree);
 
-		mort->hGBRT->Train("", 50, 0x0);
+		if (config.feat_selector != nullptr) {
+			Feats_one_by_one(hFold, hEval, flag == 0 ? BoostingForest::REGRESSION : BoostingForest::CLASIFY, nTree,0x0);
+		}
+		else {
+			mort->hGBRT = new GBRT(hFold, hEval, 0, flag == 0 ? BoostingForest::REGRESSION : BoostingForest::CLASIFY, nTree);
+			mort->hGBRT->Train("", 50, 0x0);
+		}
 		//delete mort;		//仅用于测试 
 		if (isDelEDA) {
 			delete hEDA;			hEDA = nullptr;
@@ -778,6 +827,10 @@ PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_COLUMN *train_data, PY_COLUM
 		printf("\n!!!!!! EXCEPTION@LiteMORT_fit %s!!!!!!\n\n", "...");
 	}
 	return;
+}
+
+PYMORT_DLL_API void LiteMORT_feats_one_by_one(void *mort_0, PY_COLUMN *train_data, PY_COLUMN *train_target, size_t nFeat_0, size_t nSamp, PY_COLUMN *eval_data, PY_COLUMN *eval_target, size_t nEval, size_t flag) {
+
 }
 
 const char *GRUS_LITEMORT_APP_NAME = "LiteMORT-alpha";

@@ -52,7 +52,7 @@ namespace Grusoft{
 			return hTrainData->config;
 		}
 		virtual void BeforeTrain(FeatsOnFold *hData, int flag = 0x0);
-		virtual int Train(string sTitle, int cas, int flag=0x0);
+		virtual int Train(string sTitle, int cas, int flag = 0x0);
 		virtual int Prune(int flag = 0x0);
 		virtual int IterTrain(int round,int flag);
 		virtual double Predict(FeatsOnFold *hData,bool updateStopping=false,bool checkLossy=false,bool resumeLast=false, int flag=0x0);

@@ -23,7 +23,7 @@ import gc
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 isMORT = True
 gbm='MORT' if isMORT else 'LGB'
-some_rows = 50000
+some_rows = 5000
 #some_rows = None
 #data_root = '../input/'
 data_root = "F:/Datasets/geotab"
@@ -324,7 +324,7 @@ feat_fix = ['IntersectionId', 'Latitude', 'Longitude', 'EntryStreetName','ExitSt
      'ExitHeading', 'Hour', 'Weekend', 'Month', 'City', 'EntryType', 'ExitType']
 feat_select = train.columns
 feat_select = list(set(feat_select)-set(feat_fix))
-MORT_feat_search(train,all_target[2],feat_fix,feat_select,n_init=5, n_iter=12)
+MORT_feat_select_(train,all_target[2],feat_fix,feat_select,n_init=5, n_iter=12)
 input("......MORT_feat_search......")
 
 param = {'application': 'regression','n_estimators':100000,'early_stopping_rounds':100,

@@ -257,7 +257,7 @@ namespace Grusoft {
 		int nMostSalp4feats = 0;
 		int nMostPrune = 0;
 		double rElitism = 0.05;
-		float *feat_factor = nullptr;
+		float *feat_selector = nullptr;
 
 		//gradient variance
 		//std::string leaf_optimal = "taylor_2";		//似乎有问题，grad_variance收敛速度明显更快

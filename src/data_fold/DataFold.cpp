@@ -174,9 +174,9 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 		if (BIT_TEST(hFeat->type, FeatVector::AGGREGATE)) {
 			
 		}
-		if (config.feat_factor != nullptr && hFeat->select_factor < 1) {
+		if (config.feat_selector != nullptr && hFeat->select_factor < 1) {
 			float a = rander.Uniform_(0, 1);
-			if (a < hFeat->select_factor)	{
+			if (hFeat->select_factor<a)	{
 				continue;
 			}
 		}
@@ -185,7 +185,7 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 		picks.push_back(i);
 	}
 	assert(picks.size()>0);
-	if (config.feat_factor != nullptr) {	//feat select
+	if (config.feat_selector != nullptr) {	//feat select
 		//printf("nPick4Split=%d @feat_factor\t", picks.size());
 	}else if (config.feature_fraction<1) {	//for random forest
 		nPick = MAX2(1,picks.size()*config.feature_fraction);
