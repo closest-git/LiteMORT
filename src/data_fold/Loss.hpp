@@ -32,7 +32,7 @@ namespace Grusoft {
 		DCRIMI_2 decrimi_2;
 		Distribution dist_resi;
 		IS_TYPE tpResi = is_XXX;
-		FeatVector *y = nullptr, *predict = nullptr;
+		FeatVector *y = nullptr, *predict = nullptr;// , *best_predict = nullptr;
 		vector<tpSAMP_ID> outliers;
 		//Average Precision (AP) 确实有问题
 		template <typename Tx>
@@ -443,7 +443,8 @@ namespace Grusoft {
 				throw	"tpResi should be flow or double!!!";
 
 			y = new FeatVec_T<Ty>(_len, 0, "loss");			predict = new FeatVec_T<Ty>(_len, 0, "predict");
-			
+			//best_predict = new FeatVec_T<Ty>(_len, 0, "best_predict");
+
 			resi.clear();			resi.resize(_len, 0);
 			//predict.resize(_len, 0);
 			if (isTrain) {

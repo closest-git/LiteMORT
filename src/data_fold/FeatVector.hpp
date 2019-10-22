@@ -69,13 +69,13 @@ namespace Grusoft {
 			if (select_bins != nullptr)
 				delete select_bins;
 		}
-		virtual size_t nSamp() { throw"FeatVector::nSamp is ..."; }
+		virtual size_t nSamp()	const	{ throw"FeatVector::nSamp is ..."; }
 
 		virtual void Empty(int flag = 0x0) {		}
 		virtual void Set(size_t len, void* p, int flag = 0x0) { throw"FeatVector::Set_void_p is ..."; }
 		virtual void Set(size_t len, PY_COLUMN *col, int flag = 0x0) { throw"FeatVector::Set_PY_COLUMN is ..."; }
 		virtual void Set(size_t pos, double a, int flag = 0x0) { throw"FeatVector::Set_a is ..."; }
-
+		virtual void CopyFrom(const FeatVector*src, int flag = 0x0) { throw"FeatVector::CopyFrom is ..."; }
 		virtual void loc(vector<tpSAMP_ID>&poss, double target, int flag = 0x0) { throw"FeatVector::loc is ..."; }
 		virtual tpQUANTI *GetQuantiBins(int flag=0x0) { throw"FeatVector::GetQuantiBins is ..."; }
 		virtual inline int left_rigt(const size_t& t, const double& thrsh, const int lft, const int rgt, int flag = 0x0) { throw"FeatVector::left_rigt is ..."; }

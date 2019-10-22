@@ -38,7 +38,8 @@ class Mort_Preprocess(object):
         if isinstance(X, pd.DataFrame):
             narr = None
             isCat =(categorical_feature is not None) and (feat in categorical_feature)
-            if isCat or X[feat].dtype.name == 'category':
+            dtype = X[feat].dtype
+            if isCat or dtype.name == 'category':
                 x_info = 'category'
                 type_x = '*'
             isDiscrete = (discrete_feature is not None) and (feat in discrete_feature)

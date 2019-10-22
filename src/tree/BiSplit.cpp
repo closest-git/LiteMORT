@@ -397,7 +397,7 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 	if(nSamp < hData_->nSample())
 		hData_->PickSample_GH(this);
 	string optimal = hData_->config.leaf_optimal;
-	assert(impuri>0);
+	//assert(impuri>0);
 	assert(nSamp >= hData_->config.min_data_in_leaf);
 	//double bst_split=0;
 	vector<int> picks= pick_feats;

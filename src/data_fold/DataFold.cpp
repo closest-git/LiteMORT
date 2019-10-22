@@ -155,9 +155,9 @@ feat_salps->AddSalp(nFeat, picks, nTree);
 	v0.1	cys
 		8/30/2019
 */
-void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest *hForest, int flag) {
+void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest *hBooster, int flag) {
 	int i, nFeat = feats.size(), nPick = (int)(sqrt(nFeat));
-	int nTree = hForest->forest.size();
+	int nTree = hBooster->forest.size();
 	int *mask = new int[nFeat]();
 	//picks.resize(nFeat);
 	for (i = 0; i<nFeat; i++)	{
@@ -189,7 +189,7 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 		//printf("nPick4Split=%d @feat_factor\t", picks.size());
 	}else if (config.feature_fraction<1) {	//for random forest
 		nPick = MAX2(1,picks.size()*config.feature_fraction);
-		hForest->stopping.CheckBrae();
+		hBooster->stopping.CheckBrae();
 		vector<int> no_k = rander.kSampleInN(nPick, picks.size()),pick_1;
 		double *w = new double[nFeat]();
 		for (auto x : no_k) {
@@ -201,7 +201,7 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 		}
 		picks = pick_1;		
 		nPick = picks.size();
-		if (config.rElitism>0 && hForest->forest.size()>16) {
+		if (config.rElitism>0 && hBooster->forest.size()>16) {
 			std::sort(picks.begin(), picks.end(), [&w](size_t i1, size_t i2) {return w[i1] < w[i2]; });
 			for (i = 0; i < nPick - 1; i++) {
 				assert(w[picks[i]] <= w[picks[i + 1]]);
@@ -219,6 +219,8 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 	}
 	delete[] mask;
 	nPickFeat = picks.size();
+	hBooster->stat.nMaxFeat = MAX2(hBooster->stat.nMaxFeat, nPickFeat);
+	hBooster->stat.nMinFeat = MIN2(hBooster->stat.nMinFeat, nPickFeat);
 	assert(nPickFeat>0);
 }
 
@@ -320,12 +322,12 @@ void FeatsOnFold::BeforeTrain(BoostingForest *hGBRT, int flag) {
 					//if (/*hFeat->wSplit_last>1024 &&*/ !hFeat->hDistri->isUnique && !BIT_TEST(hFeat->hDistri->type, Distribution::CATEGORY)) {					
 					bool isDiscrete = hFeat->hDistri->isUnique || BIT_TEST(hFeat->hDistri->type, Distribution::CATEGORY);
 					bool isUpdate = hFeat->wSplit_last > 1024;//future-sales,geotab等比赛验证，确实有效诶，但是。。。
-					if (isUpdate && !isDiscrete) {
+					/*if (isUpdate && !isDiscrete) {
 						hFeat->hDistri->UpdateHistoByW(this->config, hGBRT->forest.size(), hFeat->wBins);
 						//GST_TIC(t1);
 						hFeat->UpdateHisto(this, false, isFirst, 0x0);
 						//FeatsOnFold::stat.tX += GST_TOC(t1);
-					}/**/
+					}*/
 				}
 			}
 		}
@@ -836,10 +838,6 @@ void INIT_SCORE::Init(FeatsOnFold *hData_, int flag) {
 	printf("\n");
 }
 
-void INIT_SCORE::ToDownStep(int flag) {
-
-
-}
 
 
 FeatVector* FeatsOnFold::GetPrecict() {

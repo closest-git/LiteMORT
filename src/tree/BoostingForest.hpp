@@ -26,6 +26,10 @@ namespace Grusoft{
 		}
 		virtual void Reset();
 
+		double ERR_best() {
+			return e_best;
+		}
+
 		double curERR() {
 			if (errors.size() == 0)
 				return DBL_MAX;
@@ -49,6 +53,11 @@ namespace Grusoft{
 	*/
 	class BoostingForest	{
 	public:
+		struct STAT {			
+			int nMaxFeat = 0,nMinFeat=INT_MAX;
+		};
+		STAT stat;
+
 		GRander rander_;
 		typedef enum{
 			CLASIFY,REGRESSION,
@@ -151,7 +160,7 @@ namespace Grusoft{
 		DForest forest;
 		SKDU skdu;
 		string name;
-		bool isClasify;
+		bool isClasify, isRefData=false;
 		BoostingForest( ):nFeat(0),nClass(0),nTree(0),impurity(0),stage(RF_UNDEF),hfIsObj(nullptr),user_data(nullptr),nThread(1),
 			sBalance(-1),maxDepth(100000000),isDumpLeaf(false),hTrainData(nullptr),hTestData(nullptr)
 		{ ;}

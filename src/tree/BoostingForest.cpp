@@ -175,7 +175,12 @@ void BoostingForest::Clear( ){
 		delete prune;
 	if (histo_buffer != nullptr)
 		delete histo_buffer;
-	ClearData( );
+	if (isRefData) {
+
+	}	else {
+		ClearData( );
+	}
+
 	WeakLearners vNodes;
 	for (auto hTree : forest) {
 	//for each( DecisionTree *hTree in forest ){

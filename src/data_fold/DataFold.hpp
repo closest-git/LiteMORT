@@ -64,11 +64,10 @@ namespace Grusoft {
 	*/
 	class INIT_SCORE {
 	public:
-
 		double step = 0;
-
+		FeatVector *fVec = nullptr;
 		virtual void Init(FeatsOnFold *Data_, int flag = 0x0);
-		virtual void ToDownStep(int flag = 0x0);
+		//virtual void ToDownStep(int flag = 0x0);
 	};
 
 	class Feat_Importance {
@@ -551,7 +550,7 @@ namespace Grusoft {
 				val = new Tx[_len];	// val.resize(_len);
 		}
 
-		virtual size_t nSamp() {	return nSamp_;		}
+		virtual size_t nSamp() const {	return nSamp_;		}
 
 		virtual ~FeatVec_T() {
 			if (isReferVal()) {
@@ -590,6 +589,13 @@ namespace Grusoft {
 			}
 			else
 				memcpy(dst, src, sizeof(Tx)*len);			
+		}
+		virtual void CopyFrom(const FeatVector*src,int flag=0x0) {
+			size_t nSamp_ = nSamp();
+			assert(nSamp_ == src->nSamp());
+			const FeatVec_T<Tx> *tSrc = dynamic_cast<const FeatVec_T<Tx>*>(src);
+			assert(tSrc != nullptr);
+			memcpy(this->val, tSrc->val, sizeof(Tx)*nSamp_);
 		}
 
 		virtual void Set(double a, int flag = 0x0) {

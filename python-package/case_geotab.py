@@ -33,6 +33,8 @@ if os.path.isfile(pkl_path):
     print("====== Load pickle @{} ......".format(pkl_path))
     with open(pkl_path, "rb") as fp:
         [train, test,final_features, all_target] = pickle.load(fp)
+    final_features =  ['CenterDistance_Intersection_mean', 'EntryType_2', 'EntryType_1_FE',
+                                           'ExitHeading_Intersection_std' ]+final_features
 else:
     print('Loading trian set...')
     train = pd.read_csv(f'{data_root}/train.csv')
@@ -319,13 +321,14 @@ if some_rows is not None:
     gc.collect()
     print('====== Some Samples ... data={}'.format(train.shape))
 
-print(f"train={train.shape} test={test.shape}\n final_features={final_features}")
-feat_fix = ['IntersectionId', 'Latitude', 'Longitude', 'EntryStreetName','ExitStreetName', 'EntryHeading',
-     'ExitHeading', 'Hour', 'Weekend', 'Month', 'City', 'EntryType', 'ExitType']
-feat_select = train.columns
-feat_select = list(set(feat_select)-set(feat_fix))
-MORT_feat_select_(train,all_target[2],feat_fix,feat_select,n_init=5, n_iter=12)
-input("......MORT_feat_search......")
+if False:
+    print(f"train={train.shape} test={test.shape}\n final_features={final_features}")
+    feat_fix = ['IntersectionId', 'Latitude', 'Longitude', 'EntryStreetName','ExitStreetName', 'EntryHeading',
+         'ExitHeading', 'Hour', 'Weekend', 'Month', 'City', 'EntryType', 'ExitType']
+    feat_select = train.columns
+    feat_select = list(set(feat_select)-set(feat_fix))
+    MORT_feat_select_(train,all_target[2],feat_fix,feat_select,n_init=5, n_iter=12)
+    input("......MORT_feat_search......")
 
 param = {'application': 'regression','n_estimators':100000,'early_stopping_rounds':100,
          'learning_rate': 0.05,
