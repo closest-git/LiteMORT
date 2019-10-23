@@ -460,7 +460,7 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 		//HistoGRAM *histo = optimal=="grad_variance" ? new HistoGRAM(nSamp) : new Histo_CTQ(nSamp);
 		HistoGRAM *histo = GetHistogram(hData_,pick,true), *histoSwarm=nullptr;
 		double a = histo->fruit_info.mxmxN ;
-		if (hFeat->isSelect == false && hData_->config.lambda_Feat < 1) {
+		if (hFeat->select.hasCheckGain == false && hData_->config.lambda_Feat < 1) {
 			a = histo->fruit_info.mxmxN*hData_->config.lambda_Feat;
 			nNewPick = nNewPick + 1;
 			if (nNewPick > nMostNewPick) {
@@ -511,7 +511,7 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 	double mxmxN = 0;
 	if (feat_id >= 0) {
 		FeatVector *hFeat = hData_->Feat(feat_id);
-		hFeat->isSelect = true;
+		hFeat->select.hasCheckGain = true;		//isSelect = true;
 		fruit->Set(GetHistogram(hData_, feat_id, false));		mxmxN = fruit->mxmxN;
 		feat_regress = -1;
 		assert( mxmxN == fruit->mxmxN );

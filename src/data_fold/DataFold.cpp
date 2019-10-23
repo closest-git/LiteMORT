@@ -162,7 +162,7 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 	//picks.resize(nFeat);
 	for (i = 0; i<nFeat; i++)	{
 		FeatVector *hFeat = Feat(i);
-		hFeat->isSelect = false;
+		hFeat->select.hasCheckGain = false;
 		if(i==116)
 			i = 116;
 		if (hFeat->hDistri!=nullptr && hFeat->hDistri->isPass())
@@ -174,12 +174,15 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 		if (BIT_TEST(hFeat->type, FeatVector::AGGREGATE)) {
 			
 		}
-		if (config.feat_selector != nullptr && hFeat->select_factor < 1) {
+		if (hFeat->select.isPick == false)		{
+			continue;
+		}
+		/*if (config.feat_selector != nullptr && hFeat->select_factor < 1) {
 			float a = rander.Uniform_(0, 1);
 			if (hFeat->select_factor<a)	{
 				continue;
 			}
-		}
+		}*/
 		//if(hFeat->id!=360)	continue;	//Ωˆ”√”⁄≤‚ ‘ 
 		mask[i] = 1;
 		picks.push_back(i);

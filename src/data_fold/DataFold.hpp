@@ -260,7 +260,9 @@ namespace Grusoft {
 			if (no == -1)
 				//return lossy.predict;
 				return GetPrecict();
-			if (no < -1 || no >= nFeat())	throw "Feat no is OUT OF RANGE!!!";
+			if (no < -1 || no >= nFeat()) {
+				throw "Feat no is OUT OF RANGE!!!";
+			}
 			return feats[no];
 		}
 		virtual int *Rank4Feat(int type, int flag = 0x0);	

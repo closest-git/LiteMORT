@@ -39,6 +39,13 @@ namespace Grusoft {
 	class FeatVector {
 	protected:
 	public:
+		struct SELECT {
+			double vari_1=0;
+			float user_rate=0;
+			bool isPick = true;
+			bool hasCheckGain = false;
+		};
+
 		Distribution *hDistri = nullptr;		//仅指向
 		Distribution *hDistriTrain = nullptr;	//仅指向
 		Feature_Selection* select_bins=nullptr;
@@ -53,8 +60,9 @@ namespace Grusoft {
 			AGGREGATE = 0x80000,
 		};
 		size_t type = 0x0;
-		bool isSelect = false;
-		float select_factor = 1;
+		//bool isSelect = false;
+		//float select_factor = 1;
+		SELECT select;
 		bool isCategory()	{ return	BIT_TEST(type, Distribution::CATEGORY); }
 		bool isReferVal()	{ return	BIT_TEST(type, VAL_REFER); }
 		typedef enum {

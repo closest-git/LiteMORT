@@ -192,8 +192,8 @@ double GBRT::Predict(FeatsOnFold *hData_, bool updateStopping,bool checkLossy, b
 		}		
 	}
 	if (isResetZero) {
-		if (hData_->init_score.fVec == nullptr)
-			hData_->GetPrecict()->Empty();
+		//if (hData_->init_score.fVec == nullptr)
+		hData_->GetPrecict()->Empty();
 	}
 	else {
 		/*tpSAMP_ID *samps = hData_->samp_set.samps;

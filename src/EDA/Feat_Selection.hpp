@@ -7,6 +7,7 @@
 #include "../util/GRander.hpp"
 
 namespace Grusoft {
+	
 
 	//游荡在特征空间里的海鞘(only true or false)
 	struct LogicSalp {

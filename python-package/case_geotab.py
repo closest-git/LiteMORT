@@ -20,10 +20,11 @@ from LiteMORT_hyppo import *
 import time
 import random
 import gc
+
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 isMORT = True
 gbm='MORT' if isMORT else 'LGB'
-some_rows = 5000
+some_rows = 50000
 #some_rows = None
 #data_root = '../input/'
 data_root = "F:/Datasets/geotab"
@@ -33,8 +34,7 @@ if os.path.isfile(pkl_path):
     print("====== Load pickle @{} ......".format(pkl_path))
     with open(pkl_path, "rb") as fp:
         [train, test,final_features, all_target] = pickle.load(fp)
-    final_features =  ['CenterDistance_Intersection_mean', 'EntryType_2', 'EntryType_1_FE',
-                                           'ExitHeading_Intersection_std' ]+final_features
+    #final_features =  ['CenterDistance_Intersection_mean', 'EntryType_2', 'EntryType_1_FE','ExitHeading_Intersection_std' ]+final_features
 else:
     print('Loading trian set...')
     train = pd.read_csv(f'{data_root}/train.csv')
@@ -321,13 +321,13 @@ if some_rows is not None:
     gc.collect()
     print('====== Some Samples ... data={}'.format(train.shape))
 
-if False:
-    print(f"train={train.shape} test={test.shape}\n final_features={final_features}")
+print(f"train={train.shape} test={test.shape}\n final_features={final_features}")
+if True:
     feat_fix = ['IntersectionId', 'Latitude', 'Longitude', 'EntryStreetName','ExitStreetName', 'EntryHeading',
          'ExitHeading', 'Hour', 'Weekend', 'Month', 'City', 'EntryType', 'ExitType']
     feat_select = train.columns
     feat_select = list(set(feat_select)-set(feat_fix))
-    MORT_feat_select_(train,all_target[2],feat_fix,feat_select,n_init=5, n_iter=12)
+    MORT_feat_select_(train,all_target[2],feat_fix,feat_select)
     input("......MORT_feat_search......")
 
 param = {'application': 'regression','n_estimators':100000,'early_stopping_rounds':100,
@@ -362,6 +362,7 @@ def run_lgb_f(train, test,all_target):
     #all_target = [target1, target2, target3, target4, target5, target6]
     nfold = 5
     kf = KFold(n_splits=nfold, random_state=228, shuffle=True)
+    scores = []
     for i in range(len(all_preds)):
         #if i<len(all_preds)-1:            continue
         print('Training and predicting for target {}'.format(i+1))
@@ -394,9 +395,10 @@ def run_lgb_f(train, test,all_target):
             print(f"------{n}:\tRMSE: {score:0.4f} time={time.time() - t0:.4g}")
             n = n + 1
         fold_score = np.sqrt(mean_squared_error(all_target[i], oof))
+        scores.append(fold_score)
         print("\n\nTARGET_{} CV RMSE: {:0.4f} time={:.4g}".format(i, fold_score,time.time() - t0))
         #print("\n\nCV RMSE: {:<0.4f}".format(np.sqrt(mean_squared_error(all_target[i], oof))))
-    return all_preds,fold_score
+    return all_preds,scores
 
 if False:       #hyparam_search
     def MortOnParam(num_leaves, feature_fraction, bagging_fraction, max_depth, learning_rate, min_data_in_leaf,max_bin):

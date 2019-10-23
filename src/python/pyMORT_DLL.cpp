@@ -389,8 +389,8 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	for (int feat = 0; feat < ldX_; feat++) {
 		FeatVector *hFeat = hFold->Feat(feat);
 		if (config.feat_selector != nullptr) {
-			hFeat->select_factor = config.feat_selector[feat];
-			printf("%d(%.3g)\t", feat, hFeat->select_factor);
+			hFeat->select.user_rate = config.feat_selector[feat];
+			printf("%d(%.3g)\t", feat, hFeat->select.user_rate);
 		}
 		if (hFold->config.verbose==666) {
 			hFeat->hDistri->Dump(feat, false, flag);					//Êä³ödistributionÐÅÏ¢
@@ -743,11 +743,11 @@ void Feats_one_by_one(FeatsOnFold *hTrain, FeatsOnFold *hEval, BoostingForest::M
 		if (hFeat->hDistri != nullptr && hFeat->hDistri->isPass())
 			continue;
 		if (selector[i] != 1) {
-			hFeat->select_factor = 0;	nSelect++;
+			hFeat->select.isPick = false;	nSelect++;
 			cands.push_back(i);
 		}
 		else {
-			hFeat->select_factor = 1;
+			hFeat->select.isPick = true;
 			nFix++;
 		}
 	}	
@@ -765,7 +765,7 @@ void Feats_one_by_one(FeatsOnFold *hTrain, FeatsOnFold *hEval, BoostingForest::M
 	hTrain->config.early_stopping_round /= 2;
 	for (i = 0; i < nSelect; i++) {
 		cand = cands[i];		FeatVector *hFeat = hTrain->Feat(cand);
-		assert(hFeat->select_factor==0);	 hFeat->select_factor = 1;
+		assert(hFeat->select.isPick == false);	 hFeat->select.isPick = true;
 		hEval->nam = "eval_"+hFeat->nam;
 		//hTrain->InitFeatSelector();
 		hGBRT = new GBRT(hTrain, hEval, 0, flag == 0 ? BoostingForest::REGRESSION : BoostingForest::CLASIFY, nTre_);
@@ -783,9 +783,10 @@ void Feats_one_by_one(FeatsOnFold *hTrain, FeatsOnFold *hEval, BoostingForest::M
 		assert(hGBRT->stat.nMaxFeat == nFix+1 && hGBRT->stat.nMinFeat == nFix+1);
 		assert(hGBRT->stopping.errors[0]== loss_best);
 		loss = hGBRT->stopping.ERR_best();	// hEval->lossy->ERR();
-		double percent = fabs(loss_best - loss) / loss_best*100.0;
-		if (loss < loss_best && percent>0.001) {
-			printf("\n------[%s] is usefull. loss=%.3g%%[%.7g=>%.7g]------", hFeat->nam.c_str(), percent,loss_best,loss );
+		//double percent = fabs
+		hFeat->select.vari_1 = (loss_best - loss) / loss_best*100.0;
+		if (loss < loss_best && hFeat->select.vari_1>0.001) {
+			printf("\n------[%s] is usefull. loss=%.3g%%[%.7g=>%.7g]------", hFeat->nam.c_str(), hFeat->select.vari_1,loss_best,loss );
 			loss_best = loss;
 			hGBRT->Predict(hTrain, false, true, false);				
 			hGBRT->Predict(hEval,false,true,false);
@@ -796,14 +797,20 @@ void Feats_one_by_one(FeatsOnFold *hTrain, FeatsOnFold *hEval, BoostingForest::M
 			nFix++;		
 		}
 		else {
-			hFeat->select_factor = 0;
+			hFeat->select.isPick = false;
 		}
 		delete hGBRT;
 	}
 	//T_resi.clear();				E_resi.clear();
-	delete hGBRT_0;
-	//update selector
+	for (i = 0; i < nFeat; i++) {	//update selector
+		if (selector[i] == 1)
+			continue;
+		FeatVector *hFeat = hTrain->Feat(i);
+		selector[i] = hFeat->select.vari_1;
+	}
 	hTrain->config = config_0;		hEval->config = config_0;
+
+	delete hGBRT_0;
 }
 
 /*
