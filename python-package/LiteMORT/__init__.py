@@ -25,6 +25,6 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 if os.path.isfile(os.path.join(dir_path, 'VERSION.txt')):
     __version__ = open(os.path.join(dir_path, 'VERSION.txt')).read().strip()
 
-__all__ = ['LiteMORT','Mort_Preprocess']
+__all__ = ['LiteMORT','Mort_Preprocess','Mort_PickSamples']
 
 

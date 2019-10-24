@@ -730,11 +730,11 @@ PYMORT_DLL_API void LiteMORT_fit(void *mort_0, float *train_data, tpY *train_tar
 void Feats_one_by_one(FeatsOnFold *hTrain, FeatsOnFold *hEval, BoostingForest::MODEL mod_, int nTre_, int flag) {
 	LiteBOM_Config config_0 = hTrain->config;
 	GBRT *hGBRT_0 = new GBRT(hTrain, hEval, 0, flag == 0 ? BoostingForest::REGRESSION : BoostingForest::CLASIFY, nTre_), *hGBRT=nullptr;
-	int nFeat = hTrain->nFeat(), i, nSelect = 0, nFix = 0, cand, x = 0;
+	int nFeat = hTrain->nFeat(), i, nSelect = 0, nFix = 0, cand, x = 0,cand_best=-1;
 	size_t nTrain = hTrain->nSample(), nEval = hEval->nSample();
 	vector<int> cands;
 	const FeatVector *T_y = hTrain->GetY(), *E_y = hEval->GetY();
-	FeatVector*T_predict = hTrain->GetPrecict(), *E_predict = hEval->GetPrecict();
+	FeatVector*T_predict = hTrain->GetPrecict(), *E_predict = hEval->GetPrecict(),*hBestFeat=nullptr;
 	FeatVector*T_best_predict = new FeatVec_T<double>(T_predict->nSamp(), 0, "T_best"),
 		*E_best_predict = new FeatVec_T<double>(E_predict->nSamp(),0,"E_best");
 	float *selector = hTrain->config.feat_selector;		//·µ»ØÖµ
@@ -781,32 +781,39 @@ void Feats_one_by_one(FeatsOnFold *hTrain, FeatsOnFold *hEval, BoostingForest::M
 		//update train and eval'y
 		hGBRT->Train("", x, flag);
 		assert(hGBRT->stat.nMaxFeat == nFix+1 && hGBRT->stat.nMinFeat == nFix+1);
-		assert(hGBRT->stopping.errors[0]== loss_best);
+		//assert(hGBRT->stopping.errors[0]== loss_best);
 		loss = hGBRT->stopping.ERR_best();	// hEval->lossy->ERR();
 		//double percent = fabs
 		hFeat->select.vari_1 = (loss_best - loss) / loss_best*100.0;
 		if (loss < loss_best && hFeat->select.vari_1>0.001) {
 			printf("\n------[%s] is usefull. loss=%.3g%%[%.7g=>%.7g]------", hFeat->nam.c_str(), hFeat->select.vari_1,loss_best,loss );
-			loss_best = loss;
-			hGBRT->Predict(hTrain, false, true, false);				
+			loss_best = loss;		cand_best = cand;
+			/*hGBRT->Predict(hTrain, false, true, false);				
 			hGBRT->Predict(hEval,false,true,false);
 			a = hEval->lossy->ERR();	
 			assert(a==loss);
 			T_best_predict->CopyFrom(T_predict);		E_best_predict->CopyFrom(E_predict);
 			//T_resi = hTrain->lossy->resi, E_resi = hEval->lossy->resi;
-			nFix++;		
+			nFix++;		*/
 		}
 		else {
-			hFeat->select.isPick = false;
 		}
+		hFeat->select.isPick = false;
 		delete hGBRT;
 	}
-	//T_resi.clear();				E_resi.clear();
+
 	for (i = 0; i < nFeat; i++) {	//update selector
 		if (selector[i] == 1)
 			continue;
 		FeatVector *hFeat = hTrain->Feat(i);
-		selector[i] = hFeat->select.vari_1;
+		//selector[i] = hFeat->select.vari_1;
+	}
+	if (cand_best != -1) {
+		hBestFeat = hTrain->Feat(cand_best);
+		selector[cand_best] = hBestFeat->select.vari_1;
+		printf("___MORT_feat_select___:\tUpdate selector[%d]=%.5g feat=%s", cand_best,selector[cand_best], hBestFeat->nam.c_str());
+		hBestFeat = hTrain->Feat(cand_best);
+		//assert();
 	}
 	hTrain->config = config_0;		hEval->config = config_0;
 

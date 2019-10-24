@@ -16,12 +16,17 @@ class M_COLUMN(Structure):
                ]
 
 def Mort_PickSamples(pick_samples,df_train,df_test):
-    nMost = min(df_train.shape[0], df_test.shape[0])
+    nTrain = df_train.shape[0]
     random.seed(42)
-    subset = random.sample(range(nMost), pick_samples)
+    subset = random.sample(range(nTrain), pick_samples)
     df_train = df_train.iloc[subset, :].reset_index(drop=True)
-    df_test = df_test.iloc[subset, :].reset_index(drop=True)
-    print('====== Mort_PickSamples ... df_train={} df_test={}'.format(df_train.shape, df_test.shape))
+    print('====== Mort_PickSamples ... df_train={}'.format(df_train.shape))
+    if df_test is not None:
+        nTest =df_test.shape[0]
+        subset = random.sample(range(nTest), pick_samples)
+        df_test = df_test.iloc[subset, :].reset_index(drop=True)
+        print('====== Mort_PickSamples ... df_test={}'.format(df_test.shape))
+    return df_train,df_test
 
 class Mort_Preprocess(object):
     #nFeature,nSample=0,0

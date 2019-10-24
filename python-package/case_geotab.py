@@ -24,8 +24,8 @@ import gc
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 isMORT = True
 gbm='MORT' if isMORT else 'LGB'
-some_rows = 50000
-#some_rows = None
+#some_rows = 5000
+some_rows = None
 #data_root = '../input/'
 data_root = "F:/Datasets/geotab"
 pkl_path = f'{data_root}/_geotab___.pickle'
