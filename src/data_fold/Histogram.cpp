@@ -686,8 +686,7 @@ void HistoGRAM_BUFFER::BeforeTrainTree(vector<int>& pick_feats, size_t nPickSamp
 		/*for (auto bin : histo->bins) {
 			bin.nz = 0;
 		}*/
-	FeatsOnFold::stat.tX += GST_TOC(t1);
-
+	//FeatsOnFold::stat.tX += GST_TOC(t1);
 }
 
 HistoGRAM_BUFFER::~HistoGRAM_BUFFER() {

@@ -285,6 +285,7 @@ bool LiteBOM_Config::histo_bins_onY()	const {
 	return node_task == histo_Y_split_Y;
 }
 
+
 /*
 */
 void FeatsOnFold::BeforeTrain(BoostingForest *hGBRT, int flag) {
@@ -325,12 +326,12 @@ void FeatsOnFold::BeforeTrain(BoostingForest *hGBRT, int flag) {
 					//if (/*hFeat->wSplit_last>1024 &&*/ !hFeat->hDistri->isUnique && !BIT_TEST(hFeat->hDistri->type, Distribution::CATEGORY)) {					
 					bool isDiscrete = hFeat->hDistri->isUnique || BIT_TEST(hFeat->hDistri->type, Distribution::CATEGORY);
 					bool isUpdate = hFeat->wSplit_last > 1024;//future-sales,geotab等比赛验证，确实有效诶，但是。。。
-					/*if (isUpdate && !isDiscrete) {
+					if (isUpdate && !isDiscrete) {
 						hFeat->hDistri->UpdateHistoByW(this->config, hGBRT->forest.size(), hFeat->wBins);
 						//GST_TIC(t1);
 						hFeat->UpdateHisto(this, false, isFirst, 0x0);
 						//FeatsOnFold::stat.tX += GST_TOC(t1);
-					}*/
+					}/**/
 				}
 			}
 		}
@@ -625,8 +626,6 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 	#endif
 
 }
-
-
 
 /*
 	static bin mapping

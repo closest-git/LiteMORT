@@ -103,7 +103,7 @@ class LiteMORT_params(object):
             self.boost_from_average = dict_param['boost_from_average']
         if 'iter_refine' in dict_param:
             self.iter_refine = dict_param['iter_refine']
-
+        self.n_threads = self.alias_param('n_threads', 0, dict_param, ['n_threads', "n_jobs", "num_threads"])
         self.verbose = self.alias_param('verbose',0,dict_param,['verbosity',"verbose"])
         #if 'early_stop' in dict_param:
         #    self.early_stopping_rounds = dict_param['early_stop']
@@ -201,6 +201,7 @@ class LiteMORT(object):
         self.hLIB = None
         self.load_dll()
         self._n_classes = None
+        self.best_iteration_ = 0
         self.init(params)
         if self.params.objective == "binary":
             self.problem = Mort_BinaryClass(self.params.__dict__)

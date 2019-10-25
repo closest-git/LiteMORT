@@ -32,15 +32,15 @@ struct PY_COLUMN {
 	}
 	bool isInt() {
 		std::string type = dtype;
-		return type == "int" || type == "int32";
+		return type == "int" || type == "int32" || type == "uint32";
 	}
 	bool isInt16() {
 		std::string type = dtype;
-		return type == "int16";
+		return type == "int16" || type == "uint16";
 	}
 	bool isInt64() {
 		std::string type = dtype;
-		return type == "int64";
+		return type == "int64" || type == "uint64";
 	}
 	bool isFloat() {
 		std::string type = dtype;

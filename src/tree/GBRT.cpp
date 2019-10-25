@@ -92,7 +92,6 @@ void GBRT::BeforeTrain(FeatsOnFold *hData_, int flag ) {
 	v0.2	root->samp_set允许非空
 */
 double GBRT::Predict(FeatsOnFold *hData_, bool updateStopping,bool checkLossy, bool resumeLast, int flag) {
-	GST_TIC(tick);
 	size_t nSamp = hData_->nSample(), t;
 	bool isEval = hData_->isEval();
 	hData_->BeforePredict( );
@@ -115,8 +114,8 @@ double GBRT::Predict(FeatsOnFold *hData_, bool updateStopping,bool checkLossy, b
 	assert(predict!=nullptr);
 	tpDOWN *allx = predict->arr();
 
+	GST_TIC(t1);
 	for (auto tree : forest) {
-	//for each(ManifoldTree*hTree in forest) {
 		ManifoldTree *hTree = dynamic_cast<ManifoldTree *>(tree);
 		assert(hTree!=nullptr);
 		if (lastTree != nullptr && hTree != lastTree)
@@ -165,9 +164,9 @@ double GBRT::Predict(FeatsOnFold *hData_, bool updateStopping,bool checkLossy, b
 		if (hData_->hMove != nullptr);// hData_->hMove->AfterStep(hData_->samp_set, allx);
 		
 	}
+	FeatsOnFold::stat.tX += GST_TOC(t1);
 	if(checkLossy)
 		hData_->lossy->Update(hData_,this->skdu.noT,0x0);
-
 	double err=DBL_MAX, y2 = DBL_MAX;
 	if (checkLossy) {
 		//on the objective
@@ -422,7 +421,6 @@ int GBRT::Train(string sTitle, int x, int flag) {
 		if (stopping.isOscillate || t==8) {	//仅用于调试
 			;// if (hTrainData->config.nMostPrune > 0) { this->Prune(); }
 		}
-
 		this->BeforeTrain(hTrainData);
 		//gradients = self.loss.negative_gradient(preds, y)
 		ManifoldTree *hTree = new ManifoldTree(this, hTrainData, "666_" + to_string(t));

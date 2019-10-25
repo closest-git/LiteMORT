@@ -131,6 +131,9 @@ void OnUserParams(LiteBOM_Config&config, PY_ITEM* params, int nParam, int flag =
 		if (strcmp(params[i].Keys, "early_stopping_rounds") == 0) {
 			config.early_stopping_round = params[i].Values;
 		}
+		if (strcmp(params[i].Keys, "n_threads") == 0) {
+			config.num_threads = (int)params[i].Values;
+		}
 		if (strcmp(params[i].Keys, "min_child_samples") == 0) {
 			config.min_data_in_leaf = params[i].Values;
 		}

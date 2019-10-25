@@ -371,8 +371,6 @@ HistoGRAM *MT_BiSplit::GetHistogram(FeatsOnFold *hData_, int pick, bool isInsert
 	//histo->CompressBins();
 	return histo;
 }
-
-
 /*
 	v0.2	²¢ÐÐ
 */

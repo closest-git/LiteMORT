@@ -3,6 +3,7 @@
 #include "DataFold.hpp"
 #include "../learn/DCRIMI_.hpp"
 #include "Loss_binary.hpp"
+
 namespace Grusoft {
 	/*class LambdaRank {
 	protected:
@@ -337,6 +338,8 @@ namespace Grusoft {
 			tpDOWN *vHess = VECTOR2ARR(hessian);
 			size_t dim = resi.size(), nSamp=hData_->nSample(),step=dim,start,end;
 			G_INT_64 i;
+			int num_threads = OMP_FOR_STATIC_1(dim, step);
+
 			//double sum = 0;
 			//以后要集成各种loss function
 
@@ -347,13 +350,13 @@ namespace Grusoft {
 			}	else if (objective == "multiclass") {	//MSE loss
 				throw "Loss::multiclass is ...";
 			}	else if (objective == "regression" || objective == "outlier") {
+				//GST_TIC(t1);
 				err_rmse = 0.0;		err_mae = 0;
-				for (i = 0; i < dim; i++) {
+#pragma omp parallel for schedule(static,1)
+				OMP_FOR_func(vResi[i] = y1[i] - y0[i])
+				/*for (i = 0; i < dim; i++) {
 					vResi[i] = y1[i] - y0[i];
-					//double s = samp_weight != nullptr ? samp_weight[i] : 1;
-					//err_rmse += s*vResi[i] * vResi[i];
-					//err_mae += s*fabs(vResi[i]);
-				}
+				}*/
 
 				if (pDown != nullptr) {
 					if (isOutlier) {		//Average Precision
@@ -363,35 +366,46 @@ namespace Grusoft {
 					}	else {	//MSE loss
 						double a2 = 0, a1 = 0;
 						if (metric == "mse" || metric == "rmse") {
-							for (i = 0; i < dim; i++) {
-								pDown[i] = -vResi[i];
-							}
+							//for (i = 0; i < dim; i++) {		pDown[i] = -vResi[i];		}
+#pragma omp parallel for schedule(static,1)
+							OMP_FOR_func(pDown[i] = -vResi[i])
 						}else if (metric == "mae") {
-							for (i = 0; i < dim; i++) {
-								pDown[i] = vResi[i]>0 ? -1 : 1;
-							}
+							//for (i = 0; i < dim; i++) {	pDown[i] = vResi[i]>0 ? -1 : 1;		}
+#pragma omp parallel for schedule(static,1)
+							OMP_FOR_func(pDown[i] = vResi[i]>0 ? -1 : 1)
 						}	else {
 							throw "UpdateResi metric is XXX for regression!!!";
 						}
-						for (i = 0; i < dim; i++) {
-							a2 += pDown[i] * pDown[i];		a1 += fabs(pDown[i]);
+#pragma omp parallel for schedule(static,1) reduction(+ : a2,a1)
+						for (int thread = 0; thread < num_threads; thread++) {
+								size_t start = thread*step, end = MIN2(start + step, dim), i;	
+								for (i = start; i < end; i++) { a2 += pDown[i] * pDown[i];		a1 += fabs(pDown[i]); }
 						}
+						//for (i = 0; i < dim; i++) {			a2 += pDown[i] * pDown[i];		a1 += fabs(pDown[i]);		}
 						DOWN_sum_2 = a2;	DOWN_sum_1 = a1;
 						if (samp_weight != nullptr && pDown != nullptr) {	//测试集无需加权
 							WeightOnMarginal_r<Tx>(hData_, round, flag);
 						}
 					}					
 				}
-				for (i = 0; i < dim; i++) {
-					double s = samp_weight != nullptr ? samp_weight[i] : 1;
-					err_rmse += s*vResi[i] * vResi[i];
-					err_mae += s*fabs(vResi[i]);
+				double a2 = 0,a1 = 0;
+#pragma omp parallel for schedule(static,1) reduction(+ : a2,a1)
+				for (int thread = 0; thread < num_threads; thread++) {
+					size_t start = thread*step, end = MIN2(start + step, dim), i;
+					for (i = start; i < end; i++) {
+						//for (i = 0; i < dim; i++) {
+						double s = samp_weight != nullptr ? samp_weight[i] : 1;
+						a2 += s*vResi[i] * vResi[i];
+						a1 += s*fabs(vResi[i]);
+					}
 				}
+				err_rmse = a2;		err_mae = a1;
 				//sum = NRM2(dim, vResi);
 				//参见loss = PointWiseLossCalculator::AverageLoss(sum_loss, sum_weights_)及L2Metric设计
 				err_l2 = err_rmse / dim;
 				err_rmse = sqrt(err_rmse / dim);	
 				err_mae = err_mae / dim;
+				//FeatsOnFold::stat.tX += GST_TOC(t1);
 			}
 			else {
 				throw "objective";

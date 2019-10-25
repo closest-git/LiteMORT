@@ -23,7 +23,9 @@ target = 'meter_reading'
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 isMORT = True
 gbm='MORT' if isMORT else 'LGB'
-some_rows = 5000
+folds = 4
+seed = 42
+some_rows = 5000000
 #some_rows = None
 path = '../input/ashrae-energy-prediction'
 path = 'F:/Datasets/ashrae/'
@@ -45,8 +47,8 @@ def load_data(source='train', path=path):    #''' load and merge all tables '''
 if os.path.isfile(pkl_path):
     print("====== Load pickle @{} ......".format(pkl_path))
     with open(pkl_path, "rb") as fp:
-        [train, test,features] = pickle.load(fp)
-    print(f"train={train.shape}, test={test.shape}")
+        [train, test,features,folds,tr_idxs,val_idxs] = pickle.load(fp)
+    print(f"train={train.shape}, test={test.shape} folds={folds}")
 else:   # load and display some samples
     train = load_data('train')
     test = load_data('test')
@@ -103,51 +105,67 @@ else:   # load and display some samples
     test = ASHRAE3Preprocessor.transform(test)
     print(test.sample(5))
     #train[features].sample(5)
+    kf = StratifiedKFold(n_splits=folds, shuffle=True, random_state=seed)
+    kf_split = enumerate(kf.split(train, train['building_id']))
+    tr_idxs,val_idxs=[],[]
+    for i, (tr_idx, val_idx) in kf_split:
+        print(f"{i}-{tr_idx.shape}{val_idx.shape}")
+        tr_idxs.append(tr_idx)
+        val_idxs.append(val_idx)
+
     with open(pkl_path, "wb") as fp:  # Pickling
-        pickle.dump([train, test,features], fp)
+        pickle.dump([train, test,features,folds,tr_idxs,val_idxs], fp)
         print("====== Dump pickle @{} ......OK".format(pkl_path))
     input("......")
-folds = 4
-seed = 42
-kf = StratifiedKFold(n_splits=folds, shuffle=True, random_state=seed)
+
+#kf = StratifiedKFold(n_splits=folds, shuffle=True, random_state=seed)
 models = []
 shap_values = np.zeros(train[features].shape)
 shap_sampling = 125000  # reduce compute cost
 oof_pred = np.zeros(train.shape[0])  # out of fold predictions
 
-params={
-    'n_estimators':1000,'learning_rate':0.4,'feature_fraction':0.9,'subsample':0.25,  # batches of 25% of the data
-    'subsample_freq':1,'num_leaves':20,'lambda_l1':1,'lambda_l2':1,'metric':'rmse','n_jobs':6,
+params={    'application': 'regression',
+    'n_estimators':200,'learning_rate':0.4,'feature_fraction':0.9,'subsample':0.25,  # batches of 25% of the data
+    'subsample_freq':1,'num_leaves':20,'lambda_l1':1,'lambda_l2':1,'metric':'rmse','n_jobs':-1,
+    "adaptive":'weight1','verbose': 666,
 }
 ## stratify data by building_id
-for i, (tr_idx, val_idx) in tqdm(enumerate(kf.split(train, train['building_id'])), total=folds):
-    def fit_regressor(tr_idx, val_idx):  # memory closure
-        tr_x, tr_y = train[features].iloc[tr_idx], train[target].iloc[tr_idx]
-        vl_x, vl_y = train[features].iloc[val_idx], train[target].iloc[val_idx]
-        print({'fold': i, 'train size': len(tr_x), 'eval size': len(vl_x)})
-        if isMORT:
-            clf = LiteMORT(params).fit(tr_x, tr_y,eval_set=[(vl_x, vl_y)])
-            fold_importance=None
-        else:
-            tr_data = lgb.Dataset(tr_x, label=tr_y)
-            vl_data = lgb.Dataset(vl_x, label=vl_y)
-            clf = lgb.LGBMRegressor(**params)
-            clf.fit(tr_x, tr_y,
-                    eval_set=[(vl_x, vl_y)],
-                    #                 early_stopping_rounds=50,
-                    verbose=200)
-            # sample shapley values
-            fold_importance = None      #shap.TreeExplainer(clf).shap_values(vl_x[:shap_sampling])
-        # out of fold predictions
-        valid_prediticion = clf.predict(vl_x, num_iteration=clf.best_iteration_)
-        oof_loss = np.sqrt(mean_squared_error(vl_y, valid_prediticion))  # target is already in log scale
-        print(f'Fold:{i} RMSLE: {oof_loss:.4f}')
-        return clf, fold_importance, valid_prediticion
+#for i, (tr_idx, val_idx) in tqdm(enumerate(kf.split(train, train['building_id'])), total=folds):
+def fit_regressor(tr_idx, val_idx, i):  # memory closure
+    t0 = time.time()
+    tr_x, tr_y = train[features].iloc[tr_idx], train[target].iloc[tr_idx]
+    vl_x, vl_y = train[features].iloc[val_idx], train[target].iloc[val_idx]
+    print({'fold': i, 'train size': len(tr_x), 'eval size': len(vl_x)})
+    if isMORT:
+        clf = LiteMORT(params).fit(tr_x, tr_y, eval_set=[(vl_x, vl_y)])
+        fold_importance = None
+    else:
+        tr_data = lgb.Dataset(tr_x, label=tr_y)
+        vl_data = lgb.Dataset(vl_x, label=vl_y)
+        clf = lgb.LGBMRegressor(**params)
+        clf.fit(tr_x, tr_y,
+                eval_set=[(vl_x, vl_y)],
+                #                 early_stopping_rounds=50,
+                verbose=200)
+        # sample shapley values
+        fold_importance = None  # shap.TreeExplainer(clf).shap_values(vl_x[:shap_sampling])
+    # out of fold predictions
+    valid_prediticion = clf.predict(vl_x, num_iteration=clf.best_iteration_)
+    oof_loss = np.sqrt(mean_squared_error(vl_y, valid_prediticion))  # target is already in log scale
+    print(f'Fold:{i} RMSLE: {oof_loss:.4f} time={time.time() - t0:.5g}')
 
-    clf, shap_values[val_idx[:shap_sampling]], oof_pred[val_idx] = fit_regressor(tr_idx, val_idx)
+    return clf, fold_importance, valid_prediticion
+
+#for (tr_idx, val_idx) in kf.split(train, train['building_id']):
+for i in range(folds):
+    tr_idx, val_idx= tr_idxs[i], val_idxs[i]
+    clf, shap_values[val_idx[:shap_sampling]], oof_pred[val_idx] = fit_regressor(tr_idx, val_idx,i)
+    input(".............")
+    i = i + 1
     models.append(clf)
-
 gc.collect()
+oof_loss = np.sqrt(mean_squared_error(train[target], oof_pred)) # target is already in log scale
+print(f'OOF RMSLE: {oof_loss:.4f}')
 
 if isMORT:
     pass
