@@ -67,6 +67,9 @@ namespace Grusoft{
 			SAMPL_OOB=100,SAMPL_InB,
 			RAND_REINIT=9991,
 		};
+		enum {
+			ENTROPY,GINNI,HELLING
+		};
 		struct SKDU{		//Learn Schdule
 			//each cascade contain nSteps.each step contain 1 or n trees
 			int cascad,step,nStep,noT,nTree,noLeaf;		
@@ -175,7 +178,7 @@ namespace Grusoft{
 		virtual void ClearData( );
 		//FeatsOnFold *GurrentData() { FeatsOnFold *hData = hTrainData;		assert(hData != nullptr);		return hData; }
 
-		virtual bool isPass(hMTNode hNode, int flag = 0x0) { GST_THROW("BoostingForest::isPass is ..."); }
+		virtual bool isPassNode(FeatsOnFold *hData_, hMTNode hNode, int flag = 0x0) { GST_THROW("BoostingForest::isPass is ..."); }
 		//尽量基于(InX,OutY)进行训练
 		virtual void Train( FeatsOnFold *hData=nullptr,int flag=0x0 );
 		virtual void AfterTrain( FeatsOnFold *hData,int flag=0x0 )	{;}

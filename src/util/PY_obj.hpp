@@ -19,6 +19,7 @@ struct PY_COLUMN {
 	char *type_x;
 	double v_min;
 	double v_max;
+	float representive;
 
 	bool isCategory() {
 		return type_x!=NULL && strcmp(type_x,"*")==0;

@@ -149,7 +149,11 @@ void BoostingForest::Clasify( int nSamp,FeatsOnFold *hSamp,int flag ){
 }
 
 void BoostingForest::InitFeat( int type,int nFlag ){
-
+	for (auto feat : hTrainData->feats) {
+		if (BIT_TEST(feat->type, FeatVector::REPRESENT_)) {
+			
+		}
+	}
 }
 
 

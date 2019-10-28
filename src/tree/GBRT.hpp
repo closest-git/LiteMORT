@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <assert.h>
 #include "BoostingForest.hpp"
+#include "../data_fold/Representive.hpp"
 using namespace std;
 
 namespace Grusoft{	
@@ -57,7 +58,7 @@ namespace Grusoft{
 		virtual int IterTrain(int round,int flag);
 		virtual double Predict(FeatsOnFold *hData,bool updateStopping=false,bool checkLossy=false,bool resumeLast=false, int flag=0x0);
 		virtual int Test(string sTitle, BoostingForest::CASEs& TestSet, int nCls, int flag);
-		virtual bool isPass(hMTNode hNode, int flag = 0x0);
+		virtual bool isPassNode(FeatsOnFold *hData_, hMTNode hNode, int flag = 0x0);
 
 		
 	};

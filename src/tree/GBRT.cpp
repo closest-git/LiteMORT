@@ -648,9 +648,15 @@ bool GBRT::GetFeatDistri(WeakLearner *hWeak, float *distri, int flag) {
 	return true;
 }
 
-bool GBRT::isPass(hMTNode hNode, int flag) {
+bool GBRT::isPassNode(FeatsOnFold *hData_, hMTNode hNode, int flag) {
 	if( hNode->nSample()<Config().min_data_in_leaf * 2 )
 		return true;
+	if (!hData_->present.isValid(hNode)) {
+		assert(hNode->lr_eta==1.0);
+		hNode->lr_eta = 0;
+		return true;
+
+	}
 	int max_dep=Config().max_depth;
 	if (max_dep>0 && hNode->depth >= max_dep)
 		return true;
@@ -683,4 +689,18 @@ int GBRT::Test(string sTitle, BoostingForest::CASEs& TestSet, int nCls, int flag
 	delete hTestData;			hTestData = nullptr;
 	printf("\n********* GBRT nTest=%d,nTree=%d,time=%g*********\n", nTest, nTree, GST_TOC(tick));
 	return 0x0;
+}
+
+bool Representive::isValid(const MT_BiSplit *hNode, int flag) {
+	for (auto present : arrPFeat) {
+		FeatVector *hFeat = present->hFeat;
+		size_t nUnique = hFeat->UniqueCount(hNode->samp_set,0x0);
+		if (nUnique <= present->T_min) {
+			//printf("present=%d<%g\t", nUnique, present->T_min);
+
+			return false;
+		}
+
+	}
+	return true;
 }

@@ -11,7 +11,7 @@
 #include "EDA.hpp"
 using namespace std;
 #include "../include/LiteBOM_config.h"
-
+#include "./Representive.hpp"
 #include "../tree/BiSplit.hpp"
 #include "../util/GST_def.h"
 //#include "../util/BLAS_t.hpp"
@@ -103,6 +103,8 @@ namespace Grusoft {
 		INIT_SCORE init_score;
 		vector<FeatVector*> feats;				//featrue values of X
 		int nPickFeat = 0;
+		Representive present;
+
 
 		struct BUFFER {
 			tpSAMP_ID *samp_root_set = nullptr,*samp_left = nullptr,*samp_rigt = nullptr;
@@ -185,7 +187,6 @@ namespace Grusoft {
 		enum {
 			TAG_ZERO = 0x10000,
 			DF_FLAG = 0xF00000, DF_TRAIN = 0x100000, DF_EVAL = 0x200000, DF_PREDIC = 0x400000,
-			//FAST_QUANTI = 0x1000000,	//为了加速而采用量子化
 		};
 		size_t dType = 0x0;
 		bool qOrder = false, isQuanti = false;
@@ -1100,6 +1101,7 @@ namespace Grusoft {
 			}
 		}
 		HistoGRAM *GetHisto(int flag=0x0)		{	return qHisto_0;	}
+
 		void InitSampHisto(HistoGRAM* histo, bool isRandom, int flag = 0x0);
 
 		virtual void Observation_AtSamp(LiteBOM_Config config, SAMP_SET& samp, Distribution&distri, int flag = 0x0) { 
@@ -1115,6 +1117,7 @@ namespace Grusoft {
 		virtual void UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst, int flag = 0x0);
 		//根据样本集，修正每个格子的内容(Y_sum,nz...)
 		virtual void Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* hParent, HistoGRAM* histo, int nMostBin, int flag = 0x0);
+		virtual size_t UniqueCount(const SAMP_SET&samp_set, int flag = 0x0);
 		virtual void Samp2Histo_null_hessian(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag = 0x0);
 		virtual void Samp2Histo_null_hessian_sparse(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag = 0x0);
 

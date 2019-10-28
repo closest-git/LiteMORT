@@ -13,6 +13,7 @@ class M_COLUMN(Structure):
                     ('type_x', c_char_p),
                     ('v_min', c_double),
                     ('v_max', c_double),
+                    ('representive', c_float),
                ]
 
 def Mort_PickSamples(pick_samples,df_train,df_test):
@@ -39,6 +40,7 @@ class Mort_Preprocess(object):
         col.name = str(feat).encode('utf8')
         col.data = None
         col.dtype = None
+        col.representive = np.float32(0)
         x_info,type_x = '',''
         if isinstance(X, pd.DataFrame):
             narr = None
@@ -72,7 +74,7 @@ class Mort_Preprocess(object):
             #print("\"{}\":\t{}\ttype={},data={},name={}".format(feat, x_info, col.dtype, col.data, col.name))
         return col
 
-    def __init__(self,X,y,features=None,categorical_feature=None,discrete_feature=None,cXcY=False,  **kwargs):
+    def __init__(self,X,y,params,features=None,categorical_feature=None,discrete_feature=None,cXcY=False,  **kwargs):
         '''
         :param X:
         :param y:
@@ -97,6 +99,8 @@ class Mort_Preprocess(object):
         if cXcY:       #v0.2
             for feat in self.features:
                 col = self.column_info(feat,X,categorical_feature,discrete_feature)
+                if 'representive' in params.__dict__ and feat in params.representive:
+                    col.representive = params.representive[feat]
                 if col.data is not None:
                     self.col_X.append(col)
             col=self.column_info('target',y,categorical_feature,discrete_feature)

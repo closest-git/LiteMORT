@@ -536,6 +536,20 @@ void FeatVec_Q::InitSampHisto(HistoGRAM* histo, bool isRandom, int flag) {
 	}
 }
 
+
+size_t FeatVec_Q::UniqueCount(const SAMP_SET&samp_set, int flag) {
+	size_t i, nSamp = samp_set.nSamp, nUnique;
+	tpQUANTI *quanti = arr(),no;
+	const tpSAMP_ID *samps = samp_set.samps;
+	set<int>mapu; 
+	for (i = 0; i < nSamp; i += 4) {
+		no = quanti[samps[i]];
+		mapu.insert(no);
+	}
+	nUnique = mapu.size();
+	return nUnique;
+}
+
 /*
 	v0.2
 */

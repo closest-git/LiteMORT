@@ -58,6 +58,7 @@ namespace Grusoft {
 			//V_ZERO_DEVIA = 0x10000,	//常值，一般可忽略
 			IS_BUNDLE = 0x20000,	//in Feature Bundle	参见FeatsOnFold::nPick4Split
 			AGGREGATE = 0x80000,
+			REPRESENT_ = 0x1000000
 		};
 		size_t type = 0x0;
 		//bool isSelect = false;
@@ -98,7 +99,7 @@ namespace Grusoft {
 		//注意，统计信息记录在some_set
 		virtual void STA_at(SAMP_SET& some_set, int flag = 0x0) { throw "FeatVector::STA_at is ..."; }
 		virtual void Observation_AtSamp(LiteBOM_Config config, SAMP_SET& samp, Distribution&distri, int flag=0x0)	{	throw "FeatVector::Observation_AtSamp is ...";	}
-
+		virtual size_t UniqueCount(const SAMP_SET&samp_set, int flag=0x0)				{ throw "FeatVector::UniqueCount is ..."; }
 		/*vResi=predict-target		pDown=target-predict*/
 		virtual double UpdateResi(FeatsOnFold *hData_, int flag = 0x0) { throw "FeatVector::UpdateResi is ..."; }
 

@@ -56,10 +56,12 @@ class LiteMORT_params(object):
     def OnArgs(self,dict_param):
         self.isOK = False
         if 'metric' in dict_param:
-            if(dict_param['metric'] in ['regression_l2','mean_squared_error', 'mse', 'l2','l2_root','root_mean_squared_error', 'rmse'] ):
+            if(dict_param['metric'] in ['regression_l2', 'mse', 'l2'] ):
                 self.metric = 'mse'
             elif (dict_param['metric'] in ['regression_l1','mean_absolute_error', 'mae', 'l1']):
                 self.metric = 'mae'
+            elif (dict_param['metric'] in ['mean_squared_error', 'l2_root','root_mean_squared_error', 'rmse'] ):
+                self.metric = 'rmse'
             else:
                 self.metric = dict_param['metric']
         if 'num_leaves' in dict_param:
@@ -103,6 +105,8 @@ class LiteMORT_params(object):
             self.boost_from_average = dict_param['boost_from_average']
         if 'iter_refine' in dict_param:
             self.iter_refine = dict_param['iter_refine']
+        if 'representive' in dict_param:
+            self.representive = dict_param['representive']
         self.n_threads = self.alias_param('n_threads', 0, dict_param, ['n_threads', "n_jobs", "num_threads"])
         self.verbose = self.alias_param('verbose',0,dict_param,['verbosity',"verbose"])
         #if 'early_stop' in dict_param:
@@ -267,7 +271,10 @@ class LiteMORT(object):
             ca.Keys = k.encode('utf8')  # Python 3 strings are Unicode, char* needs a byte string
             if isinstance(v, set):
                 v=list(v)[0]
-            if isinstance(v, str):
+
+            if k is 'representive':
+                pass
+            elif isinstance(v, str):
                 ca.text = v.encode('utf8')
             elif isinstance(v, bool):
                 ca.Values = (c_float)(v==True)
@@ -377,12 +384,12 @@ class LiteMORT(object):
         isUpdate,y_train_1,y_eval_update = self.problem.BeforeFit([X_train_0, y_train], eval_set)
         if isUpdate:
             y_train=y_train_1
-        self.train_set = Mort_Preprocess( X_train_0,y_train,categorical_feature=categorical_feature,discrete_feature=discrete_feature,cXcY=True)
+        self.train_set = Mort_Preprocess( X_train_0,y_train,self.params,categorical_feature=categorical_feature,discrete_feature=discrete_feature,cXcY=True)
         if(eval_set is not None and len(eval_set)>0):
             X_test, y_test=eval_set[0]
             if isUpdate:
                 y_test = y_eval_update[0]
-            self.eval_set = Mort_Preprocess(X_test, y_test, categorical_feature=categorical_feature,discrete_feature=discrete_feature,cXcY=True)
+            self.eval_set = Mort_Preprocess(X_test, y_test, self.params,categorical_feature=categorical_feature,discrete_feature=discrete_feature,cXcY=True)
         #self.EDA(flag)
 
         nTrain, nFeat, nTest = self.train_set.nSample,self.train_set.nFeature, self.eval_set.nSample

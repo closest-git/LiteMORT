@@ -94,6 +94,9 @@ void OnUserParams(LiteBOM_Config&config, PY_ITEM* params, int nParam, int flag =
 				err=-1;				goto END;
 			}
 		}
+		if (strcmp(params[i].Keys, "representive") == 0) {
+			//assert(params[i].arr != nullptr);
+		}
 		if (strcmp(params[i].Keys, "verbose") == 0) {
 			config.verbose = params[i].Values;
 		}
@@ -324,6 +327,11 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 			BIT_SET(hFeat->hDistri->type,Distribution::DISCRETE);
 			BIT_SET(hFeat->type, Distribution::DISCRETE);
 		}
+		if (col->representive > 0) {
+			BIT_SET(hFeat->hDistri->type, Distribution::DISCRETE);
+			BIT_SET(hFeat->type, Distribution::DISCRETE);
+			BIT_SET(hFeat->type, FeatVector::REPRESENT_);
+		}
 	}
 	//if (hFold->hMove != nullptr)
 	//	hFold->hMove->Init_T<Tx, Ty>(nSamp_);
@@ -394,6 +402,12 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 		if (config.feat_selector != nullptr) {
 			hFeat->select.user_rate = config.feat_selector[feat];
 			printf("%d(%.3g)\t", feat, hFeat->select.user_rate);
+		}
+		if (BIT_TEST(hFeat->type, FeatVector::REPRESENT_)) {
+			PY_COLUMN *col = cX_ + feat;
+			assert(hFeat->select.isPick = true);
+			hFeat->select.isPick = false;
+			hFold->present.Append(hFeat, col->representive);
 		}
 		if (hFold->config.verbose==666) {
 			hFeat->hDistri->Dump(feat, false, flag);					//输出distribution信息
@@ -847,7 +861,7 @@ PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_COLUMN *train_data, PY_COLUM
 		vector<FeatsOnFold*> folds;
 		FeatsOnFold *hFold = FeatsOnFold_InitInstance(config, hEDA, "train", train_data, train_target, nSamp, nFeat_0, 1, flag | f1);
 		FeatsOnFold *hEval = nullptr;
-		folds.push_back(hFold);
+		folds.push_back(hFold);		
 		//hFold->ExpandFeat();
 
 		//int nTree = 501;		//出现过拟合

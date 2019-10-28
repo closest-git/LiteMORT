@@ -311,7 +311,7 @@ void ManifoldTree::OnNewLeaf(hMTNode hNode, FeatsOnFold *hData_, const vector<in
 	if (isOnlyAdd)	{
 		leafs.push(hNode);		return;
 	}
-	if (hForest->isPass(hNode)) {
+	if (hForest->isPassNode(hData_,hNode)) {
 		;
 	}
 	else {		
