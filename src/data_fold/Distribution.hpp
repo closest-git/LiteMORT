@@ -429,7 +429,7 @@ namespace Grusoft {
 			CheckUnique(config, nSamp_, val, idx, vUnique, nMostBin*10);
 			if (BIT_TEST(type, Distribution::DISCRETE))
 				nMostBin = vUnique.size() + 3;
-			if (BIT_TEST(type, Distribution::CATEGORY)) {
+			if (BIT_TEST(type, Distribution::CATEGORY) || BIT_TEST(type, Distribution::DISCRETE)) {
 				if (vUnique.size() > 0) {
 					assert(config.feat_quanti > 1);
 					//histo->bins.resize(vUnique.size());

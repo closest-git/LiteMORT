@@ -63,7 +63,8 @@ class Mort_Preprocess(object):
             type_x='S'
             x_info = 'Series'
             narr = X.values
-            pass
+        elif isinstance(X, np.ndarray):
+            narr = X
         else:
             pass
         if narr is not None:

@@ -67,6 +67,7 @@ GBRT::GBRT(FeatsOnFold *hTrain, FeatsOnFold *hEval, double sOOB, MODEL mod_, int
 	printf("\n\n********* GBRT[%s]\n\tnTrainSamp=%d,nTree=%d,maxDepth=%d regress@LEAF=%s thread=%d feat_quanti=%d...",
 		mod,nTrain, nTree, maxDepth, hTrain->config.leaf_regression.c_str(),nThread, hTrain->config.feat_quanti);
 	hTrain->config.dump( );
+	hTrain->present.dump();
 	printf("\n********* GBRT *********\n" );
 	//printf("\n\tlr=%g sample=%g leaf_optimal=\"%s\" num_leaves=%d*********\n********* GBRT *********\n",
 	//	lr, hTrain->config.leaf_optimal.c_str(),hTrain->config.num_leaves);
@@ -331,8 +332,6 @@ int GBRT::IterTrain(int round, int flag) {
 	}
 	return nIter;
 }
-
-
 
 int GBRT::Train(string sTitle, int x, int flag) {
 	GST_TIC(tick);	
@@ -689,6 +688,13 @@ int GBRT::Test(string sTitle, BoostingForest::CASEs& TestSet, int nCls, int flag
 	delete hTestData;			hTestData = nullptr;
 	printf("\n********* GBRT nTest=%d,nTree=%d,time=%g*********\n", nTest, nTree, GST_TOC(tick));
 	return 0x0;
+}
+
+void Representive::dump(int flag) {
+	for (auto present : arrPFeat) {
+		FeatVector *hFeat = present->hFeat;
+		printf("\n\tRepresentive@\"%s\">%.5g", hFeat->nam.c_str(),present->T_min);
+	}
 }
 
 bool Representive::isValid(const MT_BiSplit *hNode, int flag) {

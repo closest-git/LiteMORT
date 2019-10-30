@@ -206,7 +206,10 @@ class LiteMORT(object):
         self.load_dll()
         self._n_classes = None
         self.best_iteration_ = 0
-        self.init(params)
+        self.best_iteration = 0
+        self.best_score = 0
+
+        self.init_params(params)
         if self.params.objective == "binary":
             self.problem = Mort_BinaryClass(self.params.__dict__)
         elif self.params.objective == "regression":
@@ -245,7 +248,7 @@ class LiteMORT(object):
         gc.collect()
         return np_out
 
-    def init(self, params, flag=0x0):
+    def init_params(self, params, flag=0x0):
         if not isinstance(params, LiteMORT_params):
             if isinstance(params,dict):
                 pass
@@ -287,6 +290,7 @@ class LiteMORT(object):
             ca_list.append(ca)
         ca_array = (M_argument * len(ca_list))(*ca_list)
         self.hLIB = self.mort_init(ca_array, len(ca_array),0)
+
 
 
     def EDA(self,flag=0x0):

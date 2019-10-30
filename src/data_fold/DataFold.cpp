@@ -285,7 +285,6 @@ bool LiteBOM_Config::histo_bins_onY()	const {
 	return node_task == histo_Y_split_Y;
 }
 
-
 /*
 */
 void FeatsOnFold::BeforeTrain(BoostingForest *hGBRT, int flag) {

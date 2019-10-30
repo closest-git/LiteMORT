@@ -41,6 +41,7 @@ void SAMP_SET::Alloc(FeatsOnFold *hData_, size_t nSamp_, int flag) {
 	samps = root_set;
 }
 
+
 /*
 	v0.2		cys	
 		3/29/2019
@@ -141,7 +142,7 @@ void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const BoostingForest *hBoosting, 
 	assert(nz <= nMost);
 	nSamp = nz;
 	if (hBoosting->skdu.noT % hData_->config.verbose_eval == 0)
-		;//	printf("\nSAMP_SET::SampleFrom nSamp=%lld[%lld=>%lld] \t", nFrom, nMost, nz);
+		printf("\nSAMP_SET::SampleFrom nSamp=%lld[%lld=>%lld] \t", nFrom, nMost, nz);
 	//printf("\nsamps={%d,%d,%d,...%d,...,%d,%d}", samps[0], samps[1], samps[2], samps[nz / 2], samps[nz - 2], samps[nz - 1]);
 }
 

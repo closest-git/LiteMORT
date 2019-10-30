@@ -49,6 +49,7 @@ namespace Grusoft {
 			arrPFeat.push_back(new FeatPresent(hF, T_));
 		}
 		bool isValid(const MT_BiSplit *hNode,int flag=0x0);
+		void dump(int flag=0x0);
 	};
 
 
