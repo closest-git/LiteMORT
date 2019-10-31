@@ -125,8 +125,8 @@ class COROchann(object):
         self.data_root = data_root
         self.building_meta_df = building_meta_df
         self.weather_df = weather_df
-        #self.some_rows = 500000
-        self.some_rows = None
+        self.some_rows = 500000
+        #self.some_rows = None
         self.df_base = self.Load_Processing()
         self.df_base_shape = self.df_base.shape
 
@@ -254,7 +254,7 @@ def fit_lgbm(train, val,target_meter,fold, devices=(-1,), seed=None, cat_feature
     X_train, y_train = train
     X_valid, y_valid = val
     early_stop = 20
-    verbose_eval = 1
+    verbose_eval = 20
     params = {'num_leaves': 31,'n_estimators':num_rounds,
               'objective': 'regression',
               'max_bin': 256,
@@ -265,7 +265,7 @@ def fit_lgbm(train, val,target_meter,fold, devices=(-1,), seed=None, cat_feature
               "bagging_fraction": bf,
               "feature_fraction": 1,
               "metric": 'l2',"verbose_eval":verbose_eval,'n_jobs':8,
-              "early_stopping_rounds": early_stop, "adaptive": 'weight1', 'verbose': 666,'min_data_in_leaf': 5120,
+              "early_stopping_rounds": early_stop, "adaptive": 'weight1', 'verbose': 0,'min_data_in_leaf': 5120,
               #               "verbosity": -1,
               #               'reg_alpha': 0.1,
               #               'reg_lambda': 0.3
@@ -284,7 +284,8 @@ def fit_lgbm(train, val,target_meter,fold, devices=(-1,), seed=None, cat_feature
         np.savetxt("E:/2/LightGBM-master/examples/regression/case_cys_.csv", d_train, delimiter='\t')
 
     if isMORT:
-        model = LiteMORT(params).fit(X_train, y_train, eval_set=[(X_valid, y_valid)])
+        params['verbose']=666
+        model = LiteMORT(params).fit(X_train, y_train, eval_set=[(X_valid, y_valid)], categorical_feature=cat_features)
         fold_importance = None
     else:
         d_train = lgb.Dataset(X_train, label=y_train, categorical_feature=cat_features)
@@ -312,6 +313,7 @@ seed = 666
 shuffle = False
 kf = KFold(n_splits=folds, shuffle=shuffle, random_state=seed)
 
+cat_features=None
 meter_models=[]
 train_datas = COROchann("train",data_root,building_meta_df,weather_train_df)
 losses=[]
@@ -321,7 +323,7 @@ for target_meter in range(4):
     gc.collect()
     print(f'target_meter={target_meter} X_train={X_train.shape}')
 
-    cat_features = None #train_datas.category_cols
+    cat_features = train_datas.category_cols
     # [X_train.columns.get_loc(cat_col) for cat_col in train_datas.category_cols]
     print('cat_features', cat_features)
     t0=time.time()
@@ -334,7 +336,7 @@ for target_meter in range(4):
         print(f'fold={fold} train={train_data[0].shape},valid={valid_data[0].shape}')
         #     model, y_pred_valid, log = fit_cb(train_data, valid_data, cat_features=cat_features, devices=[0,])
         model, y_pred_valid, log = fit_lgbm(train_data, valid_data,target_meter,fold, cat_features=cat_features,
-                                            num_rounds=10, lr=0.05, bf=1)
+                                            num_rounds=1000, lr=0.05, bf=1)
         y_valid_pred_total[valid_idx] = y_pred_valid
         models_.append(model)
         gc.collect()

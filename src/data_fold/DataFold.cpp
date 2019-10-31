@@ -163,8 +163,9 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 	for (i = 0; i<nFeat; i++)	{
 		FeatVector *hFeat = Feat(i);
 		hFeat->select.hasCheckGain = false;
-		if(i==116)
-			i = 116;
+		if (i != 32) {		//仅用于调试
+			//hFeat->select.isPick =false;
+		}
 		if (hFeat->hDistri!=nullptr && hFeat->hDistri->isPass())
 			continue;
 		if (BIT_TEST(hFeat->type, FeatVector::IS_BUNDLE))
@@ -705,10 +706,15 @@ void FeatVec_Q::UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst,
 	}
 	if(hData_->config.nMostSalp4bins>0 && hData_->isTrain())
 		select_bins = new FS_gene_(this->nam,hData_->config.nMostSalp4bins, qHisto_0->nBins, 0x0);
-	if (wBins != nullptr)
-		delete[] wBins;
-	wBins = new float[qHisto_0->nBins]();
-	wSplit_last = 0;
+	if (this->isCategory()) {
+
+	}	else {
+		if (wBins != nullptr)
+			delete[] wBins;
+		wBins = new float[qHisto_0->nBins]();
+		wSplit_last = 0;
+	}
+
 		//printf("\n FeatVec_Q(%s) nBin=%d a0=%g a1=%g", desc.c_str(),qHisto->bins.size(),qHisto->a0, qHisto->a1 );	
 }
 
@@ -893,8 +899,39 @@ tpDOWN *FeatsOnFold::GetSampleHessian() const {
 		return VECTOR2ARR(lossy->sample_hessian);
 }
 
-
 int *FeatsOnFold::Tag() { return lossy->Tag(); }
+
+void FeatVec_Q::UpdateFruit(const FeatsOnFold *hData_, MT_BiSplit *hBlit, int flag) {
+	//double split = hBlit->fruit->thrshold;
+	if (hBlit->fruit->isY) {
+		//vector<HISTO_BIN>& bins=hBlit->fruit->histo->bins;
+		if (this->isCategory()) {
+			const HistoGRAM *histo = hBlit->fruit->histo_refer;
+			assert(histo!=nullptr && hBlit->fruit->mapFold.size()==0);
+			//hBlit->fruit->mapFold = this->hDistri->mapCategory;
+			for (int i = 0; i < histo->nBins; i++) {
+				int pos = histo->bins[i].tic,fold= histo->bins[i].fold;
+				hBlit->fruit->mapFold.insert(pair<int, int>(pos, fold));
+			}
+		}
+		else {
+			/*assert(bins.size() == vThrsh.size());
+			for (size_t i = 0; i < vThrsh.size(); i++) {
+			bins[i].tic = vThrsh[i];
+			}*/
+		}
+		//hBlit->fruit->T_quanti = -13;
+	}
+	else {
+		/*tpQUANTI q_split = split;		assert(q_split == split);
+		hBlit->fruit->T_quanti = q_split;
+		//assert(split>a0 && split <= a1);
+		float thrsh = vThrsh[q_split];		//严重的BUG之源啊
+		hBlit->fruit->thrshold = thrsh;*/
+		if (hData_->config.split_refine != LiteBOM_Config::REFINE_SPLIT::REFINE_NONE)
+			hFeatSource->RefineThrsh(hData_, hBlit);
+	}
+}
 
 /*
 https://ask.julyedu.com/question/7603

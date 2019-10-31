@@ -334,18 +334,25 @@ void HistoGRAM::RandomCompress(FeatVector *hFV,bool isSwarm,int flag) {
 	}*/
 }
 
-void FRUIT::Set(HistoGRAM*histo, int flag) {
+void FRUIT::Set(const HistoGRAM*histo, int flag) {
 	assert(histo != nullptr);
 	best_feat_id = histo->hFeat->id;
 	split_by = histo->split_by;
-	int pos = histo->fruit_info.tic;
-	tic_left = pos;
-	bin_S0 = histo->bins[pos - 1];			bin_S1 = histo->bins[pos];
 	//assert(fruit->bin_S0.nz>0);
 	mxmxN = histo->fruit_info.mxmxN;			
 	nLeft = histo->fruit_info.nLeft;		nRight = histo->fruit_info.nRight;
 	//fruit->thrshold = item.tic;
-	adaptive_thrsh = histo->split_F(bin_S1.tic);	// bin_S1.split_F;
+	isY = histo->fruit_info.isY;
+	if (isY) {	//参见GreedySplit_Y，不存在bin_S0,bin_S1
+		histo_refer = histo;		//只需要fold信息
+		adaptive_thrsh = histo->fruit_info.adaptive_thrsh;
+	}	else {
+		int pos = histo->fruit_info.tic;
+		assert(pos > 0 && pos < histo->nBins);
+		tic_left = pos;
+		bin_S0 = histo->bins[pos - 1];			bin_S1 = histo->bins[pos];
+		adaptive_thrsh = histo->split_F(bin_S1.tic);	// bin_S1.split_F;
+	}
 	//assert(fruit->adaptive_thrsh!= DBL_MAX);
 	isNanaLeft = false;
 }
@@ -490,6 +497,7 @@ void HistoGRAM::GreedySplit_Y(FeatsOnFold *hData_, const SAMP_SET& samp_set, boo
 		a = bins[i].G_sum / bins[i].H_sum;
 		Y_means.push_back(a);
 	}
+	Y_means.push_back(DBL_MAX);		//always last bin for NA
 	sort_indexes(Y_means, idx);
 	for (i = 0; i < nBins-1; i++) {		assert(Y_means[idx[i]]<= Y_means[idx[i+1]]);	}
 	for (i = 0; i < nBins; i++) {
@@ -516,7 +524,7 @@ void HistoGRAM::GreedySplit_Y(FeatsOnFold *hData_, const SAMP_SET& samp_set, boo
 			fruit_info.nLeft = nLeft;		fruit_info.nRight = nRight;
 			//fruit->thrshold = Y_means[idx[i]];
 			fruit_info.adaptive_thrsh = Y_means[idx[i]];
-			sprintf(temp, "L(%g/%g %d) R(%g/%g %d)", gL, hL, nLeft, gR, hR, nRight );
+			//sprintf(temp, "L(%g/%g %d) R(%g/%g %d)", gL, hL, nLeft, gR, hR, nRight );
 			//fruit->sX = temp;
 		}
 	LOOP:

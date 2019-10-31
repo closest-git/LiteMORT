@@ -272,8 +272,9 @@ double FLOAT_ZERO(double a,double ruler) {
 */
 double MT_BiSplit::AGG_CheckGain(FeatsOnFold *hData_, FeatVector *hFeat, int flag) {
 	assert(BIT_TEST(hFeat->type, FeatVector::AGGREGATE));
-	FRUIT *fruit = nullptr;
-	HistoGRAM *histo = fruit->histo;
+	throw "MT_BiSplit::AGG_CheckGain is ......";
+	/*FRUIT *fruit = nullptr;
+	const HistoGRAM *histo = fruit->histo_refer;
 	FeatVector *hAF = nullptr;
 	int nExpand = 100, i, exp_no =-1;
 	double mxmxN = 0;
@@ -284,7 +285,7 @@ double MT_BiSplit::AGG_CheckGain(FeatsOnFold *hData_, FeatVector *hFeat, int fla
 			mxmxN = fruit->mxmxN, exp_no = i;
 		}
 	}
-	hAF->agg_no = exp_no;
+	hAF->agg_no = exp_no;*/
 	return 0;
 }
 
@@ -429,8 +430,8 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 			continue;
 		FeatVector *hFeat = hData_->Feat(picks[i]);
 		if (hFeat->isCategory()) {
-			histo->GreedySplit_X(hData_, samp_set);
-			//histo->GreedySplit_Y(hData_, samp_set, false);
+			//histo->GreedySplit_X(hData_, samp_set);
+			histo->GreedySplit_Y(hData_, samp_set, false);
 		}	else {
 			if (node_task == LiteBOM_Config::split_X)
 				histo->GreedySplit_X(hData_, samp_set);

@@ -728,7 +728,7 @@ namespace Grusoft {
 			size_t i, nSamp = hBlit->nSample();
 			Tx *arrX = arr();
 			Regression *regress = hBlit->regression;
-			HistoGRAM *histo = hBlit->fruit->histo;
+			const HistoGRAM *histo = hBlit->fruit->histo_refer;
 			//printf("%.4g; ", step*shrink);
 			if (regress == nullptr && histo == nullptr)	throw "Update_regression regress=nullptr!!!";
 			for (i = 0; i < nSamp; i++) {
@@ -769,7 +769,7 @@ namespace Grusoft {
 			//if( hBlit->fruit->isY )
 			//	thrsh = hBlit->fruit->thrshold;
 			MT_BiSplit *left = hBlit->left, *rigt = hBlit->right, *child = nullptr;
-			int pos;
+			int pos,fold=-1;
 			size_t nSamp = hBlit->nSample(), i, nLeft = 0, nRigt = 0;
 			if (hData_->atTrainTask())
 				assert(left != nullptr && rigt != nullptr);
@@ -787,7 +787,7 @@ namespace Grusoft {
 				tpSAMP_ID *samps = hBlit->samp_set.samps, *left = hBlit->samp_set.left, *rigt = hBlit->samp_set.rigt;
 				lSet = hBlit->samp_set;		rSet = hBlit->samp_set;	//直接复制父节点的一些数据
 				lSet.isRef = true;			rSet.isRef = true;
-				HistoGRAM *histo = hBlit->fruit->histo;
+				const HistoGRAM *histo = hBlit->fruit->histo_refer;
 				for (i = 0; i < nSamp; i++) {
 					samp = hBlit->samp_set.samps[i];
 					//int pos = hData_->isQuanti ? val[samp] : histo->AtBin_(val[samp]);
@@ -795,11 +795,13 @@ namespace Grusoft {
 						pos = val[samp];
 					}
 					else if (isCategory()) {	
-						pos = hBlit->fruit->mapCategory[(int)(val[samp])];
+						pos = this->hDistri->mapCategory[(int)(val[samp])];
 					}else{		//predict,test对应的数据集并没有格子化!!!
+						assert(0);
 						pos = histo->AtBin_(val[samp]);		
+						fold = pos < 0 ? 0 : histo->bins[pos].fold;
 					}
-					int fold = pos < 0 ? 0 : histo->bins[pos].fold;
+					fold = hBlit->fruit->GetFold(pos);
 					if (fold <= 0)
 						left[nLeft++] = samp;
 					else
@@ -822,7 +824,8 @@ namespace Grusoft {
 					if (isQuanti) {	//训练数据格子化
 						pos = val[samp];
 					}	else if (isCategory()) {
-						pos = hBlit->fruit->mapCategory[(int)(val[samp])];
+						//pos = hBlit->fruit->mapCategory[(int)(val[samp])];
+						pos = hBlit->fruit->mapFold[(int)(val[samp])];
 					}	else {		//predict,test对应的数据集并没有格子化!!!
 						pos = histo->AtBin_(val[samp]);		
 					}
@@ -1121,30 +1124,7 @@ namespace Grusoft {
 		virtual void Samp2Histo_null_hessian(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag = 0x0);
 		virtual void Samp2Histo_null_hessian_sparse(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag = 0x0);
 
-		virtual void UpdateFruit(const FeatsOnFold *hData_, MT_BiSplit *hBlit, int flag = 0x0) {
-			//double split = hBlit->fruit->thrshold;
-			if (hBlit->fruit->isY) {
-				//vector<HISTO_BIN>& bins=hBlit->fruit->histo->bins;
-				if (this->isCategory())
-					hBlit->fruit->mapCategory = this->hDistri->mapCategory;
-				else {
-					/*assert(bins.size() == vThrsh.size());
-					for (size_t i = 0; i < vThrsh.size(); i++) {
-						bins[i].tic = vThrsh[i];
-					}*/
-				}
-				//hBlit->fruit->T_quanti = -13;
-			}
-			else {
-				/*tpQUANTI q_split = split;		assert(q_split == split);
-				hBlit->fruit->T_quanti = q_split;
-				//assert(split>a0 && split <= a1);
-				float thrsh = vThrsh[q_split];		//严重的BUG之源啊
-				hBlit->fruit->thrshold = thrsh;*/
-				if(hData_->config.split_refine!= LiteBOM_Config::REFINE_SPLIT::REFINE_NONE)
-					hFeatSource->RefineThrsh(hData_, hBlit);
-			}
-		}
+		virtual void UpdateFruit(const FeatsOnFold *hData_, MT_BiSplit *hBlit, int flag = 0x0);
 
 		friend class FeatVec_Bundle;
 	};

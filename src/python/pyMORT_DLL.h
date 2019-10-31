@@ -41,7 +41,7 @@ extern "C" {
 		PY_ITEM* params, int nParam, const size_t flag);
 
 	PYMORT_DLL_API void LiteMORT_fit_1(void *, PY_COLUMN *train, PY_COLUMN *target, size_t nSamp, size_t nFeat_0, PY_COLUMN *eval, PY_COLUMN *eval_target, size_t nEval, size_t flag);
-	PYMORT_DLL_API void LiteMORT_predict_1(void *, PY_COLUMN *X, PY_COLUMN *y, size_t flag);
+	PYMORT_DLL_API void LiteMORT_predict_1(void *, PY_COLUMN *X, PY_COLUMN *y, size_t nFeat_0,size_t nSamp,  size_t flag);
 
 
 #ifdef __cplusplus

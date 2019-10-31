@@ -122,7 +122,7 @@ namespace Grusoft {
 
 		}
 		int best_feat_id=-1;
-		HistoGRAM *histo = nullptr;		//仅指向，不再删除
+		const HistoGRAM *histo_refer = nullptr;		//仅指向，不再删除
 		HISTO_BIN bin_S0, bin_S1;						//有变化，比较危险诶
 		double split_0,adaptive_thrsh, split_1;					//可指向binSplit中间，所以保留		splitonY也需要这个值
 		SPLIT_HISTOGRAM split_by = BY_VALUE;
@@ -140,7 +140,15 @@ namespace Grusoft {
 			}
 		}
 		//tpQUANTI T_quanti = 0;
-		MAP_CATEGORY mapCategory;
+		MAP_CATEGORY mapFold;
+		inline int GetFold(int pos) {
+			if (mapFold.find(pos) == mapFold.end()) {
+				return -1;
+			}	else {
+				int fold = mapFold[pos];
+				return fold;
+			}
+		}
 		//需要重新设计，参见SplitOn以及AtLeaf函数
 		bool isY = false;
 		bool isNanaLeft = false;
@@ -154,7 +162,7 @@ namespace Grusoft {
 		//double lft_impuri,rgt_impuri;		//为了调试
 		virtual ~FRUIT();
 		
-		virtual void Set(HistoGRAM*histo,int flag=0x0);		
+		virtual void Set(const HistoGRAM*histo,int flag=0x0);		
 	};
 
 	class HistoGRAM_BUFFER;
@@ -210,7 +218,7 @@ namespace Grusoft {
 		HistoGRAM* FromDiff(const HistoGRAM*hP, const HistoGRAM*hB,bool isBuffer, int flag = 0x0);
 
 		template<typename Tx,typename Tf>
-		bool At(Tx x, Tf&f,int flag = 0x0) {
+		bool At(Tx x, Tf&f,int flag = 0x0) const {
 			double rigt=DBL_MAX;
 			bool isFind=false;
 			size_t i;
@@ -227,7 +235,7 @@ namespace Grusoft {
 		}
 
 		template<typename Tx>
-		int AtBin_(Tx x, int flag = 0x0) {
+		int AtBin_(Tx x, int flag = 0x0) const {
 			double rigt = DBL_MAX;
 			//bool isFind = false;
 			int pos=-1;

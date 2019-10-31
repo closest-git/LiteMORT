@@ -300,7 +300,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 		if (col->isFloat() ) {
 			hFold->feats.push_back(new FeatVec_T<float>(nSamp_, i, desc + std::to_string(i),flagF));		
 		}	else if (col->isFloat16()) {	//NO REFER!!!
-			if(hFold->config.verbose==666)
+			if(hFold->config.verbose>666)
 				printf("----%d\t \"%s\" is Float16\n", i,col->name);
 			hFold->feats.push_back(new FeatVec_T<float>(nSamp_, i, desc + std::to_string(i), flag));
 		}	else if (col->isInt()) {
@@ -578,7 +578,41 @@ PYMORT_DLL_API void LiteMORT_predict(void *mort_0,float *X, tpY *y, size_t nFeat
 		}
 	}
 	delete hDat;
+}
 
+/*
+	v0.2
+*/
+PYMORT_DLL_API void LiteMORT_predict_1(void *mort_0, PY_COLUMN *X, PY_COLUMN *col_y, size_t nFeat_0,size_t nSamp,  size_t flag) {
+	tpY *y = (tpY *)col_y->data;
+	MORT *mort = MORT::From(mort_0);
+	ExploreDA *hEDA = mort->hEDA;
+	LiteBOM_Config& config = mort->config;
+	if (mort->hGBRT == nullptr) {
+		printf("********* LiteMORT_predict model is NULL!!!\n");
+		return;
+	}
+
+	//yÓ¦ÉèÎªnullptr
+	//FeatsOnFold *hDat = FeatsOnFold_InitInstance<float, tpY>(config, hEDA, "predict", X, y, nSamp, nFeat_0, 1, flag | FeatsOnFold::DF_PREDIC);
+	FeatsOnFold *hDat = FeatsOnFold_InitInstance(config, hEDA, "predict", X, col_y, nSamp, nFeat_0, 1, flag | FeatsOnFold::DF_PREDIC);
+
+	printf("\n********* LiteMORT_predict nSamp=%d,nFeat=%d hEDA=%p********* \n\n", nSamp, nFeat_0, hEDA);
+	//hDat->nam = "predict";
+	mort->hGBRT->Predict(hDat);
+	FeatVector *pred = hDat->GetPrecict();
+	FeatVec_T<tpY> *fY = dynamic_cast<FeatVec_T<tpY> *>(pred);	assert(fY != nullptr);
+	tpY *p_val = fY->arr();
+	for (size_t i = 0; i<nSamp; i++)
+		y[i] = p_val[i];
+	if (config.objective == "binary") {
+		//vEXP(nSamp, y);
+		for (size_t i = 0; i < nSamp; i++) {
+			y[i] = exp(y[i]);
+			y[i] = (y[i] / (1 + y[i]));
+		}
+	}
+	delete hDat;
 }
 
 /*

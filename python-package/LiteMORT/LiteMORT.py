@@ -185,6 +185,9 @@ class LiteMORT(object):
         self.mort_predcit = self.dll.LiteMORT_predict
         self.mort_predcit.argtypes = [c_void_p,POINTER(c_float), POINTER(c_double), c_size_t, c_size_t, c_size_t]
 
+        self.mort_predcit_1 = self.dll.LiteMORT_predict_1
+        self.mort_predcit_1.argtypes = [c_void_p,POINTER(M_COLUMN), POINTER(M_COLUMN), c_size_t, c_size_t, c_size_t]
+
         self.mort_eda = self.dll.LiteMORT_EDA
         self.mort_eda.argtypes = [c_void_p,POINTER(c_float), POINTER(c_double), c_size_t, c_size_t, c_size_t,
                                   POINTER(M_argument), c_int, c_size_t]
@@ -384,6 +387,8 @@ class LiteMORT(object):
     '''
     def fit(self,X_train_0, y_train,eval_set=None,  feat_dict=None,categorical_feature=None,discrete_feature=None, params=None,flag=0x0):
         print("====== LiteMORT_fit X_train_0={} y_train={}......".format(X_train_0.shape, y_train.shape))
+        self.categorical_feature = categorical_feature
+        self.discrete_feature = discrete_feature
         gc.collect()
         isUpdate,y_train_1,y_eval_update = self.problem.BeforeFit([X_train_0, y_train], eval_set)
         if isUpdate:
@@ -423,27 +428,7 @@ class LiteMORT(object):
         Y_ = self.problem.OnResult(Y_,pred_leaf,pred_contrib,raw_score)
         return Y_
 
-    def predict_raw(self, X_,pred_leaf=False, pred_contrib=False,raw_score=False,flag=0x0):
-        """Predict class probabilities for X.
-
-        Parameters
-        ----------
-        X : {array-like, sparse matrix}, shape (n_samples, n_features)
-            The input samples. Internally, it will be converted to
-            ``dtype=np.float32`` and if a sparse matrix is provided
-            to a sparse ``csr_matrix``.
-
-        Raises
-        ------
-        AttributeError
-            If the ``loss`` does not support probabilities.
-
-        Returns
-        -------
-        p : array, shape (n_samples, n_classes)
-            The class probabilities of the input samples. The order of the
-            classes corresponds to that in the attribute `classes_`.
-        """
+    def predict_raw_v0(self, X_,pred_leaf=False, pred_contrib=False,raw_score=False,flag=0x0):
         dim, nFeat = X_.shape[0], X_.shape[1];
         Y_ = np.zeros(dim, dtype=np.float64)
         tY = Y_  # self.Y_t(Y_, np.float64)
@@ -451,6 +436,15 @@ class LiteMORT(object):
         self.mort_predcit(self.hLIB, tX.ctypes.data_as(POINTER(c_float)), tY.ctypes.data_as(POINTER(c_double)), nFeat,dim, 0)
         if not (tX is X_):
             del tX;
+        gc.collect()
+        return Y_
+
+    def predict_raw(self, X_,pred_leaf=False, pred_contrib=False,raw_score=False,flag=0x0):
+        dim, nFeat = X_.shape[0], X_.shape[1];
+        Y_ = np.zeros(dim, dtype=np.float64)
+        predict_set = Mort_Preprocess(X_, Y_, self.params, categorical_feature=self.categorical_feature,
+                                         discrete_feature=self.discrete_feature, cXcY=True)
+        self.mort_predcit_1(self.hLIB, predict_set.cX,predict_set.cY, nFeat,dim, 0)
         gc.collect()
         return Y_
 
