@@ -89,7 +89,7 @@ namespace Grusoft {
 
 		struct vDISTINCT{
 			enum {
-				BASIC,LARGE=0x10,
+				BASIC,LARGE=0x10,TINY=0x20,
 			};
 			vDISTINCT(double v_,size_t n_) : val(v_),nz(n_)	{
 			}
@@ -104,6 +104,8 @@ namespace Grusoft {
 		vector<vDISTINCT>  vUnique;		//vThrsh
 		MAP_CATEGORY mapCategory;
 		HistoGRAM *histo = nullptr;
+
+		int nHistoBin() {	return histo == nullptr ? 0 : histo->nBins;		}
 		
 		vector<BIN_FEATA> binFeatas;
 		double split_F(int no, int flag=0x0) const;
@@ -253,6 +255,8 @@ namespace Grusoft {
 			assert(nz == nA);
 		}
 
+		BIN_FEATA& AddBin(const LiteBOM_Config&config, size_t nz,double pre, double cur, int flag);		//返回FEATA，设置其它信息
+		int HistoOnFrequncy_small(const LiteBOM_Config&config, vector<vDISTINCT>& vUnique, int i_0, int i_1, size_t T, int flag);
 		//always last bin for NA
 		void HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTINCT>& vUnique, size_t nA0, size_t nMostBin, int flag = 0x0);
 		void HistoOnUnique_1(const LiteBOM_Config&config, vector<vDISTINCT>& vUnique, size_t nA0, bool isMap, int flag = 0x0);

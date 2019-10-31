@@ -201,7 +201,7 @@ namespace Grusoft {
 		}
 		virtual ~HistoGRAM();		
 
-		virtual void CheckValid(const LiteBOM_Config&config,  int flag = 0x0);
+		virtual void CheckValid(const LiteBOM_Config&config, vector<BIN_FEATA>*featas=nullptr,  int flag = 0x0);
 		virtual void CompressBins(int flag=0x0);
 		virtual void TicMap(tpQUANTI*map,int flag);
 

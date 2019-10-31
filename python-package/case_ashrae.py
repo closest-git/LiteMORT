@@ -22,7 +22,7 @@ from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from pandas.api.types import is_categorical_dtype
 
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
-isMORT = True
+#isMORT = True
 gbm='MORT' if isMORT else 'LGB'
 
 def reduce_mem_usage(df, use_float16=False):
@@ -125,7 +125,8 @@ class COROchann(object):
         self.data_root = data_root
         self.building_meta_df = building_meta_df
         self.weather_df = weather_df
-        self.some_rows=None
+        #self.some_rows = 500000
+        self.some_rows = None
         self.df_base = self.Load_Processing()
         self.df_base_shape = self.df_base.shape
 
@@ -209,6 +210,9 @@ class COROchann(object):
                              parse_dates=['timestamp'])
             if self.source=="train":
                 df = df.query('not (building_id <= 104 & meter == 0 & timestamp <= "2016-05-20")')
+                if self.some_rows is not None:
+                    df, _ = Mort_PickSamples(self.some_rows, df, None)
+                    print(f'====== Some Samples@{self.source} ... data={df.shape}')
             #df['date'] = df['timestamp'].dt.date
             df["hour"] = np.uint8(df["timestamp"].dt.hour)
             df["weekend"] = np.uint8(df["timestamp"].dt.weekday)    #cys
@@ -245,22 +249,23 @@ print(weather_train_df.head())
 weather_test_df = Whether('test', data_root).df()
 print(weather_test_df.head())
 
-def fit_lgbm(train, val,target_meter, devices=(-1,), seed=None, cat_features=None, num_rounds=1500, lr=0.1, bf=0.1):
+def fit_lgbm(train, val,target_meter,fold, devices=(-1,), seed=None, cat_features=None, num_rounds=1500, lr=0.1, bf=0.1):
     t0=time.time()
     X_train, y_train = train
     X_valid, y_valid = val
     early_stop = 20
-    verbose_eval = 20
-    params = {'num_leaves': 31,
+    verbose_eval = 1
+    params = {'num_leaves': 31,'n_estimators':num_rounds,
               'objective': 'regression',
+              'max_bin': 256,
               #               'max_depth': -1,
               'learning_rate': lr,
               "boosting": "gbdt",
               "bagging_freq": 5,
               "bagging_fraction": bf,
-              "feature_fraction": 0.9,
-              "metric": 'l2',"verbose_eval":verbose_eval,
-              "early_stopping_rounds": early_stop, "adaptive": 'weight1', 'verbose': 666,
+              "feature_fraction": 1,
+              "metric": 'l2',"verbose_eval":verbose_eval,'n_jobs':8,
+              "early_stopping_rounds": early_stop, "adaptive": 'weight1', 'verbose': 666,'min_data_in_leaf': 5120,
               #               "verbosity": -1,
               #               'reg_alpha': 0.1,
               #               'reg_lambda': 0.3
@@ -273,6 +278,10 @@ def fit_lgbm(train, val,target_meter, devices=(-1,), seed=None, cat_features=Non
         params.update({'device': 'gpu', 'gpu_device_id': device})
 
     params['seed'] = seed
+    if False:
+        d_train = pd.concat([pd.DataFrame(y_train), X_train], ignore_index=True, axis=1)
+        print("X_train={}, y_train={} d_train={}".format(X_train.shape, y_train.shape, d_train.shape))
+        np.savetxt("E:/2/LightGBM-master/examples/regression/case_cys_.csv", d_train, delimiter='\t')
 
     if isMORT:
         model = LiteMORT(params).fit(X_train, y_train, eval_set=[(X_valid, y_valid)])
@@ -281,7 +290,7 @@ def fit_lgbm(train, val,target_meter, devices=(-1,), seed=None, cat_features=Non
         d_train = lgb.Dataset(X_train, label=y_train, categorical_feature=cat_features)
         d_valid = lgb.Dataset(X_valid, label=y_valid, categorical_feature=cat_features)
         watchlist = [d_train, d_valid]
-        print('training LGB:')
+        print('training LGB: parmas=',params)
         model = lgb.train(params,
                           train_set=d_train,
                           num_boost_round=num_rounds,
@@ -294,7 +303,7 @@ def fit_lgbm(train, val,target_meter, devices=(-1,), seed=None, cat_features=Non
     # predictions
     y_pred_valid = model.predict(X_valid, num_iteration=model.best_iteration)
     oof_loss = mean_squared_error(y_valid, y_pred_valid)  # target is already in log scale
-    print(f'Fold:{target_meter} RMSLE: {oof_loss:.4f} time={time.time() - t0:.5g}')
+    print(f'METER:{target_meter} Fold:{fold} MSE: {oof_loss:.4f} time={time.time() - t0:.5g}')
     input("......")
     return model, y_pred_valid, log
 
@@ -305,30 +314,35 @@ kf = KFold(n_splits=folds, shuffle=shuffle, random_state=seed)
 
 meter_models=[]
 train_datas = COROchann("train",data_root,building_meta_df,weather_train_df)
-
+losses=[]
 for target_meter in range(4):
     X_train, y_train = train_datas.data_X_y(target_meter)
     y_valid_pred_total = np.zeros(X_train.shape[0])
     gc.collect()
-    print('target_meter', target_meter, X_train.shape)
+    print(f'target_meter={target_meter} X_train={X_train.shape}')
 
-    cat_features = [X_train.columns.get_loc(cat_col) for cat_col in train_datas.category_cols]
+    cat_features = None #train_datas.category_cols
+    # [X_train.columns.get_loc(cat_col) for cat_col in train_datas.category_cols]
     print('cat_features', cat_features)
-
+    t0=time.time()
+    fold = 0
     models_ = []
     for train_idx, valid_idx in kf.split(X_train, y_train):
         train_data = X_train.iloc[train_idx, :], y_train[train_idx]
         valid_data = X_train.iloc[valid_idx, :], y_train[valid_idx]
 
-        print('train', len(train_idx), 'valid', len(valid_idx))
+        print(f'fold={fold} train={train_data[0].shape},valid={valid_data[0].shape}')
         #     model, y_pred_valid, log = fit_cb(train_data, valid_data, cat_features=cat_features, devices=[0,])
-        model, y_pred_valid, log = fit_lgbm(train_data, valid_data,target_meter, cat_features=train_datas.category_cols,
-                                            num_rounds=1000, lr=0.05, bf=0.7)
+        model, y_pred_valid, log = fit_lgbm(train_data, valid_data,target_meter,fold, cat_features=cat_features,
+                                            num_rounds=10, lr=0.05, bf=1)
         y_valid_pred_total[valid_idx] = y_pred_valid
         models_.append(model)
         gc.collect()
+        fold=fold+1
         #break
-
+    meter_loss = mean_squared_error(y_train, y_valid_pred_total)
+    print(f'======METER:{target_meter} MSE: {meter_loss:.4f} time={time.time() - t0:.5g}\n')
+    losses.append(meter_loss)
     meter_models.append(models_)
     sns.distplot(y_train)
     del X_train, y_train
@@ -362,5 +376,6 @@ for target_meter in range(4):
     del X_test
     gc.collect()
 
-sample_submission.to_csv('submission.csv', index=False, float_format='%.4f')
+submit_path = f'{data_root}/[{gbm}]_[{losses}].csv.gz'
+sample_submission.to_csv(submit_path, index=False, float_format='%.4f',compression='gzip')
 print(sample_submission.head())

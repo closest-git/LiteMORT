@@ -197,13 +197,16 @@ void HistoGRAM::TicMap(tpQUANTI*map, int flag) {
 	}
 }
 
-void HistoGRAM::CheckValid(const LiteBOM_Config&config,  int flag) {
+void HistoGRAM::CheckValid(const LiteBOM_Config&config, vector<BIN_FEATA>*featas,int flag) {
 	int i,  nZ = 0, tic_0=-1;
 	for (i = 0; i < nBins; i++) {		//这样最快
 		//if (i<nBin - 1 && bins[i].nz == 0) { continue; }
 		nZ += bins[i].nz;
 		//assert(bins[i].nz>=config.min_data_in_bin || i>= nBin-2);
 		assert(bins[i].tic > tic_0);
+		if (i > 0 && featas!=nullptr) {
+			assert((*featas)[i-1].split_F < (*featas)[i].split_F);
+		}
 		tic_0 = bins[i].tic;
 	}
 	assert(nZ==nSamp);

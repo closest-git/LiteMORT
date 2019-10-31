@@ -207,31 +207,145 @@ void Distribution::HistoOnUnique_1(const LiteBOM_Config&config, vector<vDISTINCT
 	histo->CheckValid(config);
 }
 
+BIN_FEATA& Distribution::AddBin(const LiteBOM_Config&config, size_t nz,double left_outer,double left_inner, int flag) {
+	assert(left_inner >= left_outer);
+	if (nz > 0) {
+	}	else {
+		assert(flag==-1);		//always last bin for NA
+	}
+	int noBin = histo->nBins;
+	HISTO_BIN& bin = histo->bins[noBin];
+	BIN_FEATA& feata = binFeatas[noBin];
+	bin.tic = noBin;	//tic split_F必须一致
+						//bin.split_F = i_0 > 0 ? (v0 + vUnique[i_0 - 1].val) / 2 : v0;
+	feata.split_F = (left_outer + left_inner) / 2 ;
+	bin.nz = nz;
+	//feata.density = nz*1.0 / nDistinc;
+
+	histo->nBins++;
+	assert(histo->nBins<binFeatas.size());
+	return feata;
+}
+
+int Distribution::HistoOnFrequncy_small(const LiteBOM_Config&config, vector<vDISTINCT>& vUnique, int i_0,int i_1, size_t T_bin, int flag) {
+	size_t nz = 0,mimimum=config.min_data_in_bin,nBin0 = histo->nBins;
+	double v0;
+	int i;
+	while (i_0 <= i_1) {
+		nz = 0;
+		v0 = vUnique[i_0].val;
+		if (i_0 == 228) {	//仅用于调试
+			i_0 = 228;
+		}
+		for (i = i_0; i <= i_1; i++) {
+			assert(vUnique[i].type != vDISTINCT::LARGE);
+			nz += vUnique[i].nz;
+			if (nz >= T_bin)
+				break;
+			if (isUnique && nz >= mimimum)
+				break;
+		}
+		AddBin(config,nz, i_0>0 ? vUnique[i_0 - 1].val : v0, v0, 0x0);
+		i_0 = i + 1;
+	}
+	return histo->nBins - nBin0;
+}
+
 /*
 	always last bin for NA
 	v0.1	cys
-		8/30/2019
-*/
-void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTINCT>& vUnique,size_t nA0, size_t nMostBin, int flag) {
+		 8/30/2019
+	v0.2	cys
+		10/31/2019
+
+void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTINCT>& vUnique, size_t nA0, size_t nMostBin, int flag) {
 	assert(histo != nullptr);
-	size_t nA = 0, T_avg = nA0*1.0 / nMostBin,SMALL_na=0, BIG_bins=0,nUnique= vUnique.size(),nz;
-	for (int i = 0; i < nUnique;i++) {
+	size_t nA = 0, avg = nA0*1.0 / nMostBin, SMALL_na_0 = 0, BIG_bins_0 = 0, nUnique = vUnique.size(), nz, minimum=config.min_data_in_bin, T_222;
+	//size_t
+	double a0 = vUnique[0].val, a1 = vUnique[vUnique.size() - 1].val;
+	for (int i = 0; i < nUnique; i++) {
 		nA += vUnique[i].nz;
-		if (vUnique[i].nz <= T_avg*2) {
-			SMALL_na += vUnique[i].nz;
+		if (vUnique[i].nz <= avg) {
+			SMALL_na_0 += vUnique[i].nz;
 		}	else {
+			vUnique[i].type = vDISTINCT::LARGE;	 BIG_bins_0++;
+			//printf("%.4g=%d\t", vUnique[i].val, vUnique[i].nz);
+		}
+	}
+	assert(BIG_bins_0<nMostBin);
+	histo->nBigBins = BIG_bins_0;
+	size_t SMALL_nRight = SMALL_na_0, BIG_nRight = BIG_bins_0;
+	double T_base,vLeftInner,vLeftOuter;
+	int nBin = 0, last = -1;
+	
+	T_base = SMALL_nRight*1.0 / (nMostBin-histo->nBins - BIG_nRight);
+	for (int i = 0; i < nUnique; i++) {
+		if (last == -1) { 
+			nz = 0;		last = i; 
+			vLeftInner = vUnique[i].val;
+			vLeftOuter = i > 0 ? vUnique[i - 1].val : vLeftInner;
+		}		
+		if (histo->nBins == nMostBin) {		//哎，总是分不好
+			while (i < nUnique)	nz += vUnique[i++].nz;
+			AddBin(config, nz, vLeftOuter, vLeftInner, 0x0);
+			printf("\tHisto  undesirable BIN(nz=%lld)@[%d-%d]\n",nz, last, nUnique);
+			SMALL_nRight = 0;		 BIG_nRight = 0;
+			break;
+		}		
+		if (vUnique[i].type == vDISTINCT::LARGE) {			
+			AddBin(config,vUnique[i].nz, vLeftOuter, vLeftInner, 0x0);		
+			last = -1;			BIG_nRight--;
+			continue;
+		}
+
+		nz += vUnique[i].nz;
+		if ( i+1== nUnique || vUnique[i+1].type == vDISTINCT::LARGE ) {
+			if (histo->nBins == 132) {
+				histo->nBins = 132;		//仅用于调试
+			}
+			nBin = HistoOnFrequncy_small(config,vUnique,last,i, size_t(T_base+1),0x0);
+			assert(SMALL_nRight >= nz);
+			SMALL_nRight -= nz;
+			last = -1;
+		}	else {
+			//nz += vUnique[i].nz;		
+		}
+	}
+	assert(SMALL_nRight ==0 && BIG_nRight ==0);
+	double delta = double(fabs(a1 - a0)) / nMostBin / 100.0;
+	double d_max = DBL_MAX;	// std::numeric_limits<double>::max();
+	if (nUnique < nMostBin && nA>nMostBin * 10) {
+		d_max = a1 + delta;
+		isUnique = true;
+		//assert(histo->bins.size()== nUnique);
+	}
+	else {
+	}
+	AddBin(config,nSamp - nA, a1,d_max, -1);		//always last bin for NA
+	histo->CheckValid(config,&binFeatas);
+}*/
+
+void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTINCT>& vUnique, size_t nA0, size_t nMostBin, int flag) {
+	assert(histo != nullptr);
+	size_t nA = 0, T_avg = nA0*1.0 / nMostBin, SMALL_na = 0, BIG_bins = 0, nUnique = vUnique.size(), nz;
+	for (int i = 0; i < nUnique; i++) {
+		nA += vUnique[i].nz;
+		if (vUnique[i].nz <= T_avg * 2) {
+			SMALL_na += vUnique[i].nz;
+		}
+		else {
 			vUnique[i].type = vDISTINCT::LARGE;	 BIG_bins++;
 		}
 	}
 	//if (BIG_bins > 0)	while会自动更新
 	//	T_avg = SMALL_na*1.0 / (nMostBin - BIG_bins);
-	size_t T_avg_small = MAX2(config.min_data_in_bin, SMALL_na / (nMostBin - BIG_bins)/ 10);
+	size_t T_avg_small = MAX2(config.min_data_in_bin, SMALL_na / (nMostBin - BIG_bins) / 10);
 	T_avg_small = config.min_data_in_bin;
 
 	histo->nBigBins = BIG_bins;
 
-	size_t i_0 = -1,  noBin = 0, pos, nDistinc=0;
-	double a0 = vUnique[0].val, a1 = vUnique[vUnique.size()-1].val, v0;
+	size_t i_0 = -1, noBin = 0, pos, nDistinc = 0;
+	double a0 = vUnique[0].val, a1 = vUnique[vUnique.size() - 1].val, v0;
 	double T_min_decrimi = 0, crimi = 0;
 	bool isDcrimi = corr.dcrimi != nullptr;
 	if (isDcrimi) {
@@ -242,19 +356,19 @@ void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTIN
 		HISTO_BIN& bin = histo->bins[noBin];
 		BIN_FEATA& feata = binFeatas[noBin];
 		bin.tic = noBin;	//tic split_F必须一致
-		//bin.split_F = i_0 > 0 ? (v0 + vUnique[i_0 - 1].val) / 2 : v0;
+							//bin.split_F = i_0 > 0 ? (v0 + vUnique[i_0 - 1].val) / 2 : v0;
 		feata.split_F = i_0 > 0 ? (v0 + vUnique[i_0 - 1].val) / 2 : v0;
 		//bin.split_F =  v0;
-		T_avg = nMostBin - noBin > BIG_bins ? MAX2(config.min_data_in_bin, SMALL_na / (nMostBin- noBin- BIG_bins)) : config.min_data_in_bin;
-		T_avg = MAX2(T_avg, T_avg_small) ;	//T_avg会越来越小
+		T_avg = nMostBin - noBin > BIG_bins ? MAX2(config.min_data_in_bin, SMALL_na / (nMostBin - noBin - BIG_bins)) : config.min_data_in_bin;
+		T_avg = MAX2(T_avg, T_avg_small);	//T_avg会越来越小
 		if (isDcrimi) {
 			crimi = corr.dcrimi[i_0];
 		}
-		do	{
+		do {
 			if (vUnique[i_0].type == vDISTINCT::LARGE) {
 				nz += vUnique[i_0].nz;
 				BIG_bins--;		break;
-			}			
+			}
 			SMALL_na -= vUnique[i_0].nz;
 			nz += vUnique[i_0].nz;			nDistinc++;
 			if (isDcrimi) {
@@ -263,29 +377,32 @@ void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTIN
 				}
 				crimi += corr.dcrimi[i_0];
 			}
-			else	if (nz >= T_avg )
+			else	if (nz >= T_avg)
 				break;
-			if (isUnique && nz>= T_avg_small)
+			if (isUnique && nz >= T_avg_small)
 				break;
-			if (i_0+1<nUnique && vUnique[i_0+1].type == vDISTINCT::LARGE && nz>T_avg / 2)
-			{		break;			}
+			if (i_0 + 1<nUnique && vUnique[i_0 + 1].type == vDISTINCT::LARGE && nz>T_avg / 2)
+			{
+				break;
+			}
 		} while (++i_0 < nUnique);
-		
+
 		//assert(i_1 == nUnique );
 		//、assert(nz >= config.min_data_in_bin || i_0 == nUnique);
-		bin.nz = nz;		
+		bin.nz = nz;
 		noBin = noBin + 1;
 		feata.density = nz*1.0 / nDistinc;
 	}
-	assert(SMALL_na>=0 && BIG_bins==0);
-	assert(i_0 == nUnique+1 || i_0 == nUnique);
+	assert(SMALL_na >= 0 && BIG_bins == 0);
+	assert(i_0 == nUnique + 1 || i_0 == nUnique);
 	double delta = double(fabs(a1 - a0)) / nMostBin / 100.0;
 	double d_max = DBL_MAX;	// std::numeric_limits<double>::max();
-	if (nUnique < nMostBin && nA>nMostBin*10) {
+	if (nUnique < nMostBin && nA>nMostBin * 10) {
 		d_max = a1 + delta;
 		isUnique = true;
 		//assert(histo->bins.size()== nUnique);
-	} else {
+	}
+	else {
 	}
 
 	//histo->bins.resize(noBin + 1);		//always last bin for NA
@@ -293,16 +410,15 @@ void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTIN
 	//histo->bins[noBin].split_F = d_max;	
 	binFeatas[noBin].split_F = d_max;
 	histo->bins[noBin].tic = noBin;
-	histo->bins[noBin].nz = nSamp-nA;
+	histo->bins[noBin].nz = nSamp - nA;
 	histo->CheckValid(config);
 	/*nz = histo->bins.size();
 	if (nz >= 2) {
-		size_t n1 = ceil(nz / 4.0), n2 = ceil(nz / 2.0), n3 = ceil(nz *3.0 / 4)-1;
-		HISTO_BIN&b0 = histo->bins[0], &b1 = histo->bins[n1], &b2 = histo->bins[n2], &b3 = histo->bins[n3], &b4 = histo->bins[nz-1];
-		H_q0 = b0.split_F,				H_q4 = b4.split_F;
-		H_q1 = q1 = b1.split_F,			H_q2 = q2 = b2.split_F;		H_q3 = q3 = b3.split_F;
+	size_t n1 = ceil(nz / 4.0), n2 = ceil(nz / 2.0), n3 = ceil(nz *3.0 / 4)-1;
+	HISTO_BIN&b0 = histo->bins[0], &b1 = histo->bins[n1], &b2 = histo->bins[n2], &b3 = histo->bins[n3], &b4 = histo->bins[nz-1];
+	H_q0 = b0.split_F,				H_q4 = b4.split_F;
+	H_q1 = q1 = b1.split_F,			H_q2 = q2 = b2.split_F;		H_q3 = q3 = b3.split_F;
 	}*/
-
 }
 
 #define IS_INT(dtype) (true)

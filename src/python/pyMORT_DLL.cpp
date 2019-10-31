@@ -337,20 +337,6 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	//	hFold->hMove->Init_T<Tx, Ty>(nSamp_);
 	hFold->importance = new Feat_Importance(hFold);
 	hFold->lossy->Init_T<tpDOWN>(hFold, nSamp_, 0x0, rnd_seed, flag);
-	/*if (cY_->isFloat()) {
-		hFold->lossy->Init_T<float>(hFold, nSamp_, 0x0, rnd_seed, flag);
-	}	else if (cY_->isInt()) {
-		hFold->lossy->Init_T<int32_t>(hFold, nSamp_, 0x0, rnd_seed, flag);
-	}	else if (cY_->isInt16()) {
-		hFold->lossy->Init_T<int16_t>(hFold, nSamp_, 0x0, rnd_seed, flag);
-	}	else if (cY_->isChar()) {
-		hFold->lossy->Init_T<float>(hFold, nSamp_, 0x0, rnd_seed, flag);
-	}	else if (cY_->isInt64()) {
-		hFold->lossy->Init_T<int64_t>(hFold, nSamp_, 0x0, rnd_seed, flag);
-	}	else if (cY_->isDouble()) {
-		hFold->lossy->Init_T<double>(hFold, nSamp_, 0x0, rnd_seed, flag);
-	}	else
-		throw "FeatsOnFold_InitInstance col->dtype is XXX";*/
 
 	bool isTrain = BIT_TEST(flag, FeatsOnFold::DF_TRAIN);
 	bool isPredict = BIT_TEST(flag, FeatsOnFold::DF_PREDIC);
@@ -397,6 +383,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	if (hFold->isQuanti) {
 		hFold->Feature_Bundling();
 	}
+	int nTotalBins = 0;
 	for (int feat = 0; feat < ldX_; feat++) {
 		FeatVector *hFeat = hFold->Feat(feat);
 		if (config.feat_selector != nullptr) {
@@ -409,9 +396,10 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 			hFeat->select.isPick = false;
 			hFold->present.Append(hFeat, col->representive);
 		}
-		if (hFold->config.verbose==666) {
-			hFeat->hDistri->Dump(feat, false, flag);					//输出distribution信息
+		if (hFold->config.verbose==666 && isTrain) {
+			hFeat->hDistri->Dump(feat, false, flag);					//Train输出distribution信息
 		}
+		nTotalBins += hFeat->hDistri == nullptr ? 0 : hFeat->hDistri->nHistoBin();
 	}
 	/*if (hFold->isQuanti) {
 	printf("\n********* FeatsOnFold::QUANTI nMostQ=%d\r\n", nMostQ);
@@ -419,8 +407,8 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	sparse /= (nSamp_*ldX_);
 	nana /= (nSamp_*ldX_);
 	//assert(nana == 0.0);
-	printf("\r********* Fold_[%s] nSamp=%lld nFeat=%lld(const=%lld) QUANT=%lld\n\tsparse=%g NAN=%g nLocalConst=%lld time=%g sec\r\n",
-		hFold->nam.c_str(), nSamp_, ldX_, nConstFeat, nQuant, sparse, nana, nLocalConst, (clock() - t0) / 1000.0);
+	printf("\r********* Fold_[%s] nSamp=%lld nFeat=%lld(const=%lld) QUANT=%lld Total Bins=%d\n\tsparse=%g NAN=%g nLocalConst=%lld time=%g sec\r\n",
+		hFold->nam.c_str(), nSamp_, ldX_, nConstFeat, nQuant,nTotalBins, sparse, nana, nLocalConst, (clock() - t0) / 1000.0);
 	//if(nLocalConst>0)
 	//	printf("\t!!! [%s] nLocalConst=%lld !!! \n",hFold->nam.c_str(), nLocalConst);
 
