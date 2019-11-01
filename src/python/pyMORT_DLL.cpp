@@ -275,7 +275,6 @@ void FeatsOnFold::ExpandFeat(int flag) {
 	}
 }
 
-
 FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, string nam_, PY_COLUMN *cX_, PY_COLUMN *cY_, size_t nSamp_, size_t ldX_, size_t ldY_, int flag) {
 	clock_t t0 = clock();
 	assert(BIT_IS(flag, FeatsOnFold::DF_FLAG));
@@ -355,14 +354,16 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	for (int feat = 0; feat < ldX_; feat++) {
 		FeatVec_Q *hFQ = nullptr;
 		FeatVector *hFeat = hFold->Feat(feat);
-		//if(feat==116)
-		//	feat = 116;
+		//if(feat==31)
+		//	feat = 31;
 		PY_COLUMN *col = cX_ + feat;
 		//printf("\r\tfeat=%d\t......",feat);
 		hFeat->Set(nSamp_, col);
 		//hFeat->Set(nSamp_, col->data);
 		if(isTrain)
 			hFeat->EDA(config,true, 0x0);		//EDA基于全局分析，而这里的是局部分析。分布确实会不一样
+		else {
+		}
 		sparse += hFeat->hDistri->rSparse*nSamp_;
 		nana += hFeat->hDistri->rNA*nSamp_;
 		//if (BIT_TEST(hFeat->type, FeatVector::V_ZERO_DEVIA)) {
@@ -372,7 +373,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 			//hFeat->Clear();		//释放内存
 		}
 		else {
-			if (hFold->isQuanti) {
+			if (hFold->isQuanti || hFeat->isCategory()) {
 				hFold->feats[feat] = hFQ = new FeatVec_Q(hFold, hFeat, nMostQ);
 				hFQ->UpdateHisto(hFold, false, true);
 				nQuant++;	//delete hFeat;

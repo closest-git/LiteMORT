@@ -458,11 +458,11 @@ namespace Grusoft {
 			case LiteBOM_Config::HISTO_BINS_MAP::on_FREQ:
 				if( y!=nullptr && config.histo_bin_map== LiteBOM_Config::HISTO_BINS_MAP::on_FREQ_and_Y)
 					corr.DCRIMI_2(config, val,y, idx,flag );
-				/*if (vUnique.size() <= nMostBin - 1) {	
-					HistoOnUnique_1(config, vUnique, nA, false);//与第二函数冲突!!!
-				}	else*/ {
+				if (vUnique.size() <= nMostBin - 1) {	
+					//HistoOnUnique_1(config, vUnique, nA, false);//与第二函数冲突!!!
+					HistoOnUnique(config, val, idx, vUnique);
+				}	else/**/ {
 					HistoOnFrequncy_1(config, vUnique, nA, nMostBin-1);
-					//HistoOnFrequncy(config, val, idx, nMostBin);
 				}
 				corr.Clear();
 				break;

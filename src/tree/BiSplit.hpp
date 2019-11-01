@@ -133,61 +133,7 @@ namespace Grusoft {
 				}
 			}
 		}
-
-		template<typename Tx>
-		void SplitOn_0(FeatsOnFold *hData_, const std::vector<Tx>&vals, bool isQuanti, int flag = 0x0) {
-			GST_TIC(t1);
-			SAMP_SET& lSet = left->samp_set;
-			SAMP_SET& rSet = right->samp_set;
-			lSet = this->samp_set;		rSet = this->samp_set;
-			lSet.isRef = true;			rSet.isRef = true;
-			size_t i, nSamp = samp_set.nSamp;
-			//size_t &nLeft = samp_set.nLeft;
-			//size_t &nRigt = samp_set.nRigt;
-			//assert(nLeft == 0 && nRigt == 0);
-			tpSAMP_ID samp, *samps = samp_set.samps,*rigt= samp_set.rigt,*left= samp_set.left;
-			G_INT_64 nLeft = 0,nRigt = 0;
-			//double thrsh = isQuanti ? fruit->T_quanti : fruit->thrshold;
-			double thrsh = fruit->Thrshold(isQuanti);
-			//clock_t t1 = clock();
-			
-			for (i = 0; i < nSamp; i++) {
-				samp = samps[i];
-				_core_1_(isQuanti,samp, vals[samp], thrsh, samps, nLeft, rigt, nRigt, flag);
-				/*//教训啊，排序能有效提升速度		3/27/2019
-				//if (i > 1)		assert(samps[i]>=samps[i-1]);
-				bool isNana = (isQuanti && vals[samp] == -1) || (!isQuanti && IS_NAN_INF(vals[samp]));
-				if (isNana) {
-					if (fruit->isNanaLeft) {
-						samps[nLeft++] = samp;	continue;
-						//samps[ATOM_INC_64(nLeft)] = samp;	continue;
-					}	else {
-						rigt[nRigt++] = samp;	continue;
-						//rigt[ATOM_INC_64(nRigt)] = samp;	continue;
-					}
-				}	else {
-					if (vals[samp] < thrsh) {
-						samps[nLeft++] = samp;
-						//samps[ATOM_INC_64(nLeft)] = samp;
-					}	else {
-						rigt[nRigt++] = samp;
-						//rigt[ATOM_INC_64(nRigt)] = samp;
-					}
-				}*/
-			}
-			//nLeft++;							nRigt++;
-			//memcpy(samps, samp_set.left, sizeof(tpSAMP_ID)*nLeft);
-			memcpy(samps + nLeft, samp_set.rigt, sizeof(tpSAMP_ID)*nRigt);
-			
-			samp_set.nLeft = nLeft;				samp_set.nRigt = nRigt;
-			//tX += ((clock() - (t1))*1.0f / CLOCKS_PER_SEC);
-			lSet.samps = samps;				lSet.nSamp = nLeft;
-			//std::sort(lSet.samps, lSet.samps + lSet.nSamp);
-			rSet.samps = samps + nLeft;		rSet.nSamp = nRigt;
-			//std::sort(rSet.samps, rSet.samps + rSet.nSamp);
-			//FeatsOnFold::stat.tX += GST_TOC(t1);
-		}
-
+		
 		template<typename Tx>
 		//void SplitOn(FeatsOnFold *hData_, const std::vector<Tx>&vals, bool isQuanti, int flag = 0x0) {
 		void SplitOn(FeatsOnFold *hData_,size_t nSamp_, const Tx* vals, bool isQuanti, int flag = 0x0) {

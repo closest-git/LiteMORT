@@ -796,7 +796,8 @@ namespace Grusoft {
 						pos = val[samp];
 					}
 					else if (isCategory()) {	
-						pos = this->hDistri->mapCategory[(int)(val[samp])];
+						//pos = this->hDistri->mapCategory[(int)(val[samp])];
+						pos = (int)(val[samp]);
 					}else{		//predict,test对应的数据集并没有格子化!!!
 						assert(0);
 						pos = histo->AtBin_(val[samp]);		
@@ -1007,7 +1008,9 @@ namespace Grusoft {
 			if (isCategory()) {
 				MAP_CATEGORY mapCategory = distri.mapCategory;
 				hDistri->mapCategory = mapCategory;
-				i_0 = 0;
+				if (id == 31) {			//仅用于调试
+					id = 31;
+				}				i_0 = 0;
 				while (i_0 < nA) {
 					pos = idx[i_0];
 					int key = (int)(val[pos]);

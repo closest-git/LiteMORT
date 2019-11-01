@@ -257,7 +257,7 @@ int Distribution::HistoOnFrequncy_small(const LiteBOM_Config&config, vector<vDIS
 		 8/30/2019
 	v0.2	cys
 		10/31/2019
-
+*/
 void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTINCT>& vUnique, size_t nA0, size_t nMostBin, int flag) {
 	assert(histo != nullptr);
 	size_t nA = 0, avg = nA0*1.0 / nMostBin, SMALL_na_0 = 0, BIG_bins_0 = 0, nUnique = vUnique.size(), nz, minimum=config.min_data_in_bin, T_222;
@@ -274,43 +274,58 @@ void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTIN
 	}
 	assert(BIG_bins_0<nMostBin);
 	histo->nBigBins = BIG_bins_0;
-	size_t SMALL_nRight = SMALL_na_0, BIG_nRight = BIG_bins_0;
+	size_t SMALL_nRight = SMALL_na_0, BIG_nRight = BIG_bins_0,T_next;
 	double T_base,vLeftInner,vLeftOuter;
-	int nBin = 0, last = -1;
+	int nBin = 0, i_0=0,i_1;
 	
-	T_base = SMALL_nRight*1.0 / (nMostBin-histo->nBins - BIG_nRight);
-	for (int i = 0; i < nUnique; i++) {
-		if (last == -1) { 
-			nz = 0;		last = i; 
-			vLeftInner = vUnique[i].val;
-			vLeftOuter = i > 0 ? vUnique[i - 1].val : vLeftInner;
-		}		
-		if (histo->nBins == nMostBin) {		//哎，总是分不好
-			while (i < nUnique)	nz += vUnique[i++].nz;
-			AddBin(config, nz, vLeftOuter, vLeftInner, 0x0);
-			printf("\tHisto  undesirable BIN(nz=%lld)@[%d-%d]\n",nz, last, nUnique);
-			SMALL_nRight = 0;		 BIG_nRight = 0;
-			break;
-		}		
-		if (vUnique[i].type == vDISTINCT::LARGE) {			
-			AddBin(config,vUnique[i].nz, vLeftOuter, vLeftInner, 0x0);		
-			last = -1;			BIG_nRight--;
-			continue;
+	if(SMALL_nRight==0)
+		T_base = nA*1.0 / BIG_nRight;
+	else
+		T_base = SMALL_nRight*1.0 / (nMostBin-histo->nBins - BIG_nRight);
+	assert(T_base > 1);
+	//T_base = MAX2(T_base,minimum);
+	while (i_0 < nUnique) {
+		vLeftInner = vUnique[i_0].val;
+		vLeftOuter = i_0 > 0 ? vUnique[i_0 - 1].val : vLeftInner;
+		nz = 0;		i_1 = i_0;
+		if (histo->nBins == nMostBin)
+			T_next = nA *10;
+		else {
+			if (SMALL_nRight == 0)
+				T_base = nA*1.0 / BIG_nRight;
+			else
+				T_base = SMALL_nRight*1.0 / (nMostBin - histo->nBins - BIG_nRight);
+			T_next = size_t(T_base+0.5);
 		}
-
-		nz += vUnique[i].nz;
-		if ( i+1== nUnique || vUnique[i+1].type == vDISTINCT::LARGE ) {
-			if (histo->nBins == 132) {
-				histo->nBins = 132;		//仅用于调试
+		T_next = MAX2(T_next, minimum);
+		while (nz < T_next && i_1<nUnique) {
+			if (vUnique[i_1].type == vDISTINCT::LARGE) {
+				BIG_nRight--;
+			}	else {
+				SMALL_nRight -= vUnique[i_1].nz;
 			}
-			nBin = HistoOnFrequncy_small(config,vUnique,last,i, size_t(T_base+1),0x0);
-			assert(SMALL_nRight >= nz);
-			SMALL_nRight -= nz;
-			last = -1;
-		}	else {
-			//nz += vUnique[i].nz;		
+			nz += vUnique[i_1++].nz;
 		}
+		if (T_next>nA) {
+			printf("\tHisto  undesirable BIN(nz=%lld)@[%d-%d] nUnique=%d\n", nz, i_0, i_1, nUnique);
+		}
+		vDISTINCT& last = vUnique[i_1 - 1];
+		if (i_1==i_0+1 || last.type != vDISTINCT::LARGE) {
+			AddBin(config, nz, vLeftOuter, vLeftInner, 0x0);
+		}	else {	//maybe split
+			size_t nLeft = nz - last.nz;
+			if (nLeft > T_base / 2) {
+				AddBin(config, nLeft, vLeftOuter, vLeftInner, 0x0);
+				vLeftOuter= vUnique[i_1-2].val; vLeftInner = last.val;
+				AddBin(config, last.nz, vLeftOuter, vLeftInner, 0x0);
+			}
+			else {
+				AddBin(config, nz, vLeftOuter, vLeftInner, 0x0);
+			}
+		}
+		i_0 = i_1;		
 	}
+	
 	assert(SMALL_nRight ==0 && BIG_nRight ==0);
 	double delta = double(fabs(a1 - a0)) / nMostBin / 100.0;
 	double d_max = DBL_MAX;	// std::numeric_limits<double>::max();
@@ -323,8 +338,9 @@ void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTIN
 	}
 	AddBin(config,nSamp - nA, a1,d_max, -1);		//always last bin for NA
 	histo->CheckValid(config,&binFeatas);
-}*/
+}
 
+/*
 void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTINCT>& vUnique, size_t nA0, size_t nMostBin, int flag) {
 	assert(histo != nullptr);
 	size_t nA = 0, T_avg = nA0*1.0 / nMostBin, SMALL_na = 0, BIG_bins = 0, nUnique = vUnique.size(), nz;
@@ -412,14 +428,8 @@ void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTIN
 	histo->bins[noBin].tic = noBin;
 	histo->bins[noBin].nz = nSamp - nA;
 	histo->CheckValid(config);
-	/*nz = histo->bins.size();
-	if (nz >= 2) {
-	size_t n1 = ceil(nz / 4.0), n2 = ceil(nz / 2.0), n3 = ceil(nz *3.0 / 4)-1;
-	HISTO_BIN&b0 = histo->bins[0], &b1 = histo->bins[n1], &b2 = histo->bins[n2], &b3 = histo->bins[n3], &b4 = histo->bins[nz-1];
-	H_q0 = b0.split_F,				H_q4 = b4.split_F;
-	H_q1 = q1 = b1.split_F,			H_q2 = q2 = b2.split_F;		H_q3 = q3 = b3.split_F;
-	}*/
-}
+
+}*/
 
 #define IS_INT(dtype) (true)
 #define CAST_ON_STR(x, dtype)	IS_INT(dtype) ? (int*)(x):(float*)(x)

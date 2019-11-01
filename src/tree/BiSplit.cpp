@@ -96,9 +96,8 @@ void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const BoostingForest *hBoosting, 
 				else {
 					//b = weight==nullptr ? fabs(down[i]) : fabs(down[i])*weight[i];
 					b = fabs(down[i]);
-					//b = down[i] * down[i] / hessian[i];
 					if (b<T_grad) {
-						prob /= 10.0;		//nSmall++;
+						prob /= 10;								nSmall++;
 					}
 				}
 			}
@@ -125,12 +124,12 @@ void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const BoostingForest *hBoosting, 
 		delete[] mask;
 		std::sort(root_set, root_set + nMost);
 	}
-
 	assert(nz <= nMost);
 	nSamp = nz;
-	if (hBoosting->skdu.noT % hData_->config.verbose_eval == 0)
-		printf("\nSAMP_SET::SampleFrom nSamp=%lld[%lld=>%lld] \t", nFrom, nMost, nz);
-	//printf("\nsamps={%d,%d,%d,...%d,...,%d,%d}", samps[0], samps[1], samps[2], samps[nz / 2], samps[nz - 2], samps[nz - 1]);
+	if (hBoosting->skdu.noT % hData_->config.verbose_eval == 0) {
+		printf("\nnSamp=%lld[%lld=>%lld] nSmall=%lld\t", nFrom, nMost, nz, nSmall);
+		//printf("\nsamps={%d,%d,%d,...%d,...,%d,%d}", samps[0], samps[1], samps[2], samps[nz / 2], samps[nz - 2], samps[nz - 1]);
+	}
 }
 
 MT_BiSplit::MT_BiSplit(FeatsOnFold *hData_, const BoostingForest *hBoosting_, int d, int rnd_seed, int flag) : hBForest(hBoosting_),depth(d) {

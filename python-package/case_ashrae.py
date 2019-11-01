@@ -125,7 +125,7 @@ class COROchann(object):
         self.data_root = data_root
         self.building_meta_df = building_meta_df
         self.weather_df = weather_df
-        #self.some_rows = 5000000
+        #self.some_rows = 50000
         self.some_rows = None
         self.df_base = self.Load_Processing()
         self.df_base_shape = self.df_base.shape
@@ -255,6 +255,7 @@ def fit_lgbm(train, val,target_meter,fold, devices=(-1,), seed=None, cat_feature
     X_valid, y_valid = val
     early_stop = 20
     verbose_eval = 5
+    metric = 'l1'
     params = {'num_leaves': 31,'n_estimators':num_rounds,
               'objective': 'regression',
               'max_bin': 256,
@@ -264,8 +265,8 @@ def fit_lgbm(train, val,target_meter,fold, devices=(-1,), seed=None, cat_feature
               "bagging_freq": 5,
               "bagging_fraction": bf,
               "feature_fraction": 0.9,
-              "metric": 'l2',"verbose_eval":verbose_eval,'n_jobs':8,
-              "early_stopping_rounds": early_stop, "adaptive": 'weight1', 'verbose': 666,#'min_data_in_leaf': 5120,
+              "metric": metric,"verbose_eval":verbose_eval,'n_jobs':8,
+              "early_stopping_rounds": early_stop, "adaptive": 'weight1', 'verbose': 666,'min_data_in_leaf': 20,
               #               "verbosity": -1,
               #               'reg_alpha': 0.1,
               #               'reg_lambda': 0.3
@@ -299,8 +300,7 @@ def fit_lgbm(train, val,target_meter,fold, devices=(-1,), seed=None, cat_feature
                           verbose_eval=verbose_eval,
                           early_stopping_rounds=early_stop)
         print('best_score', model.best_score)
-        log = {'train/mae': model.best_score['training']['l2'],
-               'valid/mae': model.best_score['valid_1']['l2']}
+        log = {'train/mae': model.best_score['training'][metric], 'valid/mae': model.best_score['valid_1'][metric]}
     # predictions
     y_pred_valid = model.predict(X_valid, num_iteration=model.best_iteration)
     oof_loss = mean_squared_error(y_valid, y_pred_valid)  # target is already in log scale
