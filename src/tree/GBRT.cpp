@@ -165,7 +165,6 @@ double GBRT::Predict(FeatsOnFold *hData_, bool updateStopping,bool checkLossy, b
 		if (hData_->hMove != nullptr);// hData_->hMove->AfterStep(hData_->samp_set, allx);
 		
 	}
-	FeatsOnFold::stat.tX += GST_TOC(t1);
 	if(checkLossy)
 		hData_->lossy->Update(hData_,this->skdu.noT,0x0);
 	double err=DBL_MAX, y2 = DBL_MAX;

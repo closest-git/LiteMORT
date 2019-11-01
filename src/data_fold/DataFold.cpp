@@ -150,6 +150,7 @@ if (feat_salps != nullptr) {
 feat_salps->AddSalp(nFeat, picks, nTree);
 }
 */
+
 /*
 	feature_fraction似乎能降低overfitting
 	v0.1	cys
@@ -163,7 +164,7 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 	for (i = 0; i<nFeat; i++)	{
 		FeatVector *hFeat = Feat(i);
 		hFeat->select.hasCheckGain = false;
-		if (i != 32) {		//仅用于调试
+		if (i != 31) {		//仅用于调试
 			//hFeat->select.isPick =false;
 		}
 		if (hFeat->hDistri!=nullptr && hFeat->hDistri->isPass())
@@ -907,11 +908,12 @@ void FeatVec_Q::UpdateFruit(const FeatsOnFold *hData_, MT_BiSplit *hBlit, int fl
 		//vector<HISTO_BIN>& bins=hBlit->fruit->histo->bins;
 		if (this->isCategory()) {
 			const HistoGRAM *histo = hBlit->fruit->histo_refer;
-			assert(histo!=nullptr && hBlit->fruit->mapFold.size()==0);
+			assert(histo!=nullptr && hBlit->fruit->mapFolds!=nullptr);
 			//hBlit->fruit->mapFold = this->hDistri->mapCategory;
 			for (int i = 0; i < histo->nBins; i++) {
 				int pos = histo->bins[i].tic,fold= histo->bins[i].fold;
-				hBlit->fruit->mapFold.insert(pair<int, int>(pos, fold));
+				hBlit->fruit->mapFolds[pos] = fold;
+				//hBlit->fruit->mapFold.insert(pair<int, int>(pos, fold));
 			}
 		}
 		else {

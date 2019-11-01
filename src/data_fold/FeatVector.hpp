@@ -64,8 +64,8 @@ namespace Grusoft {
 		//bool isSelect = false;
 		//float select_factor = 1;
 		SELECT select;
-		bool isCategory()	{ return	BIT_TEST(type, Distribution::CATEGORY); }
-		bool isReferVal()	{ return	BIT_TEST(type, VAL_REFER); }
+		bool isCategory()	const	{ return	BIT_TEST(type, Distribution::CATEGORY); }	
+		bool isReferVal()	const	{ return	BIT_TEST(type, VAL_REFER); }				
 		typedef enum {
 			COPY_MEAN,
 		}BINARY_OPERATE;

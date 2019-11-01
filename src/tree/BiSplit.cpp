@@ -9,19 +9,6 @@ using namespace Grusoft;
 
 double MT_BiSplit::tX = 0;
 
-/*
-FRUIT::FRUIT(HistoGRAM *his_, int flag) : histo(his_) {
-	if( histo!=nullptr)
-		histo->fruit=this;
-}*/
-
-FRUIT::~FRUIT() {
-	//if (histo != nullptr)
-	//	delete histo;
-	//if (bsfold != nullptr)
-	//	delete bsfold;
-}
-
 void SAMP_SET::Alloc(FeatsOnFold *hData_, size_t nSamp_, int flag) {
 	clear();
 
@@ -177,7 +164,6 @@ MT_BiSplit::MT_BiSplit(FeatsOnFold *hData_, const BoostingForest *hBoosting_, in
 		9/4/2018
 	v0.2	cys
 		1/26/2018
-
 */
 void MT_BiSplit::Observation_AtLocalSamp(FeatsOnFold *hData_, int flag) {
 	GST_TIC(t1);
@@ -250,7 +236,6 @@ void MT_BiSplit::Observation_AtLocalSamp(FeatsOnFold *hData_, int flag) {
 	double shrink = hData_->config.learning_rate;
 	//double init_score=hData_->lossy.init_score;
 	down_step = down_step*shrink;
-	//FeatsOnFold::stat.tX += GST_TOC(t1);
 
 	return;
 }
@@ -418,7 +403,6 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 		BinFold bf(hData_,picks, samp_set);
 		//bf.GreedySplit(hData_, picks ,0x0 );
 	}
-	//FeatsOnFold::stat.tX += GST_TOC(t1);
 
 	GST_TIC(t222);
 	size_t start = 0, end = picks.size();
@@ -445,8 +429,8 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 	}
 	FeatsOnFold::stat.tHisto += GST_TOC(t222);
 
-	fruit = new FRUIT();
-	arrFruit.push_back(fruit);
+	//fruit = new FRUIT();
+	//arrFruit.push_back(fruit);
 	//GST_TIC(t1);
 	feat_id = -1;
 	double lambda_mxmxN = 0;
@@ -512,10 +496,12 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 	if (feat_id >= 0) {
 		FeatVector *hFeat = hData_->Feat(feat_id);
 		hFeat->select.hasCheckGain = true;		//isSelect = true;
-		fruit->Set(GetHistogram(hData_, feat_id, false));		mxmxN = fruit->mxmxN;
+		fruit = new FRUIT(GetHistogram(hData_, feat_id, false));
+		//fruit->Set(GetHistogram(hData_, feat_id, false));		
+		mxmxN = fruit->mxmxN;
 		feat_regress = -1;
 		assert( mxmxN == fruit->mxmxN );
-		hFeat->UpdateFruit(hData_,this);
+		//hFeat->UpdateFruit(hData_,this);
 		if (hFeat->hDistri != nullptr && hFeat->hDistri->rNA > 0) {			
 			//fruit->isNanaLeft = hFeat->hDistri;
 		}	

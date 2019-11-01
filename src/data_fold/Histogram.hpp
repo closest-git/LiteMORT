@@ -118,9 +118,7 @@ namespace Grusoft {
 	class FRUIT{
 	public:
 		//FRUIT(HistoGRAM *his_ = nullptr,int flag=0x0) ;
-		FRUIT(int flag = 0x0) {
-
-		}
+		FRUIT(const HistoGRAM *his_, int flag = 0x0);
 		int best_feat_id=-1;
 		const HistoGRAM *histo_refer = nullptr;		//仅指向，不再删除
 		HISTO_BIN bin_S0, bin_S1;						//有变化，比较危险诶
@@ -139,16 +137,18 @@ namespace Grusoft {
 					//return bin_S1.split_F;
 			}
 		}
-		//tpQUANTI T_quanti = 0;
-		MAP_CATEGORY mapFold;
+		//MAP_CATEGORY mapFold;
+		int *mapFolds=nullptr;
 		inline int GetFold(int pos) {
-			if (mapFold.find(pos) == mapFold.end()) {
+			return mapFolds[pos];
+			/*if (mapFold.find(pos) == mapFold.end()) {
 				return -1;
 			}	else {
 				int fold = mapFold[pos];
 				return fold;
-			}
+			}*/
 		}
+
 		//需要重新设计，参见SplitOn以及AtLeaf函数
 		bool isY = false;
 		bool isNanaLeft = false;
@@ -189,6 +189,7 @@ namespace Grusoft {
 
 			void Clear() {
 				mxmxN = -1;		nLeft = 0,	nRight = 0;		tic = -1;
+				isY = false;	adaptive_thrsh = 0;
 			}
 		}FRUIT_INFO;
 		FRUIT_INFO	fruit_info;

@@ -318,22 +318,25 @@ void ManifoldTree::OnNewLeaf(hMTNode hNode, FeatsOnFold *hData_, const vector<in
 		std::string leaf_optimal = hData_->config.leaf_optimal;
 		assert(hNode->feat_id == -1 && hNode->nSample()>=hData_->config.min_data_in_leaf * 2);
 		//if( hNode->impuri>0)		//optimal == "lambda_0"时,impuri不对
-			hNode->CheckGain(hData_,pick_feats, 0);
-			if (hGuideTree != nullptr) {
-				FeatsOnFold *hGuideData = hGuideTree->hData_;
-				hMTNode hBlit = hGuideTree->nodes[hNode->id];
-				hBlit->Observation_AtLocalSamp(hGuideData);
-				hBlit->feat_id = hNode->feat_id;	 hBlit->fruit = hNode->fruit;
-				hGuideTree->GrowLeaf(hBlit, "guide_gain", false);
-				//hGuide->lossy->Update(hData_, 0, 0x0);
-				//double a = 1 - hGuide->lossy->err_auc;
-				hBlit->left->Observation_AtLocalSamp(hGuideData);		hBlit->right->Observation_AtLocalSamp(hGuideData);
-				double imp = hBlit->right->impuri + hBlit->left->impuri;
-				double gain = FLOAT_ZERO(imp - hBlit->impuri,imp) ;
-				hNode->gain_ = gain;			assert(gain >= 0);
-				hGuideTree->DelChild(hBlit);
-				hBlit->fruit = nullptr;/**/
-			}
+		/*if (name == "666_4" && hNode->id == 39) {	//仅用于调试
+			hNode->id = 39;
+		}*/
+		hNode->CheckGain(hData_,pick_feats, 0);
+		if (hGuideTree != nullptr) {
+			FeatsOnFold *hGuideData = hGuideTree->hData_;
+			hMTNode hBlit = hGuideTree->nodes[hNode->id];
+			hBlit->Observation_AtLocalSamp(hGuideData);
+			hBlit->feat_id = hNode->feat_id;	 hBlit->fruit = hNode->fruit;
+			hGuideTree->GrowLeaf(hBlit, "guide_gain", false);
+			//hGuide->lossy->Update(hData_, 0, 0x0);
+			//double a = 1 - hGuide->lossy->err_auc;
+			hBlit->left->Observation_AtLocalSamp(hGuideData);		hBlit->right->Observation_AtLocalSamp(hGuideData);
+			double imp = hBlit->right->impuri + hBlit->left->impuri;
+			double gain = FLOAT_ZERO(imp - hBlit->impuri,imp) ;
+			hNode->gain_ = gain;			assert(gain >= 0);
+			hGuideTree->DelChild(hBlit);
+			hBlit->fruit = nullptr;/**/
+		}
 	}
 	leafs.push(hNode);
 }
@@ -604,8 +607,8 @@ void ManifoldTree::Train(int flag) {
 			BeforeEachBatch(hData_->config.batch*nSamp,42+ leafs.size());
 		}
 		hMTNode hBest = leafs.top();			leafs.pop();
-		if (hBest->id == 2)
-			hBest->id = 2;		//仅用于调试
+		//if (nTree==5 && hBest->id == 39)
+		//	hBest->id = 39;		//仅用于调试
 		if (hBest->gain_train > 0)		{
 			gain = hBest->gain_train;			
 		}		else {
@@ -642,10 +645,10 @@ void ManifoldTree::Train(int flag) {
 	while (!leafs.empty()) {
 		hMTNode node = leafs.top();		leafs.pop();
 		assert(node->isLeaf());
-		/*if (node->gain_ > 0 && node->nSample()>hData_->config.min_data_in_leaf * 3 ) {	//可以试试&& rander_.Uniform_(0,1)<0.5
+		if (node->gain_ > 0 && node->nSample()>hData_->config.min_data_in_leaf * 3 ) {	//可以试试&& rander_.Uniform_(0,1)<0.5
 			GrowLeaf(node, "more_leaf", true);
 			nMoreLeaf++;
-		} */
+		} /**/
 	}
 
 	//GetLeaf(vLeaf);

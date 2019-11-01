@@ -783,6 +783,7 @@ namespace Grusoft {
 			//double T_0 = hBlit->fruit->bin_S0.split_F, T_1 = hBlit->fruit->bin_S1.split_F;
 			double T_1 = hBlit->fruit->adaptive_thrsh;
 			if (hBlit->fruit->isY) {
+				GST_TIC(t1);
 				SAMP_SET &lSet = left->samp_set, &rSet = rigt->samp_set;
 				tpSAMP_ID *samps = hBlit->samp_set.samps, *left = hBlit->samp_set.left, *rigt = hBlit->samp_set.rigt;
 				lSet = hBlit->samp_set;		rSet = hBlit->samp_set;	//直接复制父节点的一些数据
@@ -812,6 +813,7 @@ namespace Grusoft {
 				lSet.samps = samps;				lSet.nSamp = nLeft;
 				rSet.samps = samps + nLeft;		rSet.nSamp = nRigt;
 				//hBlit->samp_set.SplitOn(ys, thrsh, left->samp_set, rigt->samp_set,1);
+				FeatsOnFold::stat.tX += GST_TOC(t1);
 			}
 			else if (hBlit->fruit->split_by==BY_DENSITY) {
 				SAMP_SET &lSet = left->samp_set, &rSet = rigt->samp_set;
@@ -824,8 +826,8 @@ namespace Grusoft {
 					if (isQuanti) {	//训练数据格子化
 						pos = val[samp];
 					}	else if (isCategory()) {
-						//pos = hBlit->fruit->mapCategory[(int)(val[samp])];
-						pos = hBlit->fruit->mapFold[(int)(val[samp])];
+						pos = this->hDistri->mapCategory[(int)(val[samp])];
+						//pos = fold = hBlit->fruit->GetFold(pos);
 					}	else {		//predict,test对应的数据集并没有格子化!!!
 						pos = histo->AtBin_(val[samp]);		
 					}

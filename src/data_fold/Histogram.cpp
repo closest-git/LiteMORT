@@ -249,7 +249,6 @@ void HistoGRAM::CompressBins(int flag) {
 		nBins = nZ;
 		//bins.resize(nZ);
 	}
-	//FeatsOnFold::stat.tX += GST_TOC(t1);
 }
 
 
@@ -334,8 +333,33 @@ void HistoGRAM::RandomCompress(FeatVector *hFV,bool isSwarm,int flag) {
 	}*/
 }
 
+FRUIT::~FRUIT() {
+	//if (histo != nullptr)
+	//	delete histo;
+	//if (bsfold != nullptr)
+	//	delete bsfold;
+	if (mapFolds != nullptr)
+		delete[] mapFolds;
+}
+
+/**/
+FRUIT::FRUIT(const HistoGRAM *his_, int flag) : histo_refer(his_) {
+	const FeatVector *hFeat = his_->hFeat;
+	int nMaxBin = hFeat->hDistri->binFeatas.size();
+	//assert(nMaxBin == hFeat->hDistri->histo->nMostBins);
+	//参见	FeatVec_T::SplitOn		if (fold <= 0)	left[nLeft++] = samp;
+	mapFolds = new int[nMaxBin]();
+	Set(his_);
+}
+
+/*
+	v0.1	cys
+		11/1/2019
+*/
 void FRUIT::Set(const HistoGRAM*histo, int flag) {
 	assert(histo != nullptr);
+	const FeatVector *hFeat = histo->hFeat;
+	int nMaxBin = hFeat->hDistri->binFeatas.size();
 	best_feat_id = histo->hFeat->id;
 	split_by = histo->split_by;
 	//assert(fruit->bin_S0.nz>0);
@@ -344,7 +368,16 @@ void FRUIT::Set(const HistoGRAM*histo, int flag) {
 	//fruit->thrshold = item.tic;
 	isY = histo->fruit_info.isY;
 	if (isY) {	//参见GreedySplit_Y，不存在bin_S0,bin_S1
-		histo_refer = histo;		//只需要fold信息
+		assert(histo->hFeat->isCategory());
+		histo_refer = histo;		
+		//需要fold信息
+		if (hFeat->isCategory()) {
+			memset(mapFolds,0x0,sizeof(int)*nMaxBin);
+			for (int i = 0; i < histo->nBins; i++) {
+				int pos = histo->bins[i].tic, fold = histo->bins[i].fold;
+				mapFolds[pos] = fold;
+			}
+		}
 		adaptive_thrsh = histo->fruit_info.adaptive_thrsh;
 	}	else {
 		int pos = histo->fruit_info.tic;
@@ -451,7 +484,6 @@ void HistoGRAM::GreedySplit_X(FeatsOnFold *hData_, const SAMP_SET& samp_set, int
 		assert(nRight >= item.nz);
 		nLeft += item.nz;			nRight -= item.nz;
 	}
-	//FeatsOnFold::stat.tX += GST_TOC(t1);
 }
 
 /*
@@ -543,6 +575,7 @@ void HistoGRAM::GreedySplit_Y(FeatsOnFold *hData_, const SAMP_SET& samp_set, boo
 	if (fruit_info.mxmxN>aX) {	//确实有可能
 	//	if (fruit->mxmxN>aX) {	//确实有可能
 		fruit_info.isY = true;
+		assert(hFeat->isCategory());
 		for (i = 0; i < nBins; i++) {
 			HISTO_BIN& item = bins[idx[i]];
 			if (Y_means[idx[i]] < fruit_info.adaptive_thrsh) {
@@ -689,6 +722,7 @@ void HistoGRAM_BUFFER::BeforeTrainTree(vector<int>& pick_feats, size_t nPickSamp
 			assert(histo != nullptr);
 			histo->nBins = 0;
 			histo->nSamp = 0;
+			histo->fruit_info.Clear();
 		}
 	}
 		/*if (histo->bins.size() < histo->nMostBins) {
@@ -697,7 +731,6 @@ void HistoGRAM_BUFFER::BeforeTrainTree(vector<int>& pick_feats, size_t nPickSamp
 		/*for (auto bin : histo->bins) {
 			bin.nz = 0;
 		}*/
-	//FeatsOnFold::stat.tX += GST_TOC(t1);
 }
 
 HistoGRAM_BUFFER::~HistoGRAM_BUFFER() {
