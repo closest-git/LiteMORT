@@ -450,7 +450,10 @@ int GBRT::Train(string sTitle, int x, int flag) {
 	string sEval = hEvalData == nullptr ? (isEvalTrain ? hTrainData->nam : "None") : hEvalData->nam;
 	string sLossE = hEvalData==nullptr?"":hEvalData->LOSSY_INFO(stopping.e_best), sLossT = hTrainData->LOSSY_INFO(err_0);
 	printf("\n====== LOOP=%d: ERR=[~%s,%s] time=%.3g(%.3g) ======\n", skdu.noT, sLossT.c_str(), sLossE.c_str(),GST_TOC(tick), 0);
+	double aNode = nzNode*1.0 / forest.size();
 	for (i = stopping.best_round ; i<forest.size(); i++) {
+		ManifoldTree *hTree = dynamic_cast<ManifoldTree *>(forest[i]);
+		//nzNode -= hTree->nodes.size();
 		delete forest[i];
 	}
 	forest.resize(stopping.best_round );
@@ -465,7 +468,7 @@ int GBRT::Train(string sTitle, int x, int flag) {
 
 	printf("\n********* GBRT::Train ERR@train=%s E_best@%s=%s nTree=%d nFeat={%d-%d} aNode=%.6g maxDepth=%d thread=%d" 
 		"\n********* train=%g(hTree->Train=%g,tCheckGain=%g,tHisto=%g(%d,%g),tX=%g) sec\r\n", 
-		sLossT.c_str(), sEval.c_str(), sLossE.c_str(),forest.size(),stat.nMinFeat,stat.nMaxFeat, nzNode*1.0/forest.size(), maxDepth, nThread,
+		sLossT.c_str(), sEval.c_str(), sLossE.c_str(),forest.size(),stat.nMinFeat,stat.nMaxFeat, aNode, maxDepth, nThread,
 		GST_TOC(tick), t_train,FeatsOnFold::stat.tCheckGain, FeatsOnFold::stat.tHisto, HistoGRAM::nAlloc, FeatsOnFold::stat.tSamp2Histo, FeatsOnFold::stat.tX);
 
 	if (nOOB>0)
@@ -484,7 +487,6 @@ int GBRT::Train(string sTitle, int x, int flag) {
 	
 	return 0x0;
 }
-
 
 /*
 	v0.1	cys

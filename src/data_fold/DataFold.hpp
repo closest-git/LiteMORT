@@ -760,6 +760,24 @@ namespace Grusoft {
 			return lft;
 		}
 
+		void _core_isY_(bool isQuanti, const tpSAMP_ID samp,const int *mapFolds, int pos, tpSAMP_ID*left, G_INT_64&nLeft, tpSAMP_ID*rigt, G_INT_64&nRigt, int flag) {
+			/*if (isQuanti) {	//训练数据格子化
+			}
+			else if (isCategory()) {
+				//pos = this->hDistri->mapCategory[(int)(val[samp])];
+			}
+			else {		//predict,test对应的数据集并没有格子化!!!
+				assert(0);
+				//pos = histo->AtBin_(val[samp]);
+				//fold = pos < 0 ? 0 : histo->bins[pos].fold;
+			}*/
+			int fold = mapFolds[pos];	// hBlit->fruit->GetFold(pos);
+			if (fold <= 0)
+				left[nLeft++] = samp;
+			else
+				rigt[nRigt++] = samp;
+		}
+
 		virtual void SplitOn(FeatsOnFold *hData_, MT_BiSplit *hBlit, int flag = 0x0) {
 			//assert (BLIT_thrsh.find(hBlit) != BLIT_thrsh.end());
 			tpSAMP_ID samp;
@@ -770,7 +788,7 @@ namespace Grusoft {
 			//	thrsh = hBlit->fruit->thrshold;
 			MT_BiSplit *left = hBlit->left, *rigt = hBlit->right, *child = nullptr;
 			int pos,fold=-1;
-			size_t nSamp = hBlit->nSample(), i, nLeft = 0, nRigt = 0;
+			size_t nSamp = hBlit->nSample(), i, nLeft = 0, nRigt = 0, step;
 			if (hData_->atTrainTask())
 				assert(left != nullptr && rigt != nullptr);
 			else
@@ -784,37 +802,48 @@ namespace Grusoft {
 			double T_1 = hBlit->fruit->adaptive_thrsh;
 			if (hBlit->fruit->isY) {
 				GST_TIC(t1);
+				const int *mapFolds = hBlit->fruit->mapFolds;
 				SAMP_SET &lSet = left->samp_set, &rSet = rigt->samp_set;
-				tpSAMP_ID *samps = hBlit->samp_set.samps, *left = hBlit->samp_set.left, *rigt = hBlit->samp_set.rigt;
+				tpSAMP_ID *samps = hBlit->samp_set.samps,  *rigt = hBlit->samp_set.rigt;//*left = hBlit->samp_set.left,
 				lSet = hBlit->samp_set;		rSet = hBlit->samp_set;	//直接复制父节点的一些数据
 				lSet.isRef = true;			rSet.isRef = true;
 				const HistoGRAM *histo = hBlit->fruit->histo_refer;
-				for (i = 0; i < nSamp; i++) {
-					samp = hBlit->samp_set.samps[i];
-					//int pos = hData_->isQuanti ? val[samp] : histo->AtBin_(val[samp]);
-					if (isQuanti) {	//训练数据格子化
-						pos = val[samp];
+				int num_threads = OMP_FOR_STATIC_1(nSamp, step);
+				G_INT_64 *pL = new G_INT_64[num_threads](), *pR = new G_INT_64[num_threads](), nLeft = 0, nRigt = 0;
+#pragma omp parallel for schedule(static,1)
+				for (int th_ = 0; th_ < num_threads; th_++) {
+					size_t start = th_*step, end = min(start + step, nSamp), i;
+					if (end <= start)		{			continue;		}
+					G_INT_64	nL = 0, nR = 0;
+					for (i = start; i < end; i++) {
+						tpSAMP_ID samp = samps[i];
+						_core_isY_(isQuanti, samp, mapFolds, (int)(val[samp]), samps + start, nL, rigt+ start, nR, 0x0);		continue;
 					}
-					else if (isCategory()) {	
-						//pos = this->hDistri->mapCategory[(int)(val[samp])];
-						pos = (int)(val[samp]);
-					}else{		//predict,test对应的数据集并没有格子化!!!
-						assert(0);
-						pos = histo->AtBin_(val[samp]);		
-						fold = pos < 0 ? 0 : histo->bins[pos].fold;
-					}
-					fold = hBlit->fruit->GetFold(pos);
-					if (fold <= 0)
-						left[nLeft++] = samp;
-					else
-						rigt[nRigt++] = samp;
+					pL[th_] = nL;	 pR[th_] = nR;
+					assert(pL[th_] + pR[th_] == end - start);
 				}
-				memcpy(samps, left, sizeof(tpSAMP_ID)*nLeft);
-				memcpy(samps + nLeft, rigt, sizeof(tpSAMP_ID)*nRigt);
+				for (int th_ = 0; th_ < num_threads; th_++) {
+					size_t start = th_*step, end = min(start + step, nSamp);
+					if (end <= start) { continue; }
+					memcpy(samps + nLeft, samps + start, sizeof(tpSAMP_ID)*pL[th_]);
+					nLeft += pL[th_];
+				}
+				for (int th_ = 0; th_ < num_threads; th_++) {
+					size_t start = th_*step, end = min(start + step, nSamp);
+					if (end <= start) { continue; }
+					memcpy(samps + nLeft + nRigt, rigt + start, sizeof(tpSAMP_ID)*pR[th_]);
+					nRigt += pR[th_];
+				}
+				delete[] pL;		delete[] pR;
+				/*for (i = 0; i < nSamp; i++) {
+					samp = hBlit->samp_set.samps[i];
+					_core_isY_(isQuanti, samp, mapFolds,(int)(val[samp]), samps, nLeft, rigt, nRigt,0x0);		continue;
+				}
+				//memcpy(samps, left, sizeof(tpSAMP_ID)*nLeft);
+				memcpy(samps + nLeft, rigt, sizeof(tpSAMP_ID)*nRigt);*/
 				lSet.samps = samps;				lSet.nSamp = nLeft;
 				rSet.samps = samps + nLeft;		rSet.nSamp = nRigt;
-				//hBlit->samp_set.SplitOn(ys, thrsh, left->samp_set, rigt->samp_set,1);
-				FeatsOnFold::stat.tX += GST_TOC(t1);
+				//FeatsOnFold::stat.tX += GST_TOC(t1);
 			}
 			else if (hBlit->fruit->split_by==BY_DENSITY) {
 				SAMP_SET &lSet = left->samp_set, &rSet = rigt->samp_set;

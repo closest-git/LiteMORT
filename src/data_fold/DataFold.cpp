@@ -151,6 +151,7 @@ feat_salps->AddSalp(nFeat, picks, nTree);
 }
 */
 
+
 /*
 	feature_fractionËÆºõÄÜ½µµÍoverfitting
 	v0.1	cys
@@ -193,7 +194,7 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 	if (config.feat_selector != nullptr) {	//feat select
 		//printf("nPick4Split=%d @feat_factor\t", picks.size());
 	}else if (config.feature_fraction<1) {	//for random forest
-		nPick = MAX2(1,picks.size()*config.feature_fraction);
+		nPick = MAX2(1,picks.size()*config.feature_fraction+0.5);
 		hBooster->stopping.CheckBrae();
 		vector<int> no_k = rander.kSampleInN(nPick, picks.size()),pick_1;
 		double *w = new double[nFeat]();
@@ -415,7 +416,9 @@ struct LOOP_unroll<0> {
 	inline void operator(Operation& op) { op();  }
 };*/
 
+//https://stackoverflow.com/questions/18971401/sparse-array-compression-using-simd-avx2
 #define TO_BIN_0(pBins,quanti,samps,down,i)	{	HISTO_BIN *pB0 = pBins + (quanti[samps[i]]);	pB0->G_sum -= down[i];	pB0->nz++;	}
+#define TO_BIN_01(pBins,quanti,samps,down)	{	HISTO_BIN *pB0 = pBins + (quanti[*(samps)]);	pB0->G_sum -= *(down);	pB0->nz++;	}
 void FeatVec_Q::Samp2Histo_null_hessian(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag0) {
 	HistoGRAM *qHisto = GetHisto();
 
@@ -433,38 +436,61 @@ void FeatVec_Q::Samp2Histo_null_hessian(const FeatsOnFold *hData_, const SAMP_SE
 	histo->CopyBins(*qHisto, true, 0x0);
 	int nBin = histo->nBins;// bins.size();
 	HISTO_BIN *pBins = histo->bins, *pBin;	//https://stackoverflow.com/questions/7377773/how-can-i-get-a-pointer-to-the-first-element-in-an-stdvector
-
+	GST_TIC(t1);
 	nSamp_LD = LD==0 ? 0 : LD * (int)(nSamp / LD);
 	for (i = 0; i < nSamp_LD; i += LD) {
-		TO_BIN_0(pBins, quanti,samps, down,i);
-		TO_BIN_0(pBins, quanti, samps, down, i+1);
-		TO_BIN_0(pBins, quanti, samps, down, i+2);
-		TO_BIN_0(pBins, quanti, samps, down, i+3);
-		/*TO_BIN_0(pBins, quanti, samps, down, i+4);
-		TO_BIN_0(pBins, quanti, samps, down, i + 5);
-		TO_BIN_0(pBins, quanti, samps, down, i + 6);
-		TO_BIN_0(pBins, quanti, samps, down, i + 7);
-		TO_BIN_0(pBins, quanti, samps, down, i + 8);
-		TO_BIN_0(pBins, quanti, samps, down, i + 9);
-		TO_BIN_0(pBins, quanti, samps, down, i + 10);
-		TO_BIN_0(pBins, quanti, samps, down, i + 11);*/
+		TO_BIN_01(pBins, quanti, samps++, down++);
+		TO_BIN_01(pBins, quanti, samps++, down++);
+		TO_BIN_01(pBins, quanti, samps++, down++);
+		TO_BIN_01(pBins, quanti, samps++, down++);	
 	}
 	 //if(nSamp<10000)
 	for (i = nSamp_LD; i<nSamp; i++) {
-		TO_BIN_0(pBins, quanti, samps, down, i);
-		/*tpQUANTI pos = quanti[samps[i]];
-		assert(pos >= 0 && pos < nBin);
-		a = down[i];
-		pBin = pBins + pos;	//HISTO_BIN& bin = histo->bins[no];
-		pBin->G_sum += -a;
-		pBin->nz++;*/
+		//TO_BIN_0(pBins, quanti, samps, down, i);
+		TO_BIN_01(pBins, quanti, samps++, down++);
 	}
-	//FeatsOnFold::stat.tX += GST_TOC(t1);
 
 	for (i = 0; i < nBin; i++) {
 		pBins[i].H_sum = pBins[i].nz;
 	}
-}
+}/*
+void FeatVec_Q::Samp2Histo_null_hessian(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag0) {
+	HistoGRAM *qHisto = GetHisto();
+	size_t nSamp = samp_set.nSamp, i,step;
+	int nBin = qHisto->nBins, *nzs = new int[nBin](),pos, num_threads = OMP_FOR_STATIC_1(nSamp, step);;
+	double *G_sums = new double[nBin]();
+
+	tpDOWN *down = hData_->GetSampleDown();
+	if (nSamp == hData_->nSample()) {
+		down = hData_->GetDownDirection();
+	}
+	const tpSAMP_ID *samps = samp_set.samps;
+	tpQUANTI *quanti = arr(), no;
+	histo->CopyBins(*qHisto, true, 0x0);
+	HISTO_BIN *pBins = histo->bins;
+	GST_TIC(t1);
+
+
+#pragma omp parallel for schedule(static,1) 
+	//for (i = 0; i < nSamp; i++, samps++, down++) {
+	for (int thread = 0; thread < num_threads; thread++) {
+		size_t start = thread*step, end = MIN2(start + step, nSamp), i;
+		const tpSAMP_ID *samps_T = samp_set.samps + start;
+		tpDOWN *down_T = down + start;
+		for (i = start; i < end; i++, samps_T++, down_T++) {
+			pos = quanti[*(samps_T)];
+			G_sums[pos] -= *(down_T);	nzs[pos]++;
+		}
+	}
+
+	FeatsOnFold::stat.tX += GST_TOC(t1);
+	for (i = 0; i < nBin; i++) {
+		pBins[i].G_sum = G_sums[i];
+		pBins[i].nz = nzs[i];
+		pBins[i].H_sum = pBins[i].nz;
+	}	
+	delete[] nzs;		delete[] G_sums;
+}*/
 
 void FeatVec_Q::Samp2Histo_null_hessian_sparse(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag0) {
 	HistoGRAM *qHisto = GetHisto();

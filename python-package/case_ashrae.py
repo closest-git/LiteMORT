@@ -3,10 +3,10 @@ import sys
 import pickle
 import seaborn as sns; sns.set()
 from sklearn.preprocessing import LabelEncoder
-from sklearn.model_selection import StratifiedKFold, GroupKFold
+from sklearn.model_selection import StratifiedKFold, GroupKFold,KFold
 from sklearn.metrics import log_loss, mean_squared_error
 from litemort import *
-from LiteMORT_hyppo import *
+#from LiteMORT_hyppo import *
 import datetime
 import time
 import random
@@ -125,7 +125,7 @@ class COROchann(object):
         self.data_root = data_root
         self.building_meta_df = building_meta_df
         self.weather_df = weather_df
-        #self.some_rows = 50000
+        #self.some_rows = 500000
         self.some_rows = None
         self.df_base = self.Load_Processing()
         self.df_base_shape = self.df_base.shape
@@ -255,17 +255,17 @@ def fit_lgbm(train, val,target_meter,fold, devices=(-1,), seed=None, cat_feature
     X_valid, y_valid = val
     early_stop = 20
     verbose_eval = 5
-    metric = 'l1'
+    metric = 'l2'
     params = {'num_leaves': 31,'n_estimators':num_rounds,
               'objective': 'regression',
               'max_bin': 256,
               #               'max_depth': -1,
               'learning_rate': lr,
               "boosting": "gbdt",
-              "bagging_freq": 5,
+              "bagging_freq": 1,
               "bagging_fraction": bf,
-              "feature_fraction": 0.9,
-              "metric": metric,"verbose_eval":verbose_eval,'n_jobs':8,
+              "feature_fraction": 1,      #STRANGE GBDT  why("bagging_freq": 5 "feature_fraction": 0.9)!!!
+              "metric": metric,"verbose_eval":verbose_eval,'n_jobs':8,"elitism":0,
               "early_stopping_rounds": early_stop, "adaptive": 'weight1', 'verbose': 666,'min_data_in_leaf': 20,
               #               "verbosity": -1,
               #               'reg_alpha': 0.1,
@@ -280,14 +280,17 @@ def fit_lgbm(train, val,target_meter,fold, devices=(-1,), seed=None, cat_feature
 
     params['seed'] = seed
     if False:
-        d_train = pd.concat([pd.DataFrame(y_train), X_train], ignore_index=True, axis=1)
-        print("X_train={}, y_train={} d_train={}".format(X_train.shape, y_train.shape, d_train.shape))
+        col_y = pd.DataFrame(y_train)
+        col_X = X_train.reset_index(drop=True)
+        d_train = pd.concat([col_y, col_X], ignore_index=True, axis=1)
         np.savetxt("E:/2/LightGBM-master/examples/regression/case_cys_.csv", d_train, delimiter='\t')
+        print("X_train={}, y_train={} d_train={}".format(col_X.shape, col_y.shape, d_train.shape))
 
     if isMORT:
         params['verbose']=666
         model = LiteMORT(params).fit(X_train, y_train, eval_set=[(X_valid, y_valid)], categorical_feature=cat_features)
         fold_importance = None
+		log = ""
     else:
         d_train = lgb.Dataset(X_train, label=y_train, categorical_feature=cat_features)
         d_valid = lgb.Dataset(X_valid, label=y_valid, categorical_feature=cat_features)
@@ -336,7 +339,7 @@ for target_meter in range(4):
         print(f'fold={fold} train={train_data[0].shape},valid={valid_data[0].shape}')
         #     model, y_pred_valid, log = fit_cb(train_data, valid_data, cat_features=cat_features, devices=[0,])
         model, y_pred_valid, log = fit_lgbm(train_data, valid_data,target_meter,fold, cat_features=cat_features,
-                                            num_rounds=1000, lr=0.05, bf=0.7)
+                                            num_rounds=1000, lr=0.05, bf=0.3)
         y_valid_pred_total[valid_idx] = y_pred_valid
         models_.append(model)
         gc.collect()

@@ -286,6 +286,10 @@ namespace Grusoft {
 					}
 				}
 				DOWN_sum_2 = a2;	DOWN_sum_1 = sum;
+				DOWN_mean = sum / dim;
+				double impuri = DOWN_sum_2 - dim*DOWN_mean*DOWN_mean;
+				assert(impuri >= 0);
+				DOWN_devia = sqrt(impuri / dim);
 				//DOWN_GH_2 = sumGH;
 				//LABEL_mean = label_sum*1.0/dim;
 			}
@@ -405,6 +409,10 @@ namespace Grusoft {
 				err_l2 = err_rmse / dim;
 				err_rmse = sqrt(err_rmse / dim);	
 				err_mae = err_mae / dim;
+				DOWN_mean = DOWN_sum_1 / dim;
+				double impuri = DOWN_sum_2 - dim*DOWN_mean*DOWN_mean;
+				assert(impuri >= 0);
+				DOWN_devia = sqrt(impuri / dim);
 				//FeatsOnFold::stat.tX += GST_TOC(t1);
 			}
 			else {
@@ -418,6 +426,7 @@ namespace Grusoft {
 		float *samp_weight = nullptr;
 		//参见samp_set之相关定义
 		double DOWN_sum_1 = 0, DOWN_sum_2 = 0, DOWN_GH_2 = 0, LABEL_mean = 0, DOWN_0 = DBL_MAX, DOWN_1 = -DBL_MAX;
+		double DOWN_mean, DOWN_devia;
 		
 		//https://medium.com/human-in-a-machine-world/mae-and-rmse-which-metric-is-better-e60ac3bde13d
 		double err_rmse = DBL_MAX, err_mae = DBL_MAX, err_l2 = DBL_MAX,err_logloss= DBL_MAX, err_auc= DBL_MAX;

@@ -28,7 +28,6 @@ void SAMP_SET::Alloc(FeatsOnFold *hData_, size_t nSamp_, int flag) {
 	samps = root_set;
 }
 
-
 /*
 	v0.2		cys	
 		3/29/2019
@@ -36,19 +35,18 @@ void SAMP_SET::Alloc(FeatsOnFold *hData_, size_t nSamp_, int flag) {
 		8/31/2019
 */
 void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const BoostingForest *hBoosting, const SAMP_SET *from, size_t nMost, int rnd_seed, int flag) {
-	int nElitism = 1;// hData_->config.nElitism;
 	float *weight = hData_->lossy->GetSampWeight(0x0);
 	const tpDOWN *hessian = hData_->GetHessian();
 	const tpDOWN *down = hData_->GetDownDirection();
 	Alloc(hData_,nMost);
 	size_t i, nFrom = hData_->nSample(),nz=0,pos,nSmall=0;
-	double T_grad = DBL_MAX,b;
+	double T_grad = DBL_MAX,b, rElitism= hData_->config.rElitism;
 	float *samp_weight = hData_->lossy->samp_weight;	//assert(samp_weight!=nullptr);
-	if (hData_->isTrain()) {	
+	if (hData_->isTrain() && rElitism>0) {
 		T_grad = hData_->lossy->DOWN_sum_2;
-		//T_grad = hData_->lossy->DOWN_GH_2;
 		assert(T_grad > 0);
 		T_grad = sqrt(T_grad / nFrom);
+		//T_grad = hData_->lossy->DOWN_mean+hData_->lossy->DOWN_devia/2;
 	}
 	//nElitism = 0;
 	if (from == nullptr) {
@@ -86,7 +84,7 @@ void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const BoostingForest *hBoosting, 
 			if (i == nFrom - 1)
 				i = nFrom - 1;
 			double prob = min(0.9999,(nMost - nz)*1.0/(nFrom - i));
-			if (nElitism > 0 ) {
+			if (rElitism > 0 ) {
 				if (samp_weight != nullptr) {
 					if (samp_weight[i]<0.5) {
 						prob /= 10.0;		//nSmall++;
@@ -103,11 +101,6 @@ void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const BoostingForest *hBoosting, 
 			}
 			double c = hData_->rander_samp.Uniform_(0, 1);
 			if (c < prob) {				root_set[nz++] = i;			}
-			/*x = (214013 * x + 2531011);
-			x = ((x >> 16) & 0x7FFF);
-			if ((x/32768.0f) < prob) {
-				root_set[nz++]=i;
-			}*/
 		}
 	}	else {
 		tpSAMP_ID *mask=new tpSAMP_ID[nFrom]();
@@ -127,7 +120,7 @@ void SAMP_SET::SampleFrom(FeatsOnFold *hData_, const BoostingForest *hBoosting, 
 	assert(nz <= nMost);
 	nSamp = nz;
 	if (hBoosting->skdu.noT % hData_->config.verbose_eval == 0) {
-		printf("\nnSamp=%lld[%lld=>%lld] nSmall=%lld\t", nFrom, nMost, nz, nSmall);
+		printf("\nnSamp=%lld[%lld=>%lld] nSmall=%lld T_grad=%.6g\t", nFrom, nMost, nz, nSmall, T_grad);
 		//printf("\nsamps={%d,%d,%d,...%d,...,%d,%d}", samps[0], samps[1], samps[2], samps[nz / 2], samps[nz - 2], samps[nz - 1]);
 	}
 }
