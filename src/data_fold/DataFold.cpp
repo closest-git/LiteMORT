@@ -11,6 +11,7 @@ using json = nlohmann::json;
 #endif
 
 #include "DataFold.hpp"
+#include "FeatVec_Quanti.hpp"
 #include "Loss.hpp"
 #include "EDA.hpp"
 #include "../tree/BoostingForest.hpp"
@@ -419,41 +420,7 @@ struct LOOP_unroll<0> {
 //https://stackoverflow.com/questions/18971401/sparse-array-compression-using-simd-avx2
 #define TO_BIN_0(pBins,quanti,samps,down,i)	{	HISTO_BIN *pB0 = pBins + (quanti[samps[i]]);	pB0->G_sum -= down[i];	pB0->nz++;	}
 #define TO_BIN_01(pBins,quanti,samps,down)	{	HISTO_BIN *pB0 = pBins + (quanti[*(samps)]);	pB0->G_sum -= *(down);	pB0->nz++;	}
-void FeatVec_Q::Samp2Histo_null_hessian(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag0) {
-	HistoGRAM *qHisto = GetHisto();
-
-	tpDOWN *down = hData_->GetSampleDown();	
-	string optimal = hData_->config.leaf_optimal;
-	bool isLambda = optimal == "lambda_0";
-	size_t nSamp = samp_set.nSamp, i, nSamp_LD= 0,LD=4;
-	if (nSamp == hData_->nSample()) {
-		down = hData_->GetDownDirection();
-	}
-	const tpSAMP_ID *samps = samp_set.samps;
-	tpSAMP_ID samp;
-	tpDOWN a;
-	tpQUANTI *quanti = arr(), no;
-	histo->CopyBins(*qHisto, true, 0x0);
-	int nBin = histo->nBins;// bins.size();
-	HISTO_BIN *pBins = histo->bins, *pBin;	//https://stackoverflow.com/questions/7377773/how-can-i-get-a-pointer-to-the-first-element-in-an-stdvector
-	GST_TIC(t1);
-	nSamp_LD = LD==0 ? 0 : LD * (int)(nSamp / LD);
-	for (i = 0; i < nSamp_LD; i += LD) {
-		TO_BIN_01(pBins, quanti, samps++, down++);
-		TO_BIN_01(pBins, quanti, samps++, down++);
-		TO_BIN_01(pBins, quanti, samps++, down++);
-		TO_BIN_01(pBins, quanti, samps++, down++);	
-	}
-	 //if(nSamp<10000)
-	for (i = nSamp_LD; i<nSamp; i++) {
-		//TO_BIN_0(pBins, quanti, samps, down, i);
-		TO_BIN_01(pBins, quanti, samps++, down++);
-	}
-
-	for (i = 0; i < nBin; i++) {
-		pBins[i].H_sum = pBins[i].nz;
-	}
-}/*
+/*
 void FeatVec_Q::Samp2Histo_null_hessian(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag0) {
 	HistoGRAM *qHisto = GetHisto();
 	size_t nSamp = samp_set.nSamp, i,step;
@@ -529,7 +496,7 @@ void FeatVec_Q::Samp2Histo_null_hessian_sparse(const FeatsOnFold *hData_, const 
 
 /*
 	测试数据也量化之后，在测试集上已无意义.		需要重新设计
-*/
+
 void FeatVec_Q::PerturbeHisto(const FeatsOnFold *hData_, int flag) {
 	if (qHisto_1 != nullptr) {
 		delete qHisto_1;
@@ -546,7 +513,7 @@ void FeatVec_Q::PerturbeHisto(const FeatsOnFold *hData_, int flag) {
 		//测试数据也量化之后，在测试集上已无意义
 		//cur->split_F = kk == 0 ? T1 - (T1 - T0) *30 : T1 + (T2 - T1) *30;
 	}
-}
+}*/
 
 
 void FeatVec_Q::InitSampHisto(HistoGRAM* histo, bool isRandom, int flag) {
@@ -639,7 +606,7 @@ void FeatVec_Q::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, H
 			}/**/
 			//if(nSamp<10000)
 			for (i = nSamp4; i<nSamp; i++) {
-				tpQUANTI pos = quanti[samps[i]];
+				auto pos = quanti[samps[i]];
 				assert(pos >= 0 && pos < nBin);
 		
 				//a = down[samp];
@@ -928,6 +895,7 @@ tpDOWN *FeatsOnFold::GetSampleHessian() const {
 
 int *FeatsOnFold::Tag() { return lossy->Tag(); }
 
+/*
 void FeatVec_Q::UpdateFruit(const FeatsOnFold *hData_, MT_BiSplit *hBlit, int flag) {
 	//double split = hBlit->fruit->thrshold;
 	if (hBlit->fruit->isY) {
@@ -943,23 +911,14 @@ void FeatVec_Q::UpdateFruit(const FeatsOnFold *hData_, MT_BiSplit *hBlit, int fl
 			}
 		}
 		else {
-			/*assert(bins.size() == vThrsh.size());
-			for (size_t i = 0; i < vThrsh.size(); i++) {
-			bins[i].tic = vThrsh[i];
-			}*/
-		}
+					}
 		//hBlit->fruit->T_quanti = -13;
 	}
 	else {
-		/*tpQUANTI q_split = split;		assert(q_split == split);
-		hBlit->fruit->T_quanti = q_split;
-		//assert(split>a0 && split <= a1);
-		float thrsh = vThrsh[q_split];		//严重的BUG之源啊
-		hBlit->fruit->thrshold = thrsh;*/
 		if (hData_->config.split_refine != LiteBOM_Config::REFINE_SPLIT::REFINE_NONE)
 			hFeatSource->RefineThrsh(hData_, hBlit);
 	}
-}
+}*/
 
 /*
 https://ask.julyedu.com/question/7603

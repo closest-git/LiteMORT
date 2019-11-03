@@ -125,8 +125,8 @@ class COROchann(object):
         self.data_root = data_root
         self.building_meta_df = building_meta_df
         self.weather_df = weather_df
-        #self.some_rows = 500000
-        self.some_rows = None
+        self.some_rows = 500000
+        #self.some_rows = None
         self.df_base = self.Load_Processing()
         self.df_base_shape = self.df_base.shape
 
@@ -290,7 +290,7 @@ def fit_lgbm(train, val,target_meter,fold, devices=(-1,), seed=None, cat_feature
         params['verbose']=666
         model = LiteMORT(params).fit(X_train, y_train, eval_set=[(X_valid, y_valid)], categorical_feature=cat_features)
         fold_importance = None
-		log = ""
+        log = ""
     else:
         d_train = lgb.Dataset(X_train, label=y_train, categorical_feature=cat_features)
         d_valid = lgb.Dataset(X_valid, label=y_valid, categorical_feature=cat_features)

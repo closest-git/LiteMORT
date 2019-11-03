@@ -192,6 +192,7 @@ copy $(OutDir)$(TargetName)$(TargetExt) D:\Anaconda3\Lib\site-packages\litemort<
     <ClInclude Include="..\..\src\data_fold\FeatVector.hpp" />
     <ClInclude Include="..\..\src\data_fold\FeatVec_2D.hpp" />
     <ClInclude Include="..\..\src\data_fold\FeatVec_EXP.hpp" />
+    <ClInclude Include="..\..\src\data_fold\FeatVec_Quanti.hpp" />
     <ClInclude Include="..\..\src\data_fold\Histogram.hpp" />
     <ClInclude Include="..\..\src\data_fold\Imputer.hpp" />
     <ClInclude Include="..\..\src\data_fold\Loss.hpp" />

@@ -6,10 +6,12 @@
 #include <thread>
 #include <stack>
 #include "../data_fold/Loss.hpp"
+#include "../data_fold/FeatVec_Quanti.hpp"
 #include "../util/Object.hpp"
 #include "../EDA/SA_salp.hpp"
 #include "../util/samp_set.hpp"
 #include "BiSplit.hpp"
+
 
 //double WeakLearner::minSet=0.01;
 //double WeakLearner::minGain=0.01;
@@ -580,11 +582,7 @@ void ManifoldTree::Train(int flag) {
 	vector<int> pick_feats;
 	hData_->nPick4Split(pick_feats, hData_->rander_feat, hForest,-1 );
 	hForest->histo_buffer->BeforeTrainTree(pick_feats, root->nSample(), flag);
-	if(false){
-		for (auto no : pick_feats) { 
-			hData_->feats[no]->PerturbeHisto(hData_);
-		}
-	}
+	
 	/*if (this->hForest->skdu.noT % 500 == 0) {
 		tpSAMP_ID *samps = root->samp_set.samps;
 		size_t nSamp = root->samp_set.nSamp;

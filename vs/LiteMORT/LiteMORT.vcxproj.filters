@@ -185,5 +185,8 @@
     <ClInclude Include="..\..\src\data_fold\Representive.hpp">
       <Filter>源文件\data_fold</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\data_fold\FeatVec_Quanti.hpp">
+      <Filter>源文件\data_fold</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

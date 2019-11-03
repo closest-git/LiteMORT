@@ -188,14 +188,14 @@ HistoGRAM* HistoGRAM::FromDiff(const HistoGRAM*hP, const HistoGRAM*hBrother, boo
 	//assert(brother == hBrother->bins.size());
 	return this;
 }
-
+/*
 void HistoGRAM::TicMap(tpQUANTI*map, int flag) {
 	int i, tic;
 	for (i = 0; i < nBins; i++) {
 		tic = bins[i].tic;
 		map[tic] = i;
 	}
-}
+}*/
 
 void HistoGRAM::CheckValid(const LiteBOM_Config&config, vector<BIN_FEATA>*featas,int flag) {
 	int i,  nZ = 0, tic_0=-1;

@@ -28,6 +28,7 @@
 #include "../util/Object.hpp"
 #include "../data_fold/EDA.hpp"
 #include "../data_fold/Loss.hpp"
+#include "../data_fold/FeatVec_Quanti.hpp"
 #include "../include/LiteBOM_config.h"
 
 using namespace Grusoft;
@@ -243,7 +244,7 @@ PYMORT_DLL_API void LiteMORT_set_feat(PY_ITEM* params, int nParam, int flag = 0x
 
 void FeatsOnFold::ExpandFeat(int flag) {
 	return;
-	bool isTrain = BIT_TEST(dType,  FeatsOnFold::DF_TRAIN);
+/*	bool isTrain = BIT_TEST(dType,  FeatsOnFold::DF_TRAIN);
 	bool isPredict = BIT_TEST(dType,  FeatsOnFold::DF_PREDIC);
 	size_t nFeat_0 = feats.size(),i,nSamp_=nSample(),feat;
 	int flagF = flag, nQuant=0, nMostQ = config.feat_quanti;
@@ -272,7 +273,7 @@ void FeatsOnFold::ExpandFeat(int flag) {
 			}else
 				feats.push_back(hExp);
 		}
-	}
+	}*/
 }
 
 FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, string nam_, PY_COLUMN *cX_, PY_COLUMN *cY_, size_t nSamp_, size_t ldX_, size_t ldY_, int flag) {

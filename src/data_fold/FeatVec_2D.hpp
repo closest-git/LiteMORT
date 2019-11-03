@@ -16,11 +16,11 @@ namespace Grusoft {
 		virtual void GreedySplit_X(const FeatsOnFold *hData_, const SAMP_SET& samp_set, int flag = 0x0);
 	};
 
-	class FeatVec_2D : public FeatVec_T<tpQUANTI> {
+	class FeatVec_2D : public FeatVec_T<short> {
 	protected:
-		FeatVec_T<tpQUANTI> *featX = nullptr, *featY = nullptr;
+		FeatVec_T<short> *featX = nullptr, *featY = nullptr;
 	public:
-		FeatVec_2D(FeatsOnFold *hData_, int id_, const FeatVec_T<tpQUANTI> *fX, const FeatVec_T<tpQUANTI> *fY, size_t nMostDup, int flag = 0x0);
+		FeatVec_2D(FeatsOnFold *hData_, int id_, const FeatVec_T<short> *fX, const FeatVec_T<short> *fY, size_t nMostDup, int flag = 0x0);
 		virtual ~FeatVec_2D() {
 		}
 

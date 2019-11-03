@@ -78,8 +78,8 @@ void sort_indexes(const vector<T> &v, vector<tpSAMP_ID>& idx, int flag = 0x0) {
 namespace Grusoft {
 	class FeatsOnFold;
 	class FeatVector;
-	//typedef uint8_t tpQUANTI;
 	typedef short tpQUANTI;
+	//typedef int tpQUANTI;
 	//用于快速split,histogram其实是最简单的GreedyCluster
 	class GreedyCluster {
 
@@ -212,7 +212,7 @@ namespace Grusoft {
 
 		virtual void CheckValid(const LiteBOM_Config&config, vector<BIN_FEATA>*featas=nullptr,  int flag = 0x0);
 		virtual void CompressBins(int flag=0x0);
-		virtual void TicMap(tpQUANTI*map,int flag);
+		//virtual void TicMap(tpQUANTI*map,int flag);
 
 		virtual double split_F(int no, int flag = 0x0) const;
 
