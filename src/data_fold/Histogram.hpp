@@ -78,7 +78,7 @@ void sort_indexes(const vector<T> &v, vector<tpSAMP_ID>& idx, int flag = 0x0) {
 namespace Grusoft {
 	class FeatsOnFold;
 	class FeatVector;
-	typedef short tpQUANTI;
+	//typedef short tpQUANTI;
 	//typedef int tpQUANTI;
 	//用于快速split,histogram其实是最简单的GreedyCluster
 	class GreedyCluster {

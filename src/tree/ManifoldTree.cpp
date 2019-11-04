@@ -819,18 +819,10 @@ void ManifoldTree::Dump( int flag ){
 			printf("%d ", node->feat_id);
 		else
 			printf("%s ", hFeat->nam.c_str());
-		if (isDistri) {
-			
-			FeatVec_Q *hFQ = dynamic_cast<FeatVec_Q*>(hFeat);
-			bool isQuanti = hFQ != nullptr;
-			
-			Distribution disX, disY,disDown;
-			
+		if (isDistri) {		
+			Distribution disX, disY,disDown;			
 			hFeat->Observation_AtSamp(hData_->config, node->samp_set, disX);
-			if (hFQ != nullptr) {
-			}
-			else {
-			}
+			
 			hData_->GetY()->Observation_AtSamp(hData_->config, node->samp_set, disY);		
 			//hData_->lossy->down.Observation_AtSamp(hData_->config, node->samp_set, disY);
 			//hFeat->Samp2Histo(hData_, node->samp_set, disX.histo, hData_->config.feat_quanti);

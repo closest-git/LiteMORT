@@ -392,7 +392,7 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 	//picks.clear();		picks.push_back(7);		//仅用于调试
 	int num_threads = OMP_FOR_STATIC_1(picks.size(), step),nNewPick=0,nMostNewPick=(int)(sqrt(picks.size()*1.0));
 	if (false) {
-		BinFold bf(hData_,picks, samp_set);
+		//BinFold bf(hData_,picks, samp_set);
 		//bf.GreedySplit(hData_, picks ,0x0 );
 	}
 

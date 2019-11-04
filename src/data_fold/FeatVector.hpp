@@ -103,6 +103,7 @@ namespace Grusoft {
 		/*vResi=predict-target		pDown=target-predict*/
 		virtual double UpdateResi(FeatsOnFold *hData_, int flag = 0x0) { throw "FeatVector::UpdateResi is ..."; }
 
+		virtual HistoGRAM *GetHisto(int flag = 0x0) {	return nullptr; }
 		//static bin mapping	生成基于EDA的格子	参见Samp2Histo
 		virtual void UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst, int flag = 0x0) { throw "FeatVector::UpdateHisto is ..."; }
 		virtual void PerturbeHisto(const FeatsOnFold *hData_, int flag = 0x0) { throw "FeatVector::PerturbeHisto is ..."; }

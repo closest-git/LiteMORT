@@ -165,7 +165,6 @@ copy $(OutDir)$(TargetName)$(TargetExt) D:\Anaconda3\Lib\site-packages\litemort<
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\data_fold\Binfold.cpp" />
     <ClCompile Include="..\..\src\data_fold\DataFold.cpp" />
     <ClCompile Include="..\..\src\data_fold\EDA.cpp" />
     <ClCompile Include="..\..\src\data_fold\Histogram.cpp" />
@@ -185,7 +184,6 @@ copy $(OutDir)$(TargetName)$(TargetExt) D:\Anaconda3\Lib\site-packages\litemort<
     <ClCompile Include="..\..\src\util\pcg_oneil\xoshiro256plusplus.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\data_fold\Binfold.hpp" />
     <ClInclude Include="..\..\src\data_fold\DataFold.hpp" />
     <ClInclude Include="..\..\src\data_fold\Distribution.hpp" />
     <ClInclude Include="..\..\src\data_fold\EDA.hpp" />

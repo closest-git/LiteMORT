@@ -6,7 +6,7 @@ namespace Grusoft {
 	/*
 		quantization
 	*/
-	//template<typename tpQUANTI>
+	template<typename tpQUANTI>
 	class FeatVec_Q : public FeatVec_T<tpQUANTI> {
 	protected:
 		FeatVector *hFeatSource = nullptr;
@@ -31,9 +31,22 @@ namespace Grusoft {
 				hDistri = nullptr;
 			}
 		}
-		HistoGRAM *GetHisto(int flag = 0x0) { return qHisto_0; }
+		virtual HistoGRAM *GetHisto(int flag = 0x0) { return qHisto_0; }
 
-		void InitSampHisto(HistoGRAM* histo, bool isRandom, int flag = 0x0);
+		void InitSampHisto(HistoGRAM* histo, bool isRandom, int flag = 0x0) {
+			if (qHisto_0->nBins == 0) {
+				histo->ReSet(0);	return;
+			}
+			else {
+				histo->CopyBins(*qHisto_0, true, 0x0);
+			}
+			if (false) {
+				//assert(qHisto_0->bins.size() > 0);
+				//histo->CopyBins(*qHisto_1, true, 0x0);		//变化2 
+				//histo->CompressBins();
+				histo->RandomCompress(this, false);					//变化1 
+			}
+		}
 
 		virtual void Observation_AtSamp(LiteBOM_Config config, SAMP_SET& samp, Distribution&distri, int flag = 0x0) {
 			hFeatSource->Observation_AtSamp(config, samp, distri, flag);
@@ -249,7 +262,7 @@ namespace Grusoft {
 				pBins[i].H_sum = pBins[i].nz;
 			}
 		}
-		virtual void Samp2Histo_null_hessian_sparse(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag = 0x0);
+		//virtual void Samp2Histo_null_hessian_sparse(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag = 0x0);
 
 		//virtual void UpdateFruit(const FeatsOnFold *hData_, MT_BiSplit *hBlit, int flag = 0x0);
 

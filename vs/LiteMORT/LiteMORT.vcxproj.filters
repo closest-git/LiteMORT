@@ -48,9 +48,6 @@
     <ClCompile Include="..\..\src\data_fold\DataFold.cpp">
       <Filter>源文件\data_fold</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\data_fold\Binfold.cpp">
-      <Filter>源文件\data_fold</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\learn\DCRIMI_.cpp">
       <Filter>源文件\learn</Filter>
     </ClCompile>
@@ -108,9 +105,6 @@
       <Filter>源文件\data_fold</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\data_fold\Distribution.hpp">
-      <Filter>源文件\data_fold</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\data_fold\Binfold.hpp">
       <Filter>源文件\data_fold</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\data_fold\FeatVec_2D.hpp">

@@ -353,7 +353,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	GST_TIC(t1);
 //#pragma omp parallel for num_threads(nThread) schedule(dynamic) reduction(+ : sparse,nana,nConstFeat,nLocalConst,nQuant) 
 	for (int feat = 0; feat < ldX_; feat++) {
-		FeatVec_Q *hFQ = nullptr;
+		FeatVector *hFQ = nullptr;
 		FeatVector *hFeat = hFold->Feat(feat);
 		//if(feat==31)
 		//	feat = 31;
@@ -375,7 +375,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 		}
 		else {
 			if (hFold->isQuanti || hFeat->isCategory()) {
-				hFold->feats[feat] = hFQ = new FeatVec_Q(hFold, hFeat, nMostQ);
+				hFold->feats[feat] = hFQ = new FeatVec_Q<short>(hFold, hFeat, nMostQ);
 				hFQ->UpdateHisto(hFold, false, true);
 				nQuant++;	//delete hFeat;
 			}
@@ -462,7 +462,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 	GST_TIC(t1);
 #pragma omp parallel for num_threads(nThread) schedule(dynamic) reduction(+ : sparse,nana,nConstFeat,nLocalConst,nQuant) 
 	for (int feat = 0; feat < ldX_; feat++) {
-		FeatVec_Q *hFQ=nullptr;
+		FeatVector *hFQ=nullptr;
 		FeatVector *hFeat = hFold->Feat(feat);
 		//if(feat==1)
 		//	feat = 1;
@@ -480,7 +480,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 			//hFeat->Clear();		//ÊÍ·ÅÄÚ´æ
 		}	else {
 			if (hFold->isQuanti) {
-				hFold->feats[feat] = hFQ = new FeatVec_Q(hFold, hFeat, nMostQ);
+				hFold->feats[feat] = hFQ = new FeatVec_Q<short>(hFold, hFeat, nMostQ);
 				hFQ->UpdateHisto(hFold,false,true);
 				nQuant++;	//delete hFeat;
 			}

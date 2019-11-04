@@ -314,9 +314,9 @@ void FeatsOnFold::BeforeTrain(BoostingForest *hGBRT, int flag) {
 			{			continue;			}
 			nValidFeat++;
 		}
-		FeatVec_Q *hFQ = dynamic_cast<FeatVec_Q *>(hFeat);
-		if (hFQ != nullptr) {
-			nTotalBin0 += hFQ->GetHisto()->nBins;
+		//FeatVec_Q *hFQ = dynamic_cast<FeatVec_Q *>(hFeat);
+		if (hFeat->GetHisto() != nullptr) {
+			nTotalBin0 += hFeat->GetHisto()->nBins;
 			if (isUpdate) {		//很多原因导致update
 				if (isByY) {
 					assert(0);
@@ -338,7 +338,7 @@ void FeatsOnFold::BeforeTrain(BoostingForest *hGBRT, int flag) {
 				}
 			}
 		}
-		nTotalBin1 += hFQ->GetHisto()->nBins;
+		nTotalBin1 += hFeat->GetHisto()->nBins;
 		//hFeat->XY2Histo_(config, this->samp_set, x);
 	}
 	if(hGBRT->skdu.noT%50==0 && nTotalBin1!=nTotalBin0)
@@ -370,7 +370,7 @@ void FeatsOnFold::PickSample_GH( MT_BiSplit*hBlit,int flag ) {
 
 /*
 	alpha-快速测试
-*/
+
 void FeatsOnFold::Compress(int flag) {
 	size_t i,j, nFeat = feats.size(), nSamp=this->nSample(),nSame=0,cur;
 	double *weight_1 = new double[nSamp](), *weight_2 = new double[nSamp]();
@@ -399,7 +399,7 @@ void FeatsOnFold::Compress(int flag) {
 		i = j;
 	}
 	delete[] weight_1;		delete[] weight_2;
-}
+}*/
 
 void FeatsOnFold::AfterTrain(int flag) {
 	//lossy.predict->BinaryOperate(lossy.y, FeatVector::COPY_MEAN, 0x0);
@@ -459,6 +459,7 @@ void FeatVec_Q::Samp2Histo_null_hessian(const FeatsOnFold *hData_, const SAMP_SE
 	delete[] nzs;		delete[] G_sums;
 }*/
 
+/*
 void FeatVec_Q::Samp2Histo_null_hessian_sparse(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag0) {
 	HistoGRAM *qHisto = GetHisto();
 
@@ -492,7 +493,7 @@ void FeatVec_Q::Samp2Histo_null_hessian_sparse(const FeatsOnFold *hData_, const 
 	for (i = 0; i < nBin; i++) {
 		pBins[i].H_sum = pBins[i].nz;
 	}
-}
+}*/
 
 /*
 	测试数据也量化之后，在测试集上已无意义.		需要重新设计
@@ -515,7 +516,7 @@ void FeatVec_Q::PerturbeHisto(const FeatsOnFold *hData_, int flag) {
 	}
 }*/
 
-
+/*
 void FeatVec_Q::InitSampHisto(HistoGRAM* histo, bool isRandom, int flag) {
 	if (qHisto_0->nBins == 0) {
 		histo->ReSet(0);	return;
@@ -528,7 +529,7 @@ void FeatVec_Q::InitSampHisto(HistoGRAM* histo, bool isRandom, int flag) {
 		//histo->CompressBins();
 		histo->RandomCompress(this,false);					//变化1 
 	}
-}
+}*/
 
 /*
 size_t FeatVec_Q::UniqueCount(const SAMP_SET&samp_set, int flag) {
@@ -606,7 +607,7 @@ FeatVec_Bundle::FeatVec_Bundle(FeatsOnFold *hData_,int id_, const vector<int>&bu
 
 
 void FeatVec_Bundle::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* hParent, HistoGRAM* histo, int nMostBin,  int flag0) {
-	if (qHisto->nBins == 0) {
+	/*if (qHisto->nBins == 0) {
 		histo->ReSet(0);
 		return;
 	}
@@ -623,9 +624,7 @@ void FeatVec_Bundle::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_s
 		samp = samps[i];
 		//no = quanti[samp];
 		a = err[samp];
-		/*if (quanti[samp]<0)	
-			pBin = &(histo->binNA);
-		else*/ {
+		{
 			if( a!=0 )
 				samp = samps[i];
 			pBin = pBins + quanti[samp];	//HISTO_BIN& bin = histo->bins[no];
@@ -633,7 +632,7 @@ void FeatVec_Bundle::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_s
 		}
 		pBin->G_sum += a;
 		pBin->nz++;
-	}
+	}*/
 }
 
 void FeatVec_Bundle::UpdateFruit(MT_BiSplit *hBlit, int flag) {
