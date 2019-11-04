@@ -1010,10 +1010,9 @@ namespace Grusoft {
 			}
 		}
 
-		/*
-			参见ExploreDA::
-		*/
-		virtual void QuantiAtEDA(const ExploreDA *edaX, tpQUANTI *quanti, int nMostBin,bool isSameSorted, int flag) {
+		/**/
+		template<typename tpQUANTI>
+		void QuantiAtEDA_(const ExploreDA *edaX, tpQUANTI *quanti, int nMostBin,bool isSameSorted, int flag) {
 			assert(quanti != nullptr && edaX != nullptr);
 			size_t nSamp_ = size(), i, i_0 = 0, i_1, noBin = 0, pos, nzHisto=0;
 			vector<tpSAMP_ID> idx;
@@ -1098,6 +1097,23 @@ namespace Grusoft {
 				return;
 			}
 		}
+
+		virtual void QuantiAtEDA(const ExploreDA *edaX, void *quanti,int sizeofQ, int nMostBin, bool isSameSorted, int flag) {
+			switch (sizeofQ) {
+			case 1:
+				QuantiAtEDA_(edaX, (int8_t*)quanti, nMostBin, isSameSorted, flag);
+				break;
+			case 2:
+				QuantiAtEDA_(edaX, (int16_t*)quanti, nMostBin, isSameSorted, flag);
+				break;
+			case 4:
+				QuantiAtEDA_(edaX, (int32_t*)quanti, nMostBin, isSameSorted, flag);
+				break;
+			default:
+				throw "QuantiAtEDA is ...sizeofQ is XXX";
+			}
+		}
+
 
 		//manifold node对应的一些statics		
 		virtual void BinaryOperate(FeatVector *hY_, BINARY_OPERATE opt, int flag = 0x0) {

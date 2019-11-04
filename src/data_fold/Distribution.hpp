@@ -315,7 +315,7 @@ namespace Grusoft {
 			histo->nBins = noBin + 1;
 			assert(i_0 == nA);
 			double delta = double(fabs(a1 - a0)) / nMostBin / 100.0;
-			//histo->bins[noBin].split_F = a1 + delta;		//上界,为了QuantiAtEDA等
+			//histo->bins[noBin].split_F = a1 + delta;		//上界,为了等
 			//assert(histo->bins[histo->bins.size()-1].split_F>a1);
 			//vThrsh.push_back(a1 + delta);
 		}
