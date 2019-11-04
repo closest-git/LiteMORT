@@ -8,6 +8,7 @@ namespace Grusoft {
 	*/
 	template<typename tpQUANTI>
 	class FeatVec_Q : public FeatVec_T<tpQUANTI> {
+		//tpQUANTI binNA = tpQUANTI(-1);
 	protected:
 		FeatVector *hFeatSource = nullptr;
 		//FeatBlit box;
@@ -15,7 +16,7 @@ namespace Grusoft {
 		//由PerturbeHisto生成，需要重新设计
 		HistoGRAM *qHisto_1 = nullptr;
 	public:
-		FeatVec_Q(const FeatsOnFold *hData_, FeatVector *hFeat, int nMostBin, int flag = 0x0):hFeatSource(hFeat){
+		FeatVec_Q(const FeatsOnFold *hData_, FeatVector *hFeat, int x, int flag = 0x0):hFeatSource(hFeat){
 			id = hFeat->id;
 			desc = hFeat->desc;
 			nam = hFeat->nam;
@@ -86,7 +87,7 @@ namespace Grusoft {
 			//val.resize(nSamp);
 			tpQUANTI *quanti = arr(), no;
 			//qHisto->quanti = quanti;
-			for (i = 0; i<nSamp; i++)	quanti[i] = -111;		//-1 for NAN
+			for (i = 0; i<nSamp; i++)	quanti[i] = tpQUANTI(-1);		//-1 for NAN
 
 			ExploreDA *edaX = hData_->edaX;
 			if (edaX != nullptr /*&& hData_->config.histo_algorithm == LiteBOM_Config::HISTO_ALGORITHM::on_EDA*/) {
@@ -109,10 +110,9 @@ namespace Grusoft {
 				throw "\n!!! FeatVec_Q::Update_Histo edaX=nullptr !!!\n";
 			}
 			for (nValid = 0, i = 0; i < nSamp; i++) {
-				if (quanti[i] == -111)
-				{
+				/*if (quanti[i] == -111)		{
 					printf("\n!!! FeatVec_Q::Update_Histo quanti[%d] is -111 !!!\n", i);		throw "\n!!! FeatVec_Q::Update_Histo quanti is -1 !!!\n";
-				}
+				}*/
 				if (quanti[i] >= 0)
 					nValid++;
 			}
@@ -193,8 +193,8 @@ namespace Grusoft {
 					}
 					//if(hParent==nullptr)
 				}
+				histo->CheckValid(hData_->config);
 			}
-			histo->CheckValid(hData_->config);
 
 #ifdef _DEBUG
 			if (true /* && !isRandomDrop*/) {
@@ -261,7 +261,9 @@ namespace Grusoft {
 			for (i = 0; i < nBin; i++) {
 				pBins[i].H_sum = pBins[i].nz;
 			}
+			histo->CheckValid(hData_->config);
 		}
+
 		//virtual void Samp2Histo_null_hessian_sparse(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag = 0x0);
 
 		//virtual void UpdateFruit(const FeatsOnFold *hData_, MT_BiSplit *hBlit, int flag = 0x0);

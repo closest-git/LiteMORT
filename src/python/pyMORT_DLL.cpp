@@ -276,6 +276,30 @@ void FeatsOnFold::ExpandFeat(int flag) {
 	}*/
 }
 
+FeatVector *FeatVecQ_InitInstance(FeatsOnFold *hFold, FeatVector *hFeat, int x, int flag = 0x0) {
+	int nBins = hFold->config.feat_quanti;
+	assert(hFeat != nullptr && hFeat->hDistri != nullptr);
+	HistoGRAM *histo = hFeat->hDistri->histo;
+	if (histo != nullptr) {
+		nBins = histo->nBins;
+	}
+	assert(nBins > 0);
+	FeatVector *hFQ = nullptr;
+	if (nBins <= 256) {
+		hFQ = new FeatVec_Q<uint8_t>(hFold, hFeat, x);
+		//hFQ = new FeatVec_Q<uint16_t>(hFold, hFeat, x);		printf("----%d\t \"%s\" nBins=%d\n", hFeat->id, hFeat->nam.c_str(), nBins);
+	}
+	else if (nBins <= SHRT_MAX) {
+		hFQ = new FeatVec_Q<uint16_t>(hFold, hFeat, x);
+		printf("----%d\t \"%s\" nBins=%d\n", hFeat->id, hFeat->nam.c_str(), nBins);
+	}
+	else {
+		assert(0);
+		hFQ = new FeatVec_Q<uint32_t>(hFold, hFeat, x);
+	}
+	return hFQ;
+}
+
 FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, string nam_, PY_COLUMN *cX_, PY_COLUMN *cY_, size_t nSamp_, size_t ldX_, size_t ldY_, int flag) {
 	clock_t t0 = clock();
 	assert(BIT_IS(flag, FeatsOnFold::DF_FLAG));
@@ -375,7 +399,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 		}
 		else {
 			if (hFold->isQuanti || hFeat->isCategory()) {
-				hFold->feats[feat] = hFQ = new FeatVec_Q<short>(hFold, hFeat, nMostQ);
+				hFold->feats[feat] = hFQ = FeatVecQ_InitInstance(hFold, hFeat, 0x0);	// new FeatVec_Q<short>(hFold, hFeat, nMostQ);
 				hFQ->UpdateHisto(hFold, false, true);
 				nQuant++;	//delete hFeat;
 			}
@@ -416,6 +440,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 
 	return hFold;
 }
+
 /*
 	模板编程真麻烦
 */
@@ -480,7 +505,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 			//hFeat->Clear();		//释放内存
 		}	else {
 			if (hFold->isQuanti) {
-				hFold->feats[feat] = hFQ = new FeatVec_Q<short>(hFold, hFeat, nMostQ);
+				hFold->feats[feat] = hFQ = FeatVecQ_InitInstance(hFold, hFeat,0x0);	// new FeatVec_Q<short>(hFold, hFeat, nMostQ);
 				hFQ->UpdateHisto(hFold,false,true);
 				nQuant++;	//delete hFeat;
 			}

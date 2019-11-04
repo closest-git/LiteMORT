@@ -2,17 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1f20a82c-2842-4728-bc01-7f01847a5972" name="Default" comment="README">
-      <change beforePath="$PROJECT_DIR$/python-package/case_ashrae.py" beforeDir="false" afterPath="$PROJECT_DIR$/python-package/case_ashrae.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/data_fold/FeatVec_Quanti.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/FeatVec_Quanti.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/data_fold/FeatVector.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/FeatVector.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/data_fold/Histogram.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/Histogram.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/python/pyMORT_DLL.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/python/pyMORT_DLL.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/tree/BiSplit.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/BiSplit.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tree/ManifoldTree.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/ManifoldTree.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vs/LiteMORT/LiteMORT.vcxproj" beforeDir="false" afterPath="$PROJECT_DIR$/vs/LiteMORT/LiteMORT.vcxproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vs/LiteMORT/LiteMORT.vcxproj.filters" beforeDir="false" afterPath="$PROJECT_DIR$/vs/LiteMORT/LiteMORT.vcxproj.filters" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -37,13 +31,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/python-package/case_ashrae.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="149">
-              <caret line="128" column="9" selection-start-line="128" selection-start-column="9" selection-end-line="128" selection-end-column="9" />
-              <folding>
-                <element signature="e#816#2659#0" />
-                <element signature="e#2694#3144#0" />
-                <element signature="e#3173#5584#0" />
-              </folding>
+            <state relative-caret-position="130">
+              <caret line="127" column="9" selection-start-line="127" selection-start-column="9" selection-end-line="127" selection-end-column="9" />
             </state>
           </provider>
         </entry>
@@ -51,7 +40,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/python-package/case_earthquake.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="158">
+            <state relative-caret-position="1539">
               <caret line="87" column="32" selection-start-line="87" selection-start-column="32" selection-end-line="87" selection-end-column="32" />
             </state>
           </provider>
@@ -60,7 +49,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/python-package/litemort/compat.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="95">
+            <state relative-caret-position="1691">
               <caret line="94" column="71" selection-start-line="94" selection-start-column="8" selection-end-line="94" selection-end-column="71" />
               <folding>
                 <element signature="e#62#100#0" expanded="true" />
@@ -72,7 +61,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tests/python_package_test/test_sklearn.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="95">
+            <state relative-caret-position="836">
               <caret line="59" column="49" selection-start-line="59" selection-start-column="8" selection-end-line="59" selection-end-column="49" />
               <folding>
                 <element signature="e#36#47#0" expanded="true" />
@@ -84,7 +73,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/python-package/case_ashrae_half.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="213">
+            <state relative-caret-position="2470">
               <caret line="146" column="72" selection-start-line="144" selection-start-column="8" selection-end-line="146" selection-end-column="72" />
             </state>
           </provider>
@@ -93,7 +82,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/python-package/case_higgs.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="161">
+            <state relative-caret-position="1178">
               <caret line="71" column="31" selection-start-line="71" selection-start-column="31" selection-end-line="71" selection-end-column="31" />
             </state>
           </provider>
@@ -111,7 +100,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/python-package/litemort/LiteMORT.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="702">
+            <state relative-caret-position="8284">
               <caret line="446" column="80" selection-start-line="446" selection-start-column="76" selection-end-line="446" selection-end-column="80" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
@@ -123,7 +112,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/python-package/litemort/LiteMORT_preprocess.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="338">
+            <state relative-caret-position="2052">
               <caret line="114" column="47" selection-start-line="114" selection-start-column="47" selection-end-line="114" selection-end-column="47" />
               <folding>
                 <element signature="e#0#19#0" expanded="true" />
@@ -135,7 +124,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/python-package/build/lib/LiteMORT/LiteMORT_preprocess.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="107">
+            <state relative-caret-position="931">
               <caret line="55" column="29" selection-start-line="55" selection-start-column="29" selection-end-line="55" selection-end-column="29" />
             </state>
           </provider>
@@ -253,9 +242,9 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="387" />
+    <option name="x" value="386" />
     <option name="y" value="130" />
-    <option name="width" value="1737" />
+    <option name="width" value="1738" />
     <option name="height" value="1090" />
   </component>
   <component name="ProjectLevelVcsManager">
@@ -557,7 +546,8 @@
       <workItem from="1571707290048" duration="19181000" />
       <workItem from="1571824203463" duration="56364000" />
       <workItem from="1572311299057" duration="26031000" />
-      <workItem from="1572400124111" duration="64585000" />
+      <workItem from="1572400124111" duration="66056000" />
+      <workItem from="1572854798356" duration="889000" />
     </task>
     <task id="LOCAL-00001" summary="README">
       <created>1556249780941</created>
@@ -602,18 +592,18 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="921899000" />
+    <option name="totallyTimeSpent" value="924259000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1390" height="878" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.5131313" visible="true" weight="0.10585585" />
-      <window_info id="Structure" order="1" sideWeight="0.48686868" side_tool="true" visible="true" weight="0.10585585" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.51206434" visible="true" weight="0.10735736" />
+      <window_info id="Structure" order="1" sideWeight="0.48793566" side_tool="true" visible="true" weight="0.10735736" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3297587" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.33646113" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.33646113" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.40616623" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -630,7 +620,7 @@
       <window_info anchor="right" id="R Packages" order="3" />
       <window_info anchor="right" id="R Graphics" order="4" />
       <window_info anchor="right" id="Database" order="5" />
-      <window_info anchor="right" x="601" y="59" width="225" height="746" id="SciView" order="6" sideWeight="0.46989527" visible="true" weight="0.26726726" />
+      <window_info active="true" anchor="right" x="601" y="59" width="225" height="746" id="SciView" order="6" sideWeight="0.46989527" visible="true" weight="0.26726726" />
       <window_info anchor="right" x="0" y="0" width="314" height="678" id="Documentation" order="7" sideWeight="0.5301047" side_tool="true" visible="true" weight="0.1398892" />
     </layout>
   </component>
@@ -1233,44 +1223,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/litemort/LiteMORT_EDA.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="57">
-          <caret line="3" selection-start-line="3" selection-end-line="3" selection-end-column="32" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/case_ashrae_corochann.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="33">
-          <caret line="271" column="49" lean-forward="true" selection-start-line="271" selection-start-column="49" selection-end-line="271" selection-end-column="49" />
-          <folding>
-            <element signature="e#70#80#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/build/lib/LiteMORT/LiteMORT_preprocess.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="107">
-          <caret line="55" column="29" selection-start-line="55" selection-start-column="29" selection-end-line="55" selection-end-column="29" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/case_ashrae_half.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="213">
-          <caret line="146" column="72" selection-start-line="144" selection-start-column="8" selection-end-line="146" selection-end-column="72" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/case_higgs.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="161">
-          <caret line="71" column="31" selection-start-line="71" selection-start-column="31" selection-end-line="71" selection-end-column="31" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/python-package/case_ashrae_corochann.py" />
     <entry file="file://$PROJECT_DIR$/python-package/case_qq2019.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="156">
@@ -1281,29 +1234,23 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/litemort/LiteMORT_preprocess.py">
+    <entry file="file://$PROJECT_DIR$/python-package/case_ashrae.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="338">
-          <caret line="114" column="47" selection-start-line="114" selection-start-column="47" selection-end-line="114" selection-end-column="47" />
-          <folding>
-            <element signature="e#0#19#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="130">
+          <caret line="127" column="9" selection-start-line="127" selection-start-column="9" selection-end-line="127" selection-end-column="9" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/litemort/LiteMORT.py">
+    <entry file="file://$PROJECT_DIR$/python-package/case_earthquake.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="702">
-          <caret line="446" column="80" selection-start-line="446" selection-start-column="76" selection-end-line="446" selection-end-column="80" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="1539">
+          <caret line="87" column="32" selection-start-line="87" selection-start-column="32" selection-end-line="87" selection-end-column="32" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/python-package/litemort/compat.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="95">
+        <state relative-caret-position="1691">
           <caret line="94" column="71" selection-start-line="94" selection-start-column="8" selection-end-line="94" selection-end-column="71" />
           <folding>
             <element signature="e#62#100#0" expanded="true" />
@@ -1313,7 +1260,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/tests/python_package_test/test_sklearn.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="95">
+        <state relative-caret-position="836">
           <caret line="59" column="49" selection-start-line="59" selection-start-column="8" selection-end-line="59" selection-end-column="49" />
           <folding>
             <element signature="e#36#47#0" expanded="true" />
@@ -1321,22 +1268,51 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/case_earthquake.py">
+    <entry file="file://$PROJECT_DIR$/python-package/case_ashrae_half.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="158">
-          <caret line="87" column="32" selection-start-line="87" selection-start-column="32" selection-end-line="87" selection-end-column="32" />
+        <state relative-caret-position="2470">
+          <caret line="146" column="72" selection-start-line="144" selection-start-column="8" selection-end-line="146" selection-end-column="72" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/case_ashrae.py">
+    <entry file="file://$PROJECT_DIR$/python-package/case_higgs.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="149">
-          <caret line="128" column="9" selection-start-line="128" selection-start-column="9" selection-end-line="128" selection-end-column="9" />
+        <state relative-caret-position="1178">
+          <caret line="71" column="31" selection-start-line="71" selection-start-column="31" selection-end-line="71" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python-package/litemort/LiteMORT_EDA.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="57">
+          <caret line="3" selection-start-line="3" selection-end-line="3" selection-end-column="32" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python-package/litemort/LiteMORT.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="8284">
+          <caret line="446" column="80" selection-start-line="446" selection-start-column="76" selection-end-line="446" selection-end-column="80" />
           <folding>
-            <element signature="e#816#2659#0" />
-            <element signature="e#2694#3144#0" />
-            <element signature="e#3173#5584#0" />
+            <element signature="e#0#9#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python-package/litemort/LiteMORT_preprocess.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2052">
+          <caret line="114" column="47" selection-start-line="114" selection-start-column="47" selection-end-line="114" selection-end-column="47" />
+          <folding>
+            <element signature="e#0#19#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python-package/build/lib/LiteMORT/LiteMORT_preprocess.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="931">
+          <caret line="55" column="29" selection-start-line="55" selection-start-column="29" selection-end-line="55" selection-end-column="29" />
         </state>
       </provider>
     </entry>

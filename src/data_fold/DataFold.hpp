@@ -1010,16 +1010,20 @@ namespace Grusoft {
 			}
 		}
 
-		/**/
+		/*
+			v0.1	cys
+				11/4/2019
+		*/
 		template<typename tpQUANTI>
 		void QuantiAtEDA_(const ExploreDA *edaX, tpQUANTI *quanti, int nMostBin,bool isSameSorted, int flag) {
 			assert(quanti != nullptr && edaX != nullptr);
+			tpQUANTI NNA = tpQUANTI(-1);
 			size_t nSamp_ = size(), i, i_0 = 0, i_1, noBin = 0, pos, nzHisto=0;
 			vector<tpSAMP_ID> idx;
 			if (hDistri->sortedA.size() > 0 && isSameSorted) {
 				idx = hDistri->sortedA;
 				for (i = 0; i < nSamp_; i++)
-					quanti[i] = -1;
+					quanti[i] = NNA;
 			}
 			else {
 				//sort_indexes(nSamp_,val, idx);
@@ -1040,10 +1044,11 @@ namespace Grusoft {
 					id = 31;
 				}				i_0 = 0;
 				while (i_0 < nA) {
-					pos = idx[i_0];
-					int key = (int)(val[pos]);
+					pos = idx[i_0];			
+					int key = (int)(val[pos]);		
 					assert(key >= distri.vMin && key <= distri.vMax);
 					quanti[pos] = mapCategory[key];	i_0++;
+					//assert(quanti[pos] >= 0 && quanti[pos] < NNA);
 				}
 			}
 			else {
@@ -1056,7 +1061,7 @@ namespace Grusoft {
 					assert(!IS_NAN_INF(val[pos]));
 					if (val[pos]< distri.vMin || val[pos]>distri.vMax) {//确实有可能
 						if (isSameSorted) {
-							quanti[pos] = -1;	i_0++;
+							quanti[pos] = NNA;	i_0++;
 						}
 						else {	//强制扰动
 							if (val[pos] < distri.vMin) {
@@ -1065,7 +1070,7 @@ namespace Grusoft {
 							if (val[pos]>distri.vMax) {
 								quanti[pos] = histo->nBins -2;
 							}
-							quanti[pos] = -1;	i_0++;
+							quanti[pos] = NNA;	i_0++;
 						}
 						continue;
 					}
@@ -1084,13 +1089,16 @@ namespace Grusoft {
 						{		throw "QuantiAtEDA noBin is XXX";						}
 						v1 = distri.binFeatas[noBin + 1].split_F;// histo->bins[noBin + 1].split_F;
 					}
+					assert(noBin >= 0 && noBin < NNA);
+
 				}
 				//int noNA = distri.histo->bins.size()-1;				
 				int noNA = distri.histo->nBins - 1;
+				assert(noNA <= NNA);
 				HISTO_BIN* hNA=distri.histo->hBinNA();
 				for (i = 0; i < nSamp_; i++) {
 					//if (quanti[i] == -1)
-					if (quanti[i] <0)
+					if (quanti[i] == NNA )
 					{	quanti[i] = noNA;		hNA->nz++;		}
 				}
 				//hNA->split_F = DBL_MAX;
@@ -1101,13 +1109,13 @@ namespace Grusoft {
 		virtual void QuantiAtEDA(const ExploreDA *edaX, void *quanti,int sizeofQ, int nMostBin, bool isSameSorted, int flag) {
 			switch (sizeofQ) {
 			case 1:
-				QuantiAtEDA_(edaX, (int8_t*)quanti, nMostBin, isSameSorted, flag);
+				QuantiAtEDA_(edaX, (uint8_t*)quanti, nMostBin, isSameSorted, flag);
 				break;
 			case 2:
-				QuantiAtEDA_(edaX, (int16_t*)quanti, nMostBin, isSameSorted, flag);
+				QuantiAtEDA_(edaX, (uint16_t*)quanti, nMostBin, isSameSorted, flag);
 				break;
 			case 4:
-				QuantiAtEDA_(edaX, (int32_t*)quanti, nMostBin, isSameSorted, flag);
+				QuantiAtEDA_(edaX, (uint32_t*)quanti, nMostBin, isSameSorted, flag);
 				break;
 			default:
 				throw "QuantiAtEDA is ...sizeofQ is XXX";
