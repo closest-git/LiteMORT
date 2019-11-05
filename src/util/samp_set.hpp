@@ -110,7 +110,7 @@ public:
 
 	//v0.2	parallel
 	template<typename Tx>
-	void STA_at_(const Tx *vec, Tx&a2_, Tx&sum_, Tx&x_0, Tx&x_1,bool hasY) {
+	void STA_at_(const Tx *vec, double&a2_, double&sum_, Tx&x_0, Tx&x_1,bool hasY) {
 		size_t step;
 		double a2 = 0,sum = 0;
 		x_0 = vec[samps[0]], x_1 = x_0;

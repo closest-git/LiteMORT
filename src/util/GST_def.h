@@ -14,7 +14,8 @@ typedef uint64_t UINT_64;
 typedef int64_t G_INT_64;
 
 //描述下降的方向，似乎float也可以，以节省内存
-typedef double tpDOWN;
+//typedef double tpDOWN;
+typedef float tpDOWN;
 //
 typedef double tpY;
 //typedef float tpY;

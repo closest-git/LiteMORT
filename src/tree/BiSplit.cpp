@@ -171,8 +171,8 @@ void MT_BiSplit::Observation_AtLocalSamp(FeatsOnFold *hData_, int flag) {
 	Y_mean = samp_set.a1_sum*1.0/dim;		Y2_mean = samp_set.a2_sum*1.0 / dim;
 	samp_set.ClearStat();
 	//double a, x_0 = DBL_MAX, x_1 = -DBL_MAX;
-	tpDOWN a, a2 = 0.0, mean = 0, y_0, y_1;
-	double DOWN_sum = 0,lambda_l2 = hData_->config.lambda_l2;
+	tpDOWN a,  mean = 0, y_0, y_1;
+	double a2 = 0.0,DOWN_sum = 0,lambda_l2 = hData_->config.lambda_l2;
 	samp_set.STA_at_<tpDOWN>(down, a2, DOWN_sum, y_0, y_1,true);
 	mean = DOWN_sum / dim;
 	G_sum = -DOWN_sum;		//很重要 gradient方向和down正好相反
@@ -197,7 +197,8 @@ void MT_BiSplit::Observation_AtLocalSamp(FeatsOnFold *hData_, int flag) {
 		if (hess == nullptr) {
 			H_sum = dim;
 		}	else {
-			double h2, h_0, h_1;
+			double h2;
+			tpDOWN h_0, h_1;
 			samp_set.STA_at_<tpDOWN>(hess, h2, H_sum, h_0, h_1,false);
 			assert(fabs(h_0)<1000 && fabs(h_1)<1000);
 		}

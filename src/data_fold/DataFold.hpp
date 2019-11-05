@@ -620,7 +620,8 @@ namespace Grusoft {
 
 		virtual void STA_at(SAMP_SET& some_set, int flag = 0x0) {
 			size_t nS = some_set.nSamp, i, pos;
-			Tx a2, a_sum, a_0, a_1, *val_0 = arr();
+			Tx  a_0, a_1, *val_0 = arr();
+			double a2,a_sum;
 			some_set.STA_at_<Tx>(val_0, a2, a_sum, a_0, a_1, false);			
 		}
 
@@ -628,7 +629,8 @@ namespace Grusoft {
 		virtual void Observation_AtSamp(LiteBOM_Config config, SAMP_SET& some_set, Distribution&distri, int flag=0x0) {
 			assert(0);
 			size_t nS = some_set.nSamp,i,pos;
-			Tx a2, a_sum,a_0, a_1,*val_s=new Tx[nS],*val_0=arr();
+			Tx  a_0, a_1,*val_s=new Tx[nS],*val_0=arr();
+			double a2,a_sum;
 			some_set.STA_at_<Tx>(val_0, a2, a_sum, a_0, a_1, false);
 			distri.vMin = a_0,				distri.vMax = a_1;
 			for (i = 0; i < nS;i++) {

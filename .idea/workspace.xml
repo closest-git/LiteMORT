@@ -2,11 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1f20a82c-2842-4728-bc01-7f01847a5972" name="Default" comment="README">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/python-package/case_ashrae.py" beforeDir="false" afterPath="$PROJECT_DIR$/python-package/case_ashrae.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/data_fold/FeatVec_Quanti.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/FeatVec_Quanti.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/python/pyMORT_DLL.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/python/pyMORT_DLL.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/tree/BiSplit.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/BiSplit.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/util/GST_def.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/GST_def.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/util/samp_set.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/samp_set.hpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -31,8 +33,11 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/python-package/case_ashrae.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="130">
-              <caret line="127" column="9" selection-start-line="127" selection-start-column="9" selection-end-line="127" selection-end-column="9" />
+            <state relative-caret-position="821">
+              <caret line="323" column="43" selection-start-line="323" selection-start-column="35" selection-end-line="323" selection-end-column="43" />
+              <folding>
+                <element signature="e#12444#15246#0" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -547,7 +552,7 @@
       <workItem from="1571824203463" duration="56364000" />
       <workItem from="1572311299057" duration="26031000" />
       <workItem from="1572400124111" duration="66056000" />
-      <workItem from="1572854798356" duration="889000" />
+      <workItem from="1572854798356" duration="4418000" />
     </task>
     <task id="LOCAL-00001" summary="README">
       <created>1556249780941</created>
@@ -592,19 +597,18 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="924259000" />
+    <option name="totallyTimeSpent" value="927788000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1390" height="878" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.51206434" visible="true" weight="0.10735736" />
-      <window_info id="Structure" order="1" sideWeight="0.48793566" side_tool="true" visible="true" weight="0.10735736" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.51166964" visible="true" weight="0.22747748" />
+      <window_info id="Structure" order="1" sideWeight="0.48833033" side_tool="true" visible="true" weight="0.22747748" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3297587" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.33646113" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.40616623" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.15147454" />
+      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.2533512" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -620,7 +624,7 @@
       <window_info anchor="right" id="R Packages" order="3" />
       <window_info anchor="right" id="R Graphics" order="4" />
       <window_info anchor="right" id="Database" order="5" />
-      <window_info active="true" anchor="right" x="601" y="59" width="225" height="746" id="SciView" order="6" sideWeight="0.46989527" visible="true" weight="0.26726726" />
+      <window_info anchor="right" x="601" y="59" width="225" height="746" id="SciView" order="6" sideWeight="0.46989527" visible="true" weight="0.17267267" />
       <window_info anchor="right" x="0" y="0" width="314" height="678" id="Documentation" order="7" sideWeight="0.5301047" side_tool="true" visible="true" weight="0.1398892" />
     </layout>
   </component>
@@ -884,11 +888,6 @@
           <line>444</line>
           <option name="timeStamp" value="803" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/python-package/case_ashrae.py</url>
-          <line>288</line>
-          <option name="timeStamp" value="807" />
-        </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
@@ -918,7 +917,7 @@
     <SUITE FILE_PATH="coverage/LiteMORT$lgb_kim.coverage" NAME="lgb_kim Coverage Results" MODIFIED="1564801856244" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
     <SUITE FILE_PATH="coverage/LiteMORT$sparsipy.coverage" NAME="sparsipy Coverage Results" MODIFIED="1569571613830" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/learn" />
     <SUITE FILE_PATH="coverage/LiteMORT$case_houseprice.coverage" NAME="case_houseprice Coverage Results" MODIFIED="1570606165493" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
-    <SUITE FILE_PATH="coverage/LiteMORT$case_ashrae.coverage" NAME="case_ashrae Coverage Results" MODIFIED="1572771464452" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
+    <SUITE FILE_PATH="coverage/LiteMORT$case_ashrae.coverage" NAME="case_ashrae Coverage Results" MODIFIED="1572863826094" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
     <SUITE FILE_PATH="coverage/LiteMORT$pytest_in_pycharm_test_py.coverage" NAME="pytest in pycharm_test.py Coverage Results" MODIFIED="1564799919413" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
     <SUITE FILE_PATH="coverage/LiteMORT$case_ashrae_corochann.coverage" NAME="case_ashrae_corochann Coverage Results" MODIFIED="1572400691972" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
     <SUITE FILE_PATH="coverage/LiteMORT$LiteMORT.coverage" NAME="LiteMORT Coverage Results" MODIFIED="1567668032608" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package/litemort" />
@@ -1236,8 +1235,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/python-package/case_ashrae.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="130">
-          <caret line="127" column="9" selection-start-line="127" selection-start-column="9" selection-end-line="127" selection-end-column="9" />
+        <state relative-caret-position="821">
+          <caret line="323" column="43" selection-start-line="323" selection-start-column="35" selection-end-line="323" selection-end-column="43" />
+          <folding>
+            <element signature="e#12444#15246#0" />
+          </folding>
         </state>
       </provider>
     </entry>

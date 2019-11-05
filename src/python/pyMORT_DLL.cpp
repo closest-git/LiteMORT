@@ -593,8 +593,8 @@ PYMORT_DLL_API void LiteMORT_predict(void *mort_0,float *X, tpY *y, size_t nFeat
 	//hDat->nam = "predict";
 	mort->hGBRT->Predict(hDat);
 	FeatVector *pred = hDat->GetPrecict();
-	FeatVec_T<tpY> *fY = dynamic_cast<FeatVec_T<tpY> *>(pred);	assert(fY != nullptr);
-	tpY *p_val = fY->arr();
+	FeatVec_T<tpDOWN> *fPred = dynamic_cast<FeatVec_T<tpDOWN> *>(pred);	assert(fPred != nullptr);
+	tpDOWN *p_val = fPred->arr();
 	for (size_t i = 0; i<nSamp; i++)
 		y[i] = p_val[i];
 	if (config.objective == "binary") {
@@ -628,8 +628,8 @@ PYMORT_DLL_API void LiteMORT_predict_1(void *mort_0, PY_COLUMN *X, PY_COLUMN *co
 	//hDat->nam = "predict";
 	mort->hGBRT->Predict(hDat);
 	FeatVector *pred = hDat->GetPrecict();
-	FeatVec_T<tpY> *fY = dynamic_cast<FeatVec_T<tpY> *>(pred);	assert(fY != nullptr);
-	tpY *p_val = fY->arr();
+	FeatVec_T<tpDOWN> *fY = dynamic_cast<FeatVec_T<tpDOWN> *>(pred);	assert(fY != nullptr);
+	tpDOWN *p_val = fY->arr();
 	for (size_t i = 0; i<nSamp; i++)
 		y[i] = p_val[i];
 	if (config.objective == "binary") {

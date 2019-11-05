@@ -248,15 +248,15 @@ weather_train_df = Whether('train', data_root).df()
 print(weather_train_df.head())
 weather_test_df = Whether('test', data_root).df()
 print(weather_test_df.head())
+early_stop = 20
+verbose_eval = 5
+metric = 'l2'
 
-def fit_lgbm(train, val,target_meter,fold, devices=(-1,), seed=None, cat_features=None, num_rounds=1500, lr=0.1, bf=0.1):
+def fit_regressor(train, val,target_meter,fold, devices=(-1,), seed=None, cat_features=None, num_rounds=1500, lr=0.1, bf=0.1):
     t0=time.time()
     X_train, y_train = train
     X_valid, y_valid = val
-    early_stop = 20
-    verbose_eval = 5
-    metric = 'l2'
-    params = {'num_leaves': 31,'n_estimators':num_rounds,
+    params = {'num_leaves': 31, 'n_estimators': num_rounds,
               'objective': 'regression',
               'max_bin': 256,
               #               'max_depth': -1,
@@ -264,9 +264,9 @@ def fit_lgbm(train, val,target_meter,fold, devices=(-1,), seed=None, cat_feature
               "boosting": "gbdt",
               "bagging_freq": 1,
               "bagging_fraction": bf,
-              "feature_fraction": 1,      #STRANGE GBDT  why("bagging_freq": 5 "feature_fraction": 0.9)!!!
-              "metric": metric,"verbose_eval":verbose_eval,'n_jobs':8,"elitism":0,
-              "early_stopping_rounds": early_stop, "adaptive": 'weight1', 'verbose': 666,'min_data_in_leaf': 20,
+              "feature_fraction": 1,  # STRANGE GBDT  why("bagging_freq": 5 "feature_fraction": 0.9)!!!
+              "metric": metric, "verbose_eval": verbose_eval, 'n_jobs': 8, "elitism": 0,
+              "early_stopping_rounds": early_stop, "adaptive": 'weight1', 'verbose': 666, 'min_data_in_leaf': 20,
               #               "verbosity": -1,
               #               'reg_alpha': 0.1,
               #               'reg_lambda': 0.3
@@ -338,7 +338,7 @@ for target_meter in range(4):
 
         print(f'fold={fold} train={train_data[0].shape},valid={valid_data[0].shape}')
         #     model, y_pred_valid, log = fit_cb(train_data, valid_data, cat_features=cat_features, devices=[0,])
-        model, y_pred_valid, log = fit_lgbm(train_data, valid_data,target_meter,fold, cat_features=cat_features,
+        model, y_pred_valid, log = fit_regressor(train_data, valid_data,target_meter,fold, cat_features=cat_features,
                                             num_rounds=1000, lr=0.05, bf=0.3)
         y_valid_pred_total[valid_idx] = y_pred_valid
         models_.append(model)
