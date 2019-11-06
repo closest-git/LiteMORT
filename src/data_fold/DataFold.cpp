@@ -325,7 +325,7 @@ void FeatsOnFold::BeforeTrain(BoostingForest *hGBRT, int flag) {
 					hFeat->UpdateHisto(this, true, isFirst, 0x0);
 				}
 				//else if (hGBRT->stopping.isOscillate && hFeat->wSplit_last>64 && !hFeat->hDistri->isUnique) {
-				else {
+				else if(config.isDynamicHisto) {
 					//if (/*hFeat->wSplit_last>1024 &&*/ !hFeat->hDistri->isUnique && !BIT_TEST(hFeat->hDistri->type, Distribution::CATEGORY)) {					
 					bool isDiscrete = hFeat->hDistri->isUnique || BIT_TEST(hFeat->hDistri->type, Distribution::CATEGORY);
 					bool isUpdate = hFeat->wSplit_last > 1024;//future-sales,geotab等比赛验证，确实有效诶，但是。。。

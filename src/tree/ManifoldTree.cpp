@@ -624,7 +624,7 @@ void ManifoldTree::Train(int flag) {
 				hGuideTree->GrowLeaf(hSplit, info,false);
 				hSplit->fruit = nullptr;/**/
 			}
-			//hBest->Dump(info, 0x0);
+			hBest->Dump(info, 0x0);		//输出每个nodal的信息
 			size_t nLeft_0 = hBest->left->nSample(), nRigt_0 = hBest->right->nSample();
 			assert( hBest->left->nSample()==hBest->fruit->nLeft && hBest->right->nSample()==hBest->fruit->nRight);
 			if (hBest->left->nSample() < hBest->right->nSample()) {
@@ -749,6 +749,7 @@ int ManifoldTree::maxDepth() {
 		8/31/2019
 */
 ARR_TREE *ManifoldTree::To_ARR_Tree(FeatsOnFold *hData_, bool isQuant_, bool isClear, int flag) {
+	return nullptr;
 	ARR_TREE *harrTree = new ARR_TREE();
 	ARR_TREE &arrTree = *(harrTree);
 	bool isQuanti = hData_->isQuanti;		//predict,test对应的数据集并没有格子化!!!
@@ -765,15 +766,21 @@ ARR_TREE *ManifoldTree::To_ARR_Tree(FeatsOnFold *hData_, bool isQuant_, bool isC
 		arrTree.feat_ids[no] = -1;
 		arrTree.left[no] = -1;		arrTree.rigt[no] = -1;
 		if (node->left != nullptr) {	//参见void SplitOn(...
-			if (node->fruit->isY)			{
-				delete harrTree;	return nullptr;
-			}
 			arrTree.feat_ids[no] = node->feat_id;
 			arrTree.left[no] = node->left->id;
 			assert(node->right != nullptr);
 			arrTree.rigt[no] = node->right->id;
 			//arrTree.thrsh_step[no] = isQuanti ? node->fruit->T_quanti : node->fruit->thrshold;
-			arrTree.thrsh_step[no] = node->fruit->Thrshold(isQuant_);
+			if (node->fruit->isY)			{
+				FeatVector *hFeat = hData_->Feat(node->feat_id);
+				int nBins = hFeat->hDistri->histo->nBins;
+				arrTree.folds[no] = new int[nBins];
+				memcpy(arrTree.folds[no], node->fruit->mapFolds,sizeof(int)*nBins);
+				arrTree.thrsh_step[no] = DBL_MAX;
+			}		else {
+				arrTree.folds[no] = nullptr;
+				arrTree.thrsh_step[no] = node->fruit->Thrshold(isQuant_);
+			}
 		}	else {
 			arrTree.thrsh_step[no] = step = node->GetDownStep();
 			assert(-1000<step && step<1000);

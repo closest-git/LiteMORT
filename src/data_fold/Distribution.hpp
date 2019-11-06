@@ -324,6 +324,7 @@ namespace Grusoft {
 			v0.1
 			v0.2	cys	
 				10/10/2019
+			The most common and popular approach is to model the missing value in a categorical column as a new category called “Unknown.”
 		*/
 		template<typename Tx>
 		void HistoOnUnique(const LiteBOM_Config&config, Tx *val, const vector<tpSAMP_ID>& sort_ids, vector<vDISTINCT>&uniques, int flag = 0x0) {
@@ -352,10 +353,10 @@ namespace Grusoft {
 				bin.nz = i_1 - i_0;
 				i_0 = i_1;
 			}
-			assert(i_0 == nA);
-			assert(noBin== nMostBin-1);
-			binFeatas[noBin].split_F = DBL_MAX;
+			assert(i_0 == nA);			assert(noBin== nMostBin-1);
 			histo->nBins = noBin + 1;
+			//AddBin(config, noBin + 1, a1, DBL_MAX, -0x0);	//last bin for NA
+			binFeatas[noBin].split_F = DBL_MAX;
 			size_t n1 = ceil(noBin / 4.0), n2 = ceil(noBin / 2.0), n3 = ceil(noBin *3.0 / 4);
 			H_q0 = uniques[0].val,			H_q4 = uniques[noBin].val;
 			H_q1 = q1 = uniques[n1].val,	H_q2 = q2 = uniques[n2].val;		H_q3 = q3 = uniques[n3].val;/**/
@@ -394,7 +395,7 @@ namespace Grusoft {
 			https://github.com/Microsoft/LightGBM/issues/583
 		*/
 		template<typename Tx, typename Ty>
-		void X2Histo_(LiteBOM_Config config, size_t nSamp_, Tx *val, Ty *y, int flag = 0x0) {
+		void X2Histo_(const LiteBOM_Config&config, size_t nSamp_, Tx *val, Ty *y, int flag = 0x0) {
 			if (rNA == 1.0) {
 				//printf("!!!%s is NAN!!!\n", desc.c_str());
 				return;
@@ -436,10 +437,13 @@ namespace Grusoft {
 			if (BIT_TEST(type, Distribution::CATEGORY) || BIT_TEST(type, Distribution::DISCRETE)) {
 				if (vUnique.size() > 0) {
 					assert(config.feat_quanti > 1);
-					//histo->bins.resize(vUnique.size());
 					assert(histo->bins == nullptr);
-					histo->bins = new HISTO_BIN[vUnique.size()];
-					HistoOnUnique(config, val, idx, vUnique);
+					histo->bins = new HISTO_BIN[vUnique.size()+1];		binFeatas.resize(vUnique.size() + 1);
+					if(config.isDebug_1)
+						HistoOnUnique_1(config, vUnique, nA, BIT_TEST(type, Distribution::CATEGORY));
+					else
+						HistoOnUnique(config, val, idx, vUnique);
+					histo->Dump(this->binFeatas, mapCategory);
 					vUnique.clear();
 					return;		//必须保持一致
 				}
@@ -458,10 +462,10 @@ namespace Grusoft {
 			case LiteBOM_Config::HISTO_BINS_MAP::on_FREQ:
 				if( y!=nullptr && config.histo_bin_map== LiteBOM_Config::HISTO_BINS_MAP::on_FREQ_and_Y)
 					corr.DCRIMI_2(config, val,y, idx,flag );
-				if (vUnique.size() <= nMostBin - 1) {	
-					//HistoOnUnique_1(config, vUnique, nA, false);//与第二函数冲突!!!
-					HistoOnUnique(config, val, idx, vUnique);
-				}	else/**/ {
+				/**/if (vUnique.size() <= nMostBin - 1) {	
+					HistoOnUnique_1(config, vUnique, nA, false);
+					//HistoOnUnique(config, val, idx, vUnique);
+				}	else {
 					HistoOnFrequncy_1(config, vUnique, nA, nMostBin-1);
 				}
 				corr.Clear();

@@ -183,27 +183,35 @@ void Distribution::HistoOnUnique_1(const LiteBOM_Config&config, vector<vDISTINCT
 	isUnique = true;
 	size_t nMostBin = uniques.size();
 	assert(histo != nullptr);
-	int noBin = 0;
+	//int noBin = 0;
 	size_t i, i_0 = 0, nUnique = vUnique.size(), nz;
-	double a0 = vUnique[0].val, a1 = vUnique[vUnique.size() - 1].val, v0;
-	//mapCategory.clear();
+	double a0 = vUnique[0].val, a1 = vUnique[vUnique.size() - 1].val, v0, vLeftOuter;
+	if(isMap)
+		mapCategory.clear();
 	while (i_0 < nUnique) {
-		v0 = vUnique[i_0].val;		
-		HISTO_BIN& bin = histo->bins[noBin];
+		v0 = vUnique[i_0].val;	
+		vLeftOuter = i_0 > 0 ? vUnique[i_0 - 1].val : v0;
+		AddBin(config, vUnique[i_0].nz, vLeftOuter, v0, flag);
+		/*HISTO_BIN& bin = histo->bins[noBin];
 		bin.tic = noBin;
 		//bin.split_F = std::nextafter(v0, INFINITY);
 		binFeatas[noBin].split_F = std::nextafter(v0, INFINITY);
-		//mapCategory.insert(pair<int, int>((int)(v0), noBin));
-		bin.nz = vUnique[i_0].nz;
-		++i_0; ++noBin;
+		bin.nz = vUnique[i_0].nz;*/
+		if (isMap)	mapCategory.insert(pair<int, int>((int)(v0), histo->nBins-1));
+		++i_0; //++noBin;
 	}
 	double delta = double(fabs(a1 - a0)) / nMostBin / 100.0;
-	//histo->bins.resize(noBin + 1);		//always last bin for NA
+	AddBin(config, nSamp - nA0, a1, a1 + delta, nSamp==nA0?-1:flag);			//always last bin for NA
+	/*//histo->bins.resize(noBin + 1);		
 	histo->nBins = noBin + 1;
 	//histo->bins[noBin].split_F = a1+delta;
 	binFeatas[noBin].split_F = a1 + delta;
 	histo->bins[noBin].tic = noBin;
-	histo->bins[noBin].nz = nSamp - nA0;
+	histo->bins[noBin].nz = nSamp - nA0;*/
+	int nBin = histo->nBins;	// bins.size();		//always last bin for NA
+	histo->nMostBins = histo->nBins;	// bins.size();
+	assert(binFeatas.size() >= nBin);
+	binFeatas.resize(nBin);
 	histo->CheckValid(config);
 }
 
@@ -223,7 +231,7 @@ BIN_FEATA& Distribution::AddBin(const LiteBOM_Config&config, size_t nz,double le
 	//feata.density = nz*1.0 / nDistinc;
 
 	histo->nBins++;
-	assert(histo->nBins<binFeatas.size());
+	assert(histo->nBins<=binFeatas.size());
 	return feata;
 }
 
@@ -259,6 +267,7 @@ int Distribution::HistoOnFrequncy_small(const LiteBOM_Config&config, vector<vDIS
 		10/31/2019
 */
 void Distribution::HistoOnFrequncy_1(const LiteBOM_Config&config, vector<vDISTINCT>& vUnique, size_t nA0, size_t nMostBin, int flag) {
+	nMostBin = MIN2(vUnique.size(), nMostBin);
 	assert(histo != nullptr);
 	size_t nA = 0, avg = nA0*1.0 / nMostBin, SMALL_na_0 = 0, BIG_bins_0 = 0, nUnique = vUnique.size(), nz, minimum=config.min_data_in_bin, T_222;
 	//size_t

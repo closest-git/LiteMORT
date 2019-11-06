@@ -37,19 +37,32 @@ namespace Grusoft {
 	template<typename Tx> class FeatVec_T;
 
 	struct ARR_TREE {
-		int nNode = 0;
+		typedef int * FOLD_MAP;
+		int nNodes = 0;
 		double *thrsh_step = nullptr,weight=1.0;
 		int *feat_ids = nullptr, *left = nullptr, *rigt = nullptr, *info = nullptr;
+		FOLD_MAP *folds = nullptr;
 
-		virtual void Init(int nNode, int flag = 0x0) {
-			thrsh_step = new double[nNode];
-			feat_ids = new int[nNode * 4];
-			left = feat_ids + nNode;		rigt = left + nNode;
-			info = rigt + nNode;
+		virtual void Init(int nNode_, int flag = 0x0) {
+			nNodes = nNode_;
+			thrsh_step = new double[nNodes];
+			feat_ids = new int[nNodes * 4];
+			left = feat_ids + nNodes;		rigt = left + nNodes;
+			info = rigt + nNodes;
+			folds = new FOLD_MAP[nNodes];
+			for (int i = 0; i < nNodes; i++)
+				folds[i] = nullptr;
 		}
 		~ARR_TREE() {
 			if (thrsh_step != nullptr)			delete[] thrsh_step;
 			if (feat_ids != nullptr)			delete[] feat_ids;
+			if (folds != nullptr) {
+				for (int i = 0; i < nNodes; i++) {
+					if (folds[i] != nullptr)
+						delete[] folds[i];
+				}
+				delete[] folds;
+			}
 		}
 	};
 
@@ -278,7 +291,7 @@ namespace Grusoft {
 
 		template<typename Ty>
 		bool DeltastepOnTree(const ARR_TREE&tree, int flag) {
-			size_t nSamp = nSample(), nNode = tree.nNode, no, nFeat = feats.size(), step = nSamp;
+			size_t nSamp = nSample(), nNode = tree.nNodes, no, nFeat = feats.size(), step = nSamp;
 			G_INT_64 t;
 			double *thrsh_step = tree.thrsh_step;
 			tpDOWN *delta_step = GetDeltaStep();			assert(delta_step != nullptr);
@@ -297,7 +310,7 @@ namespace Grusoft {
 						else {
 							assert(rigt[no] != -1);
 							FeatVector *hFT = feats[feat_ids[no]];
-							no = hFT->left_rigt(t, thrsh_step[no], left[no], rigt[no]);
+							no = hFT->left_rigt(t, &tree, no);							
 						}
 					}
 				}
@@ -311,7 +324,7 @@ namespace Grusoft {
 			if (tree.weight == 0) {
 				return true;	//pass
 			}
-			size_t nSamp = nSample(), nNode = tree.nNode, no, nFeat = feats.size(), step = nSamp;
+			size_t nSamp = nSample(), nNode = tree.nNodes, no, nFeat = feats.size(), step = nSamp;
 			G_INT_64 t;
 			double *thrsh_step = tree.thrsh_step;
 			FeatVec_T<Ty> *predict = dynamic_cast<FeatVec_T<Ty>*>(GetPrecict());
@@ -339,7 +352,8 @@ namespace Grusoft {
 						else {
 							assert(rigt[no] != -1);
 							FeatVector *hFT = feats[feat_ids[no]];
-							no = hFT->left_rigt(t,thrsh_step[no], left[no], rigt[no]);							
+							no = hFT->left_rigt(t,thrsh_step[no], left[no], rigt[no]);		
+							//no = hFT->left_rigt(t, &tree,no);
 						}
 					}
 				}
@@ -556,11 +570,16 @@ namespace Grusoft {
 		virtual size_t nSamp() const {	return nSamp_;		}
 
 		virtual ~FeatVec_T() {
+			FreeVals();
+		}
+
+		virtual void FreeVals(int flag=0x0) {
 			if (isReferVal()) {
 				;// printf("");
-			}	else if (val != nullptr)
-				delete[] val;
-			//val.clear();
+			}
+			else if (val != nullptr)			{
+				delete[] val;		val = nullptr;
+			}
 		}
 
 		//{	assert(_len>0);	val.resize(_len,(Tx)0);	 }
@@ -749,7 +768,6 @@ namespace Grusoft {
 		}
 
 		virtual inline int left_rigt(const size_t& t, const double& thrsh, const int lft, const int rgt,int flag=0x0) {
-			//Tx *feat = arrFeat[feat_ids[no]];
 			if (IS_NAN_INF(val[t])) {
 				return rgt;
 			}	else {
@@ -761,19 +779,33 @@ namespace Grusoft {
 			}
 			return lft;
 		}
+		virtual inline int left_rigt(const size_t& t, const ARR_TREE*arr_tree,int no, int flag = 0x0) { 
+			const int lft = arr_tree->left[no], rgt = arr_tree->rigt[no];
+			assert(no >= 0 && no < arr_tree->nNodes);
+			const int *fold_map = arr_tree->folds[no];
+			if (fold_map == nullptr) {
+				if (IS_NAN_INF(val[t])) {
+					return rgt;
+				}	else
+					return val[t] < arr_tree->thrsh_step[no] ? lft : rgt;
+			}
+			else {
+				if (IS_NAN_INF(val[t])) {
+					return rgt;
+				}	else {
+					int i_val = (int)(val[t]);
+					int fold = fold_map[i_val];
+					assert(fold==0 || fold==1);
+					return (fold <= 0) ? lft : rgt;
+				}
+			}
+			return lft;
+		}
 
 		void _core_isY_(bool isQuanti, const tpSAMP_ID samp,const int *mapFolds, int pos, tpSAMP_ID*left, G_INT_64&nLeft, tpSAMP_ID*rigt, G_INT_64&nRigt, int flag) {
-			/*if (isQuanti) {	//训练数据格子化
-			}
-			else if (isCategory()) {
-				//pos = this->hDistri->mapCategory[(int)(val[samp])];
-			}
-			else {		//predict,test对应的数据集并没有格子化!!!
-				assert(0);
-				//pos = histo->AtBin_(val[samp]);
-				//fold = pos < 0 ? 0 : histo->bins[pos].fold;
-			}*/
+			assert(samp >= 0 && samp <= 1152);
 			int fold = mapFolds[pos];	// hBlit->fruit->GetFold(pos);
+			assert(fold == 0 || fold == 1);
 			if (fold <= 0)
 				left[nLeft++] = samp;
 			else
@@ -1020,7 +1052,7 @@ namespace Grusoft {
 		void QuantiAtEDA_(const ExploreDA *edaX, tpQUANTI *quanti, int nMostBin,bool isSameSorted, int flag) {
 			assert(quanti != nullptr && edaX != nullptr);
 			tpQUANTI NNA = tpQUANTI(-1);
-			size_t nSamp_ = size(), i, i_0 = 0, i_1, noBin = 0, pos, nzHisto=0;
+			size_t nSamp_ = size(), i, i_0 = 0, i_1, noBin = 0, pos, nzHisto=0, nFailed=0;
 			vector<tpSAMP_ID> idx;
 			if (hDistri->sortedA.size() > 0 && isSameSorted) {
 				idx = hDistri->sortedA;
@@ -1040,18 +1072,28 @@ namespace Grusoft {
 			//const vector<double>& vThrsh = distri.vThrsh
 				
 			if (isCategory()) {
-				MAP_CATEGORY mapCategory = distri.mapCategory;
-				hDistri->mapCategory = mapCategory;
+				hDistri->mapCategory = distri.mapCategory;
 				if (id == 31) {			//仅用于调试
 					id = 31;
-				}				i_0 = 0;
+				}				
+				i_0 = 0;
 				while (i_0 < nA) {
 					pos = idx[i_0];			
 					int key = (int)(val[pos]);		
-					assert(key >= distri.vMin && key <= distri.vMax);
-					quanti[pos] = mapCategory[key];	i_0++;
+					//assert(key >= distri.vMin && key <= distri.vMax);
+					MAP_CATEGORY::iterator failed = hDistri->mapCategory.end();
+					if (hDistri->mapCategory.find(key) == failed) {
+						//hDistri->mapCategory.insert(pair<int, int>(key, hDistri->mapCategory));
+						quanti[pos] = distri.histo->nBins - 1;	//很少的fail_match	也会严重降低准确率
+						//quanti[pos] = 0;
+						nFailed++;
+					}else
+						quanti[pos] = hDistri->mapCategory[key];	
+					i_0++;
 					//assert(quanti[pos] >= 0 && quanti[pos] < NNA);
 				}
+				if (nFailed > 0)
+					printf("!!!!!! %d   \"%s\" nFailed=%lld nA=%lld !!!!!!\n", id, nam.c_str(), nFailed,nA);
 			}
 			else {
 				const HistoGRAM *histo = distri.histo;		assert(histo!=nullptr);

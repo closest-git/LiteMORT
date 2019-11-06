@@ -140,6 +140,18 @@ HistoGRAM::~HistoGRAM() {
 	}
 }
 
+void HistoGRAM::Dump(const vector<BIN_FEATA>&binFeatas, MAP_CATEGORY&mapCategory, int flag) {
+	int i;
+	MAP_CATEGORY::iterator it;
+	for (it = mapCategory.begin(); it != mapCategory.end(); it++)	{
+		int cat = it->first, i = it->second;
+		printf("%d=>%d\tnz=%d,tic=%d,split=%g\n", cat,i, bins[i].nz, bins[i].tic, binFeatas[i].split_F);
+	}
+	/*for (i = 0; i < nBins; i++) {
+		printf("%d\tnz=%d,tic=%d,split=%g\n",i,bins[i].nz, bins[i].tic, binFeatas[i].split_F);
+	}*/
+}
+
 /*
 	v0.1	cys
 		8/27/2019
@@ -345,10 +357,11 @@ FRUIT::~FRUIT() {
 /**/
 FRUIT::FRUIT(const HistoGRAM *his_, int flag) : histo_refer(his_) {
 	const FeatVector *hFeat = his_->hFeat;
-	int nMaxBin = hFeat->hDistri->binFeatas.size();
+	int nMaxBin = hFeat->hDistri->binFeatas.size(),i;
 	//assert(nMaxBin == hFeat->hDistri->histo->nMostBins);
 	//²Î¼û	FeatVec_T::SplitOn		if (fold <= 0)	left[nLeft++] = samp;
 	mapFolds = new int[nMaxBin]();
+	//for (i = 0; i < nMaxBin; i++)		mapFolds[i] = 1;
 	Set(his_);
 }
 
@@ -520,16 +533,17 @@ void HistoGRAM::GreedySplit_Y(FeatsOnFold *hData_, const SAMP_SET& samp_set, boo
 	}
 	vector<tpSAMP_ID> idx;
 	vector<double> Y_means;
-	for (i = 0; i < nBins - 1; i++) {
+	for (i = 0; i < nBins; i++) {
 	//for (auto item : bins) {
 		if (bins[i].nz == 0) {
+			assert(bins[i].H_sum == 0 && bins[i].G_sum == 0);
 			Y_means.push_back(DBL_MAX);	continue;
 		}
 		//a = item.G_sum / item.nz;
 		a = bins[i].G_sum / bins[i].H_sum;
 		Y_means.push_back(a);
 	}
-	Y_means.push_back(DBL_MAX);		//always last bin for NA
+	//Y_means.push_back(DBL_MAX);		//always last bin for NA
 	sort_indexes(Y_means, idx);
 	for (i = 0; i < nBins-1; i++) {		assert(Y_means[idx[i]]<= Y_means[idx[i+1]]);	}
 	for (i = 0; i < nBins; i++) {

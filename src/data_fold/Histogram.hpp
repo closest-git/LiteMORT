@@ -212,6 +212,7 @@ namespace Grusoft {
 
 		virtual void CheckValid(const LiteBOM_Config&config, vector<BIN_FEATA>*featas=nullptr,  int flag = 0x0);
 		virtual void CompressBins(int flag=0x0);
+		virtual void Dump(const vector<BIN_FEATA>&binFeatas, MAP_CATEGORY&mapCategory, int flag = 0x0);
 		//virtual void TicMap(tpQUANTI*map,int flag);
 
 		virtual double split_F(int no, int flag = 0x0) const;

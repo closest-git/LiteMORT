@@ -161,7 +161,7 @@ namespace Grusoft {
 				"\n\tOBJECTIVE=\"%s\"\teval_metric=\"%s\"\tleaf_optimal=\"%s\" \n\t init=%s"
 				"\n\tL2=%.8g\tLf=%.8g\tImputation=%s\tNormal=%s"
 				"\n\tnElitism=%g,Iter_refine=%g \tRefine_split=%d"
-				"\n\tnMostPrune=%d node_task=%s"
+				"\n\tnMostPrune=%d node_task=%s debug=%s"
 				"\n\tnMostSalp4Bins=%d histo_bin_::map=%s",
 				lr_adptive_leaf?"a_":"",learning_rate, subsample, feature_fraction, min_data_in_leaf, early_stopping_round, drop_out, num_leaves,
 				objective.c_str(), eval_metric.c_str(), leaf_optimal.c_str(),
@@ -169,7 +169,7 @@ namespace Grusoft {
 				lambda_l2, lambda_Feat,eda_NA == -1 ? "OFF" : eda_NA == 0 ? "0" : "Other",
 				eda_Normal == 0 ? "OFF" : "Gaussian", 
 				rElitism,T_iterrefine,split_refine,
-				nMostPrune,node_task==0 ? "split_X" : node_task == 1 ? "split_Y" : "REGRESS_X",
+				nMostPrune,node_task==0 ? "split_X" : node_task == 1 ? "split_Y" : "REGRESS_X", isDebug_1?"Debug_0":"Debug_1",
 				nMostSalp4bins,histo_alg.c_str()
 				);
 		}
@@ -249,6 +249,8 @@ namespace Grusoft {
 		// desc = shrinkage rate
 		// desc = in ``dart``, it also affects on normalization weights of dropped trees
 		double learning_rate = 0.03;
+		bool isDebug_1 = true;
+		bool isDynamicHisto = true;
 		bool lr_adptive_leaf = false;
 		int adaptive_sample_weight = 0;
 		bool useRandomSeed = false;

@@ -113,6 +113,9 @@ void OnUserParams(LiteBOM_Config&config, PY_ITEM* params, int nParam, int flag =
 		if (strcmp(params[i].Keys, "learning_rate") == 0) {
 			config.learning_rate = params[i].Values;
 		}
+		if (strcmp(params[i].Keys, "debug") == 0) {
+			config.isDebug_1 = strcmp(params[i].text, "1") == 0;
+		}
 		if (strcmp(params[i].Keys, "learning_schedule") == 0) {
 			config.lr_adptive_leaf = strcmp(params[i].text, "adaptive") == 0;
 		}
@@ -297,6 +300,11 @@ FeatVector *FeatVecQ_InitInstance(FeatsOnFold *hFold, FeatVector *hFeat, int x, 
 		assert(0);
 		hFQ = new FeatVec_Q<uint32_t>(hFold, hFeat, x);
 	}
+	if (hFQ != nullptr) {
+		hFQ->UpdateHisto(hFold, false, true);
+		if(!hFold->config.isDynamicHisto)
+			hFeat->FreeVals();		//ÐèÒªdynamic update histo
+	}
 	return hFQ;
 }
 
@@ -400,7 +408,6 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 		else {
 			if (hFold->isQuanti || hFeat->isCategory()) {
 				hFold->feats[feat] = hFQ = FeatVecQ_InitInstance(hFold, hFeat, 0x0);	// new FeatVec_Q<short>(hFold, hFeat, nMostQ);
-				hFQ->UpdateHisto(hFold, false, true);
 				nQuant++;	//delete hFeat;
 			}
 		}
@@ -506,7 +513,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 		}	else {
 			if (hFold->isQuanti) {
 				hFold->feats[feat] = hFQ = FeatVecQ_InitInstance(hFold, hFeat,0x0);	// new FeatVec_Q<short>(hFold, hFeat, nMostQ);
-				hFQ->UpdateHisto(hFold,false,true);
+				//hFQ->UpdateHisto(hFold,false,true);
 				nQuant++;	//delete hFeat;
 			}
 		}

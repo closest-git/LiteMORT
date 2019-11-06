@@ -79,6 +79,8 @@ class LiteMORT_params(object):
             self.learning_schedule = dict_param['learning_schedule']
         if 'adaptive' in dict_param:
             self.adaptive = dict_param['adaptive']
+        if 'debug' in dict_param:
+            self.debug = dict_param['debug']
         self.lambda_l2 = self.alias_param('lambda_l2', 0.0, dict_param, ['lambda_l2', 'reg_lambda'])
 
         if 'bagging_fraction' in dict_param:
@@ -403,7 +405,7 @@ class LiteMORT(object):
 
         nTrain, nFeat, nTest = self.train_set.nSample,self.train_set.nFeature, self.eval_set.nSample
 
-        self.mort_fit_1(self.hLIB,self.train_set.cX,self.train_set.cY, nFeat,nTrain,self.eval_set.cX, self.eval_set.cY, nTest,0)  # 1 : classification
+        self.mort_fit_1(self.hLIB,self.train_set.cX,self.train_set.cY, nFeat,nTrain,self.eval_set.cX, self.eval_set.cY, nTest,0)
         return self
 
 

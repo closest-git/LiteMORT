@@ -35,6 +35,7 @@ T* VECTOR2ARR(vector<T>& vecs) {
 namespace Grusoft {
 	class FeatsOnFold;
 	class Distribution;
+	class ARR_TREE;
 
 	class FeatVector {
 	protected:
@@ -80,7 +81,8 @@ namespace Grusoft {
 		}
 		virtual size_t nSamp()	const	{ throw"FeatVector::nSamp is ..."; }
 
-		virtual void Empty(int flag = 0x0) {		}
+		virtual void Empty(int flag = 0x0)		{		}
+		virtual void FreeVals(int flag = 0x0)	{		}
 		virtual void Set(size_t len, void* p, int flag = 0x0) { throw"FeatVector::Set_void_p is ..."; }
 		virtual void Set(size_t len, PY_COLUMN *col, int flag = 0x0) { throw"FeatVector::Set_PY_COLUMN is ..."; }
 		virtual void Set(size_t pos, double a, int flag = 0x0) { throw"FeatVector::Set_a is ..."; }
@@ -88,6 +90,7 @@ namespace Grusoft {
 		virtual void loc(vector<tpSAMP_ID>&poss, double target, int flag = 0x0) { throw"FeatVector::loc is ..."; }
 		//virtual tpQUANTI *GetQuantiBins(int flag=0x0) { throw"FeatVector::GetQuantiBins is ..."; }
 		virtual inline int left_rigt(const size_t& t, const double& thrsh, const int lft, const int rgt, int flag = 0x0) { throw"FeatVector::left_rigt is ..."; }
+		virtual inline int left_rigt(const size_t& t, const ARR_TREE*arr_tree,int no, int flag = 0x0) { throw"FeatVector::left_rigt is ..."; }
 		virtual void SplitOn(FeatsOnFold *hData_, MT_BiSplit *hBest, int flag = 0x0) { throw"FeatVector::Split is ..."; }
 		//根据MT_BLIT的模型，来预测
 		virtual void Update_step(FeatsOnFold *hData_, MT_BiSplit *hBlit, int flag = 0x0) { throw"FeatVector::UpdatePredict is ..."; }
