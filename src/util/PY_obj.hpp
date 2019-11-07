@@ -105,4 +105,14 @@ struct PY_COLUMN {
 	}
 };
 
+struct PY_DATASET {
+	char *name;
+	size_t nSamp;
+	int ldFeat;
+	int ldY;
+	PY_COLUMN *columnX;		//PY_COLUMN
+	PY_COLUMN *columnY;		//PY_COLUMN
+	int x;
+};
+
 

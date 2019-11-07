@@ -16,6 +16,16 @@ class M_COLUMN(Structure):
                     ('representive', c_float),
                ]
 
+class M_DATASET(Structure):
+    _fields_ = [    ('name',c_char_p),
+                    ('nSamp', c_int64),
+                    ('ldFeat',c_int),
+                    ('ldY', c_int),
+                    ('columnX', POINTER(M_COLUMN)),
+                    ('columnY', POINTER(M_COLUMN)),
+                    ('x', c_int)
+               ]
+
 def Mort_PickSamples(pick_samples,df_train,df_test):
     nTrain = df_train.shape[0]
     random.seed(42)
@@ -30,11 +40,17 @@ def Mort_PickSamples(pick_samples,df_train,df_test):
     return df_train,df_test
 
 class Mort_Preprocess(object):
-    #nFeature,nSample=0,0
-    #features = []
-    #categorical_feature=[]
-    #train_X,    train_y=None,None
-    #eval_X,     eval_y = None, None
+    def CppDataset(self,name_):
+        dat_ = M_DATASET()
+        dat_.nSamp = self.nSample
+        dat_.name = str(name_).encode('utf8')
+        dat_.ldFeat = len(self.col_X)
+        dat_.ldY = len(self.col_Y)
+        dat_.x=0
+        dat_.columnX = self.cX
+        dat_.columnY = self.cY
+        return dat_
+
     def column_info(self,feat,X,categorical_feature=None,discrete_feature=None):
         col = M_COLUMN()
         col.name = str(feat).encode('utf8')
@@ -111,6 +127,9 @@ class Mort_Preprocess(object):
             self.cX = (M_COLUMN * len(self.col_X))(*self.col_X)
             self.cY = (M_COLUMN * len(self.col_Y))(*self.col_Y)
         return    #please implement this
+
+
+
 
     def OrdinalEncode_(X,X_test,features=None):
         encoding_dict = dict()

@@ -40,8 +40,10 @@ extern "C" {
 	PYMORT_DLL_API void LiteMORT_EDA(void *, const float *X, const tpY *y, const size_t nFeat_0, const size_t nn, const size_t nValid,
 		PY_ITEM* params, int nParam, const size_t flag);
 
-	PYMORT_DLL_API void LiteMORT_fit_1(void *, PY_COLUMN *train, PY_COLUMN *target, size_t nSamp, size_t nFeat_0, PY_COLUMN *eval, PY_COLUMN *eval_target, size_t nEval, size_t flag);
+	//PYMORT_DLL_API void LiteMORT_fit_1(void *, PY_COLUMN *train, PY_COLUMN *target, size_t nSamp, size_t nFeat_0, PY_COLUMN *eval, PY_COLUMN *eval_target, size_t nEval, size_t flag);
+	PYMORT_DLL_API void LiteMORT_fit_1(void *, PY_DATASET *train, PY_DATASET *eval, size_t flag);
 	PYMORT_DLL_API void LiteMORT_predict_1(void *, PY_COLUMN *X, PY_COLUMN *y, size_t nFeat_0,size_t nSamp,  size_t flag);
+	PYMORT_DLL_API void cpp_test(void *, PY_DATASET*dat);
 
 
 #ifdef __cplusplus

@@ -322,7 +322,7 @@ if some_rows is not None:
     print('====== Some Samples ... data={}'.format(train.shape))
 
 print(f"train={train.shape} test={test.shape}\n final_features={final_features}")
-if True:
+if False:
     feat_fix = ['IntersectionId', 'Latitude', 'Longitude', 'EntryStreetName','ExitStreetName', 'EntryHeading',
          'ExitHeading', 'Hour', 'Weekend', 'Month', 'City', 'EntryType', 'ExitType']
     feat_select = train.columns

@@ -722,7 +722,9 @@ PYMORT_DLL_API void LiteMORT_EDA(void *mort_0, const float *dataX, const tpY *da
 	//g_hEDA->InitBundle(config, X, nSamp, nFeat_0, flag);
 }*/
 
-
+PYMORT_DLL_API void cpp_test(void *mort_0, PY_DATASET*dat) {
+	printf("%s",dat->name);
+}
 
 //some EDA functions
 /*
@@ -795,6 +797,7 @@ PYMORT_DLL_API void LiteMORT_fit(void *mort_0, float *train_data, tpY *train_tar
 
 	return ;
 }
+
 
 /*
 	v0.1	cys
@@ -897,11 +900,15 @@ void Feats_one_by_one(FeatsOnFold *hTrain, FeatsOnFold *hEval, BoostingForest::M
 /*
 	v0.2
 */
-PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_COLUMN *train_data, PY_COLUMN *train_target, size_t nFeat_0, size_t nSamp, PY_COLUMN *eval_data, PY_COLUMN *eval_target, size_t nEval, size_t flag) {
+//PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_COLUMN *train_data, PY_COLUMN *train_target, size_t nFeat_0, size_t nSamp, PY_COLUMN *eval_data, PY_COLUMN *eval_target, size_t nEval, size_t flag) {
+PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_DATASET *train_set, PY_DATASET *eval_set, size_t flag) {
 	try {
 		GST_TIC(tick);
 		MORT *mort = MORT::From(mort_0);
 		LiteBOM_Config& config = mort->config;
+		size_t nSamp = train_set->nSamp, nEval = eval_set == nullptr ? 0 : eval_set->nSamp;
+		int nFeat_0 = train_set->ldFeat;
+		assert(nSamp>0 && nFeat_0>0);
 		//if(hGBRT!=nullptr)
 		//	LiteMORT_clear();
 		bool isDelEDA = false;
@@ -916,7 +923,7 @@ PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_COLUMN *train_data, PY_COLUM
 
 		size_t f1 = FeatsOnFold::DF_TRAIN;
 		vector<FeatsOnFold*> folds;
-		FeatsOnFold *hFold = FeatsOnFold_InitInstance(config, hEDA, "train", train_data, train_target, nSamp, nFeat_0, 1, flag | f1);
+		FeatsOnFold *hFold = FeatsOnFold_InitInstance(config, hEDA, "train", train_set->columnX, train_set->columnY, nSamp, nFeat_0, 1, flag | f1);
 		FeatsOnFold *hEval = nullptr;
 		folds.push_back(hFold);		
 		//hFold->ExpandFeat();
@@ -925,7 +932,7 @@ PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_COLUMN *train_data, PY_COLUM
 		int nTree = hFold->config.num_trees;
 		if (nEval > 0) {
 			ExploreDA *edaX_ = isDelEDA ? nullptr : hEDA;
-			hEval = FeatsOnFold_InitInstance(config, edaX_, "eval", eval_data, eval_target, nEval, nFeat_0, 1, flag | FeatsOnFold::DF_EVAL);
+			hEval = FeatsOnFold_InitInstance(config, edaX_, "eval", eval_set->columnX, eval_set->columnY, nEval, nFeat_0, 1, flag | FeatsOnFold::DF_EVAL);
 			//hEval->ExpandFeat();
 			folds.push_back(hEval);
 		}

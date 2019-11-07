@@ -22,7 +22,7 @@ from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from pandas.api.types import is_categorical_dtype
 
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
-#isMORT = True
+isMORT = True
 gbm='MORT' if isMORT else 'LGB'
 
 def reduce_mem_usage(df, use_float16=False):
@@ -291,7 +291,8 @@ def fit_regressor(train, val,target_meter,fold, some_params, devices=(-1,), seed
 
     if isMORT:
         params['verbose']=666
-        model = LiteMORT(some_params).fit(X_train, y_train, eval_set=[(X_valid, y_valid)], categorical_feature=cat_features)
+        merge_datas=[]
+        model = LiteMORT(some_params).fit(X_train, y_train, eval_set=[(X_valid, y_valid)],merge_datas=merge_datas, categorical_feature=cat_features)
         fold_importance = None
         log = ""
     else:
@@ -344,7 +345,7 @@ for target_meter in range(4):
     # cat_features = ['building_id']
     # [X_train.columns.get_loc(cat_col) for cat_col in train_datas.category_cols]
     print('cat_features', cat_features)
-    if True :
+    if False :
         feat_select = X_train.columns
         feat_select = list(set(feat_select) - set(feat_fix))
         params['split_idxs'] = split_ids
@@ -353,7 +354,11 @@ for target_meter in range(4):
         MORT_feat_select_(X_train, y_train, feat_fix, feat_select,params,nMostSelect=(int)(len(feat_select)/2))
         input("......MORT_feat_search......")
         sys.exit(-100)
-
+    feat_useful_ =feat_fix+ ['dew_temperature_mean_lag72', 'wind_direction_mean_lag72', 'cloud_coverage_mean_lag72',
+                    'precip_depth_1_hr_mean_lag72', 'air_temperature_std_lag72', 'cloud_coverage_mean_lag3',
+                    'air_temperature_min_lag72', 'wind_direction', 'wind_speed_mean_lag72', 'air_temperature_max_lag3',
+                    'wind_speed_mean_lag3', 'dew_temperature']
+    #X_train = X_train[feat_useful_]        #0.4499->0.4496 略有提高
 
     t0=time.time()
     fold = 0
