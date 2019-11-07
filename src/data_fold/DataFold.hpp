@@ -352,8 +352,8 @@ namespace Grusoft {
 						else {
 							assert(rigt[no] != -1);
 							FeatVector *hFT = feats[feat_ids[no]];
-							no = hFT->left_rigt(t,thrsh_step[no], left[no], rigt[no]);		
-							//no = hFT->left_rigt(t, &tree,no);
+							//no = hFT->left_rigt(t,thrsh_step[no], left[no], rigt[no]);		
+							no = hFT->left_rigt(t, &tree,no);
 						}
 					}
 				}
@@ -803,7 +803,7 @@ namespace Grusoft {
 		}
 
 		void _core_isY_(bool isQuanti, const tpSAMP_ID samp,const int *mapFolds, int pos, tpSAMP_ID*left, G_INT_64&nLeft, tpSAMP_ID*rigt, G_INT_64&nRigt, int flag) {
-			assert(samp >= 0 && samp <= 1152);
+			//assert(samp >= 0 && samp <= 1152);
 			int fold = mapFolds[pos];	// hBlit->fruit->GetFold(pos);
 			assert(fold == 0 || fold == 1);
 			if (fold <= 0)

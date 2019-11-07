@@ -439,11 +439,11 @@ namespace Grusoft {
 					assert(config.feat_quanti > 1);
 					assert(histo->bins == nullptr);
 					histo->bins = new HISTO_BIN[vUnique.size()+1];		binFeatas.resize(vUnique.size() + 1);
-					if(config.isDebug_1)
-						HistoOnUnique_1(config, vUnique, nA, BIT_TEST(type, Distribution::CATEGORY));
-					else
-						HistoOnUnique(config, val, idx, vUnique);
-					histo->Dump(this->binFeatas, mapCategory);
+					HistoOnUnique_1(config, vUnique, nA, BIT_TEST(type, Distribution::CATEGORY));
+					//if(config.isDebug_1)
+					//else
+					//	HistoOnUnique(config, val, idx, vUnique);
+					//histo->Dump(this->binFeatas, mapCategory);		//输出Histogram的信息
 					vUnique.clear();
 					return;		//必须保持一致
 				}

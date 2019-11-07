@@ -125,8 +125,8 @@ class COROchann(object):
         self.data_root = data_root
         self.building_meta_df = building_meta_df
         self.weather_df = weather_df
-        self.some_rows = 5000
-        #self.some_rows = None
+        #self.some_rows = 5000
+        self.some_rows = None
         self.df_base = self.Load_Processing()
         self.df_base_shape = self.df_base.shape
 
@@ -249,7 +249,7 @@ print(weather_train_df.head())
 weather_test_df = Whether('test', data_root).df()
 print(weather_test_df.head())
 early_stop = 20
-verbose_eval = 1
+verbose_eval = 5
 metric = 'l2'
 #num_rounds=1000, lr=0.05, bf=0.3
 num_rounds = 1000;      lr = 0.05;          bf = 0.3
@@ -262,7 +262,7 @@ params = {'num_leaves': 31, 'n_estimators': num_rounds,
               "bagging_freq": 1,
               "bagging_fraction": bf,
               "feature_fraction": 1,  # STRANGE GBDT  why("bagging_freq": 5 "feature_fraction": 0.9)!!!
-              "metric": metric, "verbose_eval": verbose_eval, 'n_jobs': 8, "elitism": 0,"debug":'0',
+              "metric": metric, "verbose_eval": verbose_eval, 'n_jobs': 8, "elitism": 0,"debug":'1',
               "early_stopping_rounds": early_stop, "adaptive": 'weight1', 'verbose': 666, 'min_data_in_leaf': 20,
               #               "verbosity": -1,
               #               'reg_alpha': 0.1,
@@ -318,32 +318,48 @@ folds = 5
 seed = 666
 shuffle = False
 kf = KFold(n_splits=folds, shuffle=shuffle, random_state=seed)
+#kf = StratifiedKFold(n_splits=folds, shuffle=True, random_state=seed)
 
 cat_features=None
 meter_models=[]
 train_datas = COROchann("train",data_root,building_meta_df,weather_train_df)
 losses=[]
+feat_fix = ['building_id','building_median','hour','weekend','site_id', 'square_feet','primary_use','air_temperature', 'year_built']
+def GetSplit_idxs(kf,X_train, y_train):
+    split_idxs=[]
+    for train_idx, valid_idx in kf.split(X_train, y_train):
+        #train_idx=list(train_idx)
+        #alid_idx=list(valid_idx)
+        split_idxs.append((train_idx, valid_idx))
+    return split_idxs
+
 for target_meter in range(4):
     X_train, y_train = train_datas.data_X_y(target_meter)
+    split_ids=GetSplit_idxs(kf,X_train, y_train)
+    #X_train = X_train[feat_fix]
     y_valid_pred_total = np.zeros(X_train.shape[0])
     gc.collect()
     print(f'target_meter={target_meter} X_train={X_train.shape}')
-    if False:
-        feat_fix = ['sea_level_pressure', 'primary_use', 'site_id', 'air_temperature', 'building_id', 'year_built',
-                    'cloud_coverage','weekend', 'hour','building_median', 'square_feet', 'wind_direction', 'precip_depth_1_hr', 'wind_speed',  'dew_temperature']
-        feat_select = X_train.columns
-        feat_select = list(set(feat_select) - set(feat_fix))
-        MORT_feat_select_(X_train, y_train, feat_fix, feat_select,params)
-        input("......MORT_feat_search......")
-
     cat_features = train_datas.category_cols
-    cat_features = ['building_id']
+    # cat_features = ['building_id']
     # [X_train.columns.get_loc(cat_col) for cat_col in train_datas.category_cols]
     print('cat_features', cat_features)
+    if True :
+        feat_select = X_train.columns
+        feat_select = list(set(feat_select) - set(feat_fix))
+        params['split_idxs'] = split_ids
+        params['early_stopping_rounds'] = 50        #不宜太大，掉到坑里
+        params['category_features'] = cat_features
+        MORT_feat_select_(X_train, y_train, feat_fix, feat_select,params,nMostSelect=(int)(len(feat_select)/2))
+        input("......MORT_feat_search......")
+        sys.exit(-100)
+
+
     t0=time.time()
     fold = 0
     models_ = []
     for train_idx, valid_idx in kf.split(X_train, y_train):
+    #for (train_idx, valid_idx) in kf.split(X_train, X_train['building_id']):
         train_data = X_train.iloc[train_idx, :], y_train[train_idx]
         valid_data = X_train.iloc[valid_idx, :], y_train[valid_idx]
 

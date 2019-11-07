@@ -67,7 +67,7 @@ def MORT_feat_select_(dataX,dataY,feat_fix,feat_select,select_params,nMostSelect
         no = no + 1
     data_tmp = dataX[feats]
 
-    select_params['learning_rate'] = select_params['learning_rate']*2
+    #select_params['learning_rate'] = select_params['learning_rate']*2
     #select_params['early_stopping_rounds'] = 100
     #select_params['verbose'] = 0
 
@@ -76,8 +76,16 @@ def MORT_feat_select_(dataX,dataY,feat_fix,feat_select,select_params,nMostSelect
     if True:
         for loop in range(nMostSelect):
             select_params["feat_factor"] = feat_factor
-            x_train, x_val, y_train, y_val = train_test_split(data_tmp, dataY, test_size=0.2, random_state=42)
-            mort = LiteMORT(select_params).fit(x_train, y_train, eval_set=[(x_val, y_val)])
+            if('split_idxs' in select_params):
+                assert(len(select_params['split_idxs'])>0)
+                tr_idx, val_idx=select_params['split_idxs'][0]
+                y_train = dataY[tr_idx]
+                x_train =data_tmp.iloc[tr_idx, :]
+                x_val, y_val = data_tmp.iloc[val_idx, :], dataY[val_idx]
+            else:
+                x_train, x_val, y_train, y_val = train_test_split(data_tmp, dataY, test_size=0.2, random_state=42)
+            cat_features = select_params['category_features'] if 'category_features' in select_params else None
+            mort = LiteMORT(select_params).fit(x_train, y_train, eval_set=[(x_val, y_val)], categorical_feature=cat_features)
             feat_factor_1 = mort.params.feat_factor
             rank = np.argsort(feat_factor_1)[::-1]
             nAdd=0
@@ -86,14 +94,14 @@ def MORT_feat_select_(dataX,dataY,feat_fix,feat_select,select_params,nMostSelect
                     continue
                 if feat_factor_1[no] > 0:
                     feat_useful_.append(feats[no]);     nAdd=nAdd+1
-                    print(f"___MORT_feat_select___@[loop]:\t{feats[no]}={feat_factor_1[no]:.5g}" )
+                    print(f"___MORT_feat_select___@{loop}:\t{feats[no]}={feat_factor_1[no]:.5g}" )
                     feat_factor[no]=1
             if nAdd==0:
-                print(f"___MORT_feat_select___@[loop] break out")
-            print(f"___MORT_feat_select___@[loop] feat_useful_={feat_useful_}")
+                print(f"___MORT_feat_select___@{loop} break out")
+            print(f"___MORT_feat_select___@{loop} feat_useful_={feat_useful_}")
         input(f"......MORT_feat_select_ is OK......")
 
-    else:
+    else:       #original forward feature selection
         x_train, x_val, y_train, y_val = train_test_split(dataX[feat_fix], dataY, test_size = 0.2, random_state = 42)
         mort = LiteMORT(param_mort).fit(x_train, y_train, eval_set=[(x_val, y_val)])
         predictions = mort.predict(x_val)

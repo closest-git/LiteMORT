@@ -429,7 +429,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, st
 			hFeat->select.isPick = false;
 			hFold->present.Append(hFeat, col->representive);
 		}
-		if (hFold->config.verbose==666 && isTrain) {
+		if (hFold->config.verbose>666 && isTrain) {
 			hFeat->hDistri->Dump(feat, false, flag);					//Train输出distribution信息
 		}
 		nTotalBins += hFeat->hDistri == nullptr ? 0 : hFeat->hDistri->nHistoBin();
@@ -808,8 +808,8 @@ void Feats_one_by_one(FeatsOnFold *hTrain, FeatsOnFold *hEval, BoostingForest::M
 	vector<int> cands;
 	const FeatVector *T_y = hTrain->GetY(), *E_y = hEval->GetY();
 	FeatVector*T_predict = hTrain->GetPrecict(), *E_predict = hEval->GetPrecict(),*hBestFeat=nullptr;
-	FeatVector*T_best_predict = new FeatVec_T<double>(T_predict->nSamp(), 0, "T_best"),
-		*E_best_predict = new FeatVec_T<double>(E_predict->nSamp(),0,"E_best");
+	FeatVector*T_best_predict = new FeatVec_T<tpDOWN>(T_predict->nSamp(), 0, "T_best"),
+		*E_best_predict = new FeatVec_T<tpDOWN>(E_predict->nSamp(),0,"E_best");
 	float *selector = hTrain->config.feat_selector;		//返回值
 	for (i = 0; i < nFeat; i++) {
 		FeatVector *hFeat = hTrain->Feat(i);
@@ -830,7 +830,8 @@ void Feats_one_by_one(FeatsOnFold *hTrain, FeatsOnFold *hEval, BoostingForest::M
 	hGBRT_0->Train("", x, flag);
 	hGBRT_0->Predict(hTrain, false, true, false);		
 	T_best_predict->CopyFrom(T_predict);
-	hGBRT_0->Predict(hEval, false, true, false);		E_best_predict->CopyFrom(E_predict);
+	hGBRT_0->Predict(hEval, false, true, false);		
+	E_best_predict->CopyFrom(E_predict);
 	double loss = hEval->lossy->ERR(), loss_best = loss,a,T_err= hTrain->lossy->ERR();
 	//std::vector<tpDOWN> T_resi = hTrain->lossy->resi , E_resi = hEval->lossy->resi, *hY_best = nullptr;
 	hTrain->init_score.fVec = T_best_predict;

@@ -169,7 +169,7 @@ namespace Grusoft {
 				lambda_l2, lambda_Feat,eda_NA == -1 ? "OFF" : eda_NA == 0 ? "0" : "Other",
 				eda_Normal == 0 ? "OFF" : "Gaussian", 
 				rElitism,T_iterrefine,split_refine,
-				nMostPrune,node_task==0 ? "split_X" : node_task == 1 ? "split_Y" : "REGRESS_X", isDebug_1?"Debug_0":"Debug_1",
+				nMostPrune,node_task==0 ? "split_X" : node_task == 1 ? "split_Y" : "REGRESS_X", isDebug_1?"Debug_1":"Debug_0",
 				nMostSalp4bins,histo_alg.c_str()
 				);
 		}
