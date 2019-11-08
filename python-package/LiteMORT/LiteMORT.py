@@ -180,7 +180,7 @@ class LiteMORT(object):
         self.mort_fit.restype = None
 
         self.mort_fit_1 = self.dll.LiteMORT_fit_1
-        self.mort_fit_1.argtypes = [c_void_p, POINTER(M_DATASET_LIST), POINTER(M_DATASET_LIST),c_size_t]
+        self.mort_fit_1.argtypes = [c_void_p, POINTER(M_DATASET_LIST), POINTER(M_DATASET_LIST), POINTER(M_DATASET_LIST),c_size_t]
         self.mort_fit_1.restype = None
 
         self.cpp_test = self.dll.cpp_test
@@ -191,7 +191,7 @@ class LiteMORT(object):
         self.mort_predcit.argtypes = [c_void_p,POINTER(c_float), POINTER(c_double), c_size_t, c_size_t, c_size_t]
 
         self.mort_predcit_1 = self.dll.LiteMORT_predict_1
-        self.mort_predcit_1.argtypes = [c_void_p,POINTER(M_DATASET_LIST), c_size_t]
+        self.mort_predcit_1.argtypes = [c_void_p,POINTER(M_DATASET_LIST), POINTER(M_DATASET_LIST), c_size_t]
 
         self.mort_eda = self.dll.LiteMORT_EDA
         self.mort_eda.argtypes = [c_void_p,POINTER(c_float), POINTER(c_double), c_size_t, c_size_t, c_size_t,
@@ -385,12 +385,31 @@ class LiteMORT(object):
             gc.collect()
 
         return self
+
+    def MergeDataSets(self,merge_infos):
+        if merge_infos is None or len(merge_infos) == 0:
+            return None
+        self.merge_sets=[]
+        no = 0
+        for item in merge_infos:
+            df=item['dataset']
+            title = item['desc'] if 'desc' in item else f"merge_{no}"
+            eval_set = Mort_Preprocess(title, df, None, self.params)
+            cpp_set = eval_set.cpp_dat_
+            cols = list(df.columns)
+            pos_on = cols.index(item['on'])
+            assert(pos_on>=0)
+            cpp_set.merge_on = pos_on
+            self.merge_sets.append(cpp_set)
+            no = no+1
+        self.cpp_merge_sets = M_DATASET_LIST("merge_list", self.merge_sets)
+
     '''
             # v0.2
             # v0.3
                 feat_dict   cys@1/10/2019
     '''
-    def fit(self,X_train_0, y_train,eval_set=None,merge_datas=None,categorical_feature=None,discrete_feature=None, params=None,flag=0x0):
+    def fit(self,X_train_0, y_train,eval_set=None,merge_infos=None,categorical_feature=None,discrete_feature=None, params=None,flag=0x0):
         print("====== LiteMORT_fit X_train_0={} y_train={}......".format(X_train_0.shape, y_train.shape))
         self.categorical_feature = categorical_feature
         self.discrete_feature = discrete_feature
@@ -410,11 +429,9 @@ class LiteMORT(object):
                 #self.eval_sets.append(eval_set.cpp_dat_)
                 self.cpp_eval_sets = M_DATASET_LIST("eval",self.eval_sets)
         #self.EDA(flag)
+        self.MergeDataSets(merge_infos)
 
-        #nTrain, nFeat, nTest = self.train_set.nSample,self.train_set.nFeature, self.eval_set.nSample
-        #self.cpp_test(self.hLIB,self.train_set.CppDataset("train"))
-        #self.mort_fit_1(self.hLIB,self.train_set.cX,self.train_set.cY, nFeat,nTrain,self.eval_set.cX, self.eval_set.cY, nTest,0)
-        self.mort_fit_1(self.hLIB, self.cpp_train_sets,self.cpp_eval_sets, 0)
+        self.mort_fit_1(self.hLIB, self.cpp_train_sets,self.cpp_eval_sets,self.cpp_merge_sets, 0)
         return self
 
 
@@ -457,7 +474,7 @@ class LiteMORT(object):
                                          discrete_feature=self.discrete_feature)
         cpp_test_set = M_DATASET_LIST("test",[predict_set.cpp_dat_])
         #self.mort_predcit_1(self.hLIB, predict_set.cX,predict_set.cY, nFeat,dim, 0)
-        self.mort_predcit_1(self.hLIB, cpp_test_set, 0)
+        self.mort_predcit_1(self.hLIB, cpp_test_set,self.cpp_merge_sets, 0)
         gc.collect()
         return Y_
 

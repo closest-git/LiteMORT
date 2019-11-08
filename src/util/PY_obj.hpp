@@ -106,13 +106,14 @@ struct PY_COLUMN {
 };
 
 struct PY_DATASET {
-	char *name;
+	char *name=nullptr;
 	size_t nSamp;
 	int ldFeat;
 	int ldY;
-	PY_COLUMN *columnX;		//PY_COLUMN
-	PY_COLUMN *columnY;		//PY_COLUMN
+	PY_COLUMN *columnX = nullptr;		//PY_COLUMN
+	PY_COLUMN *columnY = nullptr;		//PY_COLUMN
 	int x;
+	int merge_on = -1;
 
 	bool isValid() {
 		return false;

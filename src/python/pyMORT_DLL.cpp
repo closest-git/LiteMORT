@@ -617,7 +617,7 @@ PYMORT_DLL_API void LiteMORT_predict(void *mort_0,float *X, tpY *y, size_t nFeat
 /*
 	v0.2
 */
-PYMORT_DLL_API void LiteMORT_predict_1(void *mort_0, PY_DATASET_LIST*predict, size_t flag) {
+PYMORT_DLL_API void LiteMORT_predict_1(void *mort_0, PY_DATASET_LIST*predict, PY_DATASET_LIST *merge, size_t flag) {
 	PY_DATASET* predict_set = PY_DATASET_LIST::GetSet(predict,0);
 	PY_COLUMN *col_y = predict_set->columnY,*X= predict_set->columnX;
 	size_t nSamp = predict_set->nSamp;
@@ -904,7 +904,7 @@ void Feats_one_by_one(FeatsOnFold *hTrain, FeatsOnFold *hEval, BoostingForest::M
 	v0.2
 */
 //PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_COLUMN *train_data, PY_COLUMN *train_target, size_t nFeat_0, size_t nSamp, PY_COLUMN *eval_data, PY_COLUMN *eval_target, size_t nEval, size_t flag) {
-PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_DATASET_LIST *train_list, PY_DATASET_LIST *eval_list, size_t flag) {
+PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_DATASET_LIST *train_list, PY_DATASET_LIST *eval_list, PY_DATASET_LIST *merge, size_t flag) {
 	try {
 		GST_TIC(tick);
 		assert(train_list!=nullptr && train_list->nSet == 1);

@@ -23,6 +23,7 @@ from pandas.api.types import is_categorical_dtype
 
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 isMORT = True
+isMerge = True
 gbm='MORT' if isMORT else 'LGB'
 
 def reduce_mem_usage(df, use_float16=False):
@@ -125,8 +126,8 @@ class COROchann(object):
         self.data_root = data_root
         self.building_meta_df = building_meta_df
         self.weather_df = weather_df
-        #self.some_rows = 5000
-        self.some_rows = None
+        self.some_rows = 5000
+        #self.some_rows = None
         self.df_base = self.Load_Processing()
         self.df_base_shape = self.df_base.shape
 
@@ -148,15 +149,18 @@ class COROchann(object):
             'precip_depth_1_hr_mean_lag3', 'sea_level_pressure_mean_lag3',
             'wind_direction_mean_lag3', 'wind_speed_mean_lag3']
 
-
-
     def fit(cls, df):
         pass
 
     def data_X_y(self,target_meter):
         train_df = self.df_base
         print(f"{self.source}_X_y@{target_meter} df_base={train_df.shape}......")
-        pkl_path = f'{data_root}/_ashrae_{self.source}_T{target_meter}_{self.some_rows}_.pickle'
+        pkl_path = f'{data_root}/_ashrae_{self.source}_T{target_meter}_{self.some_rows}_M[{isMerge}]_.pickle'
+        if isMerge:
+            self.merge_infos = [{'on': 'building_id', 'dataset': self.building_meta_df}]
+        else:
+            self.merge_infos = []
+
         if os.path.isfile(pkl_path):
             print("====== Load pickle @{} ......".format(pkl_path))
             with open(pkl_path, "rb") as fp:
@@ -164,10 +168,16 @@ class COROchann(object):
         else:
             target_train_df = train_df[train_df['meter'] == target_meter]
             print(f"target@{target_meter}={target_train_df.shape}")
-            target_train_df = target_train_df.merge(self.building_meta_df, on='building_id', how='left')
+            building_site=self.building_meta_df[['building_id','site_id']]
+            self.building_meta_df.drop(['site_id'], axis=1, inplace=True)
+            target_train_df = target_train_df.merge(building_site, on='building_id', how='left')    #add 'site_id'
             target_train_df = target_train_df.merge(self.weather_df, on=['site_id', 'timestamp'], how='left')
+            if isMerge:
+                X_train = target_train_df
+            else:
+                target_train_df = target_train_df.merge(self.building_meta_df, on='building_id', how='left')
+                X_train = target_train_df[self.feature_cols + self.category_cols]
             print(f"merged_@{target_meter}={target_train_df.shape}")
-            X_train = target_train_df[self.feature_cols + self.category_cols]
             if (self.source == "train"):
                 y_train = target_train_df['meter_reading_log1p'].values
             else:
@@ -177,25 +187,6 @@ class COROchann(object):
             with open(pkl_path, "wb") as fp:
                 pickle.dump([X_train, y_train], fp)
         return X_train, y_train
-
-    def test_X__(self,test_df, target_meter):
-        assert(self.source=="test")
-        test_df = self.df_base
-        print(f"test_X@{target_meter} df_base={test_df.shape}......")
-        pkl_path = f'{data_root}/_ashrae_{self.source}_T{target_meter}_{self.some_rows}_.pickle'
-        if os.path.isfile(pkl_path):
-            print("====== Load pickle @{} ......".format(pkl_path))
-            with open(pkl_path, "rb") as fp:
-                [X_test] = pickle.load(fp)
-        else:
-            target_test_df = test_df[test_df['meter'] == target_meter]
-            target_test_df = target_test_df.merge(building_meta_df, on='building_id', how='left')
-            target_test_df = target_test_df.merge(weather_test_df, on=['site_id', 'timestamp'], how='left')
-            print(f"merged_@{target_meter}={target_test_df.shape}")
-            X_test = target_test_df[self.feature_cols + self.category_cols]
-            with open(pkl_path, "wb") as fp:
-                pickle.dump([X_test], fp)
-        return X_test
 
     @classmethod
     def Load_Processing(self):
@@ -269,7 +260,7 @@ params = {'num_leaves': 31, 'n_estimators': num_rounds,
               #               'reg_lambda': 0.3
               }
 
-def fit_regressor(train, val,target_meter,fold, some_params, devices=(-1,), seed=None, cat_features=None):
+def fit_regressor(train, val,target_meter,fold, some_params, devices=(-1,), merge_info=None, cat_features=None):
     t0=time.time()
     X_train, y_train = train
     X_valid, y_valid = val
@@ -281,7 +272,7 @@ def fit_regressor(train, val,target_meter,fold, some_params, devices=(-1,), seed
         print(f'using gpu device_id {device}...')
         params.update({'device': 'gpu', 'gpu_device_id': device})
 
-    params['seed'] = seed
+
     if False:
         col_y = pd.DataFrame(y_train)
         col_X = X_train.reset_index(drop=True)
@@ -292,7 +283,7 @@ def fit_regressor(train, val,target_meter,fold, some_params, devices=(-1,), seed
     if isMORT:
         params['verbose']=666
         merge_datas=[]
-        model = LiteMORT(some_params).fit(X_train, y_train, eval_set=[(X_valid, y_valid)],merge_datas=merge_datas, categorical_feature=cat_features)
+        model = LiteMORT(some_params).fit(X_train, y_train, eval_set=[(X_valid, y_valid)],merge_infos=merge_info, categorical_feature=cat_features)
         fold_importance = None
         log = ""
     else:
@@ -367,10 +358,10 @@ for target_meter in range(4):
     #for (train_idx, valid_idx) in kf.split(X_train, X_train['building_id']):
         train_data = X_train.iloc[train_idx, :], y_train[train_idx]
         valid_data = X_train.iloc[valid_idx, :], y_train[valid_idx]
-
+        params['seed'] = seed
         print(f'fold={fold} train={train_data[0].shape},valid={valid_data[0].shape}')
         #     model, y_pred_valid, log = fit_cb(train_data, valid_data, cat_features=cat_features, devices=[0,])
-        model, y_pred_valid, log = fit_regressor(train_data, valid_data,target_meter,fold,params, cat_features=cat_features)
+        model, y_pred_valid, log = fit_regressor(train_data, valid_data,target_meter,fold,some_params=params,merge_info=train_datas.merge_infos, cat_features=cat_features)
         y_valid_pred_total[valid_idx] = y_pred_valid
         models_.append(model)
         gc.collect()

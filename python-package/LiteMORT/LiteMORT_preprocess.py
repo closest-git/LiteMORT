@@ -23,7 +23,8 @@ class M_DATASET(Structure):
                     ('ldY', c_int),
                     ('columnX', POINTER(M_COLUMN)),
                     ('columnY', POINTER(M_COLUMN)),
-                    ('x', c_int)
+                    ('x', c_int),
+                    ('merge_on', c_int),
                ]
 
     def __init__(self, name_, nSamp_,nFeat,nY):
@@ -114,7 +115,7 @@ class Mort_Preprocess(object):
         self.name = name_
         self.nSample,self.nFeature = X.shape[0],X.shape[1]
         self.categorical_feature=categorical_feature
-        self.col_X=[]
+        self.col_X,self.col_Y=[],[]
         if features is None:
             if isinstance(X, pd.DataFrame):
                 self.features = X.columns
@@ -129,10 +130,11 @@ class Mort_Preprocess(object):
                 col.representive = params.representive[feat]
             if col.data is not None:
                 self.col_X.append(col)
-        col=self.column_info('target',y,categorical_feature,discrete_feature)
-        if col.data is None:
-            raise( "Mort_Preprocess: col_Y is NONE!!! " )
-        self.col_Y=[col]
+        if y is not None:
+            col=self.column_info('target',y,categorical_feature,discrete_feature)
+            if col.data is None:
+                raise( "Mort_Preprocess: col_Y is NONE!!! " )
+            self.col_Y=[col]
         cpp_dat_ = M_DATASET(self.name,self.nSample,len(self.col_X),len(self.col_Y))
         cpp_dat_.columnX = (M_COLUMN * len(self.col_X))(*self.col_X)
         cpp_dat_.columnY = (M_COLUMN * len(self.col_Y))(*self.col_Y)
