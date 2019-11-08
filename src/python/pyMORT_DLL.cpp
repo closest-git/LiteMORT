@@ -617,7 +617,10 @@ PYMORT_DLL_API void LiteMORT_predict(void *mort_0,float *X, tpY *y, size_t nFeat
 /*
 	v0.2
 */
-PYMORT_DLL_API void LiteMORT_predict_1(void *mort_0, PY_COLUMN *X, PY_COLUMN *col_y, size_t nFeat_0,size_t nSamp,  size_t flag) {
+PYMORT_DLL_API void LiteMORT_predict_1(void *mort_0, PY_DATASET_LIST*predict, size_t flag) {
+	PY_DATASET* predict_set = PY_DATASET_LIST::GetSet(predict,0);
+	PY_COLUMN *col_y = predict_set->columnY,*X= predict_set->columnX;
+	size_t nSamp = predict_set->nSamp;
 	tpY *y = (tpY *)col_y->data;
 	MORT *mort = MORT::From(mort_0);
 	ExploreDA *hEDA = mort->hEDA;
@@ -629,9 +632,9 @@ PYMORT_DLL_API void LiteMORT_predict_1(void *mort_0, PY_COLUMN *X, PY_COLUMN *co
 
 	//yÓ¦ÉèÎªnullptr
 	//FeatsOnFold *hDat = FeatsOnFold_InitInstance<float, tpY>(config, hEDA, "predict", X, y, nSamp, nFeat_0, 1, flag | FeatsOnFold::DF_PREDIC);
-	FeatsOnFold *hDat = FeatsOnFold_InitInstance(config, hEDA, "predict", X, col_y, nSamp, nFeat_0, 1, flag | FeatsOnFold::DF_PREDIC);
+	FeatsOnFold *hDat = FeatsOnFold_InitInstance(config, hEDA, "predict", X, col_y, nSamp, predict_set->ldFeat, 1, flag | FeatsOnFold::DF_PREDIC);
 
-	printf("\n********* LiteMORT_predict nSamp=%d,nFeat=%d hEDA=%p********* \n\n", nSamp, nFeat_0, hEDA);
+	printf("\n********* LiteMORT_predict nSamp=%d,nFeat=%d hEDA=%p********* \n\n", nSamp, predict_set->ldFeat, hEDA);
 	//hDat->nam = "predict";
 	mort->hGBRT->Predict(hDat);
 	FeatVector *pred = hDat->GetPrecict();
@@ -901,9 +904,12 @@ void Feats_one_by_one(FeatsOnFold *hTrain, FeatsOnFold *hEval, BoostingForest::M
 	v0.2
 */
 //PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_COLUMN *train_data, PY_COLUMN *train_target, size_t nFeat_0, size_t nSamp, PY_COLUMN *eval_data, PY_COLUMN *eval_target, size_t nEval, size_t flag) {
-PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_DATASET *train_set, PY_DATASET *eval_set, size_t flag) {
+PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_DATASET_LIST *train_list, PY_DATASET_LIST *eval_list, size_t flag) {
 	try {
 		GST_TIC(tick);
+		assert(train_list!=nullptr && train_list->nSet == 1);
+		PY_DATASET* train_set = train_list->list;
+		PY_DATASET* eval_set = (eval_list==nullptr || eval_list->nSet==0) ? nullptr : eval_list->list;
 		MORT *mort = MORT::From(mort_0);
 		LiteBOM_Config& config = mort->config;
 		size_t nSamp = train_set->nSamp, nEval = eval_set == nullptr ? 0 : eval_set->nSamp;

@@ -180,7 +180,7 @@ class LiteMORT(object):
         self.mort_fit.restype = None
 
         self.mort_fit_1 = self.dll.LiteMORT_fit_1
-        self.mort_fit_1.argtypes = [c_void_p, POINTER(M_DATASET), POINTER(M_DATASET),c_size_t]
+        self.mort_fit_1.argtypes = [c_void_p, POINTER(M_DATASET_LIST), POINTER(M_DATASET_LIST),c_size_t]
         self.mort_fit_1.restype = None
 
         self.cpp_test = self.dll.cpp_test
@@ -191,7 +191,7 @@ class LiteMORT(object):
         self.mort_predcit.argtypes = [c_void_p,POINTER(c_float), POINTER(c_double), c_size_t, c_size_t, c_size_t]
 
         self.mort_predcit_1 = self.dll.LiteMORT_predict_1
-        self.mort_predcit_1.argtypes = [c_void_p,POINTER(M_COLUMN), POINTER(M_COLUMN), c_size_t, c_size_t, c_size_t]
+        self.mort_predcit_1.argtypes = [c_void_p,POINTER(M_DATASET_LIST), c_size_t]
 
         self.mort_eda = self.dll.LiteMORT_EDA
         self.mort_eda.argtypes = [c_void_p,POINTER(c_float), POINTER(c_double), c_size_t, c_size_t, c_size_t,
@@ -398,22 +398,23 @@ class LiteMORT(object):
         isUpdate,y_train_1,y_eval_update = self.problem.BeforeFit([X_train_0, y_train], eval_set)
         if isUpdate:
             y_train=y_train_1
-        self.train_set = Mort_Preprocess( X_train_0,y_train,self.params,categorical_feature=categorical_feature,discrete_feature=discrete_feature,cXcY=True)
-        self.train_set = self.train_set.CppDataset("train")
-        if(eval_set is not None and len(eval_set)>0):
-            X_test, y_test=eval_set[0]
-            if isUpdate:
-                y_test = y_eval_update[0]
-            self.eval_set = Mort_Preprocess(X_test, y_test, self.params,categorical_feature=categorical_feature,discrete_feature=discrete_feature,cXcY=True)
-            self.eval_set = self.eval_set.CppDataset("eval")
-        else:
-            self.eval_set = None
+        self.train_set = Mort_Preprocess( "train",X_train_0,y_train,self.params,categorical_feature=categorical_feature,discrete_feature=discrete_feature,cXcY=True)
+        self.cpp_train_sets = M_DATASET_LIST("train",[self.train_set.cpp_dat_])
+        self.eval_sets = [];            self.cpp_eval_sets=None
+        if(eval_set is not None):
+            for X_test, y_test in eval_set:
+                if isUpdate:
+                    y_test = y_eval_update[0]
+                eval_set = Mort_Preprocess("eval",X_test, y_test, self.params,categorical_feature=categorical_feature,discrete_feature=discrete_feature,cXcY=True)
+                self.eval_sets.append(eval_set.cpp_dat_)
+                #self.eval_sets.append(eval_set.cpp_dat_)
+                self.cpp_eval_sets = M_DATASET_LIST("eval",self.eval_sets)
         #self.EDA(flag)
 
         #nTrain, nFeat, nTest = self.train_set.nSample,self.train_set.nFeature, self.eval_set.nSample
         #self.cpp_test(self.hLIB,self.train_set.CppDataset("train"))
         #self.mort_fit_1(self.hLIB,self.train_set.cX,self.train_set.cY, nFeat,nTrain,self.eval_set.cX, self.eval_set.cY, nTest,0)
-        self.mort_fit_1(self.hLIB, self.train_set,self.eval_set, 0)
+        self.mort_fit_1(self.hLIB, self.cpp_train_sets,self.cpp_eval_sets, 0)
         return self
 
 
@@ -452,9 +453,11 @@ class LiteMORT(object):
     def predict_raw(self, X_,pred_leaf=False, pred_contrib=False,raw_score=False,flag=0x0):
         dim, nFeat = X_.shape[0], X_.shape[1];
         Y_ = np.zeros(dim, dtype=np.float64)
-        predict_set = Mort_Preprocess(X_, Y_, self.params, categorical_feature=self.categorical_feature,
-                                         discrete_feature=self.discrete_feature, cXcY=True)
-        self.mort_predcit_1(self.hLIB, predict_set.cX,predict_set.cY, nFeat,dim, 0)
+        predict_set = Mort_Preprocess("test",X_, Y_, self.params, categorical_feature=self.categorical_feature,
+                                         discrete_feature=self.discrete_feature)
+        cpp_test_set = M_DATASET_LIST("test",[predict_set.cpp_dat_])
+        #self.mort_predcit_1(self.hLIB, predict_set.cX,predict_set.cY, nFeat,dim, 0)
+        self.mort_predcit_1(self.hLIB, cpp_test_set, 0)
         gc.collect()
         return Y_
 

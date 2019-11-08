@@ -73,7 +73,6 @@ GBRT::GBRT(FeatsOnFold *hTrain, FeatsOnFold *hEval, double sOOB, MODEL mod_, int
 	//	lr, hTrain->config.leaf_optimal.c_str(),hTrain->config.num_leaves);
 }
 
-
 void GBRT::BeforeTrain(FeatsOnFold *hData_, int flag ) {
 	hData_->BeforeTrain( this,flag );
 	if (0) {	//均值平移，似乎没有必要
@@ -86,7 +85,6 @@ void GBRT::BeforeTrain(FeatsOnFold *hData_, int flag ) {
 		//assert(fabs(im0 - a - im1)<FLT_EPSILON*im0);
 	}
 }
-
 
 /*
 	如果y已知，就可以checkLossy

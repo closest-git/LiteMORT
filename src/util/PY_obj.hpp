@@ -113,6 +113,27 @@ struct PY_DATASET {
 	PY_COLUMN *columnX;		//PY_COLUMN
 	PY_COLUMN *columnY;		//PY_COLUMN
 	int x;
+
+	bool isValid() {
+		return false;
+	}
 };
+
+struct PY_DATASET_LIST {
+	char *name=nullptr;
+	int nSet=0;
+	PY_DATASET *list = nullptr;		//PY_COLUMN
+	int x=0;
+
+	static PY_DATASET* GetSet(PY_DATASET_LIST *data_list,int no=0x0) {
+		assert(data_list!=nullptr && data_list->nSet > no);
+		PY_DATASET *set = data_list->list+no;
+		assert(set->ldFeat > 0);
+		assert(set->ldY > 0);
+		assert(set->nSamp > 0);
+		return set;
+	}
+};
+
 
 

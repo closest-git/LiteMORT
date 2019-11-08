@@ -26,6 +26,26 @@ class M_DATASET(Structure):
                     ('x', c_int)
                ]
 
+    def __init__(self, name_, nSamp_,nFeat,nY):
+        self.name = str(name_).encode('utf8')
+        self.nSamp = nSamp_
+        self.ldFeat = nFeat
+        self.ldY = nY
+
+class M_DATASET_LIST(Structure):
+    _fields_ = [    ('name',c_char_p),
+                    ('nSet', c_int),
+                    ('list', POINTER(M_DATASET)),
+                    ('flag', c_int)
+               ]
+
+    def __init__(self, name_, datasets,flag=0):
+        assert(len(datasets)>0)
+        self.name = str(name_).encode('utf8')
+        self.nSet = len(datasets)
+        self.list = (M_DATASET * self.nSet)(*datasets)
+        self.flag = flag
+
 def Mort_PickSamples(pick_samples,df_train,df_test):
     nTrain = df_train.shape[0]
     random.seed(42)
@@ -40,17 +60,6 @@ def Mort_PickSamples(pick_samples,df_train,df_test):
     return df_train,df_test
 
 class Mort_Preprocess(object):
-    def CppDataset(self,name_):
-        dat_ = M_DATASET()
-        dat_.nSamp = self.nSample
-        dat_.name = str(name_).encode('utf8')
-        dat_.ldFeat = len(self.col_X)
-        dat_.ldY = len(self.col_Y)
-        dat_.x=0
-        dat_.columnX = self.cX
-        dat_.columnY = self.cY
-        return dat_
-
     def column_info(self,feat,X,categorical_feature=None,discrete_feature=None):
         col = M_COLUMN()
         col.name = str(feat).encode('utf8')
@@ -91,7 +100,7 @@ class Mort_Preprocess(object):
             #print("\"{}\":\t{}\ttype={},data={},name={}".format(feat, x_info, col.dtype, col.data, col.name))
         return col
 
-    def __init__(self,X,y,params,features=None,categorical_feature=None,discrete_feature=None,cXcY=False,  **kwargs):
+    def __init__(self,name_,X,y,params,features=None,categorical_feature=None,discrete_feature=None,  **kwargs):
         '''
         :param X:
         :param y:
@@ -102,7 +111,7 @@ class Mort_Preprocess(object):
 
         if not (isinstance(X, pd.DataFrame) or isinstance(X, np.ndarray)):
             raise NotImplementedError("Mort_Preprocess failed to init @{}".format(X))
-
+        self.name = name_
         self.nSample,self.nFeature = X.shape[0],X.shape[1]
         self.categorical_feature=categorical_feature
         self.col_X=[]
@@ -113,19 +122,21 @@ class Mort_Preprocess(object):
                 pass
         else:
             self.features = features
-        if cXcY:       #v0.2
-            for feat in self.features:
-                col = self.column_info(feat,X,categorical_feature,discrete_feature)
-                if 'representive' in params.__dict__ and feat in params.representive:
-                    col.representive = params.representive[feat]
-                if col.data is not None:
-                    self.col_X.append(col)
-            col=self.column_info('target',y,categorical_feature,discrete_feature)
-            if col.data is None:
-                raise( "Mort_Preprocess: col_Y is NONE!!! " )
-            self.col_Y=[col]
-            self.cX = (M_COLUMN * len(self.col_X))(*self.col_X)
-            self.cY = (M_COLUMN * len(self.col_Y))(*self.col_Y)
+
+        for feat in self.features:
+            col = self.column_info(feat,X,categorical_feature,discrete_feature)
+            if 'representive' in params.__dict__ and feat in params.representive:
+                col.representive = params.representive[feat]
+            if col.data is not None:
+                self.col_X.append(col)
+        col=self.column_info('target',y,categorical_feature,discrete_feature)
+        if col.data is None:
+            raise( "Mort_Preprocess: col_Y is NONE!!! " )
+        self.col_Y=[col]
+        cpp_dat_ = M_DATASET(self.name,self.nSample,len(self.col_X),len(self.col_Y))
+        cpp_dat_.columnX = (M_COLUMN * len(self.col_X))(*self.col_X)
+        cpp_dat_.columnY = (M_COLUMN * len(self.col_Y))(*self.col_Y)
+        self.cpp_dat_ = cpp_dat_
         return    #please implement this
 
 
