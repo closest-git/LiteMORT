@@ -116,8 +116,8 @@ namespace Grusoft {
 		INIT_SCORE init_score;
 		vector<FeatVector*> feats;				//featrue values of X
 		int nPickFeat = 0;
+		int merge_on = -1;
 		Representive present;
-
 
 		struct BUFFER {
 			tpSAMP_ID *samp_root_set = nullptr,*samp_left = nullptr,*samp_rigt = nullptr;
@@ -200,6 +200,7 @@ namespace Grusoft {
 		enum {
 			TAG_ZERO = 0x10000,
 			DF_FLAG = 0xF00000, DF_TRAIN = 0x100000, DF_EVAL = 0x200000, DF_PREDIC = 0x400000,
+			DF_MERGE = 0x800000,
 		};
 		size_t dType = 0x0;
 		bool qOrder = false, isQuanti = false;
@@ -249,6 +250,7 @@ namespace Grusoft {
 		}
 		//virtual void Compress(int flag = 0x0);
 		virtual void ExpandFeat(int flag = 0x0);
+		virtual void ExpandMerge(const vector<FeatsOnFold *>&merge_sets, int flag = 0x0);
 		virtual void Feature_Bundling(int flag = 0x0);
 		virtual void Reshape(int flag = 0x0) {
 			throw "FeatsOnFold::Reshape is ...";
@@ -279,6 +281,10 @@ namespace Grusoft {
 			}
 			return feats[no];
 		}
+		FeatVector *Feat(const string&name) {
+			return nullptr;
+		}
+
 		virtual int *Rank4Feat(int type, int flag = 0x0);	
 		virtual void nPick4Split(vector<int>&picks, GRander&rander, BoostingForest *hForest,int flag = 0x0);
 
@@ -1198,7 +1204,6 @@ namespace Grusoft {
 
 		virtual void UpdateFruit(MT_BiSplit *hBlit, int flag = 0x0);
 
-		virtual void Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* hParent, HistoGRAM* histo, int nMostBin, int flag = 0x0);
 	};
 
 

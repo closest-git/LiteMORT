@@ -168,17 +168,12 @@ class LiteMORT(object):
         self.dll = cdll.LoadLibrary(self.dll_path)
         print("======Load LiteMORT library @{}".format(self.dll_path))
         self.mort_init = self.dll.LiteMORT_init
-        self.mort_init.argtypes = [POINTER(M_argument), c_int, c_size_t]
+        self.mort_init.argtypes = [POINTER(M_argument), c_int,POINTER(M_DATASET_LIST), c_size_t]
         self.mort_init.restype = c_void_p
 
-        # self.mort_set_feat = self.dll.LiteMORT_set_feat
-        # self.mort_set_feat.argtypes = [POINTER(M_argument), c_int, c_size_t]
-
-        self.mort_fit = self.dll.LiteMORT_fit
-        self.mort_fit.argtypes = [c_void_p,POINTER(c_float), POINTER(c_double), c_size_t, c_size_t,
-                                  POINTER(c_float), POINTER(c_double), c_size_t, c_size_t]
-        self.mort_fit.restype = None
-
+        #self.mort_fit = self.dll.LiteMORT_fit
+        #self.mort_fit.argtypes = [c_void_p,POINTER(c_float), POINTER(c_double), c_size_t, c_size_t,POINTER(c_float), POINTER(c_double), c_size_t, c_size_t]
+        #self.mort_fit.restype = None
         self.mort_fit_1 = self.dll.LiteMORT_fit_1
         self.mort_fit_1.argtypes = [c_void_p, POINTER(M_DATASET_LIST), POINTER(M_DATASET_LIST), POINTER(M_DATASET_LIST),c_size_t]
         self.mort_fit_1.restype = None
@@ -187,11 +182,10 @@ class LiteMORT(object):
         self.cpp_test.argtypes = [c_void_p, POINTER(M_DATASET)]
         self.cpp_test.restype = None
 
-        self.mort_predcit = self.dll.LiteMORT_predict
-        self.mort_predcit.argtypes = [c_void_p,POINTER(c_float), POINTER(c_double), c_size_t, c_size_t, c_size_t]
-
+        #self.mort_predcit = self.dll.LiteMORT_predict
+        #self.mort_predcit.argtypes = [c_void_p,POINTER(c_float), POINTER(c_double), c_size_t, c_size_t, c_size_t]
         self.mort_predcit_1 = self.dll.LiteMORT_predict_1
-        self.mort_predcit_1.argtypes = [c_void_p,POINTER(M_DATASET_LIST), POINTER(M_DATASET_LIST), c_size_t]
+        self.mort_predcit_1.argtypes = [c_void_p,POINTER(M_DATASET_LIST), c_size_t]
 
         self.mort_eda = self.dll.LiteMORT_EDA
         self.mort_eda.argtypes = [c_void_p,POINTER(c_float), POINTER(c_double), c_size_t, c_size_t, c_size_t,
@@ -207,7 +201,7 @@ class LiteMORT(object):
         self.mort_clear = self.dll.LiteMORT_clear
         self.mort_clear.argtypes = [c_void_p]
 
-    def __init__(self, params,fix_seed=None):
+    def __init__(self, params,merge_infos=None,fix_seed=None):
         self.problem = None
         self.preprocess = None
         self.hLIB = None
@@ -217,11 +211,15 @@ class LiteMORT(object):
         self.best_iteration = 0
         self.best_score = 0
 
-        self.init_params(params)
+        self.init_params_cpp(params)
         if self.params.objective == "binary":
             self.problem = Mort_BinaryClass(self.params.__dict__)
         elif self.params.objective == "regression":
             self.problem = Mort_Regressor(self.params.__dict__)
+
+        self.MergeDataSets(merge_infos)
+
+        self.hLIB = self.mort_init(self.ca_array, len(self.ca_array),self.cpp_merge_sets,0x0)
 
     def __del__(self):
         try:
@@ -256,7 +254,7 @@ class LiteMORT(object):
         gc.collect()
         return np_out
 
-    def init_params(self, params, flag=0x0):
+    def init_params_cpp(self, params, flag=0x0):
         if not isinstance(params, LiteMORT_params):
             if isinstance(params,dict):
                 pass
@@ -296,10 +294,7 @@ class LiteMORT(object):
 
             # ca.Index = v[3]
             ca_list.append(ca)
-        ca_array = (M_argument * len(ca_list))(*ca_list)
-        self.hLIB = self.mort_init(ca_array, len(ca_array),0)
-
-
+        self.ca_array = (M_argument * len(ca_list))(*ca_list)
 
     def EDA(self,flag=0x0):
         '''
@@ -387,18 +382,21 @@ class LiteMORT(object):
         return self
 
     def MergeDataSets(self,merge_infos):
+        self.merge_sets=[]
+        self.cpp_merge_sets=None
         if merge_infos is None or len(merge_infos) == 0:
             return None
-        self.merge_sets=[]
+
         no = 0
         for item in merge_infos:
             df=item['dataset']
+            col_on = item['on']
+            pos_on = list(df.columns).index(col_on)
+            assert (pos_on >= 0)
             title = item['desc'] if 'desc' in item else f"merge_{no}"
             eval_set = Mort_Preprocess(title, df, None, self.params)
             cpp_set = eval_set.cpp_dat_
-            cols = list(df.columns)
-            pos_on = cols.index(item['on'])
-            assert(pos_on>=0)
+
             cpp_set.merge_on = pos_on
             self.merge_sets.append(cpp_set)
             no = no+1
@@ -409,7 +407,7 @@ class LiteMORT(object):
             # v0.3
                 feat_dict   cys@1/10/2019
     '''
-    def fit(self,X_train_0, y_train,eval_set=None,merge_infos=None,categorical_feature=None,discrete_feature=None, params=None,flag=0x0):
+    def fit(self,X_train_0, y_train,eval_set=None,categorical_feature=None,discrete_feature=None, params=None,flag=0x0):
         print("====== LiteMORT_fit X_train_0={} y_train={}......".format(X_train_0.shape, y_train.shape))
         self.categorical_feature = categorical_feature
         self.discrete_feature = discrete_feature
@@ -429,7 +427,7 @@ class LiteMORT(object):
                 #self.eval_sets.append(eval_set.cpp_dat_)
                 self.cpp_eval_sets = M_DATASET_LIST("eval",self.eval_sets)
         #self.EDA(flag)
-        self.MergeDataSets(merge_infos)
+        self.MergeDataSets()
 
         self.mort_fit_1(self.hLIB, self.cpp_train_sets,self.cpp_eval_sets,self.cpp_merge_sets, 0)
         return self

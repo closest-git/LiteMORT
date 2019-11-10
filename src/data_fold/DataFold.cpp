@@ -12,6 +12,7 @@ using json = nlohmann::json;
 
 #include "DataFold.hpp"
 #include "FeatVec_Quanti.hpp"
+#include "FeatVec_EXP.hpp"
 #include "Loss.hpp"
 #include "EDA.hpp"
 #include "../tree/BoostingForest.hpp"
@@ -605,9 +606,9 @@ FeatVec_Bundle::FeatVec_Bundle(FeatsOnFold *hData_,int id_, const vector<int>&bu
 		throw("!!!FeatVec_Bundle nDup > nMostDup*nMerge!!!");*/
 }
 
-
+/*
 void FeatVec_Bundle::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* hParent, HistoGRAM* histo, int nMostBin,  int flag0) {
-	/*if (qHisto->nBins == 0) {
+	if (qHisto->nBins == 0) {
 		histo->ReSet(0);
 		return;
 	}
@@ -632,8 +633,8 @@ void FeatVec_Bundle::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_s
 		}
 		pBin->G_sum += a;
 		pBin->nz++;
-	}*/
-}
+	}
+}*/
 
 void FeatVec_Bundle::UpdateFruit(MT_BiSplit *hBlit, int flag) {
 	/*double split = hBlit->fruit->thrshold;
@@ -724,6 +725,53 @@ tpDOWN *FeatsOnFold::GetSampleHessian() const {
 }
 
 int *FeatsOnFold::Tag() { return lossy->Tag(); }
+
+void FeatsOnFold::ExpandMerge(const vector<FeatsOnFold *>&merge_folds, int flag) {
+	int i,nFeat;
+	for (auto fold : merge_folds) {
+		FeatVector *hFeatSamp = this->Feat(fold->merge_on);		assert(hFeatSamp != nullptr);
+		for (auto hFeat : fold->feats) {
+			hFeat->fvMergeOn = hFeatSamp;
+			hFeat->nam = hFeat->nam + "@" + hFeatSamp->nam;
+			BIT_SET(hFeat->type, FeatVector::AGGREGATE);
+			feats.push_back(hFeat);
+		}
+	}
+	
+}
+void FeatsOnFold::ExpandFeat(int flag) {
+	return;
+	/*	bool isTrain = BIT_TEST(dType,  FeatsOnFold::DF_TRAIN);
+	bool isPredict = BIT_TEST(dType,  FeatsOnFold::DF_PREDIC);
+	size_t nFeat_0 = feats.size(),i,nSamp_=nSample(),feat;
+	int flagF = flag, nQuant=0, nMostQ = config.feat_quanti;
+	for (feat = 0; feat < 2; feat++) {
+	FeatVector *hBase = feats[feat];
+	tpQUANTI pos,*quanti = hBase->GetQuantiBins();
+	if (quanti != nullptr) {
+	//edaX->arrDistri.resize(feats.size()+1);
+	vector<BIN_FEATA>& featas = hBase->hDistri->binFeatas;
+	if (!hBase->hDistri->isValidFeatas() )
+	continue;
+	FeatVec_T<float> *hExp = new FeatVec_T<float>(nSamp_, feats.size(), "exp" + std::to_string(feat), flagF);
+	hExp->hDistri = &(edaX->arrDistri[feats.size()]);
+	float *val = hExp->arr();
+	for (i = 0; i < nSamp_; i++) {
+	pos = quanti[i];
+	val[i] = featas[pos].density;
+	}
+	if (isTrain)
+	hExp->EDA(config, true, 0x0);
+	if (isQuanti) {
+	FeatVec_Q *hFQ = new FeatVec_Q(this, hExp, nMostQ);
+	hFQ->UpdateHisto(this, false, true);
+	feats.push_back(hFQ);
+	nQuant++;	//delete hFeat;
+	}else
+	feats.push_back(hExp);
+	}
+	}*/
+}
 
 /*
 void FeatVec_Q::UpdateFruit(const FeatsOnFold *hData_, MT_BiSplit *hBlit, int flag) {

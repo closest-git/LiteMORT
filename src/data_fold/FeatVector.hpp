@@ -46,7 +46,7 @@ namespace Grusoft {
 			bool isPick = true;
 			bool hasCheckGain = false;
 		};
-
+		FeatVector *fvMergeOn = nullptr;			//仅指向
 		Distribution *hDistri = nullptr;		//仅指向
 		Distribution *hDistriTrain = nullptr;	//仅指向
 		Feature_Selection* select_bins=nullptr;
@@ -80,6 +80,8 @@ namespace Grusoft {
 				delete select_bins;
 		}
 		virtual size_t nSamp()	const	{ throw"FeatVector::nSamp is ..."; }
+
+		//virtual void GetMergeSampSet(const SAMP_SET&samp_set,int * int flag = 0x0);
 
 		virtual void Empty(int flag = 0x0)		{		}
 		virtual void FreeVals(int flag = 0x0)	{		}

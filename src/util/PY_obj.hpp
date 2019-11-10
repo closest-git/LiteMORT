@@ -118,6 +118,11 @@ struct PY_DATASET {
 	bool isValid() {
 		return false;
 	}
+
+	PY_COLUMN* GetColumn(int id) {
+		assert(id >= 0 && id < ldFeat);
+		return columnX + id;
+	}
 };
 
 struct PY_DATASET_LIST {

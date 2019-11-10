@@ -13,9 +13,6 @@ namespace Grusoft {
 
 		virtual void UpdateFruit(MT_BiSplit *hBlit, int flag = 0x0);
 
-		virtual void Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag = 0x0) {
-			;
-		}
 	};
 
 }
