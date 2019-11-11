@@ -727,15 +727,20 @@ tpDOWN *FeatsOnFold::GetSampleHessian() const {
 int *FeatsOnFold::Tag() { return lossy->Tag(); }
 
 void FeatsOnFold::ExpandMerge(const vector<FeatsOnFold *>&merge_folds, int flag) {
-	int i,nFeat;
+	int i,nFeat,nMerge=0;
+	assert(merge_lefts.size() == merge_folds.size());
 	for (auto fold : merge_folds) {
-		FeatVector *hFeatSamp = this->Feat(fold->merge_on);		assert(hFeatSamp != nullptr);
+		FeatVector *hLeft = this->merge_lefts[nMerge];
+		FeatVector *hRight = this->Feat(fold->merge_right);		assert(hRight != nullptr);
 		for (auto hFeat : fold->feats) {
-			hFeat->fvMergeOn = hFeatSamp;
-			hFeat->nam = hFeat->nam + "@" + hFeatSamp->nam;
+			if (hFeat == hRight)
+				continue;
+			hFeat->fvMergeLeft = hLeft;
+			hFeat->nam = hFeat->nam + "@" + hLeft->nam;
 			BIT_SET(hFeat->type, FeatVector::AGGREGATE);
 			feats.push_back(hFeat);
 		}
+		nMerge++;
 	}
 	
 }

@@ -137,10 +137,11 @@ namespace Grusoft {
 
 		//根据样本集，修正每个格子的内容(Y_sum,nz...)
 		virtual void Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* hParent, HistoGRAM* histo, int nMostBin, int flag0 = 0x0) {
-			if (this->fvMergeOn != nullptr) {
+			if (this->fvMergeLeft != nullptr) {
 				//samp_set=>samp_set
 				return;
 			}
+
 			tpDOWN *hessian = hData_->GetSampleHessian();
 			if (hessian == nullptr) {
 				Samp2Histo_null_hessian(hData_, samp_set, histo, nMostBin, flag0);

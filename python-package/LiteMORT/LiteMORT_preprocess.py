@@ -23,9 +23,10 @@ class M_DATASET(Structure):
                     ('ldY', c_int),
                     ('columnX', POINTER(M_COLUMN)),
                     ('columnY', POINTER(M_COLUMN)),
+                    ('merge_left', POINTER(M_COLUMN)),
+                    ('merge_right', c_int),
                     ('x', c_int),
-                    ('merge_on', c_int),
-               ]
+                    ]
 
     def __init__(self, name_, nSamp_,nFeat,nY):
         self.name = str(name_).encode('utf8')
@@ -102,6 +103,8 @@ class Mort_Preprocess(object):
         return col
 
     def __init__(self,name_,X,y,params,features=None,categorical_feature=None,discrete_feature=None,  **kwargs):
+    #v0.2   需要配置更多的信息
+    #def __init__(self, name_, X, y, params, features_infos=None,**kwargs):
         '''
         :param X:
         :param y:
@@ -137,6 +140,7 @@ class Mort_Preprocess(object):
             self.col_Y=[col]
         cpp_dat_ = M_DATASET(self.name,self.nSample,len(self.col_X),len(self.col_Y))
         cpp_dat_.columnX = (M_COLUMN * len(self.col_X))(*self.col_X)
+        cpp_dat_.merge_left = (M_COLUMN * len(self.col_X))(*self.col_X)
         cpp_dat_.columnY = (M_COLUMN * len(self.col_Y))(*self.col_Y)
         self.cpp_dat_ = cpp_dat_
         return    #please implement this

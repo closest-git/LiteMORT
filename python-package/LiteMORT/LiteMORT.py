@@ -175,7 +175,7 @@ class LiteMORT(object):
         #self.mort_fit.argtypes = [c_void_p,POINTER(c_float), POINTER(c_double), c_size_t, c_size_t,POINTER(c_float), POINTER(c_double), c_size_t, c_size_t]
         #self.mort_fit.restype = None
         self.mort_fit_1 = self.dll.LiteMORT_fit_1
-        self.mort_fit_1.argtypes = [c_void_p, POINTER(M_DATASET_LIST), POINTER(M_DATASET_LIST), POINTER(M_DATASET_LIST),c_size_t]
+        self.mort_fit_1.argtypes = [c_void_p, POINTER(M_DATASET_LIST), POINTER(M_DATASET_LIST), c_size_t]
         self.mort_fit_1.restype = None
 
         self.cpp_test = self.dll.cpp_test
@@ -323,7 +323,7 @@ class LiteMORT(object):
 
     def fit_index(self, X, y,train_index, eval_set=None, feat_dict=None, categorical_feature=None, params=None, flag=0x0):
         gc.collect()
-        self.preprocess = Mort_Preprocess(X, y, categorical_feature=categorical_feature)
+        self.preprocess = Mort_Preprocess("fit_index",X, y, self)
 
         if (eval_set is not None and len(eval_set) > 0):
             eval_index = eval_set[0]
@@ -415,21 +415,20 @@ class LiteMORT(object):
         isUpdate,y_train_1,y_eval_update = self.problem.BeforeFit([X_train_0, y_train], eval_set)
         if isUpdate:
             y_train=y_train_1
-        self.train_set = Mort_Preprocess( "train",X_train_0,y_train,self.params,categorical_feature=categorical_feature,discrete_feature=discrete_feature,cXcY=True)
+        self.train_set = Mort_Preprocess( "train",X_train_0,y_train,self.params,categorical_feature=categorical_feature,discrete_feature=discrete_feature)
         self.cpp_train_sets = M_DATASET_LIST("train",[self.train_set.cpp_dat_])
         self.eval_sets = [];            self.cpp_eval_sets=None
         if(eval_set is not None):
             for X_test, y_test in eval_set:
                 if isUpdate:
                     y_test = y_eval_update[0]
-                eval_set = Mort_Preprocess("eval",X_test, y_test, self.params,categorical_feature=categorical_feature,discrete_feature=discrete_feature,cXcY=True)
+                eval_set = Mort_Preprocess("eval",X_test, y_test, self.params,categorical_feature=categorical_feature,discrete_feature=discrete_feature)
                 self.eval_sets.append(eval_set.cpp_dat_)
                 #self.eval_sets.append(eval_set.cpp_dat_)
                 self.cpp_eval_sets = M_DATASET_LIST("eval",self.eval_sets)
         #self.EDA(flag)
-        self.MergeDataSets()
 
-        self.mort_fit_1(self.hLIB, self.cpp_train_sets,self.cpp_eval_sets,self.cpp_merge_sets, 0)
+        self.mort_fit_1(self.hLIB, self.cpp_train_sets,self.cpp_eval_sets, 0)
         return self
 
 
@@ -472,7 +471,7 @@ class LiteMORT(object):
                                          discrete_feature=self.discrete_feature)
         cpp_test_set = M_DATASET_LIST("test",[predict_set.cpp_dat_])
         #self.mort_predcit_1(self.hLIB, predict_set.cX,predict_set.cY, nFeat,dim, 0)
-        self.mort_predcit_1(self.hLIB, cpp_test_set,self.cpp_merge_sets, 0)
+        self.mort_predcit_1(self.hLIB, cpp_test_set, 0)
         gc.collect()
         return Y_
 

@@ -116,7 +116,8 @@ namespace Grusoft {
 		INIT_SCORE init_score;
 		vector<FeatVector*> feats;				//featrue values of X
 		int nPickFeat = 0;
-		int merge_on = -1;
+		int merge_right = -1;			//DF_MERGE
+		vector<FeatVector*> merge_lefts;				//!DF_MERGE
 		Representive present;
 
 		struct BUFFER {

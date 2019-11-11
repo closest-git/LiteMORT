@@ -23,7 +23,7 @@ from pandas.api.types import is_categorical_dtype
 
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 isMORT = True
-isMerge = True
+isMerge = False
 gbm='MORT' if isMORT else 'LGB'
 
 def reduce_mem_usage(df, use_float16=False):
@@ -126,8 +126,8 @@ class COROchann(object):
         self.data_root = data_root
         self.building_meta_df = building_meta_df
         self.weather_df = weather_df
-        self.some_rows = 5000
-        #self.some_rows = None
+        #self.some_rows = 5000
+        self.some_rows = None
         self.df_base = self.Load_Processing()
         self.df_base_shape = self.df_base.shape
 

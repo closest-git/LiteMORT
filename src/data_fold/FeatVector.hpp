@@ -46,7 +46,7 @@ namespace Grusoft {
 			bool isPick = true;
 			bool hasCheckGain = false;
 		};
-		FeatVector *fvMergeOn = nullptr;			//仅指向
+		FeatVector *fvMergeLeft = nullptr;			//仅指向
 		Distribution *hDistri = nullptr;		//仅指向
 		Distribution *hDistriTrain = nullptr;	//仅指向
 		Feature_Selection* select_bins=nullptr;

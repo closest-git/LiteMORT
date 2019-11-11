@@ -112,8 +112,9 @@ struct PY_DATASET {
 	int ldY;
 	PY_COLUMN *columnX = nullptr;		//PY_COLUMN
 	PY_COLUMN *columnY = nullptr;		//PY_COLUMN
-	int x;
-	int merge_on = -1;
+	PY_COLUMN *merge_left = nullptr;
+	int merge_rigt = -1;
+	int x;	
 
 	bool isValid() {
 		return false;

@@ -223,7 +223,7 @@ PYMORT_DLL_API void* LiteMORT_init(PY_ITEM* params, int nParam, PY_DATASET_LIST 
 			for (int i = 0; i < merge_list->nSet; i++) {
 				PY_DATASET *set = merge_list->list + i;
 				FeatsOnFold *hMerge = FeatsOnFold_InitInstance(mort->config, nullptr, set, nullptr, flag | FeatsOnFold::DF_MERGE);
-				hMerge->merge_on = set->merge_on;
+				hMerge->merge_right = set->merge_rigt;
 				mort->merge_folds.push_back(hMerge);
 			}/**/
 
