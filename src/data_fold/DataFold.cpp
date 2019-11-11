@@ -636,16 +636,6 @@ void FeatVec_Bundle::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_s
 	}
 }*/
 
-void FeatVec_Bundle::UpdateFruit(MT_BiSplit *hBlit, int flag) {
-	/*double split = hBlit->fruit->thrshold;
-	tpQUANTI q_split = split;		assert(q_split == split);
-	hBlit->fruit->T_quanti = q_split;
-	hBlit->feat_id = feat_ids[q_split];
-	//assert(split>a0 && split <= a1);
-	float thrsh = vThrsh[q_split];		//严重的BUG之源啊
-	hBlit->fruit->thrshold = thrsh;
-	printf("\nFeatVec_Bundle::pick bins=%d split=%g thrsh=%g feat=%d\t", feat_ids.size(),split, thrsh,hBlit->feat_id);*/
-}
 
 /*
 FeatVec_Q::FeatVec_Q(const FeatsOnFold *hData_, FeatVector *hFeat,int nMostBin, int flag) : hFeatSource(hFeat){
@@ -731,14 +721,15 @@ void FeatsOnFold::ExpandMerge(const vector<FeatsOnFold *>&merge_folds, int flag)
 	assert(merge_lefts.size() == merge_folds.size());
 	for (auto fold : merge_folds) {
 		FeatVector *hLeft = this->merge_lefts[nMerge];
-		FeatVector *hRight = this->Feat(fold->merge_right);		assert(hRight != nullptr);
+		FeatVector *hRight = fold->Feat(fold->merge_right);		assert(hRight != nullptr);
 		for (auto hFeat : fold->feats) {
 			if (hFeat == hRight)
 				continue;
-			hFeat->fvMergeLeft = hLeft;
-			hFeat->nam = hFeat->nam + "@" + hLeft->nam;
-			BIT_SET(hFeat->type, FeatVector::AGGREGATE);
-			feats.push_back(hFeat);
+			FeatVec_EXP *hEXP = new FeatVec_EXP(this,hFeat->nam + "@" + hLeft->nam,hLeft, hFeat);
+			hEXP->EDA(this->config, false, 0x0);
+			//hFeat->nam = hFeat->nam + "@" + hLeft->nam;
+			//BIT_SET(hFeat->type, FeatVector::AGGREGATE);
+			feats.push_back(hEXP);
 		}
 		nMerge++;
 	}

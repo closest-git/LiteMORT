@@ -24,7 +24,6 @@ namespace Grusoft {
 		virtual ~FeatVec_2D() {
 		}
 
-		virtual void UpdateFruit(MT_BiSplit *hBlit, int flag = 0x0);
 
 		
 	};

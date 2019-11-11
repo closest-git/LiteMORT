@@ -120,17 +120,17 @@ class Mort_Preprocess(object):
             dtype = np.int32
             if False:  # mapping  吃力不讨好
                 mapping = df_map.set_index(cols_on).T.to_dict('list')  # set.set_index('ID').T.to_dict('list')
+
+            df_left = df_left.merge(df_rigt, on=cols_on, how='left')
+            self.df_merge[feature_list[i]]=df_left["row_no"]
+            nNA = self.df_merge[feature_list[i]].isna().sum()
+            if(nNA>0):      #真麻烦！！！
+                print(f"OnMerge STRANGE@{cols_on}\tnNA={nNA}/{nNA*100.0/self.nSample:.3g}%%")
+                #self.df_merge[feature_list[i]]=self.df_merge[feature_list[i]].astype('Int64')
             else:
-                df_left = df_left.merge(df_rigt, on=cols_on, how='left')
-                self.df_merge[feature_list[i]]=df_left["row_no"]
-                nNA = self.df_merge[feature_list[i]].isna().sum()
-                if(nNA>0):      #真麻烦！！！
-                    print(f"OnMerge STRANGE@{cols_on}\tnNA={nNA}/{nNA*100.0/self.nSample:.3g}%%")
-                    #self.df_merge[feature_list[i]]=self.df_merge[feature_list[i]].astype('Int64')
-                else:
-                    self.df_merge[feature_list[i]]=self.df_merge[feature_list[i]].astype(np.int32)
-                del df_left,df_rigt
-                gc.collect()
+                self.df_merge[feature_list[i]]=self.df_merge[feature_list[i]].astype(np.int32)
+            del df_left,df_rigt
+            gc.collect()
             col = self.column_info(feature_list[i], self.df_merge, self.categorical_feature, self.discrete_feature)
             merge_left.append(col)
         self.cpp_dat_.merge_left = (M_COLUMN * len(merge_left))(*merge_left)

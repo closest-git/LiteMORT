@@ -167,6 +167,7 @@ copy $(OutDir)$(TargetName)$(TargetExt) D:\Anaconda3\Lib\site-packages\litemort<
   <ItemGroup>
     <ClCompile Include="..\..\src\data_fold\DataFold.cpp" />
     <ClCompile Include="..\..\src\data_fold\EDA.cpp" />
+    <ClCompile Include="..\..\src\data_fold\FeatVector.cpp" />
     <ClCompile Include="..\..\src\data_fold\Histogram.cpp" />
     <ClCompile Include="..\..\src\EDA\Feat_Selection.cpp" />
     <ClCompile Include="..\..\src\EDA\SA_salp.cpp" />

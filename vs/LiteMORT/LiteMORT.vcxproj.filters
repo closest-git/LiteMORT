@@ -87,6 +87,9 @@
     <ClCompile Include="..\..\src\util\FastExpLog.c">
       <Filter>源文件\util</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\data_fold\FeatVector.cpp">
+      <Filter>源文件\data_fold</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\data_fold\Loss.hpp">

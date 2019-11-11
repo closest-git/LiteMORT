@@ -46,7 +46,7 @@ namespace Grusoft {
 			bool isPick = true;
 			bool hasCheckGain = false;
 		};
-		FeatVector *fvMergeLeft = nullptr;			//仅指向
+		//FeatVector *fvMergeLeft = nullptr;			//仅指向
 		Distribution *hDistri = nullptr;		//仅指向
 		Distribution *hDistriTrain = nullptr;	//仅指向
 		Feature_Selection* select_bins=nullptr;
@@ -67,6 +67,7 @@ namespace Grusoft {
 		SELECT select;
 		bool isCategory()	const	{ return	BIT_TEST(type, Distribution::CATEGORY); }	
 		bool isReferVal()	const	{ return	BIT_TEST(type, VAL_REFER); }				
+		bool isMerged()	const { return	false; }
 		typedef enum {
 			COPY_MEAN,
 		}BINARY_OPERATE;
@@ -119,7 +120,7 @@ namespace Grusoft {
 		//virtual void EDA(const LiteBOM_Config&config, ExploreDA *edaX, int flag) { throw "FeatVector::EDA is ..."; }
 		virtual void QuantiAtEDA(const ExploreDA *eda, void *quanti, int sizeofQ, int nMostBin, bool isSame, int flag) { ; }
 		//virtual void Split2Quanti(const LiteBOM_Config&config, const ExploreDA *eda, vector<double>& vThrsh, HistoGRAM *qHisto, tpDOWN *yDown, int nMostBin, int flag = 0x0) { throw "FeatVector::SplitSort is ..."; }
-		virtual void UpdateFruit(const FeatsOnFold*,MT_BiSplit *hBlit, int flag = 0x0) {}
+		//virtual void UpdateFruit(const FeatsOnFold*,MT_BiSplit *hBlit, int flag = 0x0) {}
 		virtual void RefineThrsh(const FeatsOnFold *hData_, const MT_BiSplit *hBlit, int flag = 0x0) {}
 		//virtual void SetSplitInfo(MT_BiSplit *hBlit, FeatBlit&box, int flag = 0x0) { throw "FeatVector::SetSplit is ..."; }
 		virtual void BinaryOperate(FeatVector*, BINARY_OPERATE opt, int flag = 0x0) { throw "FeatVector::BinaryOperate is ..."; }

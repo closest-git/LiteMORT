@@ -395,10 +395,10 @@ class LiteMORT(object):
             pos_on = list(df.columns).index(cols_on[0])
             assert (pos_on >= 0)
             title = item['desc'] if 'desc' in item else f"merge_{no}"
-            eval_set = Mort_Preprocess(title, df, None, self.params)
-            cpp_set = eval_set.cpp_dat_
+            mort_set = Mort_Preprocess(title, df, None, self.params)
+            cpp_set = mort_set.cpp_dat_
+            cpp_set.merge_right = pos_on
 
-            cpp_set.merge_on = pos_on
             merge_sets.append(cpp_set)
             no = no+1
         self.cpp_merge_sets = M_DATASET_LIST("merge_list", merge_sets)
