@@ -157,7 +157,9 @@ class COROchann(object):
         print(f"{self.source}_X_y@{target_meter} df_base={train_df.shape}......")
         pkl_path = f'{data_root}/_ashrae_{self.source}_T{target_meter}_{self.some_rows}_M[{isMerge}]_.pickle'
         if isMerge:
-            self.merge_infos = [{'on': 'building_id', 'dataset': self.building_meta_df}]
+            self.merge_infos = [#{'on': ['site_id','timestamp'], 'dataset': self.weather_df,"desc":"weather"},
+                                {'on': ['building_id'], 'dataset': self.building_meta_df,"desc":"building"},
+                                ]
         else:
             self.merge_infos = []
 
@@ -281,7 +283,7 @@ def fit_regressor(train, val,target_meter,fold, some_params, devices=(-1,), merg
         print("X_train={}, y_train={} d_train={}".format(col_X.shape, col_y.shape, d_train.shape))
 
     if isMORT:
-        params['verbose']=666
+        params['verbose']=667
         merge_datas=[]
         model = LiteMORT(some_params,merge_infos=merge_info)   # all train,eval,predict would use same merge infomation
         model.fit(X_train, y_train, eval_set=[(X_valid, y_valid)], categorical_feature=cat_features)

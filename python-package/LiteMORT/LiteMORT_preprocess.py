@@ -33,6 +33,8 @@ class M_DATASET(Structure):
         self.nSamp = nSamp_
         self.ldFeat = nFeat
         self.ldY = nY
+        self.columnX=None;          self.columnY = None
+        self.merge_left=None;       self.merge_right=-1
 
 class M_DATASET_LIST(Structure):
     _fields_ = [    ('name',c_char_p),
@@ -102,7 +104,38 @@ class Mort_Preprocess(object):
             #print("\"{}\":\t{}\ttype={},data={},name={}".format(feat, x_info, col.dtype, col.data, col.name))
         return col
 
-    def __init__(self,name_,X,y,params,features=None,categorical_feature=None,discrete_feature=None,  **kwargs):
+    def OnMerge(self,df_base,merge_infos):
+        nFV=len(merge_infos)
+        self.df_merge = pd.DataFrame()#pd.DataFrame(0, index=np.arange(self.nSample), columns=feature_list)
+        feature_list=[]
+        merge_left=[]
+        for i in range(nFV):
+            info = merge_infos[i]
+            df,cols_on = info['dataset'],info['on']
+            feature_list.append("merge_"+info['desc'])
+
+            df_left, df_rigt = df_base[cols_on], df[cols_on]
+            df_left_0 = df_left.reset_index()
+            df_rigt["row_no"] = df_rigt.reset_index().index
+            dtype = np.int32
+            if False:  # mapping  吃力不讨好
+                mapping = df_map.set_index(cols_on).T.to_dict('list')  # set.set_index('ID').T.to_dict('list')
+            else:
+                df_left = df_left.merge(df_rigt, on=cols_on, how='left')
+                self.df_merge[feature_list[i]]=df_left["row_no"]
+                nNA = self.df_merge[feature_list[i]].isna().sum()
+                if(nNA>0):      #真麻烦！！！
+                    print(f"OnMerge STRANGE@{cols_on}\tnNA={nNA}/{nNA*100.0/self.nSample:.3g}%%")
+                    #self.df_merge[feature_list[i]]=self.df_merge[feature_list[i]].astype('Int64')
+                else:
+                    self.df_merge[feature_list[i]]=self.df_merge[feature_list[i]].astype(np.int32)
+                del df_left,df_rigt
+                gc.collect()
+            col = self.column_info(feature_list[i], self.df_merge, self.categorical_feature, self.discrete_feature)
+            merge_left.append(col)
+        self.cpp_dat_.merge_left = (M_COLUMN * len(merge_left))(*merge_left)
+
+    def __init__(self,name_,X,y,params,features=None,feat_info=None,merge_infos=None,  **kwargs):
     #v0.2   需要配置更多的信息
     #def __init__(self, name_, X, y, params, features_infos=None,**kwargs):
         '''
@@ -117,7 +150,8 @@ class Mort_Preprocess(object):
             raise NotImplementedError("Mort_Preprocess failed to init @{}".format(X))
         self.name = name_
         self.nSample,self.nFeature = X.shape[0],X.shape[1]
-        self.categorical_feature=categorical_feature
+        self.categorical_feature=feat_info['categorical'] if feat_info is not None and 'categorical' in feat_info else None
+        self.discrete_feature = feat_info['discrete'] if feat_info is not None and 'discrete' in feat_info else None
         self.col_X,self.col_Y=[],[]
         if features is None:
             if isinstance(X, pd.DataFrame):
@@ -128,25 +162,24 @@ class Mort_Preprocess(object):
             self.features = features
 
         for feat in self.features:
-            col = self.column_info(feat,X,categorical_feature,discrete_feature)
+            col = self.column_info(feat,X,self.categorical_feature,self.discrete_feature)
             if 'representive' in params.__dict__ and feat in params.representive:
                 col.representive = params.representive[feat]
             if col.data is not None:
                 self.col_X.append(col)
         if y is not None:
-            col=self.column_info('target',y,categorical_feature,discrete_feature)
+            col=self.column_info('target',y,self.categorical_feature,self.discrete_feature)
             if col.data is None:
                 raise( "Mort_Preprocess: col_Y is NONE!!! " )
             self.col_Y=[col]
         cpp_dat_ = M_DATASET(self.name,self.nSample,len(self.col_X),len(self.col_Y))
         cpp_dat_.columnX = (M_COLUMN * len(self.col_X))(*self.col_X)
-        cpp_dat_.merge_left = (M_COLUMN * len(self.col_X))(*self.col_X)
         cpp_dat_.columnY = (M_COLUMN * len(self.col_Y))(*self.col_Y)
         self.cpp_dat_ = cpp_dat_
+
+        if merge_infos is not None:
+            self.OnMerge(X,merge_infos)
         return    #please implement this
-
-
-
 
     def OrdinalEncode_(X,X_test,features=None):
         encoding_dict = dict()

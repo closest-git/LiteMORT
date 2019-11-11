@@ -286,6 +286,40 @@ FeatVector *FeatVecQ_InitInstance(FeatsOnFold *hFold, FeatVector *hFeat, int x, 
 	return hFQ;
 }
 
+FeatVector *PY_COL2FEAT(const LiteBOM_Config&config, PY_COLUMN*col,size_t nSamp_,int id,int flag) {
+	string desc = "feat_" + std::to_string(id);
+	desc = col->name;
+	FeatVector *hFeat = nullptr;
+	int flagF = flag | FeatVector::VAL_REFER;
+	if (col->isFloat()) {
+		hFeat = new FeatVec_T<float>(nSamp_, id, desc, flagF);
+	}
+	else if (col->isFloat16()) {	//NO REFER!!!
+		if (config.verbose>666)
+			printf("----%d\t \"%s\" is Float16\n", id, col->name);
+		hFeat = new FeatVec_T<float>(nSamp_, id, desc, flag);
+	}
+	else if (col->isInt()) {
+		hFeat = new FeatVec_T<int32_t>(nSamp_, id, desc, flagF);
+	}
+	else if (col->isInt16()) {
+		hFeat = new FeatVec_T<int16_t>(nSamp_, id, desc, flagF);
+	}
+	else if (col->isChar()) {
+		hFeat = new FeatVec_T<int8_t>(nSamp_, id, desc, flagF);
+	}
+	else if (col->isInt64()) {
+		hFeat = new FeatVec_T<int64_t>(nSamp_, id, desc, flagF);
+	}
+	else if (col->isDouble()) {
+		hFeat = new FeatVec_T<double>(nSamp_, id, desc, flagF);
+	}
+	else
+		throw "FeatsOnFold_InitInstance col->dtype is XXX";
+	//hFeat->Set(nSamp_, col);
+	return hFeat;
+}
+
 //FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, string nam_, PY_COLUMN *cX_, PY_COLUMN *cY_, size_t nSamp_, size_t ldX_, size_t ldY_, int flag) {
 FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY_DATASET *dataset_, MORT *mort, int flag) {
 		clock_t t0 = clock();
@@ -306,9 +340,10 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY
 	for (size_t i = 0; i < dataset_->ldFeat; i++) {
 		string desc = "feat_";
 		PY_COLUMN *col = dataset_->columnX + i;//唯一的dtype处理
-		if (i == 9)
-			i = 9;
-		if (col->isFloat() ) {
+		if (i == 31)
+			i = 31;
+		hFold->feats.push_back(PY_COL2FEAT(config,col,nSamp_, i,flag));
+		/*if (col->isFloat() ) {
 			hFold->feats.push_back(new FeatVec_T<float>(nSamp_, i, desc + std::to_string(i),flagF));		
 		}	else if (col->isFloat16()) {	//NO REFER!!!
 			if(hFold->config.verbose>666)
@@ -326,7 +361,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY
 			hFold->feats.push_back(new FeatVec_T<double>(nSamp_, i, desc + std::to_string(i), flagF));
 		}
 		else 
-			throw "FeatsOnFold_InitInstance col->dtype is XXX";
+			throw "FeatsOnFold_InitInstance col->dtype is XXX";*/
 		FeatVector *hFeat = hFold->feats[hFold->feats.size() - 1];
 		hFeat->nam = col->type_x;		hFeat->nam += col->name;
 		hFeat->hDistri = hFold->edaX==nullptr ? nullptr : &(hFold->edaX->arrDistri[i]);
@@ -344,8 +379,14 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY
 			BIT_SET(hFeat->type, FeatVector::REPRESENT_);
 		}
 	}
-	if( mort!=nullptr && mort->merge_folds.size()>0)
+	if (mort != nullptr && mort->merge_folds.size() > 0) {
+		int i, nMerge = mort->merge_folds.size();
+		for (i = 0; i < nMerge; i++) {
+			PY_COLUMN *col = dataset_->merge_left + i;
+			hFold->merge_lefts.push_back(PY_COL2FEAT(config,col, nSamp_, hFold->nFeat()+i, flag));
+		}
 		hFold->ExpandMerge(mort->merge_folds);
+	}
 	//if (hFold->hMove != nullptr)
 	//	hFold->hMove->Init_T<Tx, Ty>(nSamp_);
 
@@ -371,12 +412,10 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY
 	for (int feat = 0; feat < dataset_->ldFeat; feat++) {
 		FeatVector *hFQ = nullptr;
 		FeatVector *hFeat = hFold->Feat(feat);
-		//if(feat==31)
-		//	feat = 31;
+		if(feat==31)
+			feat = 31;
 		PY_COLUMN *col = dataset_->columnX + feat;
-		//printf("\r\tfeat=%d\t......",feat);
 		hFeat->Set(nSamp_, col);
-		//hFeat->Set(nSamp_, col->data);
 		if(isTrain || isMerge)
 			hFeat->EDA(config,true, 0x0);		//EDA基于全局分析，而这里的是局部分析。分布确实会不一样
 		else {
@@ -413,7 +452,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY
 			hFeat->select.isPick = false;
 			hFold->present.Append(hFeat, col->representive);
 		}
-		if (hFold->config.verbose>666 && isTrain) {
+		if (hFold->config.verbose>666 ) {
 			hFeat->hDistri->Dump(feat, false, flag);					//Train输出distribution信息
 		}
 		nTotalBins += hFeat->hDistri == nullptr ? 0 : hFeat->hDistri->nHistoBin();

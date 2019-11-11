@@ -382,25 +382,26 @@ class LiteMORT(object):
         return self
 
     def MergeDataSets(self,merge_infos):
-        self.merge_sets=[]
+        self.merge_infos = merge_infos
         self.cpp_merge_sets=None
         if merge_infos is None or len(merge_infos) == 0:
             return None
 
         no = 0
+        merge_sets = []
         for item in merge_infos:
             df=item['dataset']
-            col_on = item['on']
-            pos_on = list(df.columns).index(col_on)
+            cols_on = item['on']
+            pos_on = list(df.columns).index(cols_on[0])
             assert (pos_on >= 0)
             title = item['desc'] if 'desc' in item else f"merge_{no}"
             eval_set = Mort_Preprocess(title, df, None, self.params)
             cpp_set = eval_set.cpp_dat_
 
             cpp_set.merge_on = pos_on
-            self.merge_sets.append(cpp_set)
+            merge_sets.append(cpp_set)
             no = no+1
-        self.cpp_merge_sets = M_DATASET_LIST("merge_list", self.merge_sets)
+        self.cpp_merge_sets = M_DATASET_LIST("merge_list", merge_sets)
 
     '''
             # v0.2
@@ -415,14 +416,15 @@ class LiteMORT(object):
         isUpdate,y_train_1,y_eval_update = self.problem.BeforeFit([X_train_0, y_train], eval_set)
         if isUpdate:
             y_train=y_train_1
-        self.train_set = Mort_Preprocess( "train",X_train_0,y_train,self.params,categorical_feature=categorical_feature,discrete_feature=discrete_feature)
+        self.feat_info={"categorical":categorical_feature,"discrete":discrete_feature}
+        self.train_set = Mort_Preprocess( "train",X_train_0,y_train,self.params,feat_info=self.feat_info,merge_infos=self.merge_infos)
         self.cpp_train_sets = M_DATASET_LIST("train",[self.train_set.cpp_dat_])
         self.eval_sets = [];            self.cpp_eval_sets=None
         if(eval_set is not None):
             for X_test, y_test in eval_set:
                 if isUpdate:
                     y_test = y_eval_update[0]
-                eval_set = Mort_Preprocess("eval",X_test, y_test, self.params,categorical_feature=categorical_feature,discrete_feature=discrete_feature)
+                eval_set = Mort_Preprocess("eval",X_test, y_test, self.params,feat_info=self.feat_info,merge_infos=self.merge_infos)
                 self.eval_sets.append(eval_set.cpp_dat_)
                 #self.eval_sets.append(eval_set.cpp_dat_)
                 self.cpp_eval_sets = M_DATASET_LIST("eval",self.eval_sets)
@@ -467,8 +469,7 @@ class LiteMORT(object):
     def predict_raw(self, X_,pred_leaf=False, pred_contrib=False,raw_score=False,flag=0x0):
         dim, nFeat = X_.shape[0], X_.shape[1];
         Y_ = np.zeros(dim, dtype=np.float64)
-        predict_set = Mort_Preprocess("test",X_, Y_, self.params, categorical_feature=self.categorical_feature,
-                                         discrete_feature=self.discrete_feature)
+        predict_set = Mort_Preprocess("test",X_, Y_, params=self.params, feat_info=self.feat_info)
         cpp_test_set = M_DATASET_LIST("test",[predict_set.cpp_dat_])
         #self.mort_predcit_1(self.hLIB, predict_set.cX,predict_set.cY, nFeat,dim, 0)
         self.mort_predcit_1(self.hLIB, cpp_test_set, 0)
