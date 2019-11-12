@@ -26,3 +26,11 @@ void FeatVec_EXP::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_0, H
 	//samp_1.Alloc(nRightSamp);
 	hRight->Samp2Histo(hData_, samp_0, histo, nMostBin, hLeft->samp4quanti, flag0);
 }
+
+void FeatVec_EXP::SplitOn(FeatsOnFold *hData_, MT_BiSplit *hBest, int flag) {
+	//Expand 
+	hRight->Merge4Quanti(nullptr, 0x0);
+	//void *hOldVal = hRight->ExpandOnSamp(hLeft->samp4quanti);
+	hRight->SplitOn(hData_, hBest, flag);
+	//hRight->CloseOnSamp(hOldVal,hLeft->samp4quanti);
+}

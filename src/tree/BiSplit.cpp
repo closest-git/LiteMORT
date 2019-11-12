@@ -373,7 +373,7 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 	}
 	if (hData_->merge_lefts.size() > 0) {
 		for (auto hFV : hData_->merge_lefts) {
-			hFV->Merge4Quanti(samp_set);
+			hFV->Merge4Quanti(&samp_set);
 		}
 	}
 	/*if (samp_set.Y_1 - samp_set.Y_0 < hData_->stat.dY / 10) {

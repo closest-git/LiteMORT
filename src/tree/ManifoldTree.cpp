@@ -357,6 +357,7 @@ void ManifoldTree::DelChild(hMTNode hNode, int flag) {
 	}
 	cands.clear();
 }
+
 /*
 	v0.1	cys
 		8/2/2018

@@ -214,7 +214,7 @@ END:
 //GBRT *hGBRT = nullptr;
 PYMORT_DLL_API void* LiteMORT_init(PY_ITEM* params, int nParam, PY_DATASET_LIST *merge_list, int64_t flag = 0x0) {
 	try {
-		printf("大道至简");
+		printf("\n大道至简\n");
 
 		MORT *mort = new MORT();
 		OnUserParams(mort->config, params, nParam);
@@ -222,12 +222,12 @@ PYMORT_DLL_API void* LiteMORT_init(PY_ITEM* params, int nParam, PY_DATASET_LIST 
 		if (merge_list != nullptr) {
 			for (int i = 0; i < merge_list->nSet; i++) {
 				PY_DATASET *set = merge_list->list + i;
+				printf("\n\t------MERGE@[\"%s\"](%lldx%d)......", set->name,set->nSamp,set->ldFeat);
 				ExploreDA *hEDA = new ExploreDA(mort->config, set->ldFeat, flag);
 				FeatsOnFold *hMerge = FeatsOnFold_InitInstance(mort->config, hEDA, set, nullptr, flag | FeatsOnFold::DF_MERGE);
 				//hMerge->merge_right = set->merge_rigt;
 				mort->merge_folds.push_back(hMerge);
 			}/**/
-
 		}
 		return mort;
 	}
@@ -258,6 +258,7 @@ PYMORT_DLL_API void LiteMORT_set_feat(PY_ITEM* params, int nParam, int flag = 0x
 	}
 }
 
+
 FeatVector *FeatVecQ_InitInstance(FeatsOnFold *hFold, FeatVector *hFeat, int x, int flag = 0x0) {
 	int nBins = hFold->config.feat_quanti;
 	assert(hFeat != nullptr && hFeat->hDistri != nullptr);
@@ -273,7 +274,7 @@ FeatVector *FeatVecQ_InitInstance(FeatsOnFold *hFold, FeatVector *hFeat, int x, 
 	}
 	else if (nBins <= SHRT_MAX) {
 		hFQ = new FeatVec_Q<uint16_t>(hFold, hFeat, x);
-		printf("----%d\t \"%s\" nBins=%d\n", hFeat->id, hFeat->nam.c_str(), nBins);
+		printf("\t----%d\t FeatVec_Q@\"%s\" nBins=%d\n", hFeat->id, hFeat->nam.c_str(), nBins);
 	}
 	else {
 		assert(0);
@@ -286,6 +287,7 @@ FeatVector *FeatVecQ_InitInstance(FeatsOnFold *hFold, FeatVector *hFeat, int x, 
 	}
 	return hFQ;
 }
+
 
 /*
 	v0.1	cys
@@ -300,8 +302,8 @@ FeatVector *PY_COL2FEAT(const LiteBOM_Config&config, PY_COLUMN*col, Distribution
 		hFeat = new FeatVec_T<float>(nSamp_, id, desc, flagF);
 	}
 	else if (col->isFloat16()) {	//NO REFER!!!
-		if (config.verbose>666)
-			printf("----%d\t \"%s\" is Float16\n", id, col->name);
+		//if (config.verbose>666)
+		//	printf("----%d\t \"%s\" is Float16\n", id, col->name);
 		hFeat = new FeatVec_T<float>(nSamp_, id, desc, flag);
 	}
 	else if (col->isInt()) {
@@ -399,6 +401,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY
 			PY_COLUMN *col = dataset_->merge_left + i;
 			FeatVector *hFeat = PY_COL2FEAT(config, col, nullptr, nSamp_, hFold->nFeat() + i, true,flag);
 			BIT_SET(hFeat->type, FeatVector::AGGREGATE);
+			hFeat->samp4quanti = new tpSAMP_ID[nSamp_];
 			hFold->merge_lefts.push_back(hFeat);
 		}
 		hFold->ExpandMerge(mort->merge_folds);
@@ -689,6 +692,7 @@ PYMORT_DLL_API void LiteMORT_predict_1(void *mort_0, PY_DATASET_LIST*predict_lis
 		}
 	}
 	delete hDat;
+	fflush(stdout);
 }
 
 /*
@@ -994,6 +998,7 @@ PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_DATASET_LIST *train_list, PY
 	catch (...) {
 		printf("\n!!!!!! EXCEPTION@LiteMORT_fit %s!!!!!!\n\n", "...");
 	}
+	fflush(stdout);
 	return;
 }
 

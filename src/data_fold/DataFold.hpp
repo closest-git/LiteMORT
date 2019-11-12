@@ -667,25 +667,35 @@ namespace Grusoft {
 			delete[] val_s;
 		}
 
-		virtual void Merge4Quanti(const SAMP_SET&samp_0, int flag = 0x0)	{
+		virtual void Merge4Quanti(const SAMP_SET*samp_set, int flag = 0x0)	{
 			assert(BIT_TEST(type, FeatVector::AGGREGATE));
-			if (samp4quanti == nullptr)
-				delete[] samp4quanti;
-			size_t nS = samp_0.nSamp, i;
-			samp4quanti = new tpSAMP_ID[nS];
+			//if (samp4quanti == nullptr)
+			//	delete[] samp4quanti;
+			size_t nS = samp_set==nullptr?this->nSamp():samp_set->nSamp, i;
 			tpSAMP_ID pos;
 			int map;
-			for (i = 0; i < nS; i++) {
-				pos = samp_0.samps[i];
-				if(IS_NAN_INF(val[pos]))
-					samp4quanti[i] = 0;
-				else {
-					map = (int)(val[pos]);
-					//accumulate[pos]++;
-					samp4quanti[i] = (tpSAMP_ID)map;
-
+			if (samp_set == nullptr) {
+				for (i = 0; i < nS; i++) {
+					if (IS_NAN_INF(val[i]))
+						samp4quanti[i] = 0;
+					else {
+						map = (int)(val[i]);
+						samp4quanti[i] = (tpSAMP_ID)map;
+					}
 				}
-			}			
+			}
+			else {
+				for (i = 0; i < nS; i++) {
+					pos = samp_set->samps[i];
+					if(IS_NAN_INF(val[pos]))
+						samp4quanti[i] = 0;
+					else {
+						map = (int)(val[pos]);
+						samp4quanti[i] = (tpSAMP_ID)map;
+					}
+				}			
+
+			}
 		}
 
 
@@ -937,7 +947,6 @@ namespace Grusoft {
 			}
 			else/**/ {
 				hBlit->SplitOn(hData_,nSamp_,val, hData_->isQuanti);
-
 			}
 			//放这里不合适，应该在ManifoldTree::Train GrowLeaf之后
 			//assert(left->nSample() == hBlit->bst_blit.nLeft && rigt->nSample() == hBlit->bst_blit.nRight);

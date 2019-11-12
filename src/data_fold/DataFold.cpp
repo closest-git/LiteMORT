@@ -167,7 +167,7 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 	for (i = 0; i<nFeat; i++)	{
 		FeatVector *hFeat = Feat(i);
 		hFeat->select.hasCheckGain = false;
-		if (i != 77) {		//仅用于调试
+		if (i != 32) {		//仅用于调试
 			;// hFeat->select.isPick = false;
 		}
 		if (hFeat->hDistri!=nullptr && hFeat->hDistri->isPass())

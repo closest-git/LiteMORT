@@ -95,7 +95,9 @@ namespace Grusoft {
 		//virtual tpQUANTI *GetQuantiBins(int flag=0x0) { throw"FeatVector::GetQuantiBins is ..."; }
 		virtual inline int left_rigt(const size_t& t, const double& thrsh, const int lft, const int rgt, int flag = 0x0) { throw"FeatVector::left_rigt is ..."; }
 		virtual inline int left_rigt(const size_t& t, const ARR_TREE*arr_tree,int no, int flag = 0x0) { throw"FeatVector::left_rigt is ..."; }
-		virtual void SplitOn(FeatsOnFold *hData_, MT_BiSplit *hBest, int flag = 0x0) { throw"FeatVector::Split is ..."; }
+		virtual void SplitOn(FeatsOnFold *hData_, MT_BiSplit *hBest, int flag = 0x0) { 
+			throw"FeatVector::Split is ..."; 
+		}
 		//根据MT_BLIT的模型，来预测
 		virtual void Update_step(FeatsOnFold *hData_, MT_BiSplit *hBlit, int flag = 0x0) { throw"FeatVector::UpdatePredict is ..."; }
 		virtual void Update_regression(FeatsOnFold *hData_, MT_BiSplit *hBlit, tpY* target, int flag = 0x0) { throw"FeatVector::UpdatePredict is ..."; }
@@ -115,7 +117,7 @@ namespace Grusoft {
 		virtual void UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst, int flag = 0x0) { throw "FeatVector::UpdateHisto is ..."; }
 		virtual void PerturbeHisto(const FeatsOnFold *hData_, int flag = 0x0) { throw "FeatVector::PerturbeHisto is ..."; }
 		
-		virtual void Merge4Quanti(const SAMP_SET&samp_0, int flag=0x0)	{ throw "FeatVector::Merge4Quanti is ..."; }
+		virtual void Merge4Quanti(const SAMP_SET*samp_0, int flag=0x0)	{ throw "FeatVector::Merge4Quanti is ..."; }
 		virtual void Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, const tpSAMP_ID *samps4quanti=nullptr, int flag = 0x0) const
 		{ throw "FeatVector::_Samp2Histo_ is ..."; }
 		virtual void EDA(const LiteBOM_Config&config,bool genHisto, int flag) { throw "FeatVector::EDA is ..."; }

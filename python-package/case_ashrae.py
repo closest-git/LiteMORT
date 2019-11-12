@@ -23,8 +23,10 @@ from pandas.api.types import is_categorical_dtype
 
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 isMORT = True
-isMerge = False
+isMerge = False #len(sys.argv)>1 and sys.argv[1] == "merge"
 gbm='MORT' if isMORT else 'LGB'
+
+print(f"====== MERGE={isMerge} gbm={gbm} ======\n\n")
 
 def reduce_mem_usage(df, use_float16=False):
     """ iterate through all the columns of a dataframe and modify the data type
@@ -122,32 +124,34 @@ class Whether(object):
 class COROchann(object):
     @classmethod
     def __init__(self, source,data_root,building_meta_df,weather_df):
+        self.category_cols = ['building_id', 'site_id', 'primary_use']  # , 'meter'
+        self.feature_cols = ['square_feet', 'year_built'] + [
+            'hour', 'weekend',  # 'month' , 'dayofweek'
+            'building_median'] + [
+                                'air_temperature', 'cloud_coverage',
+                                'dew_temperature', 'precip_depth_1_hr', 'sea_level_pressure',
+                                'wind_direction', 'wind_speed', 'air_temperature_mean_lag72',
+                                'air_temperature_max_lag72', 'air_temperature_min_lag72',
+                                'air_temperature_std_lag72', 'cloud_coverage_mean_lag72',
+                                'dew_temperature_mean_lag72', 'precip_depth_1_hr_mean_lag72',
+                                'sea_level_pressure_mean_lag72', 'wind_direction_mean_lag72',
+                                'wind_speed_mean_lag72', 'air_temperature_mean_lag3',
+                                'air_temperature_max_lag3',
+                                'air_temperature_min_lag3', 'cloud_coverage_mean_lag3',
+                                'dew_temperature_mean_lag3',
+                                'precip_depth_1_hr_mean_lag3', 'sea_level_pressure_mean_lag3',
+                                'wind_direction_mean_lag3', 'wind_speed_mean_lag3']
+
         self.source = source
         self.data_root = data_root
         self.building_meta_df = building_meta_df
         self.weather_df = weather_df
-        #self.some_rows = 1000000
+        #self.some_rows = 5000
         self.some_rows = None
         self.df_base = self.Load_Processing()
         self.df_base_shape = self.df_base.shape
 
-        self.category_cols = ['building_id', 'site_id', 'primary_use']  # , 'meter'
-        self.feature_cols = ['square_feet', 'year_built'] + [
-            'hour', 'weekend', # 'month' , 'dayofweek'
-            'building_median'] + [
-            'air_temperature', 'cloud_coverage',
-            'dew_temperature', 'precip_depth_1_hr', 'sea_level_pressure',
-            'wind_direction', 'wind_speed', 'air_temperature_mean_lag72',
-            'air_temperature_max_lag72', 'air_temperature_min_lag72',
-            'air_temperature_std_lag72', 'cloud_coverage_mean_lag72',
-            'dew_temperature_mean_lag72', 'precip_depth_1_hr_mean_lag72',
-            'sea_level_pressure_mean_lag72', 'wind_direction_mean_lag72',
-            'wind_speed_mean_lag72', 'air_temperature_mean_lag3',
-            'air_temperature_max_lag3',
-            'air_temperature_min_lag3', 'cloud_coverage_mean_lag3',
-            'dew_temperature_mean_lag3',
-            'precip_depth_1_hr_mean_lag3', 'sea_level_pressure_mean_lag3',
-            'wind_direction_mean_lag3', 'wind_speed_mean_lag3']
+
 
     def fit(cls, df):
         pass
@@ -157,13 +161,14 @@ class COROchann(object):
         print(f"{self.source}_X_y@{target_meter} df_base={train_df.shape}......")
         pkl_path = f'{data_root}/_ashrae_{self.source}_T{target_meter}_{self.some_rows}_M[{isMerge}]_.pickle'
         if isMerge:
-            self.merge_infos = [#{'on': ['site_id','timestamp'], 'dataset': self.weather_df,"desc":"weather"},
-                                {'on': ['building_id'], 'dataset': self.building_meta_df,"desc":"building"},
-                                ]
+            self.merge_infos = [
+                    #{'on': ['site_id','timestamp'], 'dataset': self.weather_df,"desc":"weather"},
+                    {'on': ['building_id'], 'dataset': self.building_meta_df,"desc":"building"},
+            ]
         else:
             self.merge_infos = []
 
-        if os.path.isfile(pkl_path):
+        if False:#os.path.isfile(pkl_path):
             print("====== Load pickle @{} ......".format(pkl_path))
             with open(pkl_path, "rb") as fp:
                 [X_train, y_train] = pickle.load(fp)
@@ -174,12 +179,14 @@ class COROchann(object):
             self.building_meta_df.drop(['site_id'], axis=1, inplace=True)
             target_train_df = target_train_df.merge(building_site, on='building_id', how='left')    #add 'site_id'
             target_train_df = target_train_df.merge(self.weather_df, on=['site_id', 'timestamp'], how='left')
+            feat_v0 = self.feature_cols + self.category_cols
             if isMerge:
-                X_train = target_train_df
+                feat_v0 = feat_v0+['timestamp']
             else:
                 target_train_df = target_train_df.merge(self.building_meta_df, on='building_id', how='left')
-                X_train = target_train_df[self.feature_cols + self.category_cols]
-            print(f"merged_@{target_meter}={target_train_df.shape}")
+            feat_v1 = sorted(list(set(feat_v0).intersection(set(list(target_train_df.columns)))))
+            X_train = target_train_df[feat_v1]
+            print(f"merged_@{target_meter}={X_train.shape}\toriginal={target_train_df.shape}")
             if (self.source == "train"):
                 y_train = target_train_df['meter_reading_log1p'].values
             else:
@@ -305,8 +312,9 @@ def fit_regressor(train, val,target_meter,fold, some_params, devices=(-1,), merg
     # predictions
     y_pred_valid = model.predict(X_valid, num_iteration=model.best_iteration)
     oof_loss = mean_squared_error(y_valid, y_pred_valid)  # target is already in log scale
-    print(f'METER:{target_meter} Fold:{fold} MSE: {oof_loss:.4f} time={time.time() - t0:.5g}')
+    print(f'METER:{target_meter} Fold:{fold} MSE: {oof_loss:.4f} time={time.time() - t0:.5g}', flush=True)
     input("......")
+    os._exit(-200)      #
     return model, y_pred_valid, log
 
 folds = 5
