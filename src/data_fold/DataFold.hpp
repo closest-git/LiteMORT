@@ -116,7 +116,6 @@ namespace Grusoft {
 		INIT_SCORE init_score;
 		vector<FeatVector*> feats;				//featrue values of X
 		int nPickFeat = 0;
-		int merge_right = -1;			//DF_MERGE
 		vector<FeatVector*> merge_lefts;				//!DF_MERGE
 		Representive present;
 
@@ -592,7 +591,8 @@ namespace Grusoft {
 		//{	assert(_len>0);	val.resize(_len,(Tx)0);	 }
 
 		//Tx* arr() { return VECTOR2ARR(val); }
-		Tx* arr()			{ return val;		}
+		Tx* arr()					{	return val;				}
+		const Tx* arr()	const		{	return (const Tx*) val;	}
 		size_t size()		{ return nSamp_;	}
 
 		virtual void Set(size_t len, PY_COLUMN *col, int flag = 0x0) { 
@@ -625,7 +625,7 @@ namespace Grusoft {
 			const FeatVec_T<Tx> *tSrc = dynamic_cast<const FeatVec_T<Tx>*>(src);
 			assert(tSrc != nullptr);
 			memcpy(this->val, tSrc->val, sizeof(Tx)*nSamp_);
-		}
+		}		
 
 		virtual void Set(double a, int flag = 0x0) {
 			size_t len = nSamp_, i;
@@ -666,6 +666,17 @@ namespace Grusoft {
 			distri.X2Histo_<Tx,Tx>(config, nS, val_s,nullptr);		
 			delete[] val_s;
 		}
+
+		virtual void Merge_Accumulate(const SAMP_SET&samp_0, int *accumulate, int flag = 0x0)	const {
+			assert(BIT_TEST(flag, FeatVector::AGGREGATE));
+			size_t nS = samp_0.nSamp, i;
+			tpSAMP_ID pos;
+			for (i = 0; i < nS; i++) {
+				pos = samp_0.samps[i];
+				accumulate[pos]++;
+			}			
+		}
+
 
 		virtual void loc(vector<tpSAMP_ID>&poss,double target,int flag=0x0) {
 			poss.clear();

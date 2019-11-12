@@ -21,8 +21,20 @@ void SAMP_SET::Alloc(FeatsOnFold *hData_, size_t nSamp_, int flag) {
 	else {	//节省内存
 		root_set = hData_->buffer.samp_root_set;
 		left = hData_->buffer.samp_left;				rigt = hData_->buffer.samp_rigt;
-
+		isRef = true;
 	}
+	for (size_t i = 0; i<nSamp; i++)
+		root_set[i] = i;
+	samps = root_set;
+}
+
+void SAMP_SET::Alloc(size_t nSamp_, int flag) {
+	clear();
+
+	isRef = false;
+	nSamp = nSamp_;	
+	root_set = new tpSAMP_ID[nSamp];
+	left = new tpSAMP_ID[nSamp];				rigt = new tpSAMP_ID[nSamp];
 	for (size_t i = 0; i<nSamp; i++)
 		root_set[i] = i;
 	samps = root_set;
@@ -249,7 +261,7 @@ double FLOAT_ZERO(double a,double ruler) {
 		例如消费者一个时间段的消费记录
 */
 double MT_BiSplit::AGG_CheckGain(FeatsOnFold *hData_, FeatVector *hFeat, int flag) {
-	assert(BIT_TEST(hFeat->type, FeatVector::AGGREGATE));
+	//assert(BIT_TEST(hFeat->type, FeatVector::ACCUMULATE));
 	throw "MT_BiSplit::AGG_CheckGain is ......";
 	/*FRUIT *fruit = nullptr;
 	const HistoGRAM *histo = fruit->histo_refer;
@@ -338,7 +350,7 @@ HistoGRAM *MT_BiSplit::GetHistogram(FeatsOnFold *hData_, int pick, bool isInsert
 		}
 		else {
 	GST_TIC(t333);
-			hFeat->Samp2Histo(hData_, samp_set, hP,histo, hData_->config.feat_quanti);
+			hFeat->Samp2Histo(hData_, samp_set, histo, hData_->config.feat_quanti);
 	FeatsOnFold::stat.tSamp2Histo += GST_TOC(t333);
 			histo->CompressBins();
 		}
@@ -399,7 +411,7 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 
 	GST_TIC(t222);
 	size_t start = 0, end = picks.size();
-#pragma omp parallel for schedule(static)
+//#pragma omp parallel for schedule(static)
 	for (int i = start; i < end; i++) {		
 		HistoGRAM *histo=GetHistogram(hData_, picks[i], true);
 		histo->fruit_info.Clear();
@@ -454,13 +466,11 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 			histoSwarm->RandomCompress(hFeat, isSwarm);
 			histo = histoSwarm;
 		}
-
-		if (BIT_TEST(hFeat->type, FeatVector::AGGREGATE)) {
+		/*if (BIT_TEST(hFeat->type, FeatVector::AGGREGATE)) {
 			throw "AGG_CheckGain is ...";		//需要重新设计
 			//AGG_CheckGain(hData_, hFeat, flag);
 		}
-		else {
-			/*
+		else {			
 			vector<HistoGRAM *> moreHisto; 
 			histo->MoreHisto(hData_,moreHisto);
 			for (size_t i = 0; i < moreHisto.size();i++) {
@@ -468,8 +478,8 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 				moreHisto[i]->GreedySplit_X(hData_, samp_set);
 				delete moreHisto[i];
 			}
-			moreHisto.clear();*/
-		}
+			moreHisto.clear();
+		}*/
 		if (histoSwarm!=nullptr) {
 			delete histoSwarm;
 		}

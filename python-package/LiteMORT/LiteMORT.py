@@ -393,11 +393,12 @@ class LiteMORT(object):
             df=item['dataset']
             cols_on = item['on']
             pos_on = list(df.columns).index(cols_on[0])
+            feat_info={"merge_right":cols_on}
             assert (pos_on >= 0)
             title = item['desc'] if 'desc' in item else f"merge_{no}"
-            mort_set = Mort_Preprocess(title, df, None, self.params)
+            mort_set = Mort_Preprocess(title, df, None,self.params, feat_info=feat_info)
             cpp_set = mort_set.cpp_dat_
-            cpp_set.merge_right = pos_on
+            #cpp_set.merge_right = pos_on
 
             merge_sets.append(cpp_set)
             no = no+1

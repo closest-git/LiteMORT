@@ -223,7 +223,7 @@ PYMORT_DLL_API void* LiteMORT_init(PY_ITEM* params, int nParam, PY_DATASET_LIST 
 			for (int i = 0; i < merge_list->nSet; i++) {
 				PY_DATASET *set = merge_list->list + i;
 				FeatsOnFold *hMerge = FeatsOnFold_InitInstance(mort->config, nullptr, set, nullptr, flag | FeatsOnFold::DF_MERGE);
-				hMerge->merge_right = set->merge_rigt;
+				//hMerge->merge_right = set->merge_rigt;
 				mort->merge_folds.push_back(hMerge);
 			}/**/
 
@@ -397,6 +397,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY
 		for (i = 0; i < nMerge; i++) {
 			PY_COLUMN *col = dataset_->merge_left + i;
 			FeatVector *hFeat = PY_COL2FEAT(config, col, nullptr, nSamp_, hFold->nFeat() + i, true,flag);
+			BIT_SET(hFeat->type, FeatVector::AGGREGATE);
 			hFold->merge_lefts.push_back(hFeat);
 		}
 		hFold->ExpandMerge(mort->merge_folds);

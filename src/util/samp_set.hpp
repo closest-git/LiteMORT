@@ -16,9 +16,9 @@ class BoostingForest;
 class SAMP_SET {
 	void clear() {
 		if (!isRef) {
-			/*if (root_set != nullptr)	delete[] root_set;
+			if (root_set != nullptr)	delete[] root_set;
 			if (left != nullptr)		delete[] left;
-			if (rigt != nullptr)		delete[] rigt;*/
+			if (rigt != nullptr)		delete[] rigt;/**/
 		}
 		nSamp = 0, nLeft = 0, nRigt = 0;
 		Y_sum_1 = 0;
@@ -48,6 +48,7 @@ public:
 	//很重要，原则上每棵树的样本可以任意重设
 	virtual void SampleFrom(FeatsOnFold *hData_, const BoostingForest *hBoosting, const SAMP_SET *,size_t nMost,int rnd_seed, int flag = 0x0);
 	void Alloc(FeatsOnFold *hData_, size_t nSamp_, int flag = 0x0);
+	void Alloc(size_t nSamp_, int flag = 0x0);
 	void ClearInfo() {
 		nSamp = 0;		nLeft = 0, nRigt = 0;
 		samps = nullptr, left = nullptr, rigt = nullptr;

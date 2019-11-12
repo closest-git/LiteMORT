@@ -67,7 +67,7 @@ namespace Grusoft {
 		SELECT select;
 		bool isCategory()	const	{ return	BIT_TEST(type, Distribution::CATEGORY); }	
 		bool isReferVal()	const	{ return	BIT_TEST(type, VAL_REFER); }				
-		bool isMerged()	const { return	false; }
+		virtual bool isMerged()	const { return	false; }
 		typedef enum {
 			COPY_MEAN,
 		}BINARY_OPERATE;
@@ -113,9 +113,10 @@ namespace Grusoft {
 		//static bin mapping	生成基于EDA的格子	参见Samp2Histo
 		virtual void UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst, int flag = 0x0) { throw "FeatVector::UpdateHisto is ..."; }
 		virtual void PerturbeHisto(const FeatsOnFold *hData_, int flag = 0x0) { throw "FeatVector::PerturbeHisto is ..."; }
-		//virtual MT_BiSplit*OnPredict(const MT_BiSplit *cur_, const size_t no, int flag = 0x0)	 { throw"FeatVector::OnPredict is ..."; }
-		virtual void Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* hParent, HistoGRAM* histo, int nMostBin, int flag = 0x0) 
-		{ throw "FeatVector::Samp2Histo is ..."; }
+		
+		virtual void MergeSamps(const SAMP_SET&samp_0, SAMP_SET&samp_1,int flag=0x0)	const { throw "FeatVector::MapSamps is ..."; }
+		virtual void Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, const tpSAMP_ID *samps4quanti=nullptr, int flag = 0x0) const
+		{ throw "FeatVector::_Samp2Histo_ is ..."; }
 		virtual void EDA(const LiteBOM_Config&config,bool genHisto, int flag) { throw "FeatVector::EDA is ..."; }
 		//virtual void EDA(const LiteBOM_Config&config, ExploreDA *edaX, int flag) { throw "FeatVector::EDA is ..."; }
 		virtual void QuantiAtEDA(const ExploreDA *eda, void *quanti, int sizeofQ, int nMostBin, bool isSame, int flag) { ; }

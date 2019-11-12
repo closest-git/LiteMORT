@@ -14,16 +14,17 @@ namespace Grusoft {
 		}
 		virtual ~FeatVec_EXP() {
 		}
-		bool isMerged()	const { return	true; }
+		virtual bool isMerged()	const { return	true; }
 
 		virtual size_t nSamp() const	{ return hLeft->nSamp(); }
+		virtual HistoGRAM *GetHisto(int flag = 0x0) { 
+			assert(hDistri!=nullptr && hDistri->histo != nullptr);
+			return hDistri->histo; 
+		}
 
 		virtual void EDA(const LiteBOM_Config&config, bool genHisto, int flag);
 
-		virtual void Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* hParent, HistoGRAM* histo, int nMostBin, int flag0 = 0x0) {
-			throw "......";
-		}
-
+		virtual void Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, const tpSAMP_ID *samps4quanti = nullptr, int flag0 = 0x0)		const;
 
 	};
 

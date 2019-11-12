@@ -24,7 +24,7 @@ class M_DATASET(Structure):
                     ('columnX', POINTER(M_COLUMN)),
                     ('columnY', POINTER(M_COLUMN)),
                     ('merge_left', POINTER(M_COLUMN)),
-                    ('merge_right', c_int),
+                    #('merge_right', c_int),
                     ('x', c_int),
                     ]
 
@@ -34,7 +34,7 @@ class M_DATASET(Structure):
         self.ldFeat = nFeat
         self.ldY = nY
         self.columnX=None;          self.columnY = None
-        self.merge_left=None;       self.merge_right=-1
+        self.merge_left=None;       #self.merge_right=-1
 
 class M_DATASET_LIST(Structure):
     _fields_ = [    ('name',c_char_p),
@@ -50,6 +50,14 @@ class M_DATASET_LIST(Structure):
         self.list = (M_DATASET * self.nSet)(*datasets)
         self.flag = flag
 
+def FeatIs_(feat_info,type,feat):
+    if feat_info is None:
+        return False
+    if type in feat_info and feat_info[type] is not None:
+        assert(len(feat_info[type])>0)
+        return feat in feat_info[type]
+    return False
+
 def Mort_PickSamples(pick_samples,df_train,df_test):
     nTrain = df_train.shape[0]
     random.seed(42)
@@ -64,7 +72,7 @@ def Mort_PickSamples(pick_samples,df_train,df_test):
     return df_train,df_test
 
 class Mort_Preprocess(object):
-    def column_info(self,feat,X,categorical_feature=None,discrete_feature=None):
+    def column_info(self,feat,X,feat_info):
         col = M_COLUMN()
         col.name = str(feat).encode('utf8')
         col.data = None
@@ -73,12 +81,12 @@ class Mort_Preprocess(object):
         x_info,type_x = '',''
         if isinstance(X, pd.DataFrame):
             narr = None
-            isCat =(categorical_feature is not None) and (feat in categorical_feature)
+            isCat = FeatIs_(feat_info,"categorical",feat)            #(categorical_feature is not None) and (feat in categorical_feature)
             dtype = X[feat].dtype
             if isCat or dtype.name == 'category':
                 x_info = 'category'
                 type_x = '*'
-            isDiscrete = (discrete_feature is not None) and (feat in discrete_feature)
+            isDiscrete = FeatIs_(feat_info,"discrete",feat)         #(discrete_feature is not None) and (feat in discrete_feature)
             if isDiscrete:
                 x_info = 'discrete'
                 type_x = '#'
@@ -131,7 +139,7 @@ class Mort_Preprocess(object):
                 self.df_merge[feature_list[i]]=self.df_merge[feature_list[i]].astype(np.int32)
             del df_left,df_rigt
             gc.collect()
-            col = self.column_info(feature_list[i], self.df_merge, self.categorical_feature, self.discrete_feature)
+            col = self.column_info(feature_list[i], self.df_merge, self.feat_info)
             merge_left.append(col)
         self.cpp_dat_.merge_left = (M_COLUMN * len(merge_left))(*merge_left)
 
@@ -150,8 +158,9 @@ class Mort_Preprocess(object):
             raise NotImplementedError("Mort_Preprocess failed to init @{}".format(X))
         self.name = name_
         self.nSample,self.nFeature = X.shape[0],X.shape[1]
-        self.categorical_feature=feat_info['categorical'] if feat_info is not None and 'categorical' in feat_info else None
-        self.discrete_feature = feat_info['discrete'] if feat_info is not None and 'discrete' in feat_info else None
+        self.feat_info=feat_info
+        #self.categorical_feature=feat_info['categorical'] if feat_info is not None and 'categorical' in feat_info else None
+        #self.discrete_feature = feat_info['discrete'] if feat_info is not None and 'discrete' in feat_info else None
         self.col_X,self.col_Y=[],[]
         if features is None:
             if isinstance(X, pd.DataFrame):
@@ -162,13 +171,15 @@ class Mort_Preprocess(object):
             self.features = features
 
         for feat in self.features:
-            col = self.column_info(feat,X,self.categorical_feature,self.discrete_feature)
+            if  FeatIs_(feat_info,"merge_right",feat):
+                continue
+            col = self.column_info(feat,X,self.feat_info)
             if 'representive' in params.__dict__ and feat in params.representive:
                 col.representive = params.representive[feat]
             if col.data is not None:
                 self.col_X.append(col)
         if y is not None:
-            col=self.column_info('target',y,self.categorical_feature,self.discrete_feature)
+            col=self.column_info('target',y,self.feat_info)
             if col.data is None:
                 raise( "Mort_Preprocess: col_Y is NONE!!! " )
             self.col_Y=[col]

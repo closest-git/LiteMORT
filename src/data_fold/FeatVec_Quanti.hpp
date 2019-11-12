@@ -33,20 +33,15 @@ namespace Grusoft {
 			}
 		}
 		virtual HistoGRAM *GetHisto(int flag = 0x0) { return qHisto_0; }
+		virtual const HistoGRAM *GetHisto(int flag = 0x0) const { return (const HistoGRAM *)qHisto_0; }
 
-		void InitSampHisto(HistoGRAM* histo, bool isRandom, int flag = 0x0) {
+		void InitSampHisto(HistoGRAM* histo, bool isRandom, int flag = 0x0)	const {
 			if (qHisto_0->nBins == 0) {
 				histo->ReSet(0);	return;
 			}
 			else {
 				histo->CopyBins(*qHisto_0, true, 0x0);
-			}
-			if (false) {
-				//assert(qHisto_0->bins.size() > 0);
-				//histo->CopyBins(*qHisto_1, true, 0x0);		//变化2 
-				//histo->CompressBins();
-				histo->RandomCompress(this, false);					//变化1 
-			}
+			}			
 		}
 
 		virtual void Observation_AtSamp(LiteBOM_Config config, SAMP_SET& samp, Distribution&distri, int flag = 0x0) {
@@ -135,18 +130,19 @@ namespace Grusoft {
 			//printf("\n FeatVec_Q(%s) nBin=%d a0=%g a1=%g", desc.c_str(),qHisto->bins.size(),qHisto->a0, qHisto->a1 );	
 		}
 
-		//根据样本集，修正每个格子的内容(Y_sum,nz...)
-		virtual void Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* hParent, HistoGRAM* histo, int nMostBin, int flag0 = 0x0) {
+		/*
+			根据样本集，修正每个格子的内容(Y_sum,nz...)
+			samps对应于quanti,	与samp_set.samps有微妙区别!!!
+		*/
+		virtual void Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set,  HistoGRAM* histo, int nMostBin,const tpSAMP_ID *samps4quanti =nullptr, int flag0 = 0x0)	const  {
 			tpDOWN *hessian = hData_->GetSampleHessian();
 			if (hessian == nullptr) {
 				Samp2Histo_null_hessian(hData_, samp_set, histo, nMostBin, flag0);
 				//Samp2Histo_null_hessian_sparse(hData_, samp_set, histo, nMostBin, flag0);
 			}	else {
 				//histo->nSamp = samp_set.nSamp;
-				tpQUANTI *quanti = arr(), no, *map = nullptr;
-				/*if (hParent != nullptr) {
-				histo->CopyBins(*hParent, true, 0x0);
-				}else*/
+				const tpQUANTI *quanti = arr();
+				tpQUANTI no, *map = nullptr;
 				InitSampHisto(histo, false);
 				if (histo->nBins == 0) {
 					return;
@@ -160,6 +156,8 @@ namespace Grusoft {
 					down = hData_->GetDownDirection();
 				}
 				const tpSAMP_ID *samps = samp_set.samps;
+				if (samps4quanti != nullptr)
+					samps = samps4quanti;
 				tpSAMP_ID samp;
 				tpDOWN a;
 				//histo->CopyBins(*qHisto, true, 0x0);
@@ -207,7 +205,7 @@ namespace Grusoft {
 			}
 #endif
 		}
-		
+			
 		virtual size_t UniqueCount(const SAMP_SET&samp_set, int flag = 0x0) {
 			size_t i, nSamp = samp_set.nSamp, nUnique;
 			tpQUANTI *quanti = arr(), no;
@@ -221,8 +219,8 @@ namespace Grusoft {
 			return nUnique;
 		}
 
-		virtual void Samp2Histo_null_hessian(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag = 0x0) {
-			HistoGRAM *qHisto = GetHisto();
+		virtual void Samp2Histo_null_hessian(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag = 0x0)	const {
+			const HistoGRAM *qHisto = GetHisto();
 			tpDOWN *down = hData_->GetSampleDown();
 			string optimal = hData_->config.leaf_optimal;
 			bool isLambda = optimal == "lambda_0";
@@ -233,7 +231,8 @@ namespace Grusoft {
 			const tpSAMP_ID *samps = samp_set.samps;
 			tpSAMP_ID samp;
 			tpDOWN a;
-			tpQUANTI *quanti = arr(), no;
+			const tpQUANTI *quanti = arr();
+			tpQUANTI no;
 			histo->CopyBins(*qHisto, true, 0x0);
 			int nBin = histo->nBins;// bins.size();
 			HISTO_BIN *pBins = histo->bins, *pBin;	//https://stackoverflow.com/questions/7377773/how-can-i-get-a-pointer-to-the-first-element-in-an-stdvector

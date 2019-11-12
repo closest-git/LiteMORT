@@ -167,7 +167,7 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 	for (i = 0; i<nFeat; i++)	{
 		FeatVector *hFeat = Feat(i);
 		hFeat->select.hasCheckGain = false;
-		if (i != 31) {		//仅用于调试
+		if (i != 77) {		//仅用于调试
 			//hFeat->select.isPick =false;
 		}
 		if (hFeat->hDistri!=nullptr && hFeat->hDistri->isPass())
@@ -721,14 +721,13 @@ void FeatsOnFold::ExpandMerge(const vector<FeatsOnFold *>&merge_folds, int flag)
 	assert(merge_lefts.size() == merge_folds.size());
 	for (auto fold : merge_folds) {
 		FeatVector *hLeft = this->merge_lefts[nMerge];
-		FeatVector *hRight = fold->Feat(fold->merge_right);		assert(hRight != nullptr);
+		//FeatVector *hRight = fold->Feat(fold->merge_right);		assert(hRight != nullptr);
 		for (auto hFeat : fold->feats) {
-			if (hFeat == hRight)
-				continue;
+			//if (hFeat == hRight)
+			//	continue;
 			FeatVec_EXP *hEXP = new FeatVec_EXP(this,hFeat->nam + "@" + hLeft->nam,hLeft, hFeat);
 			hEXP->EDA(this->config, false, 0x0);
 			//hFeat->nam = hFeat->nam + "@" + hLeft->nam;
-			//BIT_SET(hFeat->type, FeatVector::AGGREGATE);
 			feats.push_back(hEXP);
 		}
 		nMerge++;
