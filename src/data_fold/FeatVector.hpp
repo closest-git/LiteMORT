@@ -62,6 +62,7 @@ namespace Grusoft {
 			REPRESENT_ = 0x1000000
 		};
 		size_t type = 0x0;
+		tpSAMP_ID *samp4quanti = nullptr;
 		//bool isSelect = false;
 		//float select_factor = 1;
 		SELECT select;
@@ -114,7 +115,7 @@ namespace Grusoft {
 		virtual void UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst, int flag = 0x0) { throw "FeatVector::UpdateHisto is ..."; }
 		virtual void PerturbeHisto(const FeatsOnFold *hData_, int flag = 0x0) { throw "FeatVector::PerturbeHisto is ..."; }
 		
-		virtual void MergeSamps(const SAMP_SET&samp_0, SAMP_SET&samp_1,int flag=0x0)	const { throw "FeatVector::MapSamps is ..."; }
+		virtual void Merge4Quanti(const SAMP_SET&samp_0, int flag=0x0)	{ throw "FeatVector::Merge4Quanti is ..."; }
 		virtual void Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, const tpSAMP_ID *samps4quanti=nullptr, int flag = 0x0) const
 		{ throw "FeatVector::_Samp2Histo_ is ..."; }
 		virtual void EDA(const LiteBOM_Config&config,bool genHisto, int flag) { throw "FeatVector::EDA is ..."; }

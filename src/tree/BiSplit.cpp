@@ -368,13 +368,13 @@ HistoGRAM *MT_BiSplit::GetHistogram(FeatsOnFold *hData_, int pick, bool isInsert
 */
 double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats, int x, int flag) {
 	GST_TIC(tick);
-	//H_HISTO.resize(hData_->feats.size());	
-	/*if (bsfold != nullptr) {
-		bsfold->GreedySplit(hData_, flag);
-		return 0;
-	}*/
 	if (this->id == 13) {
 		int i = 0;		//仅用于调试
+	}
+	if (hData_->merge_lefts.size() > 0) {
+		for (auto hFV : hData_->merge_lefts) {
+			hFV->Merge4Quanti(samp_set);
+		}
 	}
 	/*if (samp_set.Y_1 - samp_set.Y_0 < hData_->stat.dY / 10) {
 		printf( "\n!!!Tiny Y:::just PASS!!!	Tree=%d node=%d, samp_set=<%g-%g> |y|=%g", hModel->skdu.noT,this->id,
@@ -411,7 +411,7 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 
 	GST_TIC(t222);
 	size_t start = 0, end = picks.size();
-//#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
 	for (int i = start; i < end; i++) {		
 		HistoGRAM *histo=GetHistogram(hData_, picks[i], true);
 		histo->fruit_info.Clear();

@@ -34,7 +34,7 @@ FeatsOnFold::STAT FeatsOnFold::stat;
 */
 FeatsOnFold::FeatsOnFold(LiteBOM_Config confi_, ExploreDA *eda_, string nam_, int dtype) :config(confi_), edaX(eda_), nam(nam_) {
 	dType = dtype;
-	isQuanti = config.feat_quanti >0 && BIT_TEST(dType, FeatsOnFold::DF_TRAIN);	//BIT_TEST(dType, FAST_QUANTI);
+	isQuanti = config.feat_quanti >0 && (BIT_TEST(dType, FeatsOnFold::DF_TRAIN) || BIT_TEST(dType, FeatsOnFold::DF_MERGE));
 	//isQuanti = config.feat_quanti > 0;
 /*https://stackoverflow.com/questions/9878965/rand-between-0-and-1
 	uint64_t timeSeed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
@@ -168,7 +168,7 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 		FeatVector *hFeat = Feat(i);
 		hFeat->select.hasCheckGain = false;
 		if (i != 77) {		//仅用于调试
-			//hFeat->select.isPick =false;
+			;// hFeat->select.isPick = false;
 		}
 		if (hFeat->hDistri!=nullptr && hFeat->hDistri->isPass())
 			continue;

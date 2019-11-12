@@ -222,7 +222,8 @@ PYMORT_DLL_API void* LiteMORT_init(PY_ITEM* params, int nParam, PY_DATASET_LIST 
 		if (merge_list != nullptr) {
 			for (int i = 0; i < merge_list->nSet; i++) {
 				PY_DATASET *set = merge_list->list + i;
-				FeatsOnFold *hMerge = FeatsOnFold_InitInstance(mort->config, nullptr, set, nullptr, flag | FeatsOnFold::DF_MERGE);
+				ExploreDA *hEDA = new ExploreDA(mort->config, set->ldFeat, flag);
+				FeatsOnFold *hMerge = FeatsOnFold_InitInstance(mort->config, hEDA, set, nullptr, flag | FeatsOnFold::DF_MERGE);
 				//hMerge->merge_right = set->merge_rigt;
 				mort->merge_folds.push_back(hMerge);
 			}/**/
@@ -655,8 +656,8 @@ PYMORT_DLL_API void LiteMORT_predict(void *mort_0,float *X, tpY *y, size_t nFeat
 /*
 	v0.2
 */
-PYMORT_DLL_API void LiteMORT_predict_1(void *mort_0, PY_DATASET_LIST*predict, size_t flag) {
-	PY_DATASET* predict_set = PY_DATASET_LIST::GetSet(predict,0);
+PYMORT_DLL_API void LiteMORT_predict_1(void *mort_0, PY_DATASET_LIST*predict_list, size_t flag) {
+	PY_DATASET* predict_set = PY_DATASET_LIST::GetSet(predict_list,0);
 	PY_COLUMN *col_y = predict_set->columnY,*X= predict_set->columnX;
 	size_t nSamp = predict_set->nSamp;
 	tpY *y = (tpY *)col_y->data;
@@ -670,7 +671,7 @@ PYMORT_DLL_API void LiteMORT_predict_1(void *mort_0, PY_DATASET_LIST*predict, si
 
 	//y应设为nullptr
 	//FeatsOnFold *hDat = FeatsOnFold_InitInstance(config, hEDA, "predict", X, col_y, nSamp, predict_set->ldFeat, 1, flag | FeatsOnFold::DF_PREDIC);
-	FeatsOnFold *hDat = FeatsOnFold_InitInstance(config, hEDA, PY_DATASET_LIST::GetSet(predict),mort, flag | FeatsOnFold::DF_PREDIC);
+	FeatsOnFold *hDat = FeatsOnFold_InitInstance(config, hEDA, PY_DATASET_LIST::GetSet(predict_list),mort, flag | FeatsOnFold::DF_PREDIC);
 
 	printf("\n********* LiteMORT_predict nSamp=%d,nFeat=%d hEDA=%p********* \n\n", nSamp, hDat->nFeat(), hEDA);
 	//hDat->nam = "predict";
@@ -704,11 +705,11 @@ PYMORT_DLL_API void LiteMORT_Imputer_d(double *X, tpY *y, size_t nFeat, size_t n
 
 /*
 	EDA只分析数据，不应做任何修改
+	需要重新设计		11/12/2019	cys
 */
 //PYMORT_DLL_API void LiteMORT_EDA(const float *X, const tpY *y, size_t nFeat_0, size_t nSamp, size_t flag) {
 
-PYMORT_DLL_API void LiteMORT_EDA(void *mort_0, const float *dataX, const tpY *dataY, const size_t nFeat_0, const size_t nSamp_,
-	const size_t nValid, PY_ITEM* descs, int nParam, const size_t flag)		{
+void LiteMORT_EDA(void *mort_0, const size_t nFeat_0, const size_t nSamp_,const size_t nValid, PY_ITEM* descs, int nParam, const size_t flag)		{
 	MORT *mort = MORT::From(mort_0);
 	assert(nValid>=0 && nValid <= nSamp_);
 	LiteBOM_Config& config = mort->config;
@@ -731,12 +732,12 @@ PYMORT_DLL_API void LiteMORT_EDA(void *mort_0, const float *dataX, const tpY *da
 				distri.type = strcmp(type, "category") == 0 ? Distribution::CATEGORY : 0x0;
 		}
 	}
-	if (dataX != nullptr && dataY != nullptr) {
+	/*if (dataX != nullptr && dataY != nullptr) {
 		mort->hEDA->Analysis(config, (float *)dataX, (tpY *)dataY, nSamp_, nFeat_0, 1, flag);
 		mort->hEDA->CheckDuplicate(config, flag);
 	}	else {
 
-	}
+	}*/
 	//g_hEDA->InitBundle(config, (float *)dataX, nSamp_, nFeat_0, flag);
 	return ;
 }
@@ -948,7 +949,7 @@ PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_DATASET_LIST *train_list, PY
 		ExploreDA *hEDA = (ExploreDA *)(mort->hEDA);
 		if (hEDA == nullptr) {
 			printf("\n********* g_hEDA on train_data ********* \n");
-			LiteMORT_EDA(mort, nullptr, nullptr, nFeat_0*4, nSamp, 0, nullptr, 0x0, flag);
+			LiteMORT_EDA(mort, nFeat_0*4, nSamp, 0, nullptr, 0x0, flag);
 			hEDA = mort->hEDA;		//isDelEDA = true;
 		}
 		size_t i, feat, nTrain = nSamp;

@@ -137,7 +137,7 @@ namespace Grusoft {
 		virtual void Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set,  HistoGRAM* histo, int nMostBin,const tpSAMP_ID *samps4quanti =nullptr, int flag0 = 0x0)	const  {
 			tpDOWN *hessian = hData_->GetSampleHessian();
 			if (hessian == nullptr) {
-				Samp2Histo_null_hessian(hData_, samp_set, histo, nMostBin, flag0);
+				Samp2Histo_null_hessian(hData_, samp_set, histo, nMostBin, samps4quanti, flag0);
 				//Samp2Histo_null_hessian_sparse(hData_, samp_set, histo, nMostBin, flag0);
 			}	else {
 				//histo->nSamp = samp_set.nSamp;
@@ -219,7 +219,7 @@ namespace Grusoft {
 			return nUnique;
 		}
 
-		virtual void Samp2Histo_null_hessian(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, int flag = 0x0)	const {
+		virtual void Samp2Histo_null_hessian(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, const tpSAMP_ID *samps4quanti = nullptr, int flag = 0x0)	const {
 			const HistoGRAM *qHisto = GetHisto();
 			tpDOWN *down = hData_->GetSampleDown();
 			string optimal = hData_->config.leaf_optimal;
@@ -229,6 +229,8 @@ namespace Grusoft {
 				down = hData_->GetDownDirection();
 			}
 			const tpSAMP_ID *samps = samp_set.samps;
+			if (samps4quanti != nullptr)
+				samps = samps4quanti;
 			tpSAMP_ID samp;
 			tpDOWN a;
 			const tpQUANTI *quanti = arr();

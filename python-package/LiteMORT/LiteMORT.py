@@ -187,9 +187,9 @@ class LiteMORT(object):
         self.mort_predcit_1 = self.dll.LiteMORT_predict_1
         self.mort_predcit_1.argtypes = [c_void_p,POINTER(M_DATASET_LIST), c_size_t]
 
-        self.mort_eda = self.dll.LiteMORT_EDA
-        self.mort_eda.argtypes = [c_void_p,POINTER(c_float), POINTER(c_double), c_size_t, c_size_t, c_size_t,
-                                  POINTER(M_argument), c_int, c_size_t]
+        #self.mort_eda = self.dll.LiteMORT_EDA
+        #self.mort_eda.argtypes = [c_void_p,POINTER(c_float), POINTER(c_double), c_size_t, c_size_t, c_size_t,
+        #                          POINTER(M_argument), c_int, c_size_t]
         #self.mort_eda.restype = c_void_p
 
         self.mort_imputer_f = self.dll.LiteMORT_Imputer_f
@@ -410,9 +410,10 @@ class LiteMORT(object):
                 feat_dict   cys@1/10/2019
     '''
     def fit(self,X_train_0, y_train,eval_set=None,categorical_feature=None,discrete_feature=None, params=None,flag=0x0):
+
         print("====== LiteMORT_fit X_train_0={} y_train={}......".format(X_train_0.shape, y_train.shape))
-        self.categorical_feature = categorical_feature
-        self.discrete_feature = discrete_feature
+        #self.categorical_feature = categorical_feature
+        #self.discrete_feature = discrete_feature
         gc.collect()
         isUpdate,y_train_1,y_eval_update = self.problem.BeforeFit([X_train_0, y_train], eval_set)
         if isUpdate:
@@ -470,8 +471,8 @@ class LiteMORT(object):
     def predict_raw(self, X_,pred_leaf=False, pred_contrib=False,raw_score=False,flag=0x0):
         dim, nFeat = X_.shape[0], X_.shape[1];
         Y_ = np.zeros(dim, dtype=np.float64)
-        predict_set = Mort_Preprocess("test",X_, Y_, params=self.params, feat_info=self.feat_info)
-        cpp_test_set = M_DATASET_LIST("test",[predict_set.cpp_dat_])
+        predict_set = Mort_Preprocess("predict_raw",X_, Y_, params=self.params, feat_info=self.feat_info,merge_infos=self.merge_infos)
+        cpp_test_set = M_DATASET_LIST("predict_raw",[predict_set.cpp_dat_])
         #self.mort_predcit_1(self.hLIB, predict_set.cX,predict_set.cY, nFeat,dim, 0)
         self.mort_predcit_1(self.hLIB, cpp_test_set, 0)
         gc.collect()

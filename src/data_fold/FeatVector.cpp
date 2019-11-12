@@ -21,9 +21,8 @@ void FeatVec_EXP::EDA(const LiteBOM_Config&config, bool genHisto, int flag) {
 }
 
 void FeatVec_EXP::Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_0, HistoGRAM* histo, int nMostBin, const tpSAMP_ID *samps4quanti, int flag0)	const {
-	SAMP_SET samp_1;
-	size_t nRightSamp = hRight->nSamp();
-	samp_1.Alloc(nRightSamp);
-	hLeft->MergeSamps(samp_0, samp_1);
-	hRight->Samp2Histo(hData_, samp_1, histo, nMostBin,nullptr, flag0);
+	//SAMP_SET samp_1;
+	//size_t nRightSamp = hRight->nSamp();
+	//samp_1.Alloc(nRightSamp);
+	hRight->Samp2Histo(hData_, samp_0, histo, nMostBin, hLeft->samp4quanti, flag0);
 }

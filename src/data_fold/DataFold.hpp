@@ -667,13 +667,24 @@ namespace Grusoft {
 			delete[] val_s;
 		}
 
-		virtual void Merge_Accumulate(const SAMP_SET&samp_0, int *accumulate, int flag = 0x0)	const {
-			assert(BIT_TEST(flag, FeatVector::AGGREGATE));
+		virtual void Merge4Quanti(const SAMP_SET&samp_0, int flag = 0x0)	{
+			assert(BIT_TEST(type, FeatVector::AGGREGATE));
+			if (samp4quanti == nullptr)
+				delete[] samp4quanti;
 			size_t nS = samp_0.nSamp, i;
+			samp4quanti = new tpSAMP_ID[nS];
 			tpSAMP_ID pos;
+			int map;
 			for (i = 0; i < nS; i++) {
 				pos = samp_0.samps[i];
-				accumulate[pos]++;
+				if(IS_NAN_INF(val[pos]))
+					samp4quanti[i] = 0;
+				else {
+					map = (int)(val[pos]);
+					//accumulate[pos]++;
+					samp4quanti[i] = (tpSAMP_ID)map;
+
+				}
 			}			
 		}
 
