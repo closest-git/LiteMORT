@@ -22,6 +22,7 @@ namespace Grusoft {
 			nam = hFeat->nam;
 			type = hFeat->type;
 			hDistri = hFeatSource->hDistri;
+			nSamp_0 = hFeatSource->size();
 		}
 
 		virtual ~FeatVec_Q() {

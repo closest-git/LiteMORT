@@ -134,9 +134,10 @@ namespace Grusoft {
 			}
 		}
 		
+		//注意，samp_vals和samp_set一一对应
 		template<typename Tx>
-		//void SplitOn(FeatsOnFold *hData_, const std::vector<Tx>&vals, bool isQuanti, int flag = 0x0) {
-		void SplitOn(FeatsOnFold *hData_,size_t nSamp_, const Tx* vals, bool isQuanti, int flag = 0x0) {
+		//void SplitOn(FeatsOnFold *hData_, size_t nSamp_, const Tx* vals, bool isQuanti, int flag = 0x0) {
+		void SplitOn(FeatsOnFold *hData_,const Tx* samp_vals, bool isQuanti, int flag) {
 			GST_TIC(t1);
 			SAMP_SET& lSet = left->samp_set,& rSet = right->samp_set;
 			lSet = this->samp_set;		rSet = this->samp_set;
@@ -156,7 +157,8 @@ namespace Grusoft {
 				G_INT_64	nL=0,nR=0;
 				for (i = start; i < end; i++) {
 					tpSAMP_ID samp = samps[i];
-					_core_1_(isQuanti, samp, vals[samp], thrsh, samps+start, nL, rigt+start, nR, flag);
+					_core_1_(isQuanti, samp, samp_vals[i], thrsh, samps + start, nL, rigt + start, nR, flag);
+					//_core_1_(isQuanti, samp, vals[samp], thrsh, samps+start, nL, rigt+start, nR, flag);
 				}
 				pL[th_] = nL;	 pR[th_] = nR;
 				assert(pL[th_]+ pR[th_]== end-start);

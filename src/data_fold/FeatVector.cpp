@@ -4,7 +4,7 @@
 using namespace Grusoft;
 
 void FeatVec_EXP::EDA(const LiteBOM_Config&config, bool genHisto, int flag) {
-	size_t i,nSamp_= nSamp();
+	size_t i,nSamp_= size();
 	assert(hDistri == nullptr);
 	hDistri = new Distribution();
 	*hDistri = *hRight->hDistri;

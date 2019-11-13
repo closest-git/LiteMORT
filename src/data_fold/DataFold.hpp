@@ -121,16 +121,19 @@ namespace Grusoft {
 
 		struct BUFFER {
 			tpSAMP_ID *samp_root_set = nullptr,*samp_left = nullptr,*samp_rigt = nullptr;
+			double *samp_values = nullptr;
 			
 			virtual void Init(size_t nSamp, int flag = 0x0) {
 				samp_root_set = new tpSAMP_ID[nSamp];
 				samp_left = new tpSAMP_ID[nSamp];
 				samp_rigt = new tpSAMP_ID[nSamp];
+				samp_values = new double[nSamp];
 			}
 			virtual ~BUFFER() {
 				if (samp_root_set != nullptr)		delete[] samp_root_set;
 				if (samp_left != nullptr)			delete[] samp_left;
 				if (samp_rigt != nullptr)			delete[] samp_rigt;
+				if (samp_values != nullptr)			delete[] samp_values;
 			}
 		};
 		BUFFER buffer;
@@ -182,7 +185,11 @@ namespace Grusoft {
 		tpDOWN *GetDeltaStep()	const;
 		tpDOWN *GetHessian() const;
 		tpDOWN *GetSampleDown()	const;
-		tpDOWN *GetSampleHessian() const;		
+		tpDOWN *GetSampleHessian() const;	
+		void *GetSampleValues()	const {		//不支持并行！！！
+			return buffer.samp_values;
+		}
+
 		/**/
 		bool atTrainTask()		const	{
 			return config.task == LiteBOM_Config::kTrain;
@@ -557,14 +564,14 @@ namespace Grusoft {
 	class FeatVec_T : public FeatVector {
 	protected:
 		//std::vector<Tx> val;
-		size_t nSamp_=0;
+		size_t nSamp_0=0;
 		Tx *val=nullptr;
 		//map<hMTNode,Tx> BLIT_thrsh,BLIT_mean;
 	public:
 		FeatVec_T() { 	}
 		FeatVec_T(size_t _len, int id_, const string&des_, int flag = 0x0) {
 			id = id_;
-			nSamp_ = _len;
+			nSamp_0 = _len;
 			desc = des_;	assert(_len > 0);	
 			type = flag;
 			if (isReferVal()) {
@@ -573,7 +580,12 @@ namespace Grusoft {
 				val = new Tx[_len];	// val.resize(_len);
 		}
 
-		virtual size_t nSamp() const {	return nSamp_;		}
+		inline size_t size()	const		{ 
+			assert(nSamp_0>0); return nSamp_0; 
+		}
+		/*virtual size_t nSamp() const {	
+			assert(nSamp_0>0); return nSamp_0;
+		}*/
 
 		virtual ~FeatVec_T() {
 			FreeVals();
@@ -593,10 +605,9 @@ namespace Grusoft {
 		//Tx* arr() { return VECTOR2ARR(val); }
 		Tx* arr()					{	return val;				}
 		const Tx* arr()	const		{	return (const Tx*) val;	}
-		size_t size()		{ return nSamp_;	}
 
 		virtual void Set(size_t len, PY_COLUMN *col, int flag = 0x0) { 
-			if (len != nSamp_)
+			if (len != size())
 				throw "FeatVec_T::Set len mismatch!!!";
 			if (isReferVal()) {
 				val = (Tx*)(col->data);
@@ -610,7 +621,7 @@ namespace Grusoft {
 		virtual void Set(size_t len, void* src, int flag = 0x0) {
 			//assert(len == val.size());
 			size_t szT = sizeof(Tx);
-			if (len != nSamp_)
+			if (len != size())
 				throw "FeatVec_T::Set len mismatch!!!";
 			void* dst = arr();
 			if (isReferVal()) {
@@ -620,15 +631,15 @@ namespace Grusoft {
 				memcpy(dst, src, sizeof(Tx)*len);			
 		}
 		virtual void CopyFrom(const FeatVector*src,int flag=0x0) {
-			size_t nSamp_ = nSamp();
-			assert(nSamp_ == src->nSamp());
+			size_t nSamp_ = size();
+			assert(nSamp_ == src->size());
 			const FeatVec_T<Tx> *tSrc = dynamic_cast<const FeatVec_T<Tx>*>(src);
 			assert(tSrc != nullptr);
 			memcpy(this->val, tSrc->val, sizeof(Tx)*nSamp_);
 		}		
 
 		virtual void Set(double a, int flag = 0x0) {
-			size_t len = nSamp_, i;
+			size_t len = size(), i;
 			Tx *x_ = arr();
 			for (i = 0; i < len; i++)
 				x_[i] = a;
@@ -640,8 +651,7 @@ namespace Grusoft {
 			val.clear();
 		}*/
 		virtual void Empty(int flag = 0x0) {
-			//memset(arr(), 0, val.size() * sizeof(Tx));
-			memset(val, 0, nSamp_ * sizeof(Tx));
+			memset(val, 0, size() * sizeof(Tx));
 		}
 
 		virtual void STA_at(SAMP_SET& some_set, int flag = 0x0) {
@@ -671,7 +681,7 @@ namespace Grusoft {
 			assert(BIT_TEST(type, FeatVector::AGGREGATE));
 			//if (samp4quanti == nullptr)
 			//	delete[] samp4quanti;
-			size_t nS = samp_set==nullptr?this->nSamp():samp_set->nSamp, i;
+			size_t nS = samp_set==nullptr?this->size():samp_set->nSamp, i;
 			tpSAMP_ID pos;
 			int map;
 			if (samp_set == nullptr) {
@@ -701,7 +711,7 @@ namespace Grusoft {
 
 		virtual void loc(vector<tpSAMP_ID>&poss,double target,int flag=0x0) {
 			poss.clear();
-			size_t i;
+			size_t i, nSamp_=size();
 			for (i = 0; i < nSamp_; i++) {
 				if (val[i] == target)
 					poss.push_back(i);
@@ -862,6 +872,7 @@ namespace Grusoft {
 			MT_BiSplit *left = hBlit->left, *rigt = hBlit->right, *child = nullptr;
 			int pos,fold=-1;
 			size_t nSamp = hBlit->nSample(), i, nLeft = 0, nRigt = 0, step;
+			assert(nSamp <= this->size());
 			if (hData_->atTrainTask())
 				assert(left != nullptr && rigt != nullptr);
 			else
@@ -946,10 +957,21 @@ namespace Grusoft {
 				rSet.samps = samps + nLeft;		rSet.nSamp = nRigt;
 			}
 			else/**/ {
-				hBlit->SplitOn(hData_,nSamp_,val, hData_->isQuanti);
+				Tx *samp_val = (Tx*)(hData_->GetSampleValues());
+				GetSampleValue(&hBlit->samp_set, samp_val);
+				hBlit->SplitOn(hData_,samp_val, hData_->isQuanti,0x0);
 			}
 			//放这里不合适，应该在ManifoldTree::Train GrowLeaf之后
 			//assert(left->nSample() == hBlit->bst_blit.nLeft && rigt->nSample() == hBlit->bst_blit.nRight);
+		}
+
+		void GetSampleValue(const SAMP_SET*samp_set,Tx *samp_values,int flag=0x0) {
+			size_t nSamp = samp_set->nSamp,i;
+			tpSAMP_ID samp, *samps = samp_set->samps;
+//#pragma omp parallel for schedule(static)
+			for (i = 0; i < nSamp; i++) {
+				samp_values[i] = val[samps[i]];
+			}
 		}
 
 		//参见 FeatVec_Q::Samp2Histo
@@ -1012,7 +1034,7 @@ namespace Grusoft {
 			v0.3 no edaX 
 		*/
 		virtual void EDA(const LiteBOM_Config&config,bool genHisto, int flag) {
-			size_t i;
+			size_t i, nSamp_=size();
 			if (hDistri == nullptr) {	//only for Y
 				hDistri = new Distribution();		
 			}	else {
@@ -1042,7 +1064,7 @@ namespace Grusoft {
 		//参见Distribution::STA_at，需要独立出来		8/20/2019
 		void sorted_idx(vector<tpSAMP_ID>& sortedA,int flag=0x0) {
 			sortedA.clear();
-			size_t i = 0, i_0 = 0, nA = 0, nNA=0, nZERO=0,N= nSamp_;
+			size_t i = 0, i_0 = 0, nA = 0, nNA=0, nZERO=0,N= size();
 			for (i = i_0; i < N; i++) {
 				if (IS_NAN_INF(val[i])) {
 					nNA++;	continue;

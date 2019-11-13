@@ -81,7 +81,7 @@ namespace Grusoft {
 			if (select_bins != nullptr)
 				delete select_bins;
 		}
-		virtual size_t nSamp()	const	{ throw"FeatVector::nSamp is ..."; }
+		virtual inline size_t size()	const	{ throw"FeatVector::size() is ..."; }
 
 		//virtual void GetMergeSampSet(const SAMP_SET&samp_set,int * int flag = 0x0);
 

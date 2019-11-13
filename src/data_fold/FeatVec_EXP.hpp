@@ -17,7 +17,7 @@ namespace Grusoft {
 		}
 		virtual bool isMerged()	const { return	true; }
 
-		virtual size_t nSamp() const	{ return hLeft->nSamp(); }
+		virtual inline size_t size() const	{ return hLeft->size(); }
 		virtual HistoGRAM *GetHisto(int flag = 0x0) { 
 			assert(hDistri!=nullptr && hDistri->histo != nullptr);
 			return hDistri->histo; 

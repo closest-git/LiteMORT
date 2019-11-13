@@ -274,7 +274,7 @@ FeatVector *FeatVecQ_InitInstance(FeatsOnFold *hFold, FeatVector *hFeat, int x, 
 	}
 	else if (nBins <= SHRT_MAX) {
 		hFQ = new FeatVec_Q<uint16_t>(hFold, hFeat, x);
-		printf("\t----%d\t FeatVec_Q@\"%s\" nBins=%d\n", hFeat->id, hFeat->nam.c_str(), nBins);
+		printf("\t----%d\t FeatVec_Q<uint16_t>@\"%s\" nBins=%d\n", hFeat->id, hFeat->nam.c_str(), nBins);
 	}
 	else {
 		assert(0);
@@ -846,8 +846,8 @@ void Feats_one_by_one(FeatsOnFold *hTrain, FeatsOnFold *hEval, BoostingForest::M
 	vector<int> cands;
 	const FeatVector *T_y = hTrain->GetY(), *E_y = hEval->GetY();
 	FeatVector*T_predict = hTrain->GetPrecict(), *E_predict = hEval->GetPrecict(),*hBestFeat=nullptr;
-	FeatVector*T_best_predict = new FeatVec_T<tpDOWN>(T_predict->nSamp(), 0, "T_best"),
-		*E_best_predict = new FeatVec_T<tpDOWN>(E_predict->nSamp(),0,"E_best");
+	FeatVector*T_best_predict = new FeatVec_T<tpDOWN>(T_predict->size(), 0, "T_best"),
+		*E_best_predict = new FeatVec_T<tpDOWN>(E_predict->size(),0,"E_best");
 	float *selector = hTrain->config.feat_selector;		//·µ»ØÖµ
 	for (i = 0; i < nFeat; i++) {
 		FeatVector *hFeat = hTrain->Feat(i);
