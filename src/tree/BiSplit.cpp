@@ -9,6 +9,12 @@ using namespace Grusoft;
 
 double MT_BiSplit::tX = 0;
 
+SAMP_SET::SAMP_SET(size_t nSamp_, tpSAMP_ID *samp_0, int flag) {
+	isRef = true;
+	nSamp = nSamp_;
+	samps = samp_0;
+}
+
 void SAMP_SET::Alloc(FeatsOnFold *hData_, size_t nSamp_, int flag) {
 	clear();
 

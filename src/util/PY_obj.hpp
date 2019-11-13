@@ -27,11 +27,11 @@ struct PY_COLUMN {
 	bool isDiscrete() {
 		return type_x != NULL && strcmp(type_x, "#") == 0;
 	}
-	bool isChar() {
+	bool isInt8() {
 		std::string type = dtype;
 		return type == "char" || type == "int8" || type == "uint8";
 	}
-	bool isInt() {
+	bool isInt32() {
 		std::string type = dtype;
 		return type == "int" || type == "int32" || type == "uint32";
 	}
@@ -58,7 +58,7 @@ struct PY_COLUMN {
 
 	template<typename Tx>
 	void CopyTo_(size_t nSamp, Tx* dst, int flag = 0x0) {
-		if (isChar()) {
+		if (isInt8()) {
 			//assert(typeof(Tx) == typeof(int8_t));
 			//G_MEMCOPY_(nSamp, dst, (int8_t*)data, flag);
 			int8_t *i8_ = (int8_t*)data;
@@ -82,7 +82,7 @@ struct PY_COLUMN {
 				dst[i] = i64[i];
 			}
 		}
-		else if (isInt()) {
+		else if (isInt32()) {
 			int32_t *i32 = (int32_t*)data;
 			for (size_t i = 0; i < nSamp; i++) {
 				dst[i] = i32[i];

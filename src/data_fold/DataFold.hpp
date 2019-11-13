@@ -298,8 +298,8 @@ namespace Grusoft {
 		//核心函数 
 		virtual void SplitOn(MT_BiSplit *hBlit, int flag = 0x0) {
 			FeatVector *hF_ = Feat(hBlit->feat_id);
+			hF_->Value_AtSamp(&hBlit->samp_set,GetSampleValues());
 			hF_->SplitOn(this, hBlit);
-
 		}
 
 		template<typename Ty>
@@ -661,6 +661,22 @@ namespace Grusoft {
 			some_set.STA_at_<Tx>(val_0, a2, a_sum, a_0, a_1, false);			
 		}
 
+		virtual void Value_AtSamp(const SAMP_SET*samp_set, void *samp_val_, int flag = 0x0) {
+			size_t nSamp = samp_set->nSamp, i,nMost=this->size();
+			tpSAMP_ID samp, *samps = samp_set->samps;
+			Tx *samp_values = (Tx *)(samp_val_);
+			//#pragma omp parallel for schedule(static)
+			for (i = 0; i < nSamp; i++) {
+				samp = samps[i];	
+				assert(samp >= 0 && samp < nMost);
+				samp_values[i] = val[samp];
+			}
+		}
+		virtual inline void Value_AtSamp(const size_t& samp, void *samp_value, int flag = 0x0) {
+			assert(samp >= 0 && samp < size());
+			*((Tx*)(samp_value)) = val[samp];
+		}
+
 		//参见MT_BiSplit::Observation_AtSamp(FeatsOnFold *hData_, int flag) 
 		virtual void Observation_AtSamp(LiteBOM_Config config, SAMP_SET& some_set, Distribution&distri, int flag=0x0) {
 			assert(0);
@@ -686,15 +702,15 @@ namespace Grusoft {
 			int map;
 			if (samp_set == nullptr) {
 				for (i = 0; i < nS; i++) {
-					if (IS_NAN_INF(val[i]))
-						samp4quanti[i] = 0;
-					else {
+					if (IS_NAN_INF(val[i])) {
+						samp4quanti[i] = numeric_limits<int>::quiet_NaN();
+						assert(IS_NAN_INF(samp4quanti[i]));
+					}	else {
 						map = (int)(val[i]);
 						samp4quanti[i] = (tpSAMP_ID)map;
 					}
 				}
-			}
-			else {
+			}	else {
 				for (i = 0; i < nS; i++) {
 					pos = samp_set->samps[i];
 					if(IS_NAN_INF(val[pos]))
@@ -829,20 +845,22 @@ namespace Grusoft {
 			return lft;
 		}
 		virtual inline int left_rigt(const size_t& t, const ARR_TREE*arr_tree,int no, int flag = 0x0) { 
+			Tx val_t;
+			Value_AtSamp(t,&val_t);
 			const int lft = arr_tree->left[no], rgt = arr_tree->rigt[no];
 			assert(no >= 0 && no < arr_tree->nNodes);
 			const int *fold_map = arr_tree->folds[no];
 			if (fold_map == nullptr) {
-				if (IS_NAN_INF(val[t])) {
+				if (IS_NAN_INF(val_t)) {
 					return rgt;
 				}	else
-					return val[t] < arr_tree->thrsh_step[no] ? lft : rgt;
+					return val_t < arr_tree->thrsh_step[no] ? lft : rgt;
 			}
 			else {
-				if (IS_NAN_INF(val[t])) {
+				if (IS_NAN_INF(val_t)) {
 					return rgt;
 				}	else {
-					int i_val = (int)(val[t]);
+					int i_val = (int)(val_t);
 					int fold = fold_map[i_val];
 					assert(fold==0 || fold==1);
 					return (fold <= 0) ? lft : rgt;
@@ -861,7 +879,9 @@ namespace Grusoft {
 				rigt[nRigt++] = samp;
 		}
 
+		//不支持并行！！！
 		virtual void SplitOn(FeatsOnFold *hData_, MT_BiSplit *hBlit, int flag = 0x0) {
+			Tx *samp_val = (Tx*)(hData_->GetSampleValues());
 			//assert (BLIT_thrsh.find(hBlit) != BLIT_thrsh.end());
 			tpSAMP_ID samp;
 			bool isQuanti = hData_->isQuanti;		//predict,test对应的数据集并没有格子化!!!
@@ -957,22 +977,14 @@ namespace Grusoft {
 				rSet.samps = samps + nLeft;		rSet.nSamp = nRigt;
 			}
 			else/**/ {
-				Tx *samp_val = (Tx*)(hData_->GetSampleValues());
-				GetSampleValue(&hBlit->samp_set, samp_val);
+				//Value_AtSamp(&hBlit->samp_set, samp_val);
 				hBlit->SplitOn(hData_,samp_val, hData_->isQuanti,0x0);
 			}
 			//放这里不合适，应该在ManifoldTree::Train GrowLeaf之后
 			//assert(left->nSample() == hBlit->bst_blit.nLeft && rigt->nSample() == hBlit->bst_blit.nRight);
 		}
 
-		void GetSampleValue(const SAMP_SET*samp_set,Tx *samp_values,int flag=0x0) {
-			size_t nSamp = samp_set->nSamp,i;
-			tpSAMP_ID samp, *samps = samp_set->samps;
-//#pragma omp parallel for schedule(static)
-			for (i = 0; i < nSamp; i++) {
-				samp_values[i] = val[samps[i]];
-			}
-		}
+		
 
 		//参见 FeatVec_Q::Samp2Histo
 		virtual void  RefineThrsh(const FeatsOnFold *hData_, const MT_BiSplit *hBlit,int flag = 0x0) {

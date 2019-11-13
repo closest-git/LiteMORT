@@ -194,7 +194,6 @@ namespace Grusoft {
 				}
 				histo->CheckValid(hData_->config);
 			}
-
 #ifdef _DEBUG
 			if (true /* && !isRandomDrop*/) {
 				double G_sum = 0;	// histo->hBinNA()->G_sum;

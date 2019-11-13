@@ -40,6 +40,7 @@ namespace Grusoft {
 	class FeatVector {
 	protected:
 	public:
+		PY_COLUMN *PY;
 		struct SELECT {
 			double vari_1=0;
 			float user_rate=0;
@@ -107,6 +108,8 @@ namespace Grusoft {
 		virtual void Set(double a, int flag = 0x0) { throw "FeatVector::Set is ..."; }
 		//注意，统计信息记录在some_set
 		virtual void STA_at(SAMP_SET& some_set, int flag = 0x0) { throw "FeatVector::STA_at is ..."; }
+		virtual void Value_AtSamp(const SAMP_SET*samp_set, void *samp_values, int flag = 0x0) { throw "FeatVector::Values_AtSamp is ..."; }
+		virtual inline void Value_AtSamp(const size_t&, void *samp_value, int flag = 0x0) { throw "FeatVector::One_Value_AtSamp is ..."; }
 		virtual void Observation_AtSamp(LiteBOM_Config config, SAMP_SET& samp, Distribution&distri, int flag=0x0)	{	throw "FeatVector::Observation_AtSamp is ...";	}
 		virtual size_t UniqueCount(const SAMP_SET&samp_set, int flag=0x0)				{ throw "FeatVector::UniqueCount is ..."; }
 		/*vResi=predict-target		pDown=target-predict*/

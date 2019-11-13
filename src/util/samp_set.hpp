@@ -44,6 +44,7 @@ public:
 	}	
 
 	SAMP_SET( )	{}
+	SAMP_SET(size_t nSamp, tpSAMP_ID *samp_0, int flag = 0x0);
 
 	//很重要，原则上每棵树的样本可以任意重设
 	virtual void SampleFrom(FeatsOnFold *hData_, const BoostingForest *hBoosting, const SAMP_SET *,size_t nMost,int rnd_seed, int flag = 0x0);

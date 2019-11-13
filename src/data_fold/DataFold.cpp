@@ -168,7 +168,9 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 		FeatVector *hFeat = Feat(i);
 		hFeat->select.hasCheckGain = false;
 		if (i != 32) {		//仅用于调试
-			;// hFeat->select.isPick = false;
+#ifdef _DEBUG
+			 hFeat->select.isPick = false;
+#endif
 		}
 		if (hFeat->hDistri!=nullptr && hFeat->hDistri->isPass())
 			continue;
@@ -725,7 +727,15 @@ void FeatsOnFold::ExpandMerge(const vector<FeatsOnFold *>&merge_folds, int flag)
 		for (auto hFeat : fold->feats) {
 			//if (hFeat == hRight)
 			//	continue;
-			FeatVec_EXP *hEXP = new FeatVec_EXP(this,hFeat->nam + "@" + hLeft->nam,hLeft, hFeat);
+			FeatVector *hEXP = nullptr;
+			if(hLeft->PY->isInt8())
+				hEXP = new FeatVec_EXP<uint8_t>(this,hFeat->nam + "@" + hLeft->nam,hLeft, hFeat);
+			else if(hLeft->PY->isInt16())
+				hEXP = new FeatVec_EXP<uint16_t>(this, hFeat->nam + "@" + hLeft->nam, hLeft, hFeat);
+			else {
+				assert(hLeft->PY->isInt32());
+				hEXP = new FeatVec_EXP<int32_t>(this, hFeat->nam + "@" + hLeft->nam, hLeft, hFeat);
+			}
 			hEXP->EDA(this->config, false, 0x0);
 			//hFeat->nam = hFeat->nam + "@" + hLeft->nam;
 			feats.push_back(hEXP);

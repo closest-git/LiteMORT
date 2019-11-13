@@ -306,13 +306,13 @@ FeatVector *PY_COL2FEAT(const LiteBOM_Config&config, PY_COLUMN*col, Distribution
 		//	printf("----%d\t \"%s\" is Float16\n", id, col->name);
 		hFeat = new FeatVec_T<float>(nSamp_, id, desc, flag);
 	}
-	else if (col->isInt()) {
+	else if (col->isInt32()) {
 		hFeat = new FeatVec_T<int32_t>(nSamp_, id, desc, flagF);
 	}
 	else if (col->isInt16()) {
 		hFeat = new FeatVec_T<int16_t>(nSamp_, id, desc, flagF);
 	}
-	else if (col->isChar()) {
+	else if (col->isInt8()) {
 		hFeat = new FeatVec_T<int8_t>(nSamp_, id, desc, flagF);
 	}
 	else if (col->isInt64()) {
