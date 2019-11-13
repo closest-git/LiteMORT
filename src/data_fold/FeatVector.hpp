@@ -95,7 +95,7 @@ namespace Grusoft {
 		virtual void loc(vector<tpSAMP_ID>&poss, double target, int flag = 0x0) { throw"FeatVector::loc is ..."; }
 		//virtual tpQUANTI *GetQuantiBins(int flag=0x0) { throw"FeatVector::GetQuantiBins is ..."; }
 		virtual inline int left_rigt(const size_t& t, const double& thrsh, const int lft, const int rgt, int flag = 0x0) { throw"FeatVector::left_rigt is ..."; }
-		virtual inline int left_rigt(const size_t& t, const ARR_TREE*arr_tree,int no, int flag = 0x0) { throw"FeatVector::left_rigt is ..."; }
+		virtual inline int left_rigt(const void *pVal, const ARR_TREE*arr_tree,int no, int flag = 0x0) { throw"FeatVector::left_rigt is ..."; }
 		virtual void SplitOn(FeatsOnFold *hData_, MT_BiSplit *hBest, int flag = 0x0) { 
 			throw"FeatVector::Split is ..."; 
 		}
@@ -109,7 +109,7 @@ namespace Grusoft {
 		//注意，统计信息记录在some_set
 		virtual void STA_at(SAMP_SET& some_set, int flag = 0x0) { throw "FeatVector::STA_at is ..."; }
 		virtual void Value_AtSamp(const SAMP_SET*samp_set, void *samp_values, int flag = 0x0) { throw "FeatVector::Values_AtSamp is ..."; }
-		virtual inline void Value_AtSamp(const size_t&, void *samp_value, int flag = 0x0) { throw "FeatVector::One_Value_AtSamp is ..."; }
+		virtual inline void *pValue_AtSamp(const size_t&, int flag = 0x0) { throw "FeatVector::One_Value_AtSamp is ..."; }
 		virtual void Observation_AtSamp(LiteBOM_Config config, SAMP_SET& samp, Distribution&distri, int flag=0x0)	{	throw "FeatVector::Observation_AtSamp is ...";	}
 		virtual size_t UniqueCount(const SAMP_SET&samp_set, int flag=0x0)				{ throw "FeatVector::UniqueCount is ..."; }
 		/*vResi=predict-target		pDown=target-predict*/

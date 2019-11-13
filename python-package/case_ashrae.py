@@ -23,7 +23,7 @@ from pandas.api.types import is_categorical_dtype
 
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 isMORT = True
-isMerge = False #len(sys.argv)>1 and sys.argv[1] == "merge"
+isMerge = True #len(sys.argv)>1 and sys.argv[1] == "merge"
 gbm='MORT' if isMORT else 'LGB'
 
 print(f"====== MERGE={isMerge} gbm={gbm} ======\n\n")
@@ -146,7 +146,7 @@ class COROchann(object):
         self.data_root = data_root
         self.building_meta_df = building_meta_df
         self.weather_df = weather_df
-        #self.some_rows = 5000
+        #self.some_rows = 500000
         self.some_rows = None
         self.df_base = self.Load_Processing()
         self.df_base_shape = self.df_base.shape

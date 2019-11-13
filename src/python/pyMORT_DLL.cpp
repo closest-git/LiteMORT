@@ -324,6 +324,7 @@ FeatVector *PY_COL2FEAT(const LiteBOM_Config&config, PY_COLUMN*col, Distribution
 	else
 		throw "FeatsOnFold_InitInstance col->dtype is XXX";
 
+	hFeat->PY = col;
 	hFeat->nam = col->type_x;		hFeat->nam += col->name;
 	hFeat->hDistri = hDistri;// hFold->edaX == nullptr ? nullptr : &(hFold->edaX->arrDistri[i]);
 	if (col->isCategory()) {

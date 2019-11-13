@@ -298,6 +298,8 @@ namespace Grusoft {
 		//核心函数 
 		virtual void SplitOn(MT_BiSplit *hBlit, int flag = 0x0) {
 			FeatVector *hF_ = Feat(hBlit->feat_id);
+			assert(hBlit->samp_set.nSamp <= hF_->size());
+
 			hF_->Value_AtSamp(&hBlit->samp_set,GetSampleValues());
 			hF_->SplitOn(this, hBlit);
 		}
@@ -323,7 +325,7 @@ namespace Grusoft {
 						else {
 							assert(rigt[no] != -1);
 							FeatVector *hFT = feats[feat_ids[no]];
-							no = hFT->left_rigt(t, &tree, no);							
+							no = hFT->left_rigt(hFT->pValue_AtSamp(t), &tree, no);
 						}
 					}
 				}
@@ -365,8 +367,9 @@ namespace Grusoft {
 						else {
 							assert(rigt[no] != -1);
 							FeatVector *hFT = feats[feat_ids[no]];
+							void *pVal = hFT->pValue_AtSamp(t);
 							//no = hFT->left_rigt(t,thrsh_step[no], left[no], rigt[no]);		
-							no = hFT->left_rigt(t, &tree,no);
+							no = hFT->left_rigt(pVal, &tree,no);
 						}
 					}
 				}
@@ -672,9 +675,9 @@ namespace Grusoft {
 				samp_values[i] = val[samp];
 			}
 		}
-		virtual inline void Value_AtSamp(const size_t& samp, void *samp_value, int flag = 0x0) {
+		virtual inline void* pValue_AtSamp(const size_t& samp, int flag = 0x0) {
 			assert(samp >= 0 && samp < size());
-			*((Tx*)(samp_value)) = val[samp];
+			return val+samp;
 		}
 
 		//参见MT_BiSplit::Observation_AtSamp(FeatsOnFold *hData_, int flag) 
@@ -844,9 +847,11 @@ namespace Grusoft {
 			}
 			return lft;
 		}
-		virtual inline int left_rigt(const size_t& t, const ARR_TREE*arr_tree,int no, int flag = 0x0) { 
-			Tx val_t;
-			Value_AtSamp(t,&val_t);
+		virtual inline int left_rigt(const void *pVal, const ARR_TREE*arr_tree, int no, int flag = 0x0) {
+		//virtual inline int left_rigt(const size_t& t, const ARR_TREE*arr_tree,int no, int flag = 0x0) {
+			//void *pVal = pValue_AtSamp(t);		//需要优化啊
+			Tx val_t=*(Tx*)pVal;// = val[t];
+			
 			const int lft = arr_tree->left[no], rgt = arr_tree->rigt[no];
 			assert(no >= 0 && no < arr_tree->nNodes);
 			const int *fold_map = arr_tree->folds[no];
@@ -892,7 +897,6 @@ namespace Grusoft {
 			MT_BiSplit *left = hBlit->left, *rigt = hBlit->right, *child = nullptr;
 			int pos,fold=-1;
 			size_t nSamp = hBlit->nSample(), i, nLeft = 0, nRigt = 0, step;
-			assert(nSamp <= this->size());
 			if (hData_->atTrainTask())
 				assert(left != nullptr && rigt != nullptr);
 			else

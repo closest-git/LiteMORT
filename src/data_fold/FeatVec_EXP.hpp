@@ -3,6 +3,7 @@
 #include "./DataFold.hpp"
 
 namespace Grusoft {
+	//FeatVec_EXP的设计不是很合理
 	template<typename tpLEFT>
 	class FeatVec_EXP : public FeatVector {
 		const tpLEFT *left_maps=nullptr;		//仅仅指向	
@@ -34,12 +35,12 @@ namespace Grusoft {
 			SAMP_SET samp1(samp_set->nSamp, hLeft->samp4quanti);
 			hRight->Value_AtSamp(&samp1, samp_values);
 		}
-		virtual inline void Value_AtSamp(const size_t&samp_0, void *samp_value, int flag = 0x0) {
+		virtual inline void* pValue_AtSamp(const size_t&samp_0, int flag = 0x0) {
 			tpLEFT pos_R = left_maps[samp_0];
 			if (IS_NAN_INF(pos_R)) {
-
+				return nullptr;
 			}	else {
-				hRight->Value_AtSamp((size_t)pos_R, samp_value);
+				return hRight->pValue_AtSamp((size_t)pos_R);
 			}
 		}
 
@@ -58,9 +59,15 @@ namespace Grusoft {
 			if (ZERO_DEVIA(hDistri->vMin, hDistri->vMax))
 				BIT_SET(this->type, Distribution::V_ZERO_DEVIA);
 		}
+
 		virtual void SplitOn(FeatsOnFold *hData_, MT_BiSplit *hBest, int flag = 0x0) {
-			assert(0);
+			hRight->SplitOn(hData_, hBest, flag);
 		}
+
+		virtual inline int left_rigt(const void *pVal, const ARR_TREE*arr_tree, int no, int flag = 0x0) {
+			return hRight->left_rigt(pVal, arr_tree,no, flag);
+		}
+
 		virtual void Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_0, HistoGRAM* histo, int nMostBin, const tpSAMP_ID *samps4quanti = nullptr, int flag0 = 0x0)	const {
 			hRight->Samp2Histo(hData_, samp_0, histo, nMostBin, hLeft->samp4quanti, flag0);
 		}

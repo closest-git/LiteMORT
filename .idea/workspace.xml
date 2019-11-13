@@ -6,17 +6,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1f20a82c-2842-4728-bc01-7f01847a5972" name="Default" comment="README">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/python-package/case_ashrae.py" beforeDir="false" afterPath="$PROJECT_DIR$/python-package/case_ashrae.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/data_fold/FeatVec_EXP.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/FeatVec_EXP.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/data_fold/FeatVec_Quanti.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/FeatVec_Quanti.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/data_fold/FeatVector.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/FeatVector.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/data_fold/FeatVector.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/FeatVector.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/python/pyMORT_DLL.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/python/pyMORT_DLL.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tree/BiSplit.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tree/BiSplit.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/util/PY_obj.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/PY_obj.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/util/samp_set.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/samp_set.hpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -41,8 +36,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/python-package/case_ashrae.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="266">
-              <caret line="25" column="15" selection-start-line="25" selection-start-column="10" selection-end-line="25" selection-end-column="15" />
+            <state relative-caret-position="229">
+              <caret line="148" column="9" selection-start-line="148" selection-start-column="9" selection-end-line="148" selection-end-column="9" />
             </state>
           </provider>
         </entry>
@@ -529,7 +524,8 @@
       <workItem from="1573203163717" duration="1474000" />
       <workItem from="1573366847802" duration="3190000" />
       <workItem from="1573435927112" duration="35707000" />
-      <workItem from="1573609644671" duration="4707000" />
+      <workItem from="1573609644671" duration="5386000" />
+      <workItem from="1573629490699" duration="3378000" />
     </task>
     <task id="LOCAL-00001" summary="README">
       <created>1556249780941</created>
@@ -574,14 +570,14 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1030153000" />
+    <option name="totallyTimeSpent" value="1034210000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1417" height="878" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.27882037" visible="true" weight="0.18543047" />
-      <window_info id="Structure" order="1" sideWeight="0.7211796" side_tool="true" visible="true" weight="0.18543047" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.2774799" visible="true" weight="0.1883738" />
+      <window_info id="Structure" order="1" sideWeight="0.7225201" side_tool="true" visible="true" weight="0.1883738" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3297587" />
@@ -602,7 +598,7 @@
       <window_info anchor="right" id="R Packages" order="3" />
       <window_info anchor="right" id="R Graphics" order="4" />
       <window_info anchor="right" id="Database" order="5" />
-      <window_info active="true" anchor="right" x="601" y="59" width="225" height="746" id="SciView" order="6" sideWeight="0.46989527" visible="true" weight="0.16850625" />
+      <window_info active="true" anchor="right" x="601" y="59" width="225" height="746" id="SciView" order="6" sideWeight="0.46989527" visible="true" weight="0.18248713" />
       <window_info anchor="right" x="0" y="0" width="314" height="678" id="Documentation" order="7" sideWeight="0.5301047" side_tool="true" visible="true" weight="0.1398892" />
     </layout>
   </component>
@@ -1213,8 +1209,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/python-package/case_ashrae.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="266">
-          <caret line="25" column="15" selection-start-line="25" selection-start-column="10" selection-end-line="25" selection-end-column="15" />
+        <state relative-caret-position="229">
+          <caret line="148" column="9" selection-start-line="148" selection-start-column="9" selection-end-line="148" selection-end-column="9" />
         </state>
       </provider>
     </entry>
