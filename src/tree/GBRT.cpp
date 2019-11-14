@@ -332,6 +332,7 @@ int GBRT::IterTrain(int round, int flag) {
 	return nIter;
 }
 
+
 int GBRT::Train(string sTitle, int x, int flag) {
 	GST_TIC(tick);	
 	eOOB = 1.0;
@@ -351,7 +352,7 @@ int GBRT::Train(string sTitle, int x, int flag) {
 	double err_0= DBL_MAX,err=DBL_MAX,a,t_train=0;
 	size_t nPickSamp=0;
 	if (hTrainData->merge_lefts.size() > 0) {
-		printf("----MERGE=%d\n", hTrainData->merge_lefts.size());
+		printf("----MERGE_sets=%d\n", hTrainData->merge_lefts.size());
 	}
 	if (stopping.LR_jump>0){
 		hTrainData->config.learning_rate *= 2;

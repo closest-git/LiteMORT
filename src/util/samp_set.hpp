@@ -8,6 +8,9 @@
 using namespace std;
 
 typedef int tpSAMP_ID;			//SAMP_SET需要节省内存
+#define tpSAMP_ID_NAN		INT_MAX
+#define tpSAMP_ID_MAX		INT_MAX/2
+
 //typedef std::vector<tpSAMP_ID> SAMP_SET;
 
 namespace Grusoft {

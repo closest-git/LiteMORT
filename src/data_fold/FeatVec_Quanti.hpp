@@ -221,7 +221,7 @@ namespace Grusoft {
 
 		virtual void Samp2Histo_null_hessian(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, const tpSAMP_ID *samps4quanti = nullptr, int flag = 0x0)	const {
 			const HistoGRAM *qHisto = GetHisto();
-			tpDOWN *down = hData_->GetSampleDown();
+			tpDOWN *down = hData_->GetSampleDown(),a;
 			string optimal = hData_->config.leaf_optimal;
 			bool isLambda = optimal == "lambda_0";
 			size_t nSamp = samp_set.nSamp, i, nSamp_LD = 0, LD = 4;
@@ -229,14 +229,14 @@ namespace Grusoft {
 				down = hData_->GetDownDirection();
 			}
 			const tpSAMP_ID *samps = samp_set.samps;
-			if (samps4quanti != nullptr)
-				samps = samps4quanti;
-			tpSAMP_ID samp;
-			tpDOWN a;
-			const tpQUANTI *quanti = arr();
-			tpQUANTI no;
 			histo->CopyBins(*qHisto, true, 0x0);
 			int nBin = histo->nBins;// bins.size();
+			if (samps4quanti != nullptr) {
+				samps = samps4quanti;				
+			}
+			tpSAMP_ID samp;
+			const tpQUANTI *quanti = arr();
+			tpQUANTI no;
 			HISTO_BIN *pBins = histo->bins, *pBin;	//https://stackoverflow.com/questions/7377773/how-can-i-get-a-pointer-to-the-first-element-in-an-stdvector
 			GST_TIC(t1);
 			nSamp_LD = LD == 0 ? 0 : LD * (int)(nSamp / LD);

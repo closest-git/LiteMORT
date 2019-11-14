@@ -620,7 +620,7 @@ namespace Grusoft {
 			}
 		}
 
-		
+
 		virtual void Set(size_t len, void* src, int flag = 0x0) {
 			//assert(len == val.size());
 			size_t szT = sizeof(Tx);
@@ -631,15 +631,15 @@ namespace Grusoft {
 				val = (Tx*)src;
 			}
 			else
-				memcpy(dst, src, sizeof(Tx)*len);			
+				memcpy(dst, src, sizeof(Tx)*len);
 		}
-		virtual void CopyFrom(const FeatVector*src,int flag=0x0) {
+		virtual void CopyFrom(const FeatVector*src, int flag = 0x0) {
 			size_t nSamp_ = size();
 			assert(nSamp_ == src->size());
 			const FeatVec_T<Tx> *tSrc = dynamic_cast<const FeatVec_T<Tx>*>(src);
 			assert(tSrc != nullptr);
 			memcpy(this->val, tSrc->val, sizeof(Tx)*nSamp_);
-		}		
+		}
 
 		virtual void Set(double a, int flag = 0x0) {
 			size_t len = size(), i;
@@ -660,67 +660,67 @@ namespace Grusoft {
 		virtual void STA_at(SAMP_SET& some_set, int flag = 0x0) {
 			size_t nS = some_set.nSamp, i, pos;
 			Tx  a_0, a_1, *val_0 = arr();
-			double a2,a_sum;
-			some_set.STA_at_<Tx>(val_0, a2, a_sum, a_0, a_1, false);			
+			double a2, a_sum;
+			some_set.STA_at_<Tx>(val_0, a2, a_sum, a_0, a_1, false);
 		}
 
 		virtual void Value_AtSamp(const SAMP_SET*samp_set, void *samp_val_, int flag = 0x0) {
-			size_t nSamp = samp_set->nSamp, i,nMost=this->size();
+			size_t nSamp = samp_set->nSamp, i, nMost = this->size();
 			tpSAMP_ID samp, *samps = samp_set->samps;
 			Tx *samp_values = (Tx *)(samp_val_);
 			//#pragma omp parallel for schedule(static)
 			for (i = 0; i < nSamp; i++) {
-				samp = samps[i];	
+				samp = samps[i];
 				assert(samp >= 0 && samp < nMost);
 				samp_values[i] = val[samp];
 			}
 		}
 		virtual inline void* pValue_AtSamp(const size_t& samp, int flag = 0x0) {
 			assert(samp >= 0 && samp < size());
-			return val+samp;
+			return val + samp;
 		}
 
 		//²Î¼ûMT_BiSplit::Observation_AtSamp(FeatsOnFold *hData_, int flag) 
-		virtual void Observation_AtSamp(LiteBOM_Config config, SAMP_SET& some_set, Distribution&distri, int flag=0x0) {
+		virtual void Observation_AtSamp(LiteBOM_Config config, SAMP_SET& some_set, Distribution&distri, int flag = 0x0) {
 			assert(0);
-			size_t nS = some_set.nSamp,i,pos;
-			Tx  a_0, a_1,*val_s=new Tx[nS],*val_0=arr();
-			double a2,a_sum;
+			size_t nS = some_set.nSamp, i, pos;
+			Tx  a_0, a_1, *val_s = new Tx[nS], *val_0 = arr();
+			double a2, a_sum;
 			some_set.STA_at_<Tx>(val_0, a2, a_sum, a_0, a_1, false);
-			distri.vMin = a_0,				distri.vMax = a_1;
-			for (i = 0; i < nS;i++) {
+			distri.vMin = a_0, distri.vMax = a_1;
+			for (i = 0; i < nS; i++) {
 				pos = some_set.samps[i];
 				val_s[i] = val_0[pos];
 			}
-			distri.X2Histo_<Tx,Tx>(config, nS, val_s,nullptr);		
+			distri.X2Histo_<Tx, Tx>(config, nS, val_s, nullptr);
 			delete[] val_s;
 		}
 
-		virtual void Merge4Quanti(const SAMP_SET*samp_set, int flag = 0x0)	{
+		virtual void Merge4Quanti(const SAMP_SET*samp_set, int flag = 0x0) {
 			assert(BIT_TEST(type, FeatVector::AGGREGATE));
 			//if (samp4quanti == nullptr)
 			//	delete[] samp4quanti;
-			size_t nS = samp_set==nullptr?this->size():samp_set->nSamp, i;
+			size_t nS = samp_set == nullptr ? this->size() : samp_set->nSamp, i;
 			tpSAMP_ID pos;
 			int map;
 			if (samp_set == nullptr) {
 				for (i = 0; i < nS; i++) {
-					if (IS_NAN_INF(val[i])) {
-						samp4quanti[i] = numeric_limits<int>::quiet_NaN();
-						assert(IS_NAN_INF(samp4quanti[i]));
+					if (IS_NAN_INF(val[i]) || val[i] < 0) {
+						map4set[i] = tpSAMP_ID_NAN;
 					}	else {
 						map = (int)(val[i]);
-						samp4quanti[i] = (tpSAMP_ID)map;
+						map4set[i] = (tpSAMP_ID)map;
 					}
 				}
-			}	else {
+			}
+			else {
 				for (i = 0; i < nS; i++) {
 					pos = samp_set->samps[i];
-					if(IS_NAN_INF(val[pos]))
-						samp4quanti[i] = 0;
-					else {
+					if (IS_NAN_INF(val[pos]) || val[i] < 0){
+						map4set[i] = tpSAMP_ID_NAN;
+					}	else {
 						map = (int)(val[pos]);
-						samp4quanti[i] = (tpSAMP_ID)map;
+						map4set[i] = (tpSAMP_ID)map;
 					}
 				}			
 

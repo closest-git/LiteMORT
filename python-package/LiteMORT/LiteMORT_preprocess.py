@@ -134,7 +134,8 @@ class Mort_Preprocess(object):
             nNA = self.df_merge[feature_list[i]].isna().sum()
             if(nNA>0):      #真麻烦！！！
                 print(f"OnMerge STRANGE@{cols_on}\tnNA={nNA}/{nNA*100.0/self.nSample:.3g}%%")
-                #self.df_merge[feature_list[i]]=self.df_merge[feature_list[i]].astype('Int64')
+                self.df_merge[feature_list[i]].fillna(-1, inplace=True)
+                self.df_merge[feature_list[i]]=self.df_merge[feature_list[i]].astype(np.int32)
             else:
                 self.df_merge[feature_list[i]]=self.df_merge[feature_list[i]].astype(np.int32)
             del df_left,df_rigt

@@ -23,7 +23,7 @@ from pandas.api.types import is_categorical_dtype
 
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 isMORT = True
-isMerge = True #len(sys.argv)>1 and sys.argv[1] == "merge"
+isMerge = False #len(sys.argv)>1 and sys.argv[1] == "merge"
 gbm='MORT' if isMORT else 'LGB'
 
 print(f"====== MERGE={isMerge} gbm={gbm} ======\n\n")
@@ -146,12 +146,10 @@ class COROchann(object):
         self.data_root = data_root
         self.building_meta_df = building_meta_df
         self.weather_df = weather_df
-        #self.some_rows = 500000
+        #self.some_rows = 5000
         self.some_rows = None
         self.df_base = self.Load_Processing()
         self.df_base_shape = self.df_base.shape
-
-
 
     def fit(cls, df):
         pass
@@ -161,14 +159,15 @@ class COROchann(object):
         print(f"{self.source}_X_y@{target_meter} df_base={train_df.shape}......")
         pkl_path = f'{data_root}/_ashrae_{self.source}_T{target_meter}_{self.some_rows}_M[{isMerge}]_.pickle'
         if isMerge:
+            self.weather_df = self.weather_df[:1000]
             self.merge_infos = [
-                    #{'on': ['site_id','timestamp'], 'dataset': self.weather_df,"desc":"weather"},
+                    {'on': ['site_id','timestamp'], 'dataset': self.weather_df,"desc":"weather"},
                     {'on': ['building_id'], 'dataset': self.building_meta_df,"desc":"building"},
             ]
         else:
             self.merge_infos = []
 
-        if False:#os.path.isfile(pkl_path):
+        if True:#os.path.isfile(pkl_path):
             print("====== Load pickle @{} ......".format(pkl_path))
             with open(pkl_path, "rb") as fp:
                 [X_train, y_train] = pickle.load(fp)
@@ -186,7 +185,7 @@ class COROchann(object):
                 target_train_df = target_train_df.merge(self.building_meta_df, on='building_id', how='left')
             feat_v1 = sorted(list(set(feat_v0).intersection(set(list(target_train_df.columns)))))
             X_train = target_train_df[feat_v1]
-            print(f"merged_@{target_meter}={X_train.shape}\toriginal={target_train_df.shape}")
+            print(f"data_X__@{target_meter}={X_train.shape}\toriginal={target_train_df.shape}\tmerge={isMerge}")
             if (self.source == "train"):
                 y_train = target_train_df['meter_reading_log1p'].values
             else:

@@ -153,7 +153,6 @@ feat_salps->AddSalp(nFeat, picks, nTree);
 }
 */
 
-
 /*
 	feature_fraction似乎能降低overfitting
 	v0.1	cys
@@ -169,7 +168,7 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 		hFeat->select.hasCheckGain = false;
 		if (i != 32) {		//仅用于调试
 #ifdef _DEBUG
-			 hFeat->select.isPick = false;
+			;// hFeat->select.isPick = false;
 #endif
 		}
 		if (hFeat->hDistri!=nullptr && hFeat->hDistri->isPass())

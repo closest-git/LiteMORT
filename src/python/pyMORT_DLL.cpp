@@ -402,7 +402,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY
 			PY_COLUMN *col = dataset_->merge_left + i;
 			FeatVector *hFeat = PY_COL2FEAT(config, col, nullptr, nSamp_, hFold->nFeat() + i, true,flag);
 			BIT_SET(hFeat->type, FeatVector::AGGREGATE);
-			hFeat->samp4quanti = new tpSAMP_ID[nSamp_];
+			hFeat->map4set = new tpSAMP_ID[nSamp_ * 2];		hFeat->map4feat = hFeat->map4set + nSamp_;
 			hFold->merge_lefts.push_back(hFeat);
 		}
 		hFold->ExpandMerge(mort->merge_folds);
