@@ -402,7 +402,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY
 			PY_COLUMN *col = dataset_->merge_left + i;
 			FeatVector *hFeat = PY_COL2FEAT(config, col, nullptr, nSamp_, hFold->nFeat() + i, true,flag);
 			BIT_SET(hFeat->type, FeatVector::AGGREGATE);
-			hFeat->map4set = new tpSAMP_ID[nSamp_ * 2];		hFeat->map4feat = hFeat->map4set + nSamp_;
+			hFeat->map4set = new tpSAMP_ID[nSamp_ * 2];		//hFeat->map4feat = hFeat->map4set + nSamp_;
 			hFold->merge_lefts.push_back(hFeat);
 		}
 		hFold->ExpandMerge(mort->merge_folds);
@@ -410,8 +410,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY
 	//if (hFold->hMove != nullptr)
 	//	hFold->hMove->Init_T<Tx, Ty>(nSamp_);
 
-
-	if (!isMerge) {
+	if (!isMerge) {		//lossy and importance
 		hFold->importance = new Feat_Importance(hFold);
 		hFold->lossy->Init_T<tpDOWN>(hFold, nSamp_, 0x0, rnd_seed, flag);
 		if (isPredict) {
@@ -427,18 +426,19 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY
 
 	GST_TIC(t1);
 	int nFeat = hFold->nFeat();
+	if (true) {	//为了调试
+		std::sort(hFold->feats.begin(), hFold->feats.end(), FeatVector::OrderByName );
+		for (int i = 0; i < nFeat; i++) {
+			//hFold->feats[i]->id = i;		指向eda->distribution，不能改
+		}
+	}
+
 //#pragma omp parallel for num_threads(nThread) schedule(dynamic) reduction(+ : sparse,nana,nConstFeat,nLocalConst,nQuant) 
 	for (int feat = 0; feat < nFeat; feat++) {
 		FeatVector *hFQ = nullptr;
-		FeatVector *hFeat = hFold->Feat(feat);
+		FeatVector *hFeat = hFold->Feat(feat);		
 		if(feat==77)
 			feat = 77;
-		//PY_COLUMN *col = dataset_->columnX + feat;
-		//hFeat->Set(nSamp_, col);
-		/*if(isTrain || isMerge)
-			hFeat->EDA(config,true, 0x0);		//EDA基于全局分析，而这里的是局部分析。分布确实会不一样
-		else {
-		}*/
 		sparse += hFeat->hDistri->rSparse*nSamp_;
 		nana += hFeat->hDistri->rNA*nSamp_;
 		//if (BIT_TEST(hFeat->type, FeatVector::V_ZERO_DEVIA)) {
@@ -469,7 +469,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY
 			printf("%d(%.3g)\t", feat, hFeat->select.user_rate);
 		}
 		if (BIT_TEST(hFeat->type, FeatVector::REPRESENT_)) {
-			PY_COLUMN *col = dataset_->columnX + feat;
+			PY_COLUMN *col = hFeat->PY;			// dataset_->columnX + feat;
 			assert(hFeat->select.isPick = true);
 			hFeat->select.isPick = false;
 			hFold->present.Append(hFeat, col->representive);

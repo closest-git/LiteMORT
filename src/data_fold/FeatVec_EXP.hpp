@@ -32,7 +32,7 @@ namespace Grusoft {
 
 		virtual void Value_AtSamp(const SAMP_SET*samp_set, void *samp_values, int flag = 0x0) {
 			hLeft->Merge4Quanti(samp_set, 0x0);
-			SAMP_SET samp1(samp_set->nSamp, hLeft->map4feat);
+			SAMP_SET samp1(samp_set->nSamp, hLeft->map4set);
 			hRight->Value_AtSamp(&samp1, samp_values);
 		}
 		virtual inline void* pValue_AtSamp(const size_t&samp_0, int flag = 0x0) {
@@ -71,20 +71,21 @@ namespace Grusoft {
 		//每个feat的binNA都不一样
 		virtual void Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_0, HistoGRAM* histo, int nMostBin, const tpSAMP_ID *samps4quanti = nullptr, int flag0 = 0x0)	const {
 			assert(samps4quanti==nullptr);
-			size_t nSamp = samp_0.nSamp, i,nRight=hRight->size();
+			size_t nSamp = samp_0.nSamp, i,nRight=hRight->size(),nNA=0;
 			const HistoGRAM *qHisto = hRight->GetHisto();		assert(qHisto!=nullptr);
 			int nBin = qHisto->nBins;
-			tpSAMP_ID *map4feat = hLeft->map4feat;
+			/*tpSAMP_ID *map4feat = hLeft->map4feat;
 			memcpy(map4feat, hLeft->map4set,sizeof(tpSAMP_ID)*nSamp);
 			for (i = 0; i < nSamp; i++) {
 				if (map4feat[i] == tpSAMP_ID_NAN) {
-					map4feat[i] = nBin - 1;		//always last bin for NAN
+					map4feat[i] = nRight - 1;		//always last bin for NAN
+					assert(0);
 				}
-				else {
-					assert(map4feat[i] >= 0 && map4feat[i]<nRight);
-				}
-			}
-			hRight->Samp2Histo(hData_, samp_0, histo, nMostBin, map4feat, flag0);
+				assert(map4feat[i] >= 0 && map4feat[i]<nRight);
+				if (map4feat[i] == nRight - 1)
+					nNA++;
+			}*/
+			hRight->Samp2Histo(hData_, samp_0, histo, nMostBin, hLeft->map4set, flag0);
 		}
 
 	};

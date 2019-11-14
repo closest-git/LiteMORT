@@ -435,7 +435,8 @@ void HistoGRAM::GreedySplit_X(FeatsOnFold *hData_, const SAMP_SET& samp_set, int
 	//if (fruit == nullptr)
 	//	throw "HistoGRAM::GreedySplit_X fruit is 0!!!";
 	fruit_info.Clear();
-	
+	//if (nSamp == 139)		//仅用于调试
+	//	nSamp = 139;
 	size_t minSet = hData_->config.min_data_in_leaf,i;
 	string optimal = hData_->config.leaf_optimal, obj = hData_->config.objective;
 	//double sum = samp_set.Y_sum_1, a = a0, errL = 0, g, gL = 0, g1 = 0, lft, rgt;

@@ -166,7 +166,7 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 	for (i = 0; i<nFeat; i++)	{
 		FeatVector *hFeat = Feat(i);
 		hFeat->select.hasCheckGain = false;
-		if (i != 32) {		//仅用于调试
+		if (i != 71) {		//仅用于调试
 #ifdef _DEBUG
 			;// hFeat->select.isPick = false;
 #endif
@@ -740,9 +740,19 @@ void FeatsOnFold::ExpandMerge(const vector<FeatsOnFold *>&merge_folds, int flag)
 			feats.push_back(hEXP);
 		}
 		nMerge++;
-	}
-	
+	}	
 }
+
+//核心函数 
+void FeatsOnFold::SplitOn(MT_BiSplit *hBlit, int flag) {
+	FeatVector *hF_ = Feat(hBlit->feat_id);
+	assert(hBlit->samp_set.nSamp <= hF_->size());
+	//if (hBlit->samp_set.nSamp == 139)	//仅用于调试
+	//	int i = 0;
+	hF_->Value_AtSamp(&hBlit->samp_set, GetSampleValues());
+	hF_->SplitOn(this, hBlit);
+}
+
 void FeatsOnFold::ExpandFeat(int flag) {
 	return;
 	/*	bool isTrain = BIT_TEST(dType,  FeatsOnFold::DF_TRAIN);

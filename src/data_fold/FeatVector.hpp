@@ -40,6 +40,8 @@ namespace Grusoft {
 	class FeatVector {
 	protected:
 	public:
+		static bool OrderByName(const FeatVector *l, const FeatVector *r) { return l->nam<r->nam; }
+
 		PY_COLUMN *PY;
 		struct SELECT {
 			double vari_1=0;
@@ -63,7 +65,7 @@ namespace Grusoft {
 			REPRESENT_ = 0x1000000
 		};
 		size_t type = 0x0;
-		tpSAMP_ID *map4set = nullptr, *map4feat=nullptr;
+		tpSAMP_ID *map4set = nullptr;// , *map4feat = nullptr;
 		//bool isSelect = false;
 		//float select_factor = 1;
 		SELECT select;

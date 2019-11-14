@@ -23,7 +23,7 @@ from pandas.api.types import is_categorical_dtype
 
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 isMORT = True
-isMerge = False #len(sys.argv)>1 and sys.argv[1] == "merge"
+isMerge = True #len(sys.argv)>1 and sys.argv[1] == "merge"
 gbm='MORT' if isMORT else 'LGB'
 
 print(f"====== MERGE={isMerge} gbm={gbm} ======\n\n")
@@ -155,11 +155,15 @@ class COROchann(object):
         pass
 
     def data_X_y(self,target_meter):
+        feat_v0 = self.feature_cols + self.category_cols
         train_df = self.df_base
         print(f"{self.source}_X_y@{target_meter} df_base={train_df.shape}......")
         pkl_path = f'{data_root}/_ashrae_{self.source}_T{target_meter}_{self.some_rows}_M[{isMerge}]_.pickle'
         if isMerge:
-            self.weather_df = self.weather_df[:1000]
+            feat_v0 = feat_v0 + ['timestamp']
+            #self.weather_df = self.weather_df[:1000]
+            feat_v1 = list(set(feat_v0).intersection(set(list(self.weather_df.columns))))
+            self.weather_df = self.weather_df[feat_v1]
             self.merge_infos = [
                     {'on': ['site_id','timestamp'], 'dataset': self.weather_df,"desc":"weather"},
                     {'on': ['building_id'], 'dataset': self.building_meta_df,"desc":"building"},
@@ -167,7 +171,7 @@ class COROchann(object):
         else:
             self.merge_infos = []
 
-        if True:#os.path.isfile(pkl_path):
+        if False:#os.path.isfile(pkl_path):
             print("====== Load pickle @{} ......".format(pkl_path))
             with open(pkl_path, "rb") as fp:
                 [X_train, y_train] = pickle.load(fp)
@@ -177,13 +181,14 @@ class COROchann(object):
             building_site=self.building_meta_df[['building_id','site_id']]
             self.building_meta_df.drop(['site_id'], axis=1, inplace=True)
             target_train_df = target_train_df.merge(building_site, on='building_id', how='left')    #add 'site_id'
-            target_train_df = target_train_df.merge(self.weather_df, on=['site_id', 'timestamp'], how='left')
-            feat_v0 = self.feature_cols + self.category_cols
+            #target_train_df = target_train_df.merge(self.weather_df, on=['site_id', 'timestamp'], how='left')
+
             if isMerge:
-                feat_v0 = feat_v0+['timestamp']
+                pass#
             else:
                 target_train_df = target_train_df.merge(self.building_meta_df, on='building_id', how='left')
-            feat_v1 = sorted(list(set(feat_v0).intersection(set(list(target_train_df.columns)))))
+                target_train_df = target_train_df.merge(self.weather_df, on=['site_id', 'timestamp'], how='left')
+            feat_v1 = list(set(feat_v0).intersection(set(list(target_train_df.columns))))
             X_train = target_train_df[feat_v1]
             print(f"data_X__@{target_meter}={X_train.shape}\toriginal={target_train_df.shape}\tmerge={isMerge}")
             if (self.source == "train"):

@@ -381,6 +381,7 @@ class LiteMORT(object):
 
         return self
 
+	#v0.1
     def MergeDataSets(self,merge_infos):
         self.merge_infos = merge_infos
         self.cpp_merge_sets=None
@@ -390,6 +391,7 @@ class LiteMORT(object):
         no = 0
         merge_sets = []
         for item in merge_infos:
+            item['dataset']=item['dataset'].append(pd.Series(), ignore_index=True)#name='last_nan'
             df=item['dataset']
             cols_on = item['on']
             pos_on = list(df.columns).index(cols_on[0])
@@ -397,10 +399,7 @@ class LiteMORT(object):
             assert (pos_on >= 0)
             title = item['desc'] if 'desc' in item else f"merge_{no}"
             mort_set = Mort_Preprocess(title, df, None,self.params, feat_info=feat_info)
-            cpp_set = mort_set.cpp_dat_
-            #cpp_set.merge_right = pos_on
-
-            merge_sets.append(cpp_set)
+            merge_sets.append(mort_set.cpp_dat_)
             no = no+1
         self.cpp_merge_sets = M_DATASET_LIST("merge_list", merge_sets)
 

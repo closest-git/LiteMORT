@@ -120,7 +120,7 @@ class Mort_Preprocess(object):
         for i in range(nFV):
             info = merge_infos[i]
             df,cols_on = info['dataset'],info['on']
-            feature_list.append("merge_"+info['desc'])
+            feature_list.append("@M_"+info['desc'])
 
             df_left, df_rigt = df_base[cols_on], df[cols_on].copy()
             #df_left_0 = df_left.reset_index()
@@ -134,7 +134,8 @@ class Mort_Preprocess(object):
             nNA = self.df_merge[feature_list[i]].isna().sum()
             if(nNA>0):      #真麻烦！！！
                 print(f"OnMerge STRANGE@{cols_on}\tnNA={nNA}/{nNA*100.0/self.nSample:.3g}%%")
-                self.df_merge[feature_list[i]].fillna(-1, inplace=True)
+                nRightRow = df_rigt.shape[0]
+                self.df_merge[feature_list[i]].fillna(nRightRow-1, inplace=True)
                 self.df_merge[feature_list[i]]=self.df_merge[feature_list[i]].astype(np.int32)
             else:
                 self.df_merge[feature_list[i]]=self.df_merge[feature_list[i]].astype(np.int32)

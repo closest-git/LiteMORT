@@ -340,11 +340,11 @@ HistoGRAM *MT_BiSplit::GetHistogram(FeatsOnFold *hData_, int pick, bool isInsert
 	histo->nSamp = nSamp;		//nSamp动态变化，H_buffer无法确定
 	assert(histo != nullptr);
 	if (histo->nBins==0) {
-	//if (H_HISTO[pick]==nullptr) {
 		if (!isInsert)
 			return nullptr;
+		//if (nSamp == 139)
+		//	nSamp = 139;
 		FeatVector *hFeat = hData_->Feat(pick);
-		//histo = new HistoGRAM(hFeat, nSamp);
 		HistoGRAM *hP = parent==nullptr ? nullptr : parent->GetHistogram(hData_,pick,false);
 		HistoGRAM *hB = brother==nullptr ? nullptr : brother->GetHistogram(hData_,pick, false);
 		if (hP != nullptr && hB != nullptr) {

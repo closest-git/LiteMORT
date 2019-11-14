@@ -332,7 +332,6 @@ int GBRT::IterTrain(int round, int flag) {
 	return nIter;
 }
 
-
 int GBRT::Train(string sTitle, int x, int flag) {
 	GST_TIC(tick);	
 	eOOB = 1.0;

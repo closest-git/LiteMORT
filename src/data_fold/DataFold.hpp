@@ -296,13 +296,7 @@ namespace Grusoft {
 		virtual void nPick4Split(vector<int>&picks, GRander&rander, BoostingForest *hForest,int flag = 0x0);
 
 		//核心函数 
-		virtual void SplitOn(MT_BiSplit *hBlit, int flag = 0x0) {
-			FeatVector *hF_ = Feat(hBlit->feat_id);
-			assert(hBlit->samp_set.nSamp <= hF_->size());
-
-			hF_->Value_AtSamp(&hBlit->samp_set,GetSampleValues());
-			hF_->SplitOn(this, hBlit);
-		}
+		virtual void SplitOn(MT_BiSplit *hBlit, int flag = 0x0);
 
 		template<typename Ty>
 		bool DeltastepOnTree(const ARR_TREE&tree, int flag) {
@@ -925,7 +919,8 @@ namespace Grusoft {
 					G_INT_64	nL = 0, nR = 0;
 					for (i = start; i < end; i++) {
 						tpSAMP_ID samp = samps[i];
-						_core_isY_(isQuanti, samp, mapFolds, (int)(val[samp]), samps + start, nL, rigt+ start, nR, 0x0);		continue;
+						_core_isY_(isQuanti, samp, mapFolds, (int)(samp_val[i]), samps + start, nL, rigt + start, nR, 0x0);		continue;
+						//_core_isY_(isQuanti, samp, mapFolds, (int)(val[samp]), samps + start, nL, rigt+ start, nR, 0x0);		continue;
 					}
 					pL[th_] = nL;	 pR[th_] = nR;
 					assert(pL[th_] + pR[th_] == end - start);
@@ -954,6 +949,7 @@ namespace Grusoft {
 				//FeatsOnFold::stat.tX += GST_TOC(t1);
 			}
 			else if (hBlit->fruit->split_by==BY_DENSITY) {
+				assert(0);
 				SAMP_SET &lSet = left->samp_set, &rSet = rigt->samp_set;
 				tpSAMP_ID *samps = hBlit->samp_set.samps, *left = hBlit->samp_set.left, *rigt = hBlit->samp_set.rigt;
 				lSet = hBlit->samp_set;		rSet = hBlit->samp_set;	//直接复制父节点的一些数据
