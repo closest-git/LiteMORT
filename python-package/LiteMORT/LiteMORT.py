@@ -392,10 +392,11 @@ class LiteMORT(object):
         merge_sets = []
         for item in merge_infos:
             item['dataset']=item['dataset'].append(pd.Series(), ignore_index=True)#name='last_nan'
+            feat_info=item['feat_info'] if 'feat_info' in item else {}
             df=item['dataset']
             cols_on = item['on']
             pos_on = list(df.columns).index(cols_on[0])
-            feat_info={"merge_right":cols_on}
+            feat_info["merge_right"]=cols_on
             assert (pos_on >= 0)
             title = item['desc'] if 'desc' in item else f"merge_{no}"
             mort_set = Mort_Preprocess(title, df, None,self.params, feat_info=feat_info)

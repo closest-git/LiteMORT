@@ -146,7 +146,7 @@ class COROchann(object):
         self.data_root = data_root
         self.building_meta_df = building_meta_df
         self.weather_df = weather_df
-        #self.some_rows = 5000
+        #self.some_rows = 50000
         self.some_rows = None
         self.df_base = self.Load_Processing()
         self.df_base_shape = self.df_base.shape
@@ -155,7 +155,10 @@ class COROchann(object):
         pass
 
     def data_X_y(self,target_meter):
+        self.building_meta_df.drop('floor_count', axis=1, inplace=True)
+        self.building_meta_df['primary_use'] = self.building_meta_df.primary_use.astype('category')
         feat_v0 = self.feature_cols + self.category_cols
+        feat_infos = {"categorical": self.category_cols}
         train_df = self.df_base
         print(f"{self.source}_X_y@{target_meter} df_base={train_df.shape}......")
         pkl_path = f'{data_root}/_ashrae_{self.source}_T{target_meter}_{self.some_rows}_M[{isMerge}]_.pickle'
@@ -165,8 +168,8 @@ class COROchann(object):
             feat_v1 = list(set(feat_v0).intersection(set(list(self.weather_df.columns))))
             self.weather_df = self.weather_df[feat_v1]
             self.merge_infos = [
-                    {'on': ['site_id','timestamp'], 'dataset': self.weather_df,"desc":"weather"},
-                    {'on': ['building_id'], 'dataset': self.building_meta_df,"desc":"building"},
+                {'on': ['building_id'], 'dataset': self.building_meta_df, "desc": "building","feat_info": feat_infos},
+                {'on': ['site_id', 'timestamp'], 'dataset': self.weather_df, "desc": "weather"},
             ]
         else:
             self.merge_infos = []

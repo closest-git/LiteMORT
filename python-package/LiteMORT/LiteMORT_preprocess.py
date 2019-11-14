@@ -72,6 +72,7 @@ def Mort_PickSamples(pick_samples,df_train,df_test):
     return df_train,df_test
 
 class Mort_Preprocess(object):
+	#v0.1	cys
     def column_info(self,feat,X,feat_info):
         col = M_COLUMN()
         col.name = str(feat).encode('utf8')
@@ -81,19 +82,23 @@ class Mort_Preprocess(object):
         x_info,type_x = '',''
         if isinstance(X, pd.DataFrame):
             narr = None
-            isCat = FeatIs_(feat_info,"categorical",feat)            #(categorical_feature is not None) and (feat in categorical_feature)
             dtype = X[feat].dtype
-            if isCat or dtype.name == 'category':
+            isCat = FeatIs_(feat_info,"categorical",feat) or dtype.name == 'category'           #(categorical_feature is not None) and (feat in categorical_feature)
+            if isCat:
                 x_info = 'category'
                 type_x = '*'
             isDiscrete = FeatIs_(feat_info,"discrete",feat)         #(discrete_feature is not None) and (feat in discrete_feature)
             if isDiscrete:
                 x_info = 'discrete'
                 type_x = '#'
-            if X[feat].dtype.name == 'category':
+            if dtype.name == 'category':
                 narr = X[feat].cat.codes.values
             elif is_numeric_dtype(X[feat]):
                 narr = X[feat].values
+            elif isCat:         # dtype.name != 'category':
+                X_cat = X[feat].astype('category')        #once more
+                assert(X_cat.dtype.name == 'category')
+                narr = X_cat.cat.codes.values
             else:
                 pass
         elif isinstance(X, pd.Series):
