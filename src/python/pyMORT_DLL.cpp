@@ -257,6 +257,7 @@ PYMORT_DLL_API void LiteMORT_set_feat(PY_ITEM* params, int nParam, int flag = 0x
 	}
 }
 
+
 namespace Grusoft {
 	FeatVector *FeatVecQ_InitInstance(FeatsOnFold *hFold, FeatVector *hFeat, int x, int flag) {
 		int nBins = hFold->config.feat_quanti;
@@ -327,7 +328,8 @@ FeatVector *PY_COL2FEAT(const LiteBOM_Config&config, PY_COLUMN*col, Distribution
 	hFeat->PY = col;
 	hFeat->nam = col->type_x;		hFeat->nam += col->name;
 	hFeat->hDistri = hDistri;// hFold->edaX == nullptr ? nullptr : &(hFold->edaX->arrDistri[i]);
-	if (col->isCategory()) {
+	hFeat->UpdateType();
+	/*if (col->isCategory()) {
 		BIT_SET(hFeat->hDistri->type, Distribution::CATEGORY);
 		BIT_SET(hFeat->type, Distribution::CATEGORY);
 	}
@@ -339,7 +341,7 @@ FeatVector *PY_COL2FEAT(const LiteBOM_Config&config, PY_COLUMN*col, Distribution
 		BIT_SET(hFeat->hDistri->type, Distribution::DISCRETE);
 		BIT_SET(hFeat->type, Distribution::DISCRETE);
 		BIT_SET(hFeat->type, FeatVector::REPRESENT_);
-	}
+	}*/
 
 	hFeat->Set(nSamp_, col);
 	if(isEDA)

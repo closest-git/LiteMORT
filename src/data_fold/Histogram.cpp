@@ -426,6 +426,7 @@ void HistoGRAM::UpdateBestGain(int item_tic,double g1,size_t nLef,size_t nRight,
 	}
 	//fruit->lft_impuri = nLeft*lft*lft;		fruit->rgt_impuri = nRight*rgt*rgt;*/
 }
+
 /*
 	v0.2	cys
 		1/28/2019

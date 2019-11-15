@@ -18,6 +18,9 @@ namespace Grusoft {
 			hLeft = dynamic_cast<FeatVec_T<tpLEFT>*>(hL_);
 			assert(hLeft != nullptr);
 			left_maps = hLeft->arr();
+
+			PY = hRight->PY;
+			UpdateType();
 		}
 
 		virtual ~FeatVec_EXP() {
@@ -32,9 +35,11 @@ namespace Grusoft {
 
 		virtual void Value_AtSamp(const SAMP_SET*samp_set, void *samp_values, int flag = 0x0) {
 			hLeft->Merge4Quanti(samp_set, 0x0);
-			SAMP_SET samp1(samp_set->nSamp, hLeft->map4set);
+			size_t nSamp = samp_set == nullptr ? hLeft->size(): samp_set->nSamp;
+			SAMP_SET samp1(nSamp, hLeft->map4set);
 			hRight->Value_AtSamp(&samp1, samp_values);
 		}
+
 		virtual inline void* pValue_AtSamp(const size_t&samp_0, int flag = 0x0) {
 			tpLEFT pos_R = left_maps[samp_0];
 			if (IS_NAN_INF(pos_R)) {

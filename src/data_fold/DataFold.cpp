@@ -166,7 +166,7 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 	for (i = 0; i<nFeat; i++)	{
 		FeatVector *hFeat = Feat(i);
 		hFeat->select.hasCheckGain = false;
-		if (i != 71) {		//仅用于调试
+		if (i != 30) {		//仅用于调试
 #ifdef _DEBUG
 			;// hFeat->select.isPick = false;
 #endif
@@ -717,7 +717,6 @@ tpDOWN *FeatsOnFold::GetSampleHessian() const {
 
 int *FeatsOnFold::Tag() { return lossy->Tag(); }
 
-
 /*
 	v0.1 cys
 		11/15/2019
@@ -732,15 +731,17 @@ void FeatsOnFold::ExpandMerge(const vector<FeatsOnFold *>&merge_folds, int flag)
 		hLeft->Merge4Quanti(nullptr, 0x0);
 		SAMP_SET samp1(hLeft->size(), hLeft->map4set);
 		for (auto hFeat : fold->feats) {
-			if (nExFeat == 0)
+			if (hFeat->nam=="wind_speed")	{	//仅用于调试	
 				i = 0;
+			}
+
 			FeatVector *hRight = hFeat;
 			if (isEval()) {
 				assert(hRight->hDistri!=nullptr);		//already in ExpandMerge@train
 			}else
 				hFeat->EDA(config, true, &samp1, 0x0);
 
-			if (fold->isQuanti || hFeat->isCategory()) {
+			if (isQuanti || hFeat->isCategory()) {
 				//assert(isTrain());
 				FeatVector *hFQ = FeatVecQ_InitInstance(fold, hFeat, 0x0);	// new FeatVec_Q<short>(hFold, hFeat, nMostQ);
 				hRight = hFQ;	//delete hFeat;
@@ -755,7 +756,6 @@ void FeatsOnFold::ExpandMerge(const vector<FeatsOnFold *>&merge_folds, int flag)
 				assert(hLeft->PY->isInt32());
 				hEXP = new FeatVec_EXP<int32_t>(this, hRight->nam + "@" + hLeft->nam, hLeft, hRight);
 			}
-
 			hEXP->EDA(this->config, false, nullptr, 0x0);
 			feats.push_back(hEXP);
 			nExFeat++;

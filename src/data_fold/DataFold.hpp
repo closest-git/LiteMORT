@@ -342,7 +342,12 @@ namespace Grusoft {
 			tpDOWN *delta_step = GetDeltaStep();			//assert(delta_step != nullptr);
 			Ty *pred = predict->arr();
 			int *feat_ids = tree.feat_ids, *left = tree.left, *rigt = tree.rigt;
-			
+			if(false){	//仅用于莫名其妙
+				FeatVector *hFT = feats[30];
+				double *vals = new double[nSamp];
+				hFT->Value_AtSamp(nullptr,vals);
+				printf("%g", vals[0]);
+			}
 			/**/
 			int num_threads = OMP_FOR_STATIC_1(nSamp, step);
 #pragma omp parallel for schedule(static,1)
@@ -659,14 +664,22 @@ namespace Grusoft {
 		}
 
 		virtual void Value_AtSamp(const SAMP_SET*samp_set, void *samp_val_, int flag = 0x0) {
-			size_t nSamp = samp_set->nSamp, i, nMost = this->size();
-			tpSAMP_ID samp, *samps = samp_set->samps;
+			size_t i, nMost = this->size(),nSamp=nMost;
 			Tx *samp_values = (Tx *)(samp_val_);
-			//#pragma omp parallel for schedule(static)
-			for (i = 0; i < nSamp; i++) {
-				samp = samps[i];
-				assert(samp >= 0 && samp < nMost);
-				samp_values[i] = val[samp];
+			if (samp_set == nullptr) {
+				for (i = 0; i < nSamp; i++) {
+					samp_values[i] = val[i];
+				}
+			}
+			else {
+				nSamp = samp_set->nSamp;
+				tpSAMP_ID samp, *samps = samp_set->samps;
+				//#pragma omp parallel for schedule(static)
+				for (i = 0; i < nSamp; i++) {
+					samp = samps[i];
+					assert(samp >= 0 && samp < nMost);
+					samp_values[i] = val[samp];
+				}
 			}
 		}
 		virtual inline void* pValue_AtSamp(const size_t& samp, int flag = 0x0) {
@@ -1129,6 +1142,7 @@ namespace Grusoft {
 		}
 
 		/*
+			isSameSorted 仅对应于isTrain()
 			v0.1	cys
 				11/4/2019
 		*/
@@ -1213,9 +1227,12 @@ namespace Grusoft {
 							}
 						}
 						noBin++;
-						if (noBin >= histo->nBins)
-						{		throw "QuantiAtEDA noBin is XXX";						}
-						v1 = distri.binFeatas[noBin + 1].split_F;// histo->bins[noBin + 1].split_F;
+						if (noBin >= histo->nBins)						{
+							quanti[pos] = histo->nBins - 1;	i_0++;
+							continue;
+							//throw "QuantiAtEDA noBin is XXX";						
+						}
+						v1 = noBin+1==histo->nBins ? distri.vMax  : distri.binFeatas[noBin + 1].split_F;
 					}
 					assert(noBin >= 0 && noBin < NNA);
 

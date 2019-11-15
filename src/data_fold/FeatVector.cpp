@@ -3,6 +3,25 @@
 #include "./FeatVec_EXP.hpp"
 using namespace Grusoft;
 
+void FeatVector::UpdateType(int flag){
+	assert(PY != nullptr);
+	if (PY->isCategory()) {
+		if(hDistri!=nullptr)	//expanded feat has no hDistri
+			BIT_SET(hDistri->type, Distribution::CATEGORY);
+		BIT_SET(type, Distribution::CATEGORY);
+	}
+	if (PY->isDiscrete()) {
+		if (hDistri != nullptr)
+			BIT_SET(hDistri->type, Distribution::DISCRETE);
+		BIT_SET(type, Distribution::DISCRETE);
+	}
+	if (PY->representive > 0) {
+		if (hDistri != nullptr)
+			BIT_SET(hDistri->type, Distribution::DISCRETE);
+		BIT_SET(type, Distribution::DISCRETE);
+		BIT_SET(type, FeatVector::REPRESENT_);
+	}
+}
 /*
 void FeatVec_EXP::EDA(const LiteBOM_Config&config, bool genHisto, int flag) {
 	size_t i,nSamp_= size();
