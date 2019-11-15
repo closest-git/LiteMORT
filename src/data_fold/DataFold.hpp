@@ -1044,33 +1044,45 @@ namespace Grusoft {
 		
 		/*
 			v0.3 no edaX 
+			v0.4 on samp_set
 		*/
-		virtual void EDA(const LiteBOM_Config&config,bool genHisto, int flag) {
+		virtual void EDA(const LiteBOM_Config&config,bool genHisto,const SAMP_SET *samp_set, int flag) {
 			size_t i, nSamp_=size();
 			if (hDistri == nullptr) {	//only for Y
 				hDistri = new Distribution();		
 			}	else {
 
 			}
+			Tx *samp_val = arr();
+			if (samp_set != nullptr) {//EDA on replacement sampling
+				nSamp_ = samp_set->nSamp;
+				samp_val = new Tx[nSamp_];
+				tpSAMP_ID *samps = samp_set->samps;
+				for (i = 0; i < nSamp_; i++) {
+					samp_val[i] = val[samps[i]];
+				}
+			}
 			hDistri->nam = nam;
-			hDistri->STA_at(nSamp_, val, true, 0x0);
+			hDistri->STA_at(nSamp_, samp_val, true, 0x0);
 			if (ZERO_DEVIA(hDistri->vMin, hDistri->vMax))
 				BIT_SET(this->type, Distribution::V_ZERO_DEVIA);
-			else if (config.eda_Normal != LiteBOM_Config::NORMAL_off) {
+			/*else if (config.eda_Normal != LiteBOM_Config::NORMAL_off) {
 				Tx *val_c = arr();
 				double mean = hDistri->mean, s = 1.0 / hDistri->devia;
 				//for each(tpSAMP_ID samp in hDistri->sortedA
 				for (i = 0; i < nSamp_; i++) {
 					val_c[i] = (val_c[i] - mean)*s;
 				}
-				hDistri->STA_at(nSamp_, val, true, 0x0);/**/
-			}
+				hDistri->STA_at(nSamp_, val, true, 0x0);
+			}*/
 			if (genHisto) {
 				if (hDistri->histo == nullptr) {	//参见LiteMORT_EDA->Analysis(config, (float *)dataX, (tpY *)dataY, nSamp_, nFeat_0, 1, flag);
-					hDistri->X2Histo_(config, nSamp_, arr(), (double*)nullptr);
+					hDistri->X2Histo_(config, nSamp_, samp_val, (double*)nullptr);
 					//hDistri->Dump(this->id, false, flag);
 				}			
 			}
+			if (samp_val != arr())
+				delete[] samp_val;
 		}
 
 		//参见Distribution::STA_at，需要独立出来		8/20/2019

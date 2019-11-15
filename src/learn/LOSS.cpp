@@ -87,7 +87,7 @@ void FeatVec_LOSS::EDA( ExploreDA *edaX, int flag) {
 	if (isPredict) {
 
 	}	else {
-		y->EDA(config,true, 0x0);
+		y->EDA(config,true, nullptr, 0x0);
 		if(y->hDistri!=nullptr)
 			y->hDistri->Dump(-1, false, flag);
 		size_t dim = size(),i,nOutlier;

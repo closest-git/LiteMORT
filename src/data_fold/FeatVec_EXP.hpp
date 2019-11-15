@@ -44,7 +44,8 @@ namespace Grusoft {
 			}
 		}
 
-		virtual void EDA(const LiteBOM_Config&config, bool genHisto, int flag) {
+		virtual void EDA(const LiteBOM_Config&config, bool genHisto, const SAMP_SET *samp_set, int flag) {
+			assert(samp_set==nullptr);
 			size_t i, nSamp_ = size();
 			assert(hDistri == nullptr);
 			hDistri = new Distribution();
@@ -58,6 +59,11 @@ namespace Grusoft {
 			//hDistri->STA_at(nSamp_, val, true, 0x0);
 			if (ZERO_DEVIA(hDistri->vMin, hDistri->vMax))
 				BIT_SET(this->type, Distribution::V_ZERO_DEVIA);
+
+			/*if (hFold->isQuanti || hFeat->isCategory()) {
+				hFQ = FeatVecQ_InitInstance(hFold, hFeat, 0x0);	// new FeatVec_Q<short>(hFold, hFeat, nMostQ);
+				hRight = hFQ;	//delete hFeat;
+			}*/
 		}
 
 		virtual void SplitOn(FeatsOnFold *hData_, MT_BiSplit *hBest, int flag = 0x0) {

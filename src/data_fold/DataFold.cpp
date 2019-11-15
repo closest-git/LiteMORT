@@ -717,29 +717,49 @@ tpDOWN *FeatsOnFold::GetSampleHessian() const {
 
 int *FeatsOnFold::Tag() { return lossy->Tag(); }
 
+
+/*
+	v0.1 cys
+		11/15/2019
+*/
 void FeatsOnFold::ExpandMerge(const vector<FeatsOnFold *>&merge_folds, int flag) {
-	int i,nFeat,nMerge=0;
+	int i,nFeat,nMerge=0,nExFeat=0;
 	assert(merge_lefts.size() == merge_folds.size());
 	for (auto fold : merge_folds) {
-		FeatVector *hLeft = this->merge_lefts[nMerge];
+		assert( BIT_TEST(fold->dType, FeatsOnFold::DF_MERGE) );
+		FeatVector *hLeft = this->merge_lefts[nMerge++];
 		//FeatVector *hRight = fold->Feat(fold->merge_right);		assert(hRight != nullptr);
+		hLeft->Merge4Quanti(nullptr, 0x0);
+		SAMP_SET samp1(hLeft->size(), hLeft->map4set);
 		for (auto hFeat : fold->feats) {
-			//if (hFeat == hRight)
-			//	continue;
+			if (nExFeat == 0)
+				i = 0;
+			FeatVector *hRight = hFeat;
+			if (isEval()) {
+				assert(hRight->hDistri!=nullptr);		//already in ExpandMerge@train
+			}else
+				hFeat->EDA(config, true, &samp1, 0x0);
+
+			if (fold->isQuanti || hFeat->isCategory()) {
+				//assert(isTrain());
+				FeatVector *hFQ = FeatVecQ_InitInstance(fold, hFeat, 0x0);	// new FeatVec_Q<short>(hFold, hFeat, nMostQ);
+				hRight = hFQ;	//delete hFeat;
+			}
+
 			FeatVector *hEXP = nullptr;
 			if(hLeft->PY->isInt8())
-				hEXP = new FeatVec_EXP<uint8_t>(this,hFeat->nam + "@" + hLeft->nam,hLeft, hFeat);
+				hEXP = new FeatVec_EXP<uint8_t>(this, hRight->nam + "@" + hLeft->nam,hLeft, hRight);
 			else if(hLeft->PY->isInt16())
-				hEXP = new FeatVec_EXP<uint16_t>(this, hFeat->nam + "@" + hLeft->nam, hLeft, hFeat);
+				hEXP = new FeatVec_EXP<uint16_t>(this, hRight->nam + "@" + hLeft->nam, hLeft, hRight);
 			else {
 				assert(hLeft->PY->isInt32());
-				hEXP = new FeatVec_EXP<int32_t>(this, hFeat->nam + "@" + hLeft->nam, hLeft, hFeat);
+				hEXP = new FeatVec_EXP<int32_t>(this, hRight->nam + "@" + hLeft->nam, hLeft, hRight);
 			}
-			hEXP->EDA(this->config, false, 0x0);
-			//hFeat->nam = hFeat->nam + "@" + hLeft->nam;
+
+			hEXP->EDA(this->config, false, nullptr, 0x0);
 			feats.push_back(hEXP);
+			nExFeat++;
 		}
-		nMerge++;
 	}	
 }
 

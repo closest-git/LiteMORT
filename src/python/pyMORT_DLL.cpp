@@ -33,8 +33,6 @@
 
 using namespace Grusoft;
 
-
-
 struct MORT{
 	LiteBOM_Config config;
 	GBRT *hGBRT = nullptr;
@@ -259,34 +257,35 @@ PYMORT_DLL_API void LiteMORT_set_feat(PY_ITEM* params, int nParam, int flag = 0x
 	}
 }
 
-
-FeatVector *FeatVecQ_InitInstance(FeatsOnFold *hFold, FeatVector *hFeat, int x, int flag = 0x0) {
-	int nBins = hFold->config.feat_quanti;
-	assert(hFeat != nullptr && hFeat->hDistri != nullptr);
-	HistoGRAM *histo = hFeat->hDistri->histo;
-	if (histo != nullptr) {
-		nBins = histo->nBins;
+namespace Grusoft {
+	FeatVector *FeatVecQ_InitInstance(FeatsOnFold *hFold, FeatVector *hFeat, int x, int flag) {
+		int nBins = hFold->config.feat_quanti;
+		assert(hFeat != nullptr && hFeat->hDistri != nullptr);
+		HistoGRAM *histo = hFeat->hDistri->histo;
+		if (histo != nullptr) {
+			nBins = histo->nBins;
+		}
+		assert(nBins > 0);
+		FeatVector *hFQ = nullptr;
+		if (nBins <= 256) {
+			hFQ = new FeatVec_Q<uint8_t>(hFold, hFeat, x);
+			//hFQ = new FeatVec_Q<uint16_t>(hFold, hFeat, x);		printf("----%d\t \"%s\" nBins=%d\n", hFeat->id, hFeat->nam.c_str(), nBins);
+		}
+		else if (nBins <= SHRT_MAX) {
+			hFQ = new FeatVec_Q<uint16_t>(hFold, hFeat, x);
+			printf("\t----%d\t FeatVec_Q<uint16_t>@\"%s\" nBins=%d\n", hFeat->id, hFeat->nam.c_str(), nBins);
+		}
+		else {
+			assert(0);
+			hFQ = new FeatVec_Q<uint32_t>(hFold, hFeat, x);
+		}
+		if (hFQ != nullptr) {
+			hFQ->UpdateHisto(hFold, false, true);
+			if (!hFold->config.isDynamicHisto)
+				hFeat->FreeVals();		//需要dynamic update histo
+		}
+		return hFQ;
 	}
-	assert(nBins > 0);
-	FeatVector *hFQ = nullptr;
-	if (nBins <= 256) {
-		hFQ = new FeatVec_Q<uint8_t>(hFold, hFeat, x);
-		//hFQ = new FeatVec_Q<uint16_t>(hFold, hFeat, x);		printf("----%d\t \"%s\" nBins=%d\n", hFeat->id, hFeat->nam.c_str(), nBins);
-	}
-	else if (nBins <= SHRT_MAX) {
-		hFQ = new FeatVec_Q<uint16_t>(hFold, hFeat, x);
-		printf("\t----%d\t FeatVec_Q<uint16_t>@\"%s\" nBins=%d\n", hFeat->id, hFeat->nam.c_str(), nBins);
-	}
-	else {
-		assert(0);
-		hFQ = new FeatVec_Q<uint32_t>(hFold, hFeat, x);
-	}
-	if (hFQ != nullptr) {
-		hFQ->UpdateHisto(hFold, false, true);
-		if(!hFold->config.isDynamicHisto)
-			hFeat->FreeVals();		//需要dynamic update histo
-	}
-	return hFQ;
 }
 
 
@@ -344,7 +343,7 @@ FeatVector *PY_COL2FEAT(const LiteBOM_Config&config, PY_COLUMN*col, Distribution
 
 	hFeat->Set(nSamp_, col);
 	if(isEDA)
-		hFeat->EDA(config, true, 0x0);		//EDA基于全局分析，而这里的是局部分析。分布确实会不一样
+		hFeat->EDA(config, true,nullptr, 0x0);		//EDA基于全局分析，而这里的是局部分析。分布确实会不一样
 
 	return hFeat;
 }
@@ -375,7 +374,9 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY
 		if (i == 31)
 			i = 31;
 		Distribution *hD_ = hFold->edaX == nullptr ? nullptr : &(hFold->edaX->arrDistri[i]);
-		hFold->feats.push_back(PY_COL2FEAT(config,col, hD_,nSamp_, i, isTrain || isMerge,flag));
+		if (hD_ != nullptr && hD_->nam.size() > 0)
+			;// assert(hD_->nam == string(col->name));	//需要验证
+		hFold->feats.push_back(PY_COL2FEAT(config,col, hD_,nSamp_, i, isTrain ,flag));
 		/*if (col->isFloat() ) {
 			hFold->feats.push_back(new FeatVec_T<float>(nSamp_, i, desc + std::to_string(i),flagF));		
 		}	else if (col->isFloat16()) {	//NO REFER!!!
@@ -448,7 +449,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY
 			nConstFeat++;			nLocalConst++;
 			//hFeat->Clear();		//释放内存
 		}
-		else if (hFeat->isMerged()) {
+		else if (hFeat->isMerged() || isMerge) {
 			nMergedFeat++;
 
 		}	else {
