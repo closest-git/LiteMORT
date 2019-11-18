@@ -9,6 +9,7 @@ from sklearn import preprocessing
 import os
 import warnings
 import matplotlib.pyplot as plt
+import psutil
 
 def _check_not_tuple_of_2_elements(obj, obj_name='obj'):
     """Check object is not tuple or does not have 2 elements."""
@@ -40,6 +41,29 @@ def _check_call(ret,normal_value=0x0):
 '''
     sklearn style
 '''
+
+class LiteMORT_profile(object):
+    def __init__(self):
+        self.memory_info={}
+        self.params = {}
+        self.memory_info['virtual memory'] = 0
+        self.memory_info['physical memory'] = 0
+
+    def Begin(self, params=None):
+        process = psutil.Process(os.getpid())
+        self.mem_info_0 = process.memory_info()
+        #print(process.memory_info().rss)
+
+    def End(self,dump=True):
+        process = psutil.Process(os.getpid())
+        mem_info_1 = process.memory_info()
+        self.memory_info['virtual memory']=a=(mem_info_1.vms-self.mem_info_0.vms)/1.0e6
+        self.memory_info['physical memory']=b=(mem_info_1.rss-self.mem_info_0.rss)/1.0e6
+        v0=self.mem_info_0.vms/1.0e6
+        if dump:
+            print(f"\n{'-'* 80}\n\tMEMORY usage: physical={a:.2f}(M) virtual={b:.2f}(M) begin={v0:.2f}(M)"
+                  f"\n{'-'* 80}\n")
+        return
 
 class LiteMORT_params(object):
     def alias_param(self,key,default_value,dict_param,alia_list):
@@ -210,6 +234,7 @@ class LiteMORT(object):
         self.best_iteration_ = 0
         self.best_iteration = 0
         self.best_score = 0
+        self.profile = LiteMORT_profile()
 
         self.init_params_cpp(params)
         if self.params.objective == "binary":
@@ -410,7 +435,7 @@ class LiteMORT(object):
                 feat_dict   cys@1/10/2019
     '''
     def fit(self,X_train_0, y_train,eval_set=None,categorical_feature=None,discrete_feature=None, params=None,flag=0x0):
-
+        self.profile.Begin()
         print("====== LiteMORT_fit X_train_0={} y_train={}......".format(X_train_0.shape, y_train.shape))
         #self.categorical_feature = categorical_feature
         #self.discrete_feature = discrete_feature
@@ -433,6 +458,8 @@ class LiteMORT(object):
         #self.EDA(flag)
 
         self.mort_fit_1(self.hLIB, self.cpp_train_sets,self.cpp_eval_sets, 0)
+        self.profile.End()
+
         return self
 
 

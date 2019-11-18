@@ -498,16 +498,10 @@ namespace Grusoft {
 
 		FeatVec_LOSS() {
 		}
-		virtual ~FeatVec_LOSS() {
-			down.clear();				sample_down.clear();
-			resi.clear();				delta_step.clear();
-			hessian.clear();			sample_hessian.clear();
-
-			if (samp_weight != nullptr)			delete samp_weight;
-			if (y != nullptr)			delete y;
-			if (predict != nullptr)		delete predict;
-		}
-
+		virtual ~FeatVec_LOSS(){
+			Clear();
+		}		
+		virtual void Clear();
 		//virtual void Stat_Dump(const string&info, int flag=0x0);
 		virtual FeatVector * GetY() { return y; }
 

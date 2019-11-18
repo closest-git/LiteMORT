@@ -176,6 +176,11 @@ namespace Grusoft{
 		//hRANDER InitRander( unsigned seed );
 		virtual void Clear( );
 		virtual void ClearData( );
+		virtual void ClearHisto() {
+			if (histo_buffer != nullptr) {
+				delete histo_buffer;		histo_buffer = nullptr;
+			}
+		}
 		//FeatsOnFold *GurrentData() { FeatsOnFold *hData = hTrainData;		assert(hData != nullptr);		return hData; }
 
 		virtual bool isPassNode(FeatsOnFold *hData_, hMTNode hNode, int flag = 0x0) { GST_THROW("BoostingForest::isPass is ..."); }

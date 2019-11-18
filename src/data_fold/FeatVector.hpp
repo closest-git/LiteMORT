@@ -83,6 +83,8 @@ namespace Grusoft {
 		virtual ~FeatVector() {
 			if (select_bins != nullptr)
 				delete select_bins;
+			if (wBins != nullptr)
+				delete[] wBins;
 		}
 		virtual inline size_t size()	const	{ throw"FeatVector::size() is ..."; }
 

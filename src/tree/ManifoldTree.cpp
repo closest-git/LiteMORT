@@ -775,8 +775,8 @@ ARR_TREE *ManifoldTree::To_ARR_Tree(FeatsOnFold *hData_, bool isQuant_, bool isC
 			if (node->fruit->isY)			{
 				FeatVector *hFeat = hData_->Feat(node->feat_id);
 				int nBins = hFeat->hDistri->histo->nBins;
-				arrTree.folds[no] = new int[nBins];
-				memcpy(arrTree.folds[no], node->fruit->mapFolds,sizeof(int)*nBins);
+				arrTree.folds[no] = new tpFOLD[nBins];
+				memcpy(arrTree.folds[no], node->fruit->mapFolds,sizeof(tpFOLD)*nBins);
 				arrTree.thrsh_step[no] = DBL_MAX;
 			}		else {
 				arrTree.folds[no] = nullptr;

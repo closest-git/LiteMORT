@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import gc
 from ctypes import *
+from ctypes import _reset_cache
 from pandas.api.types import is_string_dtype
 from pandas.api.types import is_numeric_dtype
 import random
@@ -74,6 +75,7 @@ def Mort_PickSamples(pick_samples,df_train,df_test):
 class Mort_Preprocess(object):
 	#v0.1	cys
     def column_info(self,feat,X,feat_info):
+        #_reset_cache()
         col = M_COLUMN()
         col.name = str(feat).encode('utf8')
         col.data = None
@@ -115,6 +117,7 @@ class Mort_Preprocess(object):
             col.data = narr.ctypes.data_as(c_void_p)
             col.dtype = str(narr.dtype).encode('utf8')
             #print("\"{}\":\t{}\ttype={},data={},name={}".format(feat, x_info, col.dtype, col.data, col.name))
+        #_reset_cache()
         return col
 
     def OnMerge(self,df_base,merge_infos):

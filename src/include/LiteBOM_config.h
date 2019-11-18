@@ -250,7 +250,7 @@ namespace Grusoft {
 		// desc = in ``dart``, it also affects on normalization weights of dropped trees
 		double learning_rate = 0.03;
 		bool isDebug_1 = true;
-		bool isDynamicHisto = true;
+		bool isDynamicHisto = false;
 		bool lr_adptive_leaf = false;
 		int adaptive_sample_weight = 0;
 		bool useRandomSeed = false;

@@ -11,6 +11,19 @@ using namespace Grusoft;
 		type=multi-enum, options=l1,l2,ndcg,auc,binary_logloss,binary_error...
 
 */
+void FeatVec_LOSS::Clear() {
+	down.clear();				sample_down.clear();
+	resi.clear();				delta_step.clear();
+	hessian.clear();			sample_hessian.clear();
+
+	if (samp_weight != nullptr)			delete[] samp_weight;
+	if (y != nullptr) {
+		if (y->hDistri != nullptr)
+			delete y->hDistri;
+		delete y;
+	}
+	if (predict != nullptr)		delete predict;
+}
 /*
 	Ä¿Ç°½öUpdateResi
 */

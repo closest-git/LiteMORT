@@ -80,6 +80,7 @@ namespace Grusoft {
 			 //assert(val == nullptr);
 			if (val == nullptr) {
 				val = new tpQUANTI[nSamp];
+				BIT_RESET(type, VAL_REFER);
 			}
 			//val.resize(nSamp);
 			tpQUANTI *quanti = arr(), no;

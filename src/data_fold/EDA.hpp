@@ -56,6 +56,7 @@ namespace Grusoft {
 		ExploreDA( LiteBOM_Config&,int nFeat,int flag=0x0);
 		
 		virtual ~ExploreDA( ){
+			arrDistri.clear();
 		}
 
 		virtual void CheckDuplicate(LiteBOM_Config config, int flag) {

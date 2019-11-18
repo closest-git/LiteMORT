@@ -37,7 +37,7 @@ namespace Grusoft {
 	template<typename Tx> class FeatVec_T;
 
 	struct ARR_TREE {
-		typedef int * FOLD_MAP;
+		typedef tpFOLD * FOLD_MAP;
 		int nNodes = 0;
 		double *thrsh_step = nullptr,weight=1.0;
 		int *feat_ids = nullptr, *left = nullptr, *rigt = nullptr, *info = nullptr;
@@ -93,6 +93,7 @@ namespace Grusoft {
 
 		Feat_Importance(FeatsOnFold *hData_, int flag = 0x0);
 		virtual ~Feat_Importance() {
+			split_sum.clear();		gain_sum.clear();
 		}
 	};
 
@@ -129,11 +130,12 @@ namespace Grusoft {
 				samp_rigt = new tpSAMP_ID[nSamp];
 				samp_values = new double[nSamp];
 			}
+			virtual void Clear() {
+				FREE_a(samp_root_set);			FREE_a(samp_left);
+				FREE_a(samp_rigt);				FREE_a(samp_values);
+			}
 			virtual ~BUFFER() {
-				if (samp_root_set != nullptr)		delete[] samp_root_set;
-				if (samp_left != nullptr)			delete[] samp_left;
-				if (samp_rigt != nullptr)			delete[] samp_rigt;
-				if (samp_values != nullptr)			delete[] samp_values;
+				Clear();				
 			}
 		};
 		BUFFER buffer;
@@ -241,16 +243,8 @@ namespace Grusoft {
 			importance = new Feat_Importance(this);
 		}*/
 
-		virtual ~FeatsOnFold() {
-			for (auto hFeat : feats)
-			//for each(FeatVector *hFeat in feats)
-				delete hFeat;
-			feats.clear();					//fold.clear();
-			delete[] distri;
-			if (importance != nullptr)			delete importance;
-			if (hMove != nullptr)				delete hMove;
-			//delete[] resi;			delete[] move;
-		}
+		virtual ~FeatsOnFold();
+
 		int *Tag();
 		virtual void Empty(int flag) {
 
@@ -861,7 +855,7 @@ namespace Grusoft {
 			
 			const int lft = arr_tree->left[no], rgt = arr_tree->rigt[no];
 			assert(no >= 0 && no < arr_tree->nNodes);
-			const int *fold_map = arr_tree->folds[no];
+			const tpFOLD *fold_map = arr_tree->folds[no];
 			if (fold_map == nullptr) {
 				if (IS_NAN_INF(val_t)) {
 					return rgt;
@@ -873,7 +867,7 @@ namespace Grusoft {
 					return rgt;
 				}	else {
 					int i_val = (int)(val_t);
-					int fold = fold_map[i_val];
+					tpFOLD fold = fold_map[i_val];
 					assert(fold==0 || fold==1);
 					return (fold <= 0) ? lft : rgt;
 				}
@@ -881,9 +875,9 @@ namespace Grusoft {
 			return lft;
 		}
 
-		void _core_isY_(bool isQuanti, const tpSAMP_ID samp,const int *mapFolds, int pos, tpSAMP_ID*left, G_INT_64&nLeft, tpSAMP_ID*rigt, G_INT_64&nRigt, int flag) {
+		void _core_isY_(bool isQuanti, const tpSAMP_ID samp,const tpFOLD *mapFolds, int pos, tpSAMP_ID*left, G_INT_64&nLeft, tpSAMP_ID*rigt, G_INT_64&nRigt, int flag) {
 			//assert(samp >= 0 && samp <= 1152);
-			int fold = mapFolds[pos];	// hBlit->fruit->GetFold(pos);
+			tpFOLD fold = mapFolds[pos];	// hBlit->fruit->GetFold(pos);
 			assert(fold == 0 || fold == 1);
 			if (fold <= 0)
 				left[nLeft++] = samp;
@@ -917,7 +911,7 @@ namespace Grusoft {
 			double T_1 = hBlit->fruit->adaptive_thrsh;
 			if (hBlit->fruit->isY) {
 				GST_TIC(t1);
-				const int *mapFolds = hBlit->fruit->mapFolds;
+				const tpFOLD *mapFolds = hBlit->fruit->mapFolds;
 				SAMP_SET &lSet = left->samp_set, &rSet = rigt->samp_set;
 				tpSAMP_ID *samps = hBlit->samp_set.samps,  *rigt = hBlit->samp_set.rigt;//*left = hBlit->samp_set.left,
 				lSet = hBlit->samp_set;		rSet = hBlit->samp_set;	//直接复制父节点的一些数据
@@ -1296,17 +1290,7 @@ namespace Grusoft {
 		virtual ~FeatVec_Bundle() {
 			if (qHisto != nullptr)	delete qHisto;
 		}
-
-
 	};
-
-
-	
-
-	class FeatVec_LOSS;
-
-	
-	
 
 
 

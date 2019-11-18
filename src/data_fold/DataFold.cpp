@@ -47,7 +47,22 @@ FeatsOnFold::FeatsOnFold(LiteBOM_Config confi_, ExploreDA *eda_, string nam_, in
 		config.subsample = 1;	config.feature_fraction = 1;
 
 	}
+}
 
+FeatsOnFold::~FeatsOnFold() {
+	buffer.Clear();
+	for (auto hFeat : feats)
+		//for each(FeatVector *hFeat in feats)
+		delete hFeat;
+	feats.clear();					//fold.clear();
+	delete[] distri;
+	if (importance != nullptr)
+		delete importance;
+	if (hMove != nullptr)				delete hMove;
+	//delete[] resi;			delete[] move;
+	if (lossy != nullptr) {
+		delete lossy;		lossy = nullptr;
+	}
 }
 
 void FeatsOnFold::InitRanders(int flag) {

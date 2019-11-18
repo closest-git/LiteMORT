@@ -360,7 +360,7 @@ FRUIT::FRUIT(const HistoGRAM *his_, int flag) : histo_refer(his_) {
 	int nMaxBin = hFeat->hDistri->binFeatas.size(),i;
 	//assert(nMaxBin == hFeat->hDistri->histo->nMostBins);
 	//参见	FeatVec_T::SplitOn		if (fold <= 0)	left[nLeft++] = samp;
-	mapFolds = new int[nMaxBin]();
+	mapFolds = new tpFOLD[nMaxBin]();
 	//for (i = 0; i < nMaxBin; i++)		mapFolds[i] = 1;
 	Set(his_);
 }
@@ -385,7 +385,7 @@ void FRUIT::Set(const HistoGRAM*histo, int flag) {
 		histo_refer = histo;		
 		//需要fold信息
 		if (hFeat->isCategory()) {
-			memset(mapFolds,0x0,sizeof(int)*nMaxBin);
+			memset(mapFolds,0x0,sizeof(tpFOLD)*nMaxBin);
 			for (int i = 0; i < histo->nBins; i++) {
 				int pos = histo->bins[i].tic, fold = histo->bins[i].fold;
 				mapFolds[pos] = fold;

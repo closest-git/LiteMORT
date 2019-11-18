@@ -373,33 +373,14 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY
 	for (size_t i = 0; i < dataset_->ldFeat; i++) {
 		string desc = "feat_";
 		PY_COLUMN *col = dataset_->columnX + i;//唯一的dtype处理
-		if (i == 31)
-			i = 31;
+		if (i != 18)
+			;// continue;
 		Distribution *hD_ = hFold->edaX == nullptr ? nullptr : &(hFold->edaX->arrDistri[i]);
 		if (hD_ != nullptr && hD_->nam.size() > 0)
 			;// assert(hD_->nam == string(col->name));	//需要验证
 		hFold->feats.push_back(PY_COL2FEAT(config,col, hD_,nSamp_, i, isTrain ,flag));
-		/*if (col->isFloat() ) {
-			hFold->feats.push_back(new FeatVec_T<float>(nSamp_, i, desc + std::to_string(i),flagF));		
-		}	else if (col->isFloat16()) {	//NO REFER!!!
-			if(hFold->config.verbose>666)
-				printf("----%d\t \"%s\" is Float16\n", i,col->name);
-			hFold->feats.push_back(new FeatVec_T<float>(nSamp_, i, desc + std::to_string(i), flag));
-		}	else if (col->isInt()) {
-			hFold->feats.push_back(new FeatVec_T<int32_t>(nSamp_, i, desc + std::to_string(i), flagF));
-		}	else if (col->isInt16()) {
-			hFold->feats.push_back(new FeatVec_T<int16_t>(nSamp_, i, desc + std::to_string(i), flagF));
-		}	else if (col->isChar()) {
-			hFold->feats.push_back(new FeatVec_T<int8_t>(nSamp_, i, desc + std::to_string(i), flagF));
-		}	else if (col->isInt64()) {
-			hFold->feats.push_back(new FeatVec_T<int64_t>(nSamp_, i, desc + std::to_string(i), flagF));
-		}	else if (col->isDouble()) {
-			hFold->feats.push_back(new FeatVec_T<double>(nSamp_, i, desc + std::to_string(i), flagF));
-		}
-		else 
-			throw "FeatsOnFold_InitInstance col->dtype is XXX";
-		FeatVector *hFeat = hFold->feats[hFold->feats.size() - 1];*/
 	}
+
 	if (mort != nullptr && mort->merge_folds.size() > 0) {
 		int i, nMerge = mort->merge_folds.size();
 		for (i = 0; i < nMerge; i++) {
@@ -413,7 +394,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY
 	}
 	//if (hFold->hMove != nullptr)
 	//	hFold->hMove->Init_T<Tx, Ty>(nSamp_);
-
+	
 	if (!isMerge) {		//lossy and importance
 		hFold->importance = new Feat_Importance(hFold);
 		hFold->lossy->Init_T<tpDOWN>(hFold, nSamp_, 0x0, rnd_seed, flag);
@@ -483,7 +464,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY
 		}
 		nTotalBins += hFeat->hDistri == nullptr ? 0 : hFeat->hDistri->nHistoBin();
 	}
-	/*if (hFold->isQuanti) {
+											/*if (hFold->isQuanti) {
 	printf("\n********* FeatsOnFold::QUANTI nMostQ=%d\r\n", nMostQ);
 	}*/
 	sparse /= (nSamp_*hFold->nFeat());
@@ -493,7 +474,6 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY
 		hFold->nam.c_str(), nSamp_, hFold->nFeat(), nConstFeat, nQuant,nTotalBins, sparse, nana, nLocalConst, (clock() - t0) / 1000.0);
 	//if(nLocalConst>0)
 	//	printf("\t!!! [%s] nLocalConst=%lld !!! \n",hFold->nam.c_str(), nLocalConst);
-
 	return hFold;
 }
 
@@ -992,7 +972,10 @@ PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_DATASET_LIST *train_list, PY
 		if (isDelEDA) {
 			delete hEDA;			hEDA = nullptr;
 		}
+		//memory
 		mort->hGBRT->ClearData();
+		mort->hGBRT->ClearHisto();
+		//delete hEDA;		//仅用于调试
 		//@%p(hEDA=%p,hGBRT=%p)	mort,mort->hEDA,mort->hGBRT,
 		//FeatsOnFold::stat.tX += GST_TOC(tick);
 		printf("\n********* LiteMORT_fit_1  time=%.3g(%.3g)......OK\n\n", GST_TOC(tick), FeatsOnFold::stat.tX + DCRIMI_2::tX);

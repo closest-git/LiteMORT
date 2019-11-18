@@ -96,7 +96,7 @@ namespace Grusoft {
 		//double split_F = 0;		
 		size_t nz = 0;
 		//if (val[pos] < bins[noBin+1].split_F) {		quanti[pos] = noBin;		}
-		char fold = -1;			//每个BIN属于一个FOLD
+		tpFOLD fold = -1;			//每个BIN属于一个FOLD
 		uint16_t tic = 0;			
 		double G_sum = 0, H_sum = 0;		//Second-order approximation from Tianqi Chen's formula
 
@@ -138,8 +138,8 @@ namespace Grusoft {
 			}
 		}
 		//MAP_CATEGORY mapFold;
-		int *mapFolds=nullptr;
-		inline int GetFold(int pos) {
+		tpFOLD *mapFolds=nullptr;
+		inline tpFOLD GetFold(int pos) {
 			return mapFolds[pos];
 			/*if (mapFold.find(pos) == mapFold.end()) {
 				return -1;

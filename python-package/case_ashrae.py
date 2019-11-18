@@ -205,7 +205,7 @@ class COROchann(object):
         self.data_root = data_root
         self.building_meta_df = building_meta_df
         self.weather_df = weather_df
-        #self.some_rows = 5000
+        #self.some_rows = 500000
         self.some_rows = None
         self.df_base = self.Load_Processing()
         self.df_base_shape = self.df_base.shape
@@ -223,7 +223,7 @@ class COROchann(object):
         pkl_path = f'{data_root}/_ashrae_{self.source}_T{target_meter}_{self.some_rows}_M[{isMerge}]_.pickle'
         if isMerge:
             feat_v0 = feat_v0 + ['timestamp']
-            #self.weather_df = self.weather_df[:1000]
+            #self.weather_df = self.weather_df[:1100]
             feat_v1 = list(set(feat_v0).intersection(set(list(self.weather_df.columns))))
             #feat_v1 = ['site_id','timestamp','precip_depth_1_hr']       #测试需要
             #self.weather_df = self.weather_df[feat_v1]

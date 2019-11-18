@@ -22,7 +22,10 @@ ExploreDA::ExploreDA(LiteBOM_Config&config,int nFeat_, int flag):nFeat(nFeat_){
 
 Distribution::~Distribution() {
 	//vThrsh.clear();
+	binFeatas.clear();
+	sortedA.clear();
 	vUnique.clear( );
+	mapCategory.clear();
 	if(histo != nullptr)
 		delete histo;
 }
