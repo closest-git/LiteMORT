@@ -164,12 +164,16 @@ void BoostingForest::SetUserData( void*ud_,isTrueObj hf,int flag ){
 }
 
 void BoostingForest::ClearData( )	{
-/*	for each( FeatsOnFold *hDat in arrDat )
-		delete hDat;
-	arrDat.clear( );*/
-	if( hTrainData!=nullptr )			delete hTrainData;
-	if( hTestData!=nullptr )			delete hTestData;
-	if (hEvalData != nullptr)			delete hEvalData;
+	printf("********* BoostingForest::ClearData hTrainData=%p,hTestData=%p,hEvalData=%p", hTrainData, hTestData,hEvalData);
+	if (hTrainData != nullptr) {
+		delete hTrainData;		hTrainData = nullptr;
+	}
+	if (hTestData != nullptr) {
+		delete hTestData;		hTestData = nullptr;
+	}
+	if (hEvalData != nullptr) {
+		delete hEvalData;		hEvalData = nullptr;
+	}
 	//for each( CASE* hCase in SamplSet )		delete hCase;
 	//SamplSet.clear( );
 }

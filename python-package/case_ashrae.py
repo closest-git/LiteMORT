@@ -1,7 +1,10 @@
-# https://www.kaggle.com/corochann/ashrae-training-lgbm-by-meter-type
-import sys
-import pickle
-import seaborn as sns; sns.set()
+'''
+    # https://www.kaggle.com/corochann/ashrae-training-lgbm-by-meter-type
+    # https://www.kaggle.com/yamsam/new-ucf-starter-kernel
+    v0.2-case_ashrae
+        11/18/2019
+'''
+
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import StratifiedKFold, GroupKFold,KFold
 from sklearn.metrics import log_loss, mean_squared_error
@@ -9,6 +12,8 @@ from litemort import *
 #from LiteMORT_hyppo import *
 import datetime
 import time
+import seaborn as sns; sns.set(style="ticks", color_codes=True)
+import matplotlib.pyplot as plt
 import random
 import gc
 import pandas as pd
@@ -16,6 +21,8 @@ import numpy as np
 import lightgbm as lgb
 # import shap as shap
 import os
+import sys
+import pickle
 from tqdm import tqdm
 data_root = 'F:/Datasets/ashrae/'
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
@@ -23,7 +30,7 @@ from pandas.api.types import is_categorical_dtype
 
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 isMORT = True
-isMerge = len(sys.argv)>1 and sys.argv[1] == "merge"
+isMerge = False #len(sys.argv)>1 and sys.argv[1] == "merge"
 gbm='MORT' if isMORT else 'LGB'
 
 print(f"====== MERGE={isMerge} gbm={gbm} ======\n\n")
@@ -69,6 +76,16 @@ def reduce_mem_usage(df, use_float16=False):
 
     return df
 
+def LoadUCF(data_root):
+    ucf_leak_df = pd.read_pickle(f'{data_root}site0.pkl')
+    ucf_leak_df['meter_reading'] = ucf_leak_df.meter_reading_scraped
+    ucf_leak_df.drop(['meter_reading_original', 'meter_reading_scraped'], axis=1, inplace=True)
+    ucf_leak_df.fillna(0, inplace=True)
+    ucf_leak_df.loc[ucf_leak_df.meter_reading < 0, 'meter_reading'] = 0
+    ucf_leak_df = ucf_leak_df[ucf_leak_df.timestamp.dt.year > 2016]
+    print(len(ucf_leak_df))
+    return ucf_leak_df
+    
 def LoadBuilding(data_root):
     building_meta_df = pd.read_csv(f'{data_root}/building_metadata.csv')
     primary_use_list = building_meta_df['primary_use'].unique()
@@ -82,7 +99,48 @@ class Whether(object):
     def __init__(self, source, data_root,params=None):
         self.source = source
         self.data_root = data_root
-        self.pkl_path = f'{data_root}/_ashrae_whether_{source}_.pickle'
+        self.lag_day=[3,72]
+        self.pkl_path = f'{data_root}/_ashrae_whether_{source}_[{self.lag_day}]_.pickle'
+
+    def TimeAlignment(self,weather_df):   #https://www.kaggle.com/nz0722/aligned-timestamp-lgbm-by-meter-type
+        print(f"TimeAlignment@{self.source}\tdf{weather_df.shape}......")
+        weather_key = ['site_id', 'timestamp']
+        temp_skeleton = weather_df[weather_key + ['air_temperature']].drop_duplicates(subset=weather_key).\
+            sort_values(by=weather_key).copy()
+        temp_skeleton['temp_rank'] = temp_skeleton.groupby(['site_id', temp_skeleton.timestamp.dt.date])[
+            'air_temperature'].rank('average')
+        # create a dataframe of site_ids (0-16) x mean hour rank of temperature within day (0-23)
+        df_2d = temp_skeleton.groupby(['site_id', temp_skeleton.timestamp.dt.hour])['temp_rank'].mean().unstack(level=1)
+        # Subtract the columnID of temperature peak by 14, getting the timestamp alignment gap.
+        site_ids_offsets = pd.Series(df_2d.values.argmax(axis=1) - 14)
+        site_ids_offsets.index.name = 'site_id'
+
+        weather_df['offset'] = weather_df.site_id.map(site_ids_offsets)
+        weather_df['timestamp_aligned'] = (weather_df.timestamp - pd.to_timedelta(weather_df.offset, unit='H'))
+        weather_df['timestamp'] = weather_df['timestamp_aligned']
+        del weather_df['timestamp_aligned']
+        if False:
+            print(f"TimeAlignment@{self.source}\tPlot......")
+            site_meter_raw = pd.read_csv(f'{self.data_root}/train.csv', usecols = ['building_id', 'meter', 'timestamp','meter_reading'],
+                                   dtype={'building_id': np.uint16, 'meter': np.uint8},parse_dates=['timestamp'])
+            building_site_dict = dict(zip(building_meta_df['building_id'], building_meta_df['site_id']))
+            site_meter_raw['site_id'] = site_meter_raw.building_id.map(building_site_dict)
+            del site_meter_raw['building_id']
+            site_meter_to_plot = site_meter_raw.copy()
+            site_meter_to_plot["hour"] = site_meter_to_plot["timestamp"].dt.hour
+            elec_to_plot = site_meter_to_plot[site_meter_to_plot.meter == 0]
+            count = 1
+            plt.figure(figsize=(25, 50))
+            for site_id, data_by_site in elec_to_plot.groupby('site_id'):
+                by_site_by_hour = data_by_site.groupby('hour').mean()
+                ax = plt.subplot(15, 4, count)
+                plt.plot(by_site_by_hour.index, by_site_by_hour['meter_reading'], 'xb-')
+                ax.set_title(f'site: {site_id}@{self.source}')
+                count += 1
+            plt.tight_layout()
+            plt.show()
+            del elec_to_plot, site_meter_to_plot, building_site_dict, site_meter_raw
+        return weather_df
 
     def df(self):
         if os.path.isfile(self.pkl_path):
@@ -91,20 +149,20 @@ class Whether(object):
                 [whether_df] = pickle.load(fp)
             return whether_df
         else:
-            weather_train_df = pd.read_csv(f'{self.data_root}/weather_{self.source}.csv', parse_dates=['timestamp'],
+            weather_df = pd.read_csv(f'{self.data_root}/weather_{self.source}.csv', parse_dates=['timestamp'],
                         dtype={'site_id': np.uint8, 'air_temperature': np.float16,
                                'cloud_coverage': np.float16, 'dew_temperature': np.float16,'precip_depth_1_hr': np.float16})
-            print(f"{weather_train_df.shape}\n{weather_train_df.isna().sum()}")
-            w_sum = weather_train_df.groupby('site_id').apply(lambda group: group.isna().sum())
-            weather_train_df = weather_train_df.groupby('site_id').apply(
-                lambda group: group.interpolate(limit_direction='both'))
-            w_sum = weather_train_df.groupby('site_id').apply(lambda group: group.isna().sum())
-            self.add_lag_feature(weather_train_df, window=3)
-            self.add_lag_feature(weather_train_df, window=72)
-            print(weather_train_df.head(), weather_train_df.columns)
+            print(f"{weather_df.shape}\n{weather_df.isna().sum()}")
+            weather_df = self.TimeAlignment(weather_df)
+            #w_sum = weather_df.groupby('site_id').apply(lambda group: group.isna().sum())
+            weather_df = weather_df.groupby('site_id').apply(lambda group: group.interpolate(limit_direction='both'))
+            w_sum = weather_df.groupby('site_id').apply(lambda group: group.isna().sum())
+            for days in self.lag_day:
+                self.add_lag_feature(weather_df, window=days)
+            print(weather_df.head(), weather_df.columns)
             with open(self.pkl_path, "wb") as fp:
-                pickle.dump([weather_train_df], fp)
-            return weather_train_df
+                pickle.dump([weather_df], fp)
+            return weather_df
 
     def add_lag_feature(self,weather_df, window=3):
         group_df = weather_df.groupby('site_id')
@@ -129,13 +187,14 @@ class COROchann(object):
             'hour', 'weekend',  # 'month' , 'dayofweek'
             'building_median'] + [
                                 'air_temperature', 'cloud_coverage',
-                                'dew_temperature', 'precip_depth_1_hr', 'sea_level_pressure',
-                                'wind_direction', 'wind_speed', 'air_temperature_mean_lag72',
-                                'air_temperature_max_lag72', 'air_temperature_min_lag72',
-                                'air_temperature_std_lag72', 'cloud_coverage_mean_lag72',
-                                'dew_temperature_mean_lag72', 'precip_depth_1_hr_mean_lag72',
-                                'sea_level_pressure_mean_lag72', 'wind_direction_mean_lag72',
-                                'wind_speed_mean_lag72', 'air_temperature_mean_lag3',
+            'dew_temperature', 'precip_depth_1_hr', 'sea_level_pressure','wind_direction', 'wind_speed',
+            'air_temperature_mean_lag72','air_temperature_max_lag72', 'air_temperature_min_lag72','air_temperature_std_lag72', 'cloud_coverage_mean_lag72',
+            'dew_temperature_mean_lag72', 'precip_depth_1_hr_mean_lag72','sea_level_pressure_mean_lag72', 'wind_direction_mean_lag72',
+            'air_temperature_mean_lag24', 'air_temperature_max_lag24', 'air_temperature_min_lag24','air_temperature_std_lag24', 'cloud_coverage_mean_lag24',
+            'dew_temperature_mean_lag24', 'precip_depth_1_hr_mean_lag24', 'sea_level_pressure_mean_lag24','wind_direction_mean_lag24',
+            'air_temperature_mean_lag168', 'air_temperature_max_lag168', 'air_temperature_min_lag168','air_temperature_std_lag168', 'cloud_coverage_mean_lag168',
+            'dew_temperature_mean_lag168', 'precip_depth_1_hr_mean_lag168', 'sea_level_pressure_mean_lag168','wind_direction_mean_lag168',
+            'wind_speed_mean_lag72', 'air_temperature_mean_lag3',
                                 'air_temperature_max_lag3',
                                 'air_temperature_min_lag3', 'cloud_coverage_mean_lag3',
                                 'dew_temperature_mean_lag3',
@@ -155,8 +214,8 @@ class COROchann(object):
         pass
 
     def data_X_y(self,target_meter):
-        self.building_meta_df.drop('floor_count', axis=1, inplace=True)
-        self.building_meta_df['primary_use'] = self.building_meta_df.primary_use.astype('category')
+        #self.building_meta_df.drop('floor_count', axis=1, inplace=True)
+        #self.building_meta_df['primary_use'] = self.building_meta_df.primary_use.astype('category')
         feat_v0 = self.feature_cols + self.category_cols
         feat_infos = {"categorical": self.category_cols}
         train_df = self.df_base
@@ -167,7 +226,7 @@ class COROchann(object):
             #self.weather_df = self.weather_df[:1000]
             feat_v1 = list(set(feat_v0).intersection(set(list(self.weather_df.columns))))
             #feat_v1 = ['site_id','timestamp','precip_depth_1_hr']       #测试需要
-            self.weather_df = self.weather_df[feat_v1]
+            #self.weather_df = self.weather_df[feat_v1]
             self.merge_infos = [
                 {'on': ['site_id', 'timestamp'], 'dataset': self.weather_df, "desc": "weather"},
                 {'on': ['building_id'], 'dataset': self.building_meta_df, "desc": "building","feat_info": feat_infos},
@@ -175,19 +234,18 @@ class COROchann(object):
         else:
             self.merge_infos = []
 
-        if False:#os.path.isfile(pkl_path):
+        if os.path.isfile(pkl_path):
             print("====== Load pickle @{} ......".format(pkl_path))
             with open(pkl_path, "rb") as fp:
                 [X_train, y_train] = pickle.load(fp)
         else:
             target_train_df = train_df[train_df['meter'] == target_meter]
             print(f"target@{target_meter}={target_train_df.shape}")
-            building_site=self.building_meta_df[['building_id','site_id']]
-            self.building_meta_df.drop(['site_id'], axis=1, inplace=True)
-            target_train_df = target_train_df.merge(building_site, on='building_id', how='left')    #add 'site_id'
             #target_train_df = target_train_df.merge(self.weather_df, on=['site_id', 'timestamp'], how='left')
-
             if isMerge:
+                building_site = self.building_meta_df[['building_id', 'site_id']]
+                self.building_meta_df.drop(['site_id'], axis=1, inplace=True)
+                target_train_df = target_train_df.merge(building_site, on='building_id', how='left')  # add 'site_id'
                 pass#
             else:
                 target_train_df = target_train_df.merge(self.building_meta_df, on='building_id', how='left')
@@ -216,7 +274,9 @@ class COROchann(object):
         else:
             df = pd.read_csv(f'{self.data_root}/{self.source}.csv', dtype={'building_id': np.uint16, 'meter': np.uint8},
                              parse_dates=['timestamp'])
-            if self.source=="train":
+            ucf_leak_df = LoadUCF(data_root)
+            #df = pd.concat([df, ucf_leak_df])
+            if self.source=="train":    #All electricity meter is 0 until May 20 for site_id == 0
                 df = df.query('not (building_id <= 104 & meter == 0 & timestamp <= "2016-05-20")')
                 if self.some_rows is not None:
                     df, _ = Mort_PickSamples(self.some_rows, df, None)
@@ -252,10 +312,11 @@ class COROchann(object):
         return df
 
 building_meta_df=LoadBuilding(data_root)
-weather_train_df = Whether('train', data_root).df()
-print(weather_train_df.head())
 weather_test_df = Whether('test', data_root).df()
 print(weather_test_df.head())
+weather_train_df = Whether('train', data_root).df()
+print(weather_train_df.head())
+
 early_stop = 20
 verbose_eval = 5
 metric = 'l2'
@@ -267,9 +328,9 @@ params = {'num_leaves': 31, 'n_estimators': num_rounds,
               #               'max_depth': -1,
               'learning_rate': lr,
               "boosting": "gbdt",
-              "bagging_freq": 1,
+              "bagging_freq": 5,
               "bagging_fraction": bf,
-              "feature_fraction": 1,  # STRANGE GBDT  why("bagging_freq": 5 "feature_fraction": 0.9)!!!
+              "feature_fraction": 0.9,  # STRANGE GBDT  why("bagging_freq": 5 "feature_fraction": 0.9)!!!
               "metric": metric, "verbose_eval": verbose_eval, 'n_jobs': 8, "elitism": 0,"debug":'1',
               "early_stopping_rounds": early_stop, "adaptive": 'weight1', 'verbose': 666, 'min_data_in_leaf': 20,
               #               "verbosity": -1,
@@ -298,13 +359,14 @@ def fit_regressor(train, val,target_meter,fold, some_params, devices=(-1,), merg
         print("X_train={}, y_train={} d_train={}".format(col_X.shape, col_y.shape, d_train.shape))
 
     if isMORT:
-        params['verbose']=667
+        #params['verbose']=667
         merge_datas=[]
         model = LiteMORT(some_params,merge_infos=merge_info)   # all train,eval,predict would use same merge infomation
         model.fit(X_train, y_train, eval_set=[(X_valid, y_valid)], categorical_feature=cat_features)
         fold_importance = None
         log = ""
     else:
+        params['verbose'] = 0
         d_train = lgb.Dataset(X_train, label=y_train, categorical_feature=cat_features)
         d_valid = lgb.Dataset(X_valid, label=y_valid, categorical_feature=cat_features)
         watchlist = [d_train, d_valid]
@@ -321,8 +383,7 @@ def fit_regressor(train, val,target_meter,fold, some_params, devices=(-1,), merg
     y_pred_valid = model.predict(X_valid, num_iteration=model.best_iteration)
     oof_loss = mean_squared_error(y_valid, y_pred_valid)  # target is already in log scale
     print(f'METER:{target_meter} Fold:{fold} MSE: {oof_loss:.4f} time={time.time() - t0:.5g}', flush=True)
-    #input("......")
-    os._exit(-200)      #
+    #input("......")    os._exit(-200)      #
     return model, y_pred_valid, log
 
 folds = 5
@@ -344,13 +405,14 @@ def GetSplit_idxs(kf,X_train, y_train):
         split_idxs.append((train_idx, valid_idx))
     return split_idxs
 
-for target_meter in range(4):
+nTargetMeter=4
+for target_meter in range(nTargetMeter):
     X_train, y_train = train_datas.data_X_y(target_meter)
     split_ids=GetSplit_idxs(kf,X_train, y_train)
     #X_train = X_train[feat_fix]
     y_valid_pred_total = np.zeros(X_train.shape[0])
     gc.collect()
-    print(f'target_meter={target_meter} X_train={X_train.shape}')
+    print(f'target_meter={target_meter} X_train={X_train.shape}\nfeatures={X_train.columns}')
     cat_features = train_datas.category_cols
     # cat_features = ['building_id']
     # [X_train.columns.get_loc(cat_col) for cat_col in train_datas.category_cols]
@@ -383,6 +445,7 @@ for target_meter in range(4):
         model, y_pred_valid, log = fit_regressor(train_data, valid_data,target_meter,fold,some_params=params,merge_info=train_datas.merge_infos, cat_features=cat_features)
         y_valid_pred_total[valid_idx] = y_pred_valid
         models_.append(model)
+        del train_data,valid_data
         gc.collect()
         fold=fold+1
         #break
@@ -413,15 +476,17 @@ test_datas = COROchann("test",data_root,building_meta_df,weather_test_df)
 test_df = test_datas.df_base
 sample_submission = pd.read_csv(os.path.join(data_root, 'sample_submission.csv'))
 reduce_mem_usage(sample_submission)
-for target_meter in range(4):
+for target_meter in range(nTargetMeter):
     X_test,_ = test_datas.data_X_y(target_meter)
+    print(f'\t target_meter={target_meter} X_test={X_test.shape}\nfeatures={X_test.columns}')
     gc.collect()
     y_test0 = pred(X_test, meter_models[target_meter])
-    sns.distplot(y_test0)
+    sns.distplot(y_test0); plt.show()
     sample_submission.loc[test_df['meter'] == target_meter, 'meter_reading'] = np.expm1(y_test0)
     del X_test
     gc.collect()
 
 submit_path = f'{data_root}/[{gbm}]_[{losses}].csv.gz'
 sample_submission.to_csv(submit_path, index=False, float_format='%.4f',compression='gzip')
-print(sample_submission.head())
+print(sample_submission.head(100))
+print(sample_submission.tail(100))

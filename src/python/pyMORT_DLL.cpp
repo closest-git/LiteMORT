@@ -937,6 +937,7 @@ void Feats_one_by_one(FeatsOnFold *hTrain, FeatsOnFold *hEval, BoostingForest::M
 	delete hGBRT_0;
 }
 
+
 /*
 	v0.2
 */
@@ -991,6 +992,7 @@ PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_DATASET_LIST *train_list, PY
 		if (isDelEDA) {
 			delete hEDA;			hEDA = nullptr;
 		}
+		mort->hGBRT->ClearData();
 		//@%p(hEDA=%p,hGBRT=%p)	mort,mort->hEDA,mort->hGBRT,
 		//FeatsOnFold::stat.tX += GST_TOC(tick);
 		printf("\n********* LiteMORT_fit_1  time=%.3g(%.3g)......OK\n\n", GST_TOC(tick), FeatsOnFold::stat.tX + DCRIMI_2::tX);
