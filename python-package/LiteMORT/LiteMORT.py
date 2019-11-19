@@ -46,23 +46,31 @@ class LiteMORT_profile(object):
     def __init__(self):
         self.memory_info={}
         self.params = {}
+        self.shots = {}
         self.memory_info['virtual memory'] = 0
         self.memory_info['physical memory'] = 0
 
-    def Begin(self, params=None):
+    def Snapshot(self, title,params=None):
         process = psutil.Process(os.getpid())
-        self.mem_info_0 = process.memory_info()
+        self.shots[title] = process.memory_info()
         #print(process.memory_info().rss)
 
-    def End(self,dump=True):
-        process = psutil.Process(os.getpid())
-        mem_info_1 = process.memory_info()
-        self.memory_info['virtual memory']=a=(mem_info_1.vms-self.mem_info_0.vms)/1.0e6
-        self.memory_info['physical memory']=b=(mem_info_1.rss-self.mem_info_0.rss)/1.0e6
-        v0=self.mem_info_0.vms/1.0e6
+    def Stat(self,shot0,shot1,dump=True):
+        assert (shot0 in self.shots)
+        if shot1 not in self.shots:
+            self.Snapshot(shot1)
+        assert (shot1 in self.shots)
+        mem_0 = self.shots[shot0]
+        mem_1 = self.shots[shot1]
+        self.memory_info['virtual memory']=a=(mem_1.vms-mem_0.vms)/1.0e6
+        self.memory_info['physical memory']=b=(mem_1.rss-mem_0.rss)/1.0e6
+        v0=mem_0.vms/1.0e6
         if dump:
-            print(f"\n{'-'* 80}\n\tMEMORY usage: physical={a:.2f}(M) virtual={b:.2f}(M) begin={v0:.2f}(M)"
-                  f"\n{'-'* 80}\n")
+            print(f"\n{'-'* 120}\nMEMORY@[{shot0}-{shot1}]: physical={a:.2f}(M) virtual={b:.2f}(M) begin={v0:.2f}(M)")
+            if getattr(mem_1,"peak_pagefile") and getattr(mem_1,"peak_wset"):
+                peak_info=f"PEAK=[{mem_1.peak_pagefile/1.0e6:.1f},{mem_1.peak_wset/1.0e6:.1f}](M)"
+                print(f"\t{peak_info}")
+            print(f"\n{'-'* 120}\n")
         return
 
 class LiteMORT_params(object):
@@ -435,7 +443,7 @@ class LiteMORT(object):
                 feat_dict   cys@1/10/2019
     '''
     def fit(self,X_train_0, y_train,eval_set=None,categorical_feature=None,discrete_feature=None, params=None,flag=0x0):
-        self.profile.Begin()
+        self.profile.Snapshot("fit_0")
         print("====== LiteMORT_fit X_train_0={} y_train={}......".format(X_train_0.shape, y_train.shape))
         #self.categorical_feature = categorical_feature
         #self.discrete_feature = discrete_feature
@@ -458,7 +466,7 @@ class LiteMORT(object):
         #self.EDA(flag)
 
         self.mort_fit_1(self.hLIB, self.cpp_train_sets,self.cpp_eval_sets, 0)
-        self.profile.End()
+        self.profile.Stat("fit_0","fit_1")
 
         return self
 
@@ -478,10 +486,12 @@ class LiteMORT(object):
         y : array, shape (n_samples,)
             The predicted values.
         """
+        self.profile.Snapshot("PRED_0")
         # print("====== LiteMORT_predict X_={} ......".format(X_.shape))
         Y_ = self.predict_raw(X_,pred_leaf, pred_contrib,raw_score, flag)
         Y_ = self.problem.AfterPredict(X_,Y_)
         Y_ = self.problem.OnResult(Y_,pred_leaf,pred_contrib,raw_score)
+        self.profile.Stat("PRED_0","PRED_1")
         return Y_
 
     def predict_raw_v0(self, X_,pred_leaf=False, pred_contrib=False,raw_score=False,flag=0x0):

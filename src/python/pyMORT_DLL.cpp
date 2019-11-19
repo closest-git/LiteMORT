@@ -282,7 +282,7 @@ namespace Grusoft {
 		}
 		if (hFQ != nullptr) {
 			hFQ->UpdateHisto(hFold, false, true);
-			if (!hFold->config.isDynamicHisto)
+			if (!hFold->config.isDynamicHisto && !hFold->isMerge())
 				hFeat->FreeVals();		//ĞèÒªdynamic update histo
 		}
 		return hFQ;

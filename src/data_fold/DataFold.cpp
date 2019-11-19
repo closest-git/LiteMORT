@@ -733,11 +733,12 @@ tpDOWN *FeatsOnFold::GetSampleHessian() const {
 int *FeatsOnFold::Tag() { return lossy->Tag(); }
 
 /*
+	hFeat必须保持不变诶
 	v0.1 cys
 		11/15/2019
 */
 void FeatsOnFold::ExpandMerge(const vector<FeatsOnFold *>&merge_folds, int flag) {
-	int i,nFeat,nMerge=0,nExFeat=0;
+	int i,j,nMerge=0,nExFeat=0;
 	assert(merge_lefts.size() == merge_folds.size());
 	for (auto fold : merge_folds) {
 		assert( BIT_TEST(fold->dType, FeatsOnFold::DF_MERGE) );
@@ -745,9 +746,11 @@ void FeatsOnFold::ExpandMerge(const vector<FeatsOnFold *>&merge_folds, int flag)
 		//FeatVector *hRight = fold->Feat(fold->merge_right);		assert(hRight != nullptr);
 		hLeft->Merge4Quanti(nullptr, 0x0);
 		SAMP_SET samp1(hLeft->size(), hLeft->map4set);
-		for (auto hFeat : fold->feats) {
+		//for (auto hFeat : fold->feats) {
+		for(i=0;i<fold->feats.size();i++)	{
+			FeatVector *hFeat = fold->feats[i];
 			if (hFeat->nam=="wind_speed")	{	//仅用于调试	
-				i = 0;
+				j = i;
 			}
 
 			FeatVector *hRight = hFeat;
@@ -761,7 +764,7 @@ void FeatsOnFold::ExpandMerge(const vector<FeatsOnFold *>&merge_folds, int flag)
 				FeatVector *hFQ = FeatVecQ_InitInstance(fold, hFeat, 0x0);	// new FeatVec_Q<short>(hFold, hFeat, nMostQ);
 				hRight = hFQ;	//delete hFeat;
 			}
-
+			//assert(hRight->arr() != nullptr);
 			FeatVector *hEXP = nullptr;
 			if(hLeft->PY->isInt8())
 				hEXP = new FeatVec_EXP<uint8_t>(this, hRight->nam + "@" + hLeft->nam,hLeft, hRight);

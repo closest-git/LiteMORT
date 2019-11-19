@@ -28,6 +28,9 @@ data_root = 'F:/Datasets/ashrae/'
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from pandas.api.types import is_categorical_dtype
 
+profile = LiteMORT_profile()
+profile.Snapshot(":");          profile.Stat(":","::")
+
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 isMORT = True
 isMerge = False #len(sys.argv)>1 and sys.argv[1] == "merge"
@@ -99,8 +102,9 @@ class Whether(object):
     def __init__(self, source, data_root,params=None):
         self.source = source
         self.data_root = data_root
-        self.lag_day=[3,72]
+        self.lag_day=[]#,[3,72]72
         self.pkl_path = f'{data_root}/_ashrae_whether_{source}_[{self.lag_day}]_.pickle'
+        self.lag_feat_list=[]
 
     def TimeAlignment(self,weather_df):   #https://www.kaggle.com/nz0722/aligned-timestamp-lgbm-by-meter-type
         print(f"TimeAlignment@{self.source}\tdf{weather_df.shape}......")
@@ -158,7 +162,8 @@ class Whether(object):
             weather_df = weather_df.groupby('site_id').apply(lambda group: group.interpolate(limit_direction='both'))
             w_sum = weather_df.groupby('site_id').apply(lambda group: group.isna().sum())
             for days in self.lag_day:
-                self.add_lag_feature(weather_df, window=days)
+                f_list = self.add_lag_feature(weather_df, window=days)
+                self.lag_feat_list.extend(f_list)
             print(weather_df.head(), weather_df.columns)
             with open(self.pkl_path, "wb") as fp:
                 pickle.dump([weather_df], fp)
@@ -166,6 +171,7 @@ class Whether(object):
 
     def add_lag_feature(self,weather_df, window=3):
         group_df = weather_df.groupby('site_id')
+        feat_list=[]
         cols = ['air_temperature', 'cloud_coverage', 'dew_temperature', 'precip_depth_1_hr', 'sea_level_pressure',
                 'wind_direction', 'wind_speed']
         rolled = group_df[cols].rolling(window=window, min_periods=0)
@@ -174,39 +180,32 @@ class Whether(object):
         lag_min = rolled.min().reset_index().astype(np.float16)
         lag_std = rolled.std().reset_index().astype(np.float16)
         for col in cols:
+            feat_list.append(f'{col}_mean_lag{window}')
             weather_df[f'{col}_mean_lag{window}'] = lag_mean[col]
+            feat_list.append(f'{col}_max_lag{window}')
             weather_df[f'{col}_max_lag{window}'] = lag_max[col]
+            feat_list.append(f'{col}_min_lag{window}')
             weather_df[f'{col}_min_lag{window}'] = lag_min[col]
+            feat_list.append(f'{col}_std_lag{window}')
             weather_df[f'{col}_std_lag{window}'] = lag_std[col]
+        return feat_list
 
 class COROchann(object):
     @classmethod
     def __init__(self, source,data_root,building_meta_df,weather_df):
         self.category_cols = ['building_id', 'site_id', 'primary_use']  # , 'meter'
-        self.feature_cols = ['square_feet', 'year_built'] + [
-            'hour', 'weekend',  # 'month' , 'dayofweek'
-            'building_median'] + [
-                                'air_temperature', 'cloud_coverage',
-            'dew_temperature', 'precip_depth_1_hr', 'sea_level_pressure','wind_direction', 'wind_speed',
-            'air_temperature_mean_lag72','air_temperature_max_lag72', 'air_temperature_min_lag72','air_temperature_std_lag72', 'cloud_coverage_mean_lag72',
-            'dew_temperature_mean_lag72', 'precip_depth_1_hr_mean_lag72','sea_level_pressure_mean_lag72', 'wind_direction_mean_lag72',
-            'air_temperature_mean_lag24', 'air_temperature_max_lag24', 'air_temperature_min_lag24','air_temperature_std_lag24', 'cloud_coverage_mean_lag24',
-            'dew_temperature_mean_lag24', 'precip_depth_1_hr_mean_lag24', 'sea_level_pressure_mean_lag24','wind_direction_mean_lag24',
-            'air_temperature_mean_lag168', 'air_temperature_max_lag168', 'air_temperature_min_lag168','air_temperature_std_lag168', 'cloud_coverage_mean_lag168',
-            'dew_temperature_mean_lag168', 'precip_depth_1_hr_mean_lag168', 'sea_level_pressure_mean_lag168','wind_direction_mean_lag168',
-            'wind_speed_mean_lag72', 'air_temperature_mean_lag3',
-                                'air_temperature_max_lag3',
-                                'air_temperature_min_lag3', 'cloud_coverage_mean_lag3',
-                                'dew_temperature_mean_lag3',
-                                'precip_depth_1_hr_mean_lag3', 'sea_level_pressure_mean_lag3',
-                                'wind_direction_mean_lag3', 'wind_speed_mean_lag3']
+
 
         self.source = source
         self.data_root = data_root
         self.building_meta_df = building_meta_df
         self.weather_df = weather_df
-        #self.some_rows = 500000
-        self.some_rows = None
+        feats_whether =[e for e in list(self.weather_df.columns) if e not in ('site_id','offset', 'timestamp')]
+        self.feature_cols = ['square_feet', 'year_built'] + [
+            'hour', 'weekend',  # 'month' , 'dayofweek'
+            'building_median']+feats_whether
+        self.some_rows = 5000
+        #self.some_rows = None
         self.df_base = self.Load_Processing()
         self.df_base_shape = self.df_base.shape
 
@@ -220,13 +219,13 @@ class COROchann(object):
         feat_infos = {"categorical": self.category_cols}
         train_df = self.df_base
         print(f"{self.source}_X_y@{target_meter} df_base={train_df.shape}......")
-        pkl_path = f'{data_root}/_ashrae_{self.source}_T{target_meter}_{self.some_rows}_M[{isMerge}]_.pickle'
+        pkl_path = f'{data_root}/_ashrae_{self.source}_T{target_meter}_{self.some_rows}_{"Mg"if isMerge else ""}_.pickle'
         if isMerge:
             feat_v0 = feat_v0 + ['timestamp']
             #self.weather_df = self.weather_df[:1100]
             feat_v1 = list(set(feat_v0).intersection(set(list(self.weather_df.columns))))
             #feat_v1 = ['site_id','timestamp','precip_depth_1_hr']       #测试需要
-            #self.weather_df = self.weather_df[feat_v1]
+            self.weather_df = self.weather_df[feat_v1]
             self.merge_infos = [
                 {'on': ['site_id', 'timestamp'], 'dataset': self.weather_df, "desc": "weather"},
                 {'on': ['building_id'], 'dataset': self.building_meta_df, "desc": "building","feat_info": feat_infos},
@@ -359,7 +358,7 @@ def fit_regressor(train, val,target_meter,fold, some_params, devices=(-1,), merg
         print("X_train={}, y_train={} d_train={}".format(col_X.shape, col_y.shape, d_train.shape))
 
     if isMORT:
-        #params['verbose']=667
+        params['verbose']=667
         merge_datas=[]
         model = LiteMORT(some_params,merge_infos=merge_info)   # all train,eval,predict would use same merge infomation
         model.fit(X_train, y_train, eval_set=[(X_valid, y_valid)], categorical_feature=cat_features)
@@ -383,7 +382,7 @@ def fit_regressor(train, val,target_meter,fold, some_params, devices=(-1,), merg
     y_pred_valid = model.predict(X_valid, num_iteration=model.best_iteration)
     oof_loss = mean_squared_error(y_valid, y_pred_valid)  # target is already in log scale
     print(f'METER:{target_meter} Fold:{fold} MSE: {oof_loss:.4f} time={time.time() - t0:.5g}', flush=True)
-    #input("......")    os._exit(-200)      #
+    input("......");   os._exit(-200)      #
     return model, y_pred_valid, log
 
 folds = 5

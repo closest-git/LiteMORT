@@ -205,6 +205,10 @@ namespace Grusoft {
 		bool isEval()			const {
 			return BIT_TEST(dType, FeatsOnFold::DF_EVAL);
 		}
+		//内部数据必须保持不变！！！
+		bool isMerge()			const {		
+			return BIT_TEST(dType, FeatsOnFold::DF_MERGE);
+		}
 
 		enum {
 			TAG_ZERO = 0x10000,
@@ -348,6 +352,8 @@ namespace Grusoft {
 			for (int thread = 0; thread < num_threads; thread++) {
 				size_t start = thread*step, end = min(start + step, nSamp), t;
 				for (t = start; t < end; t++) {
+					//if (t == 7)		//仅用于调试
+					//	t = 7;
 					int no = 0, feat;
 					while (no != -1) {
 						if (left[no] == -1) {
@@ -1090,6 +1096,11 @@ namespace Grusoft {
 			}
 			if (samp_val != arr())
 				delete[] samp_val;
+//https://stackoverflow.com/questions/13944886/is-stdvector-memory-freed-upon-a-clear
+			vector<tpSAMP_ID>().swap(hDistri->sortedA);	
+			vector<Distribution::vDISTINCT>().swap(hDistri->vUnique);
+			//hDistri->sortedA.clear();		hDistri->sortedA.resize(0);
+			//hDistri->vUnique.clear();		hDistri->vUnique.resize(0);
 		}
 
 		//参见Distribution::STA_at，需要独立出来		8/20/2019
