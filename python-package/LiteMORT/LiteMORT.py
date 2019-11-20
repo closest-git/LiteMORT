@@ -203,6 +203,10 @@ class LiteMORT(object):
         self.mort_init.argtypes = [POINTER(M_argument), c_int,POINTER(M_DATASET_LIST), c_size_t]
         self.mort_init.restype = c_void_p
 
+        self.C_set_mergesets = self.dll.LiteMORT_set_mergesets
+        self.C_set_mergesets.argtypes = [c_void_p,POINTER(M_DATASET_LIST), c_size_t]
+        self.C_set_mergesets.restype = None
+
         #self.mort_fit = self.dll.LiteMORT_fit
         #self.mort_fit.argtypes = [c_void_p,POINTER(c_float), POINTER(c_double), c_size_t, c_size_t,POINTER(c_float), POINTER(c_double), c_size_t, c_size_t]
         #self.mort_fit.restype = None
@@ -250,13 +254,12 @@ class LiteMORT(object):
         elif self.params.objective == "regression":
             self.problem = Mort_Regressor(self.params.__dict__)
 
+        self.hLIB = self.mort_init(self.ca_array, len(self.ca_array),None,0x0)
         self.MergeDataSets(merge_infos)
-
-        self.hLIB = self.mort_init(self.ca_array, len(self.ca_array),self.cpp_merge_sets,0x0)
 
     def __del__(self):
         try:
-            print("LiteMORT::__del__...".format())
+            #print("LiteMORT::__del__...".format())
             if self.hLIB is not None:
                 self.mort_clear(self.hLIB)
             self.hLIB = None
@@ -415,10 +418,12 @@ class LiteMORT(object):
         return self
 
 	#v0.1
-    def MergeDataSets(self,merge_infos):
+    def MergeDataSets(self,merge_infos,comment=""):
+        assert self.hLIB is not None
         self.merge_infos = merge_infos
         self.cpp_merge_sets=None
         if merge_infos is None or len(merge_infos) == 0:
+            self.C_set_mergesets(self.hLIB,self.cpp_merge_sets, 0x0)
             return None
 
         no = 0
@@ -431,11 +436,12 @@ class LiteMORT(object):
             pos_on = list(df.columns).index(cols_on[0])
             feat_info["merge_right"]=cols_on
             assert (pos_on >= 0)
-            title = item['desc'] if 'desc' in item else f"merge_{no}"
+            title = item['desc'] if 'desc' in item else f"merge_{no}"+comment
             mort_set = Mort_Preprocess(title, df, None,self.params, feat_info=feat_info)
             merge_sets.append(mort_set.cpp_dat_)
             no = no+1
         self.cpp_merge_sets = M_DATASET_LIST("merge_list", merge_sets)
+        self.C_set_mergesets(self.hLIB,self.cpp_merge_sets,0x0)
 
     '''
             # v0.2
@@ -488,7 +494,7 @@ class LiteMORT(object):
         """
         self.profile.Snapshot("PRED_0")
         # print("====== LiteMORT_predict X_={} ......".format(X_.shape))
-        Y_ = self.predict_raw(X_,pred_leaf, pred_contrib,raw_score, flag)
+        Y_ = self.predict_raw(X_,pred_leaf, pred_contrib,raw_score,flag=flag)
         Y_ = self.problem.AfterPredict(X_,Y_)
         Y_ = self.problem.OnResult(Y_,pred_leaf,pred_contrib,raw_score)
         self.profile.Stat("PRED_0","PRED_1")

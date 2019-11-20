@@ -35,6 +35,8 @@ isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 isMORT = True
 isMerge = False #len(sys.argv)>1 and sys.argv[1] == "merge"
 gbm='MORT' if isMORT else 'LGB'
+use_ucf=False
+nTargetMeter=4
 
 print(f"====== MERGE={isMerge} gbm={gbm} ======\n\n")
 
@@ -102,7 +104,7 @@ class Whether(object):
     def __init__(self, source, data_root,params=None):
         self.source = source
         self.data_root = data_root
-        self.lag_day=[]#,[3,72]72
+        self.lag_day=[3,72]     #3,72
         self.pkl_path = f'{data_root}/_ashrae_whether_{source}_[{self.lag_day}]_.pickle'
         self.lag_feat_list=[]
 
@@ -204,8 +206,8 @@ class COROchann(object):
         self.feature_cols = ['square_feet', 'year_built'] + [
             'hour', 'weekend',  # 'month' , 'dayofweek'
             'building_median']+feats_whether
-        self.some_rows = 5000
-        #self.some_rows = None
+        #self.some_rows = 5000
+        self.some_rows = None
         self.df_base = self.Load_Processing()
         self.df_base_shape = self.df_base.shape
 
@@ -213,39 +215,35 @@ class COROchann(object):
         pass
 
     def data_X_y(self,target_meter):
-        #self.building_meta_df.drop('floor_count', axis=1, inplace=True)
-        #self.building_meta_df['primary_use'] = self.building_meta_df.primary_use.astype('category')
         feat_v0 = self.feature_cols + self.category_cols
         feat_infos = {"categorical": self.category_cols}
         train_df = self.df_base
         print(f"{self.source}_X_y@{target_meter} df_base={train_df.shape}......")
         pkl_path = f'{data_root}/_ashrae_{self.source}_T{target_meter}_{self.some_rows}_{"Mg"if isMerge else ""}_.pickle'
-        if isMerge:
-            feat_v0 = feat_v0 + ['timestamp']
-            #self.weather_df = self.weather_df[:1100]
-            feat_v1 = list(set(feat_v0).intersection(set(list(self.weather_df.columns))))
-            #feat_v1 = ['site_id','timestamp','precip_depth_1_hr']       #测试需要
-            self.weather_df = self.weather_df[feat_v1]
-            self.merge_infos = [
-                {'on': ['site_id', 'timestamp'], 'dataset': self.weather_df, "desc": "weather"},
-                {'on': ['building_id'], 'dataset': self.building_meta_df, "desc": "building","feat_info": feat_infos},
-            ]
-        else:
-            self.merge_infos = []
+        self.merge_infos = []
 
-        if os.path.isfile(pkl_path):
+        if False:#os.path.isfile(pkl_path):
             print("====== Load pickle @{} ......".format(pkl_path))
             with open(pkl_path, "rb") as fp:
                 [X_train, y_train] = pickle.load(fp)
         else:
             target_train_df = train_df[train_df['meter'] == target_meter]
             print(f"target@{target_meter}={target_train_df.shape}")
-            #target_train_df = target_train_df.merge(self.weather_df, on=['site_id', 'timestamp'], how='left')
+
             if isMerge:
                 building_site = self.building_meta_df[['building_id', 'site_id']]
-                self.building_meta_df.drop(['site_id'], axis=1, inplace=True)
                 target_train_df = target_train_df.merge(building_site, on='building_id', how='left')  # add 'site_id'
-                pass#
+                self.building_merge_ = self.building_meta_df[['building_id', 'primary_use', 'square_feet', 'year_built']]  # only need 3 col for merge
+                feat_v0 = feat_v0 + ['timestamp']
+                # self.weather_df = self.weather_df[:1100]
+                feat_v1 = list(set(feat_v0).intersection(set(list(self.weather_df.columns))))
+                # feat_v1 = ['site_id','timestamp','precip_depth_1_hr']       #测试需要
+                self.weather_df = self.weather_df[feat_v1]
+                self.merge_infos = [
+                    {'on': ['site_id', 'timestamp'], 'dataset': self.weather_df, "desc": "weather"},
+                    {'on': ['building_id'], 'dataset': self.building_merge_, "desc": "building",
+                     "feat_info": feat_infos},
+                ]
             else:
                 target_train_df = target_train_df.merge(self.building_meta_df, on='building_id', how='left')
                 target_train_df = target_train_df.merge(self.weather_df, on=['site_id', 'timestamp'], how='left')
@@ -262,9 +260,12 @@ class COROchann(object):
                 pickle.dump([X_train, y_train], fp)
         return X_train, y_train
 
+    def OnTrainDf(self,df):
+        pass
+
     @classmethod
     def Load_Processing(self):
-        pkl_path = f'{self.data_root}/_ashrae_{self.source}_{self.some_rows}_.pickle'
+        pkl_path = f'{self.data_root}/_ashrae_{self.source}_{self.some_rows}_{"ucf" if use_ucf else ""}_.pickle'
         build_group_pkl = f'{self.data_root}/_ashrae_build_group_{self.some_rows}_.pickle'
         if os.path.isfile(pkl_path):
             print("====== Load pickle @{} ......".format(pkl_path))
@@ -277,9 +278,18 @@ class COROchann(object):
             #df = pd.concat([df, ucf_leak_df])
             if self.source=="train":    #All electricity meter is 0 until May 20 for site_id == 0
                 df = df.query('not (building_id <= 104 & meter == 0 & timestamp <= "2016-05-20")')
-                if self.some_rows is not None:
-                    df, _ = Mort_PickSamples(self.some_rows, df, None)
-                    print(f'====== Some Samples@{self.source} ... data={df.shape}')
+                if use_ucf:
+                    ucf_year = [2017, 2018]  # ucf data year used in train
+                    if True:  # del_2016:
+                        print('delete all buildings site0 in 2016')
+                        bids = ucf_leak_df.building_id.unique()
+                        df = df[df.building_id.isin(bids) == False]
+                    ucf_leak_df = ucf_leak_df[ucf_leak_df.timestamp.dt.year.isin(ucf_year)]
+                    df = pd.concat([df, ucf_leak_df])
+                    df.reset_index(inplace=True)
+            if self.some_rows is not None:
+                df, _ = Mort_PickSamples(self.some_rows, df, None)
+                print(f'====== Some Samples@{self.source} ... data={df.shape}')
             #df['date'] = df['timestamp'].dt.date
             df["hour"] = np.uint8(df["timestamp"].dt.hour)
             df["weekend"] = np.uint8(df["timestamp"].dt.weekday)    #cys
@@ -382,7 +392,7 @@ def fit_regressor(train, val,target_meter,fold, some_params, devices=(-1,), merg
     y_pred_valid = model.predict(X_valid, num_iteration=model.best_iteration)
     oof_loss = mean_squared_error(y_valid, y_pred_valid)  # target is already in log scale
     print(f'METER:{target_meter} Fold:{fold} MSE: {oof_loss:.4f} time={time.time() - t0:.5g}', flush=True)
-    input("......");   os._exit(-200)      #
+    #input("......");   os._exit(-200)      #
     return model, y_pred_valid, log
 
 folds = 5
@@ -404,7 +414,6 @@ def GetSplit_idxs(kf,X_train, y_train):
         split_idxs.append((train_idx, valid_idx))
     return split_idxs
 
-nTargetMeter=4
 for target_meter in range(nTargetMeter):
     X_train, y_train = train_datas.data_X_y(target_meter)
     split_ids=GetSplit_idxs(kf,X_train, y_train)
@@ -447,12 +456,12 @@ for target_meter in range(nTargetMeter):
         del train_data,valid_data
         gc.collect()
         fold=fold+1
-        #break
+        if nTargetMeter==1: break
     meter_loss = mean_squared_error(y_train, y_valid_pred_total)
     print(f'======METER:{target_meter} MSE: {meter_loss:.4f} time={time.time() - t0:.5g}\n')
     losses.append(meter_loss)
     meter_models.append(models_)
-    sns.distplot(y_train)
+    #sns.distplot(y_train)
     del X_train, y_train
     gc.collect()
     #break
@@ -465,27 +474,53 @@ def pred(X_test, models, batch_size=1000000):
     for i, model in enumerate(models):
         print(f'predicting {i}-th model')
         for k in tqdm(range(iterations)):
+        #for k in (range(iterations)):
+            #print(X_test[k*batch_size:(k+1)*batch_size].head(50),X_test[k*batch_size:(k+1)*batch_size].tail(50))
             y_pred_test = model.predict(X_test[k*batch_size:(k+1)*batch_size], num_iteration=model.best_iteration)
+            #print(y_pred_test[:100]);            input("pred ......")
             y_test_pred_total[k*batch_size:(k+1)*batch_size] += y_pred_test
 
     y_test_pred_total /= len(models)
     return y_test_pred_total
 
+print(f'\t test_datas.df_base......')
 test_datas = COROchann("test",data_root,building_meta_df,weather_test_df)
 test_df = test_datas.df_base
 sample_submission = pd.read_csv(os.path.join(data_root, 'sample_submission.csv'))
 reduce_mem_usage(sample_submission)
+
 for target_meter in range(nTargetMeter):
+    print(f'\t target_meter={target_meter}......')
     X_test,_ = test_datas.data_X_y(target_meter)
     print(f'\t target_meter={target_meter} X_test={X_test.shape}\nfeatures={X_test.columns}')
     gc.collect()
+    if isMORT and isMerge:
+        for i, model in enumerate(meter_models[target_meter]):
+            model.MergeDataSets(test_datas.merge_infos,comment="_predict")
     y_test0 = pred(X_test, meter_models[target_meter])
-    sns.distplot(y_test0); plt.show()
+    #sns.distplot(y_test0); plt.show()
     sample_submission.loc[test_df['meter'] == target_meter, 'meter_reading'] = np.expm1(y_test0)
     del X_test
     gc.collect()
-
 submit_path = f'{data_root}/[{gbm}]_[{losses}].csv.gz'
 sample_submission.to_csv(submit_path, index=False, float_format='%.4f',compression='gzip')
-print(sample_submission.head(100))
-print(sample_submission.tail(100))
+print(sample_submission.head(100),sample_submission.tail(100))
+
+def ReplaceUCF():
+    leak_score = 0
+    leak_df = LoadUCF()
+    sample_submission.loc[sample_submission.meter_reading < 0, 'meter_reading'] = 0
+    for bid in leak_df.building_id.unique():
+        temp_df = leak_df[(leak_df.building_id == bid)]
+        for m in temp_df.meter.unique():
+            v0 = sample_submission.loc[(test_df.building_id == bid) & (test_df.meter == m), 'meter_reading'].values
+            v1 = temp_df[temp_df.meter == m].meter_reading.values
+            leak_score += mean_squared_error(np.log1p(v0), np.log1p(v1)) * len(v0)
+            sample_submission.loc[(test_df.building_id == bid) & (test_df.meter == m), 'meter_reading'] = temp_df[
+                temp_df.meter == m].meter_reading.values
+    print('UCF score = ', np.sqrt(leak_score / len(leak_df)))
+    sample_submission.to_csv('submission_ucf_replaced.csv', index=False, float_format='%.4f')
+    print(sample_submission.head(100),sample_submission.tail(100))
+
+if use_ucf:
+    ReplaceUCF()

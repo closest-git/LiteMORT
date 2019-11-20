@@ -33,6 +33,9 @@ extern "C" {
 
 	PYMORT_DLL_API void* LiteMORT_init(PY_ITEM* params, int nParam, PY_DATASET_LIST *merge_list,int64_t flag);
 	PYMORT_DLL_API void LiteMORT_clear(void*);
+
+	PYMORT_DLL_API void LiteMORT_set_mergesets(void *, PY_DATASET_LIST *train, int64_t flag);
+
 	//PYMORT_DLL_API void LiteMORT_set_feat(PY_ITEM* params, int nParam, int flag);
 	PYMORT_DLL_API void LiteMORT_fit(void *,float *h_data, tpY *h_target, size_t nSamp, size_t ldS, float *eval_data, tpY *eval_target, size_t nEval, size_t flag);
 	PYMORT_DLL_API void LiteMORT_predict(void *,float *X, tpY *y, size_t nFeat_0, size_t nSamp, size_t flag);

@@ -130,9 +130,9 @@ double GBRT::Predict(FeatsOnFold *hData_, bool updateStopping,bool checkLossy, b
 					hData_->UpdateStepOnReduce<float, double>(hTree->ArrTree_data, hTree->ArrTree_quanti);
 				}*/
 				if (hData_->isQuanti) {
-					isNodeMajor = !hData_->PredictOnTree<tpDOWN>(*(hTree->ArrTree_quanti), flag);
+					isNodeMajor = !hData_->PredictOnTree<tpDOWN>(hTree,*(hTree->ArrTree_quanti), flag);
 				}		else				{
-					isNodeMajor = !hData_->PredictOnTree<tpDOWN>(*(hTree->ArrTree_data), flag);
+					isNodeMajor = !hData_->PredictOnTree<tpDOWN>(hTree,*(hTree->ArrTree_data), flag);
 				}
 			}
 		}

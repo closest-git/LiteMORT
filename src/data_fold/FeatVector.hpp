@@ -35,7 +35,37 @@ T* VECTOR2ARR(vector<T>& vecs) {
 namespace Grusoft {
 	class FeatsOnFold;
 	class Distribution;
-	class ARR_TREE;
+
+	class ARR_TREE {
+	public:
+		typedef tpFOLD * FOLD_MAP;
+		int nNodes = 0;
+		double *thrsh_step = nullptr, weight = 1.0;
+		int *feat_ids = nullptr, *left = nullptr, *rigt = nullptr, *info = nullptr;
+		FOLD_MAP *folds = nullptr;
+
+		virtual void Init(int nNode_, int flag = 0x0) {
+			nNodes = nNode_;
+			thrsh_step = new double[nNodes];
+			feat_ids = new int[nNodes * 4];
+			left = feat_ids + nNodes;		rigt = left + nNodes;
+			info = rigt + nNodes;
+			folds = new FOLD_MAP[nNodes];
+			for (int i = 0; i < nNodes; i++)
+				folds[i] = nullptr;
+		}
+		~ARR_TREE() {
+			if (thrsh_step != nullptr)			delete[] thrsh_step;
+			if (feat_ids != nullptr)			delete[] feat_ids;
+			if (folds != nullptr) {
+				for (int i = 0; i < nNodes; i++) {
+					if (folds[i] != nullptr)
+						delete[] folds[i];
+				}
+				delete[] folds;
+			}
+		}
+	};
 
 	class FeatVector {
 	protected:

@@ -36,36 +36,7 @@ namespace Grusoft {
 	class BinarySwarm_GBDT;
 	template<typename Tx> class FeatVec_T;
 
-	struct ARR_TREE {
-		typedef tpFOLD * FOLD_MAP;
-		int nNodes = 0;
-		double *thrsh_step = nullptr,weight=1.0;
-		int *feat_ids = nullptr, *left = nullptr, *rigt = nullptr, *info = nullptr;
-		FOLD_MAP *folds = nullptr;
-
-		virtual void Init(int nNode_, int flag = 0x0) {
-			nNodes = nNode_;
-			thrsh_step = new double[nNodes];
-			feat_ids = new int[nNodes * 4];
-			left = feat_ids + nNodes;		rigt = left + nNodes;
-			info = rigt + nNodes;
-			folds = new FOLD_MAP[nNodes];
-			for (int i = 0; i < nNodes; i++)
-				folds[i] = nullptr;
-		}
-		~ARR_TREE() {
-			if (thrsh_step != nullptr)			delete[] thrsh_step;
-			if (feat_ids != nullptr)			delete[] feat_ids;
-			if (folds != nullptr) {
-				for (int i = 0; i < nNodes; i++) {
-					if (folds[i] != nullptr)
-						delete[] folds[i];
-				}
-				delete[] folds;
-			}
-		}
-	};
-
+	
 	/*
 	比较微妙的数据结构
 	1 train,test可以用不同的init
@@ -327,7 +298,7 @@ namespace Grusoft {
 
 		//int  OMP_FOR_STATIC_1(const size_t nSamp, size_t& step, int flag = 0x0);
 		template<typename Ty>
-		bool PredictOnTree(const ARR_TREE&tree, int flag) {
+		bool PredictOnTree(ManifoldTree*hTree,const ARR_TREE&tree, int flag) {
 			if (tree.weight == 0) {
 				return true;	//pass
 			}
@@ -339,7 +310,7 @@ namespace Grusoft {
 				return false;
 			tpDOWN *delta_step = GetDeltaStep();			//assert(delta_step != nullptr);
 			Ty *pred = predict->arr();
-			int *feat_ids = tree.feat_ids, *left = tree.left, *rigt = tree.rigt;
+			int *feat_ids = tree.feat_ids, *left = tree.left, *rigt = tree.rigt, flagLR=0x0;
 			if(false){	//仅用于莫名其妙
 				FeatVector *hFT = feats[30];
 				double *vals = new double[nSamp];
@@ -352,7 +323,13 @@ namespace Grusoft {
 			for (int thread = 0; thread < num_threads; thread++) {
 				size_t start = thread*step, end = min(start + step, nSamp), t;
 				for (t = start; t < end; t++) {
-					//if (t == 7)		//仅用于调试
+					/*if (nSamp == 2955)				{//仅用于调试
+						t = 1;		flagLR = 0x1000000;
+						FeatVector *hFT = feats[10];
+						void *pVal = hFT->pValue_AtSamp(t);
+						printf("\nTree[%s]@%d\t", hTree->name.c_str(), t);
+					}*/
+					//if (t == 7)		
 					//	t = 7;
 					int no = 0, feat;
 					while (no != -1) {
@@ -368,9 +345,9 @@ namespace Grusoft {
 							FeatVector *hFT = feats[feat_ids[no]];
 							void *pVal = hFT->pValue_AtSamp(t);
 							//no = hFT->left_rigt(t,thrsh_step[no], left[no], rigt[no]);		
-							no = hFT->left_rigt(pVal, &tree,no);
+							no = hFT->left_rigt(pVal, &tree,no, flagLR);
 						}
-					}
+					}					
 				}
 
 			}
@@ -380,7 +357,7 @@ namespace Grusoft {
 
 		/*
 			尽量优化
-		*/
+		
 		template<typename Tx, typename Ty>
 		bool PredictOnTree_0(const ARR_TREE&tree, int flag) {
 			size_t nSamp = nSample(), nNode = tree.nNode, no, nFeat = feats.size(), step = nSamp;
@@ -403,7 +380,7 @@ namespace Grusoft {
 					arrFeat[t] = hFT->arr();
 				}
 			}
-			/**/
+	
 			int num_threads = OMP_FOR_STATIC_1(nSamp, step);
 #pragma omp parallel for schedule(static,1)
 			for (int thread = 0; thread < num_threads; thread++) {
@@ -436,12 +413,12 @@ namespace Grusoft {
 			}
 			delete[] arrFeat;
 			return true;
-		}
+		}*/
 
 		template<typename Tx, typename Ty>
 		bool UpdateStepOnReduce(ARR_TREE*treeEval, ARR_TREE*tree4train, int flag=0x0) {
 			ARR_TREE& tree = *treeEval;
-			size_t nSamp = nSample(), nNode = tree.nNode, no, nFeat = feats.size(), step = nSamp;
+			size_t nSamp = nSample(), nNode = tree.nNodes, no, nFeat = feats.size(), step = nSamp;
 			G_INT_64 t;
 			double *thrsh_step = tree.thrsh_step;
 			FeatVec_T<Ty> *predict = dynamic_cast<FeatVec_T<Ty>*>(GetPrecict());
@@ -859,23 +836,47 @@ namespace Grusoft {
 			//void *pVal = pValue_AtSamp(t);		//需要优化啊
 			Tx val_t=*(Tx*)pVal;// = val[t];
 			
-			const int lft = arr_tree->left[no], rgt = arr_tree->rigt[no];
+			const int lft = arr_tree->left[no], rgt = arr_tree->rigt[no],feat=arr_tree->feat_ids[no];
 			assert(no >= 0 && no < arr_tree->nNodes);
 			const tpFOLD *fold_map = arr_tree->folds[no];
 			if (fold_map == nullptr) {
 				if (IS_NAN_INF(val_t)) {
+#ifdef _DEBUG
+					if (flag == 0x1000000) {
+						printf("\t%dF%d<>=%d", no, feat, rgt);
+					}
+#endif					
 					return rgt;
-				}	else
-					return val_t < arr_tree->thrsh_step[no] ? lft : rgt;
+				}	else {
+					int child = val_t < arr_tree->thrsh_step[no] ? lft : rgt;
+#ifdef _DEBUG
+					if (flag == 0x1000000) {
+						printf("\t%dF%d<%.8g,%.8g>=%d",no, feat, double(val_t), arr_tree->thrsh_step[no],child);
+					}
+#endif
+					return child;
+
+				}
 			}
 			else {
 				if (IS_NAN_INF(val_t)) {
+#ifdef _DEBUG
+					if (flag == 0x1000000) {
+						printf("\t%dF%d<>=%d", no, feat, rgt);
+					}
+#endif	
 					return rgt;
 				}	else {
 					int i_val = (int)(val_t);
 					tpFOLD fold = fold_map[i_val];
 					assert(fold==0 || fold==1);
-					return (fold <= 0) ? lft : rgt;
+					int child = (fold <= 0) ? lft : rgt;
+#ifdef _DEBUG
+					if (flag == 0x1000000) {
+						printf("\t%dF%d<%d:%d>=%d", no, feat, i_val, fold,child);
+					}
+#endif					
+					return child;
 				}
 			}
 			return lft;

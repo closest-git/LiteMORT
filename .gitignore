@@ -301,3 +301,4 @@ ModelManifest.xml
 /python-package/litemort/桌面.lnk
 /python-package/LiteMORT_hyppo.py
 /python-package/shap_test.py
+*.pickle

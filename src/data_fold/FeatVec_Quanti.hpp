@@ -17,13 +17,13 @@ namespace Grusoft {
 		HistoGRAM *qHisto_1 = nullptr;
 	public:
 		FeatVec_Q(const FeatsOnFold *hData_, FeatVector *hFeat, int x, int flag = 0x0):hFeatSource(hFeat){
-			id = hFeat->id;
-			desc = hFeat->desc;
-			nam = hFeat->nam;
-			type = hFeat->type;
-			hDistri = hFeatSource->hDistri;
-			nSamp_0 = hFeatSource->size();
-			PY = hFeatSource->PY;
+			FeatVector::id = hFeat->id;
+			FeatVector::desc = hFeat->desc;
+			FeatVector::nam = hFeat->nam;
+			FeatVector::type = hFeat->type;
+			FeatVector::hDistri = hFeatSource->hDistri;
+			FeatVec_T<tpQUANTI>::nSamp_0 = hFeatSource->size();
+			FeatVector::PY = hFeatSource->PY;
 		}
 
 		virtual ~FeatVec_Q() {
@@ -31,7 +31,7 @@ namespace Grusoft {
 			if (qHisto_1 != nullptr)			delete qHisto_1;
 			if (hFeatSource != nullptr) {
 				delete hFeatSource;
-				hDistri = nullptr;
+				FeatVector::hDistri = nullptr;
 			}
 		}
 		virtual HistoGRAM *GetHisto(int flag = 0x0) { return qHisto_0; }
@@ -78,18 +78,18 @@ namespace Grusoft {
 				yDown = ((FeatsOnFold *)hData_)->GetDownDirection();
 			}/**/
 			 //assert(val == nullptr);
-			if (val == nullptr) {
-				val = new tpQUANTI[nSamp];
-				BIT_RESET(type, VAL_REFER);
+			if (FeatVec_T<tpQUANTI>::val == nullptr) {
+				FeatVec_T<tpQUANTI>::val = new tpQUANTI[nSamp];
+				BIT_RESET(FeatVector::type, FeatVector::VAL_REFER);
 			}
 			//val.resize(nSamp);
-			tpQUANTI *quanti = arr(), no;
+			tpQUANTI *quanti = FeatVec_T<tpQUANTI>::arr(), no;
 			//qHisto->quanti = quanti;
 			for (i = 0; i<nSamp; i++)	quanti[i] = tpQUANTI(-1);		//-1 for NAN
 
 			ExploreDA *edaX = hData_->edaX;
 			if (edaX != nullptr /*&& hData_->config.histo_algorithm == LiteBOM_Config::HISTO_ALGORITHM::on_EDA*/) {
-				Distribution& distri = edaX->arrDistri[id];
+				Distribution& distri = edaX->arrDistri[FeatVector::id];
 				if (isOnY) {
 					throw "!!!histogram_bins onY is ...!!!";
 					FeatVec_T<float> *hFeatFloat = dynamic_cast<FeatVec_T<float>*>(hFeatSource);
@@ -115,19 +115,19 @@ namespace Grusoft {
 					nValid++;
 			}
 			if (nValid == 0) {
-				printf("\n FeatVec_Q(%s) nBin=%d a0=%g a1=%g", desc.c_str(), qHisto_0->nBins, 0, -1);
+				printf("\n FeatVec_Q(%s) nBin=%d a0=%g a1=%g", FeatVector::desc.c_str(), qHisto_0->nBins, 0, -1);
 				BIT_SET(this->type, Distribution::DISTRI_OUTSIDE);
 			}
 			if (hData_->config.nMostSalp4bins>0 && hData_->isTrain())
-				select_bins = new FS_gene_(this->nam, hData_->config.nMostSalp4bins, qHisto_0->nBins, 0x0);
+				FeatVector::select_bins = new FS_gene_(this->nam, hData_->config.nMostSalp4bins, qHisto_0->nBins, 0x0);
 			if (this->isCategory()) {
 
 			}
 			else {
-				if (wBins != nullptr)
-					delete[] wBins;
-				wBins = new float[qHisto_0->nBins]();
-				wSplit_last = 0;
+				if (FeatVector::wBins != nullptr)
+					delete[] FeatVector::wBins;
+				FeatVector::wBins = new float[qHisto_0->nBins]();
+				FeatVector::wSplit_last = 0;
 			}
 
 			//printf("\n FeatVec_Q(%s) nBin=%d a0=%g a1=%g", desc.c_str(),qHisto->bins.size(),qHisto->a0, qHisto->a1 );	
@@ -144,7 +144,7 @@ namespace Grusoft {
 				//Samp2Histo_null_hessian_sparse(hData_, samp_set, histo, nMostBin, flag0);
 			}	else {
 				//histo->nSamp = samp_set.nSamp;
-				const tpQUANTI *quanti = arr();
+				const tpQUANTI *quanti = FeatVec_T<tpQUANTI>::arr();
 				tpQUANTI no, *map = nullptr;
 				InitSampHisto(histo, false);
 				if (histo->nBins == 0) {
@@ -210,7 +210,7 @@ namespace Grusoft {
 			
 		virtual size_t UniqueCount(const SAMP_SET&samp_set, int flag = 0x0) {
 			size_t i, nSamp = samp_set.nSamp, nUnique;
-			tpQUANTI *quanti = arr(), no;
+			tpQUANTI *quanti = FeatVec_T<tpQUANTI>::arr(), no;
 			const tpSAMP_ID *samps = samp_set.samps;
 			set<int>mapu;
 			for (i = 0; i < nSamp; i += 4) {
@@ -237,7 +237,7 @@ namespace Grusoft {
 				samps = samps4quanti;				
 			}
 			tpSAMP_ID samp;
-			const tpQUANTI *quanti = arr();
+			const tpQUANTI *quanti = FeatVec_T<tpQUANTI>::arr();
 			tpQUANTI no;
 			HISTO_BIN *pBins = histo->bins, *pBin;	//https://stackoverflow.com/questions/7377773/how-can-i-get-a-pointer-to-the-first-element-in-an-stdvector
 			GST_TIC(t1);

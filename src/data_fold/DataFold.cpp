@@ -749,7 +749,7 @@ void FeatsOnFold::ExpandMerge(const vector<FeatsOnFold *>&merge_folds, int flag)
 		//for (auto hFeat : fold->feats) {
 		for(i=0;i<fold->feats.size();i++)	{
 			FeatVector *hFeat = fold->feats[i];
-			if (hFeat->nam=="wind_speed")	{	//仅用于调试	
+			if (hFeat->nam=="air_temperature" && samp1.nSamp==586)	{	//仅用于调试	
 				j = i;
 			}
 

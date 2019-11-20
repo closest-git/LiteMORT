@@ -209,25 +209,30 @@ END:
 	printf("********* OnUserParams ********* \n\n");
 }
 
+PYMORT_DLL_API void LiteMORT_set_mergesets(void *mort_0, PY_DATASET_LIST *merge_list, int64_t flag) {
+	MORT *mort = MORT::From(mort_0);
+	mort->merge_folds.clear();
+	if (merge_list != nullptr) {
+		for (int i = 0; i < merge_list->nSet; i++) {
+			PY_DATASET *set = merge_list->list + i;
+			printf("\n\t------MERGE@[\"%s\"](%lldx%d)......", set->name, set->nSamp, set->ldFeat);
+			ExploreDA *hEDA = new ExploreDA(mort->config, set->ldFeat, flag);
+			FeatsOnFold *hMerge = FeatsOnFold_InitInstance(mort->config, hEDA, set, nullptr, flag | FeatsOnFold::DF_MERGE);
+			//hMerge->merge_right = set->merge_rigt;
+			mort->merge_folds.push_back(hMerge);
+		}/**/
+	}
+}
 
 //GBRT *hGBRT = nullptr;
-PYMORT_DLL_API void* LiteMORT_init(PY_ITEM* params, int nParam, PY_DATASET_LIST *merge_list, int64_t flag = 0x0) {
+PYMORT_DLL_API void* LiteMORT_init(PY_ITEM* params, int nParam, PY_DATASET_LIST *null_list, int64_t flag = 0x0) {
 	try {
-		printf("\n大道至简\n");
+		printf("\nLiteMORT_api init......\n");		//大道至简
 
 		MORT *mort = new MORT();
 		OnUserParams(mort->config, params, nParam);
 		printf("\n======LiteMORT_api init @%p(hEDA=%p,hGBRT=%p)...OK\n", mort,mort->hEDA,mort->hGBRT);
-		if (merge_list != nullptr) {
-			for (int i = 0; i < merge_list->nSet; i++) {
-				PY_DATASET *set = merge_list->list + i;
-				printf("\n\t------MERGE@[\"%s\"](%lldx%d)......", set->name,set->nSamp,set->ldFeat);
-				ExploreDA *hEDA = new ExploreDA(mort->config, set->ldFeat, flag);
-				FeatsOnFold *hMerge = FeatsOnFold_InitInstance(mort->config, hEDA, set, nullptr, flag | FeatsOnFold::DF_MERGE);
-				//hMerge->merge_right = set->merge_rigt;
-				mort->merge_folds.push_back(hMerge);
-			}/**/
-		}
+		
 		return mort;
 	}
 	catch (char * sInfo) {
@@ -349,6 +354,7 @@ FeatVector *PY_COL2FEAT(const LiteBOM_Config&config, PY_COLUMN*col, Distribution
 
 	return hFeat;
 }
+
 
 //FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, string nam_, PY_COLUMN *cX_, PY_COLUMN *cY_, size_t nSamp_, size_t ldX_, size_t ldY_, int flag) {
 FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY_DATASET *dataset_, MORT *mort, int flag) {
@@ -996,7 +1002,7 @@ PYMORT_DLL_API void LiteMORT_feats_one_by_one(void *mort_0, PY_COLUMN *train_dat
 
 }
 
-const char *GRUS_LITEMORT_APP_NAME = "LiteMORT-alpha";
+const char *GRUS_LITEMORT_APP_NAME = "LiteMORT-beta";
 
 void GRUS_LITEMORT_VERSION(char * str) {
 	char sName[80];
