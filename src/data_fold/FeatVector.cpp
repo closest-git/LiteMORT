@@ -1,6 +1,6 @@
 #pragma once
 
-#include "./FeatVec_EXP.hpp"
+#include "./FeatVector.hpp"
 using namespace Grusoft;
 
 void FeatVector::UpdateType(int flag){

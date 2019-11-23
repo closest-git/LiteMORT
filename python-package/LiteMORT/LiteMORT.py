@@ -2,6 +2,7 @@ import gc
 import numpy as np
 import pandas as pd
 from ctypes import *
+from ctypes.util import find_library
 from .libpath import find_lib_path
 from .LiteMORT_preprocess import *
 from .LiteMORT_problems import *
@@ -197,6 +198,11 @@ class LiteMORT(object):
         # lib_path.append( 'F:/Project/LiteMORT/LiteMORT.dll' )
 
         self.dll_path = lib_path[0]
+        CWD = os.path.abspath('.')
+        #os.environ['PATH'] = CWD + ";" + os.environ['PATH']
+        theDll = find_library(self.dll_path)
+        if theDll is None:
+            print(f"ctyped failed to find {self.dll_path},SO STRANGE!!!\tCWD={CWD}")
         self.dll = cdll.LoadLibrary(self.dll_path)
         print("======Load LiteMORT library @{}".format(self.dll_path))
         self.mort_init = self.dll.LiteMORT_init
@@ -497,7 +503,7 @@ class LiteMORT(object):
         Y_ = self.predict_raw(X_,pred_leaf, pred_contrib,raw_score,flag=flag)
         Y_ = self.problem.AfterPredict(X_,Y_)
         Y_ = self.problem.OnResult(Y_,pred_leaf,pred_contrib,raw_score)
-        self.profile.Stat("PRED_0","PRED_1")
+        self.profile.Stat("PRED_0","PRED_1",dump=self.params.verbose>0)
         return Y_
 
     def predict_raw_v0(self, X_,pred_leaf=False, pred_contrib=False,raw_score=False,flag=0x0):

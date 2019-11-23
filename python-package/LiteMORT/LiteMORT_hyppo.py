@@ -1,5 +1,5 @@
 #hyperparameter optimization
-from bayes_opt import BayesianOptimization
+#from bayes_opt import BayesianOptimization
 from sklearn.model_selection import KFold, train_test_split
 from sklearn.metrics import mean_squared_error
 from litemort import *

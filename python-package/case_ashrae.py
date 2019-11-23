@@ -8,8 +8,9 @@
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import StratifiedKFold, GroupKFold,KFold
 from sklearn.metrics import log_loss, mean_squared_error
+import litemort
 from litemort import *
-#from LiteMORT_hyppo import *
+print(litemort.__version__)
 import datetime
 import time
 import seaborn as sns; sns.set(style="ticks", color_codes=True)
@@ -35,8 +36,9 @@ isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 isMORT = True
 isMerge = False #len(sys.argv)>1 and sys.argv[1] == "merge"
 gbm='MORT' if isMORT else 'LGB'
-use_ucf=False
-nTargetMeter=4
+use_ucf=True
+nTargetMeter=1
+
 
 print(f"====== MERGE={isMerge} gbm={gbm} ======\n\n")
 
@@ -90,7 +92,23 @@ def LoadUCF(data_root):
     ucf_leak_df = ucf_leak_df[ucf_leak_df.timestamp.dt.year > 2016]
     print(len(ucf_leak_df))
     return ucf_leak_df
-    
+
+def ReplaceUCF():
+    leak_score = 0
+    leak_df = LoadUCF(data_root)
+    sample_submission.loc[sample_submission.meter_reading < 0, 'meter_reading'] = 0
+    for bid in leak_df.building_id.unique():
+        temp_df = leak_df[(leak_df.building_id == bid)]
+        for m in temp_df.meter.unique():
+            v0 = sample_submission.loc[(test_df.building_id == bid) & (test_df.meter == m), 'meter_reading'].values
+            v1 = temp_df[temp_df.meter == m].meter_reading.values
+            leak_score += mean_squared_error(np.log1p(v0), np.log1p(v1)) * len(v0)
+            sample_submission.loc[(test_df.building_id == bid) & (test_df.meter == m), 'meter_reading'] = temp_df[
+                temp_df.meter == m].meter_reading.values
+    print('UCF score = ', np.sqrt(leak_score / len(leak_df)))
+    sample_submission.to_csv('submission_ucf_.csv.gz', index=False, float_format='%.4f',compression='gzip')
+    print(sample_submission.head(100),sample_submission.tail(100))
+
 def LoadBuilding(data_root):
     building_meta_df = pd.read_csv(f'{data_root}/building_metadata.csv')
     primary_use_list = building_meta_df['primary_use'].unique()
@@ -105,7 +123,7 @@ class Whether(object):
         self.source = source
         self.data_root = data_root
         self.lag_day=[3,72]     #3,72
-        self.pkl_path = f'{data_root}/_ashrae_whether_{source}_[{self.lag_day}]_.pickle'
+        self.pkl_path = f'{data_root}/Whether_{source}_[{self.lag_day}]_.pickle'
         self.lag_feat_list=[]
 
     def TimeAlignment(self,weather_df):   #https://www.kaggle.com/nz0722/aligned-timestamp-lgbm-by-meter-type
@@ -184,19 +202,19 @@ class Whether(object):
         for col in cols:
             feat_list.append(f'{col}_mean_lag{window}')
             weather_df[f'{col}_mean_lag{window}'] = lag_mean[col]
-            feat_list.append(f'{col}_max_lag{window}')
-            weather_df[f'{col}_max_lag{window}'] = lag_max[col]
-            feat_list.append(f'{col}_min_lag{window}')
-            weather_df[f'{col}_min_lag{window}'] = lag_min[col]
-            feat_list.append(f'{col}_std_lag{window}')
-            weather_df[f'{col}_std_lag{window}'] = lag_std[col]
+            if col=='air_temperature':
+                feat_list.append(f'{col}_max_lag{window}')
+                weather_df[f'{col}_max_lag{window}'] = lag_max[col]
+                feat_list.append(f'{col}_min_lag{window}')
+                weather_df[f'{col}_min_lag{window}'] = lag_min[col]
+                feat_list.append(f'{col}_std_lag{window}')
+                weather_df[f'{col}_std_lag{window}'] = lag_std[col]
         return feat_list
 
-class COROchann(object):
+class ASHRAE_data(object):
     @classmethod
     def __init__(self, source,data_root,building_meta_df,weather_df):
         self.category_cols = ['building_id', 'site_id', 'primary_use']  # , 'meter'
-
 
         self.source = source
         self.data_root = data_root
@@ -206,8 +224,8 @@ class COROchann(object):
         self.feature_cols = ['square_feet', 'year_built'] + [
             'hour', 'weekend',  # 'month' , 'dayofweek'
             'building_median']+feats_whether
-        #self.some_rows = 5000
-        self.some_rows = None
+        self.some_rows = 5000
+        #self.some_rows = None
         self.df_base = self.Load_Processing()
         self.df_base_shape = self.df_base.shape
 
@@ -260,8 +278,22 @@ class COROchann(object):
                 pickle.dump([X_train, y_train], fp)
         return X_train, y_train
 
-    def OnTrainDf(self,df):
-        pass
+    def OnTrain(self,df):
+        ucf_leak_df = LoadUCF(data_root)
+        df = df.query('not (building_id <= 104 & meter == 0 & timestamp <= "2016-05-20")')
+        if use_ucf:
+            ucf_year = [2017, 2018]  # ucf data year used in train
+            if True:  # del_2016:
+                print('delete all buildings site0 in 2016')
+                bids = ucf_leak_df.building_id.unique()
+                df = df[df.building_id.isin(bids) == False]
+            ucf_leak_df = ucf_leak_df[ucf_leak_df.timestamp.dt.year.isin(ucf_year)]
+            df = pd.concat([df, ucf_leak_df])
+            df.reset_index(inplace=True)
+        if self.some_rows is not None:
+            df, _ = Mort_PickSamples(self.some_rows, df, None)
+            print(f'====== Some Samples@{self.source} ... data={df.shape}')
+        return df
 
     @classmethod
     def Load_Processing(self):
@@ -274,9 +306,12 @@ class COROchann(object):
         else:
             df = pd.read_csv(f'{self.data_root}/{self.source}.csv', dtype={'building_id': np.uint16, 'meter': np.uint8},
                              parse_dates=['timestamp'])
-            ucf_leak_df = LoadUCF(data_root)
+
             #df = pd.concat([df, ucf_leak_df])
             if self.source=="train":    #All electricity meter is 0 until May 20 for site_id == 0
+                df = self.OnTrain(df)
+                '''                
+                ucf_leak_df = LoadUCF(data_root)
                 df = df.query('not (building_id <= 104 & meter == 0 & timestamp <= "2016-05-20")')
                 if use_ucf:
                     ucf_year = [2017, 2018]  # ucf data year used in train
@@ -287,9 +322,10 @@ class COROchann(object):
                     ucf_leak_df = ucf_leak_df[ucf_leak_df.timestamp.dt.year.isin(ucf_year)]
                     df = pd.concat([df, ucf_leak_df])
                     df.reset_index(inplace=True)
-            if self.some_rows is not None:
-                df, _ = Mort_PickSamples(self.some_rows, df, None)
-                print(f'====== Some Samples@{self.source} ... data={df.shape}')
+                if self.some_rows is not None:
+                    df, _ = Mort_PickSamples(self.some_rows, df, None)
+                    print(f'====== Some Samples@{self.source} ... data={df.shape}')
+                '''
             #df['date'] = df['timestamp'].dt.date
             df["hour"] = np.uint8(df["timestamp"].dt.hour)
             df["weekend"] = np.uint8(df["timestamp"].dt.weekday)    #cys
@@ -326,6 +362,13 @@ print(weather_test_df.head())
 weather_train_df = Whether('train', data_root).df()
 print(weather_train_df.head())
 
+if False:        #unit testing for ReplaceUCF
+    sample_submission = pd.read_csv(os.path.join(data_root, 'sample_submission.csv'))
+    reduce_mem_usage(sample_submission)
+    test_datas = ASHRAE_data("test", data_root, building_meta_df, weather_test_df)
+    test_df = test_datas.df_base
+    ReplaceUCF()
+
 early_stop = 20
 verbose_eval = 5
 metric = 'l2'
@@ -341,7 +384,7 @@ params = {'num_leaves': 31, 'n_estimators': num_rounds,
               "bagging_fraction": bf,
               "feature_fraction": 0.9,  # STRANGE GBDT  why("bagging_freq": 5 "feature_fraction": 0.9)!!!
               "metric": metric, "verbose_eval": verbose_eval, 'n_jobs': 8, "elitism": 0,"debug":'1',
-              "early_stopping_rounds": early_stop, "adaptive": 'weight1', 'verbose': 666, 'min_data_in_leaf': 20,
+              "early_stopping_rounds": early_stop, "adaptive": 'weight1', 'verbose': 0, 'min_data_in_leaf': 20,
               #               "verbosity": -1,
               #               'reg_alpha': 0.1,
               #               'reg_lambda': 0.3
@@ -368,7 +411,7 @@ def fit_regressor(train, val,target_meter,fold, some_params, devices=(-1,), merg
         print("X_train={}, y_train={} d_train={}".format(col_X.shape, col_y.shape, d_train.shape))
 
     if isMORT:
-        params['verbose']=667
+        #params['verbose']=667
         merge_datas=[]
         model = LiteMORT(some_params,merge_infos=merge_info)   # all train,eval,predict would use same merge infomation
         model.fit(X_train, y_train, eval_set=[(X_valid, y_valid)], categorical_feature=cat_features)
@@ -403,7 +446,7 @@ kf = KFold(n_splits=folds, shuffle=shuffle, random_state=seed)
 
 cat_features=None
 meter_models=[]
-train_datas = COROchann("train",data_root,building_meta_df,weather_train_df)
+train_datas = ASHRAE_data("train",data_root,building_meta_df,weather_train_df)
 losses=[]
 feat_fix = ['building_id','building_median','hour','weekend','site_id', 'square_feet','primary_use','air_temperature', 'year_built']
 def GetSplit_idxs(kf,X_train, y_train):
@@ -475,7 +518,6 @@ def pred(X_test, models, batch_size=1000000):
         print(f'predicting {i}-th model')
         for k in tqdm(range(iterations)):
         #for k in (range(iterations)):
-            #print(X_test[k*batch_size:(k+1)*batch_size].head(50),X_test[k*batch_size:(k+1)*batch_size].tail(50))
             y_pred_test = model.predict(X_test[k*batch_size:(k+1)*batch_size], num_iteration=model.best_iteration)
             #print(y_pred_test[:100]);            input("pred ......")
             y_test_pred_total[k*batch_size:(k+1)*batch_size] += y_pred_test
@@ -484,7 +526,7 @@ def pred(X_test, models, batch_size=1000000):
     return y_test_pred_total
 
 print(f'\t test_datas.df_base......')
-test_datas = COROchann("test",data_root,building_meta_df,weather_test_df)
+test_datas = ASHRAE_data("test",data_root,building_meta_df,weather_test_df)
 test_df = test_datas.df_base
 sample_submission = pd.read_csv(os.path.join(data_root, 'sample_submission.csv'))
 reduce_mem_usage(sample_submission)
@@ -506,21 +548,6 @@ submit_path = f'{data_root}/[{gbm}]_[{losses}].csv.gz'
 sample_submission.to_csv(submit_path, index=False, float_format='%.4f',compression='gzip')
 print(sample_submission.head(100),sample_submission.tail(100))
 
-def ReplaceUCF():
-    leak_score = 0
-    leak_df = LoadUCF()
-    sample_submission.loc[sample_submission.meter_reading < 0, 'meter_reading'] = 0
-    for bid in leak_df.building_id.unique():
-        temp_df = leak_df[(leak_df.building_id == bid)]
-        for m in temp_df.meter.unique():
-            v0 = sample_submission.loc[(test_df.building_id == bid) & (test_df.meter == m), 'meter_reading'].values
-            v1 = temp_df[temp_df.meter == m].meter_reading.values
-            leak_score += mean_squared_error(np.log1p(v0), np.log1p(v1)) * len(v0)
-            sample_submission.loc[(test_df.building_id == bid) & (test_df.meter == m), 'meter_reading'] = temp_df[
-                temp_df.meter == m].meter_reading.values
-    print('UCF score = ', np.sqrt(leak_score / len(leak_df)))
-    sample_submission.to_csv('submission_ucf_replaced.csv', index=False, float_format='%.4f')
-    print(sample_submission.head(100),sample_submission.tail(100))
 
 if use_ucf:
     ReplaceUCF()

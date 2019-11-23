@@ -279,7 +279,8 @@ namespace Grusoft {
 		}
 		else if (nBins <= SHRT_MAX) {
 			hFQ = new FeatVec_Q<uint16_t>(hFold, hFeat, x);
-			printf("\t----%d\t FeatVec_Q<uint16_t>@\"%s\" nBins=%d\n", hFeat->id, hFeat->nam.c_str(), nBins);
+			if(hFold->config.verbose>0)
+				printf("\t----%d\t FeatVec_Q<uint16_t>@\"%s\" nBins=%d\n", hFeat->id, hFeat->nam.c_str(), nBins);
 		}
 		else {
 			assert(0);
@@ -476,8 +477,10 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY
 	sparse /= (nSamp_*hFold->nFeat());
 	nana /= (nSamp_*hFold->nFeat());
 	//assert(nana == 0.0);
-	printf("\r********* Fold_[%s] nSamp=%lld nFeat=%lld(const=%lld) QUANT=%lld Total Bins=%d\n\tsparse=%g NAN=%g nLocalConst=%lld time=%g sec\r\n",
-		hFold->nam.c_str(), nSamp_, hFold->nFeat(), nConstFeat, nQuant,nTotalBins, sparse, nana, nLocalConst, (clock() - t0) / 1000.0);
+	if (config.verbose > 0) {
+		printf("\r********* Fold_[%s] nSamp=%lld nFeat=%lld(const=%lld) QUANT=%lld Total Bins=%d\n\tsparse=%g NAN=%g nLocalConst=%lld time=%g sec\r\n",
+			hFold->nam.c_str(), nSamp_, hFold->nFeat(), nConstFeat, nQuant,nTotalBins, sparse, nana, nLocalConst, (clock() - t0) / 1000.0);
+	}
 	//if(nLocalConst>0)
 	//	printf("\t!!! [%s] nLocalConst=%lld !!! \n",hFold->nam.c_str(), nLocalConst);
 	return hFold;
@@ -667,7 +670,8 @@ PYMORT_DLL_API void LiteMORT_predict_1(void *mort_0, PY_DATASET_LIST*predict_lis
 	//FeatsOnFold *hDat = FeatsOnFold_InitInstance(config, hEDA, "predict", X, col_y, nSamp, predict_set->ldFeat, 1, flag | FeatsOnFold::DF_PREDIC);
 	FeatsOnFold *hDat = FeatsOnFold_InitInstance(config, hEDA, PY_DATASET_LIST::GetSet(predict_list),mort, flag | FeatsOnFold::DF_PREDIC);
 
-	printf("\n********* LiteMORT_predict nSamp=%d,nFeat=%d hEDA=%p********* \n\n", nSamp, hDat->nFeat(), hEDA);
+	if(config.verbose>0)
+		printf("\n********* LiteMORT_predict nSamp=%d,nFeat=%d hEDA=%p********* \n\n", nSamp, hDat->nFeat(), hEDA);
 	//hDat->nam = "predict";
 	mort->hGBRT->Predict(hDat);
 	FeatVector *pred = hDat->GetPrecict();

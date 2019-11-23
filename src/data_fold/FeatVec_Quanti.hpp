@@ -115,7 +115,7 @@ namespace Grusoft {
 					nValid++;
 			}
 			if (nValid == 0) {
-				printf("\n FeatVec_Q(%s) nBin=%d a0=%g a1=%g", FeatVector::desc.c_str(), qHisto_0->nBins, 0, -1);
+				printf("\n FeatVec_Q(%s) nBin=%d a0=%g a1=%g", FeatVector::desc.c_str(), qHisto_0->nBins, 0.0, -1.0);
 				BIT_SET(this->type, Distribution::DISTRI_OUTSIDE);
 			}
 			if (hData_->config.nMostSalp4bins>0 && hData_->isTrain())

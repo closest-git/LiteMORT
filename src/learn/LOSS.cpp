@@ -96,7 +96,8 @@ void FeatVec_LOSS::EDA( ExploreDA *edaX, int flag) {
 	bool isPredict = BIT_TEST(flag, FeatsOnFold::DF_PREDIC);
 	bool isEval = BIT_TEST(flag, FeatsOnFold::DF_EVAL);
 	bool isTrain = BIT_TEST(flag, FeatsOnFold::DF_TRAIN);
-	printf("********* FeatVec_LOSS::EDA@\"%s\"\tsamp_weight=%p...\n",hBaseData_->nam.c_str(),samp_weight);
+	if(config.verbose>0)
+		printf("********* FeatVec_LOSS::EDA@\"%s\"\tsamp_weight=%p...\n",hBaseData_->nam.c_str(),samp_weight);
 	if (isPredict) {
 
 	}	else {

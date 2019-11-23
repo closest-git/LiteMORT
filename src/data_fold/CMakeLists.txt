@@ -9,5 +9,5 @@ add_library(data_fold_
 	./Histogram.cpp
 	./EDA.cpp
 	./DataFold.cpp
-	./Binfold.cpp
+	./FeatVector.cpp
 	)

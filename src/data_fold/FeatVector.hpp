@@ -110,6 +110,7 @@ namespace Grusoft {
 		
 		string nam = "", desc = "";
 
+		FeatVector()	{}
 		virtual ~FeatVector() {
 			if (select_bins != nullptr)
 				delete select_bins;

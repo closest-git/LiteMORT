@@ -1196,8 +1196,11 @@ namespace Grusoft {
 					i_0++;
 					//assert(quanti[pos] >= 0 && quanti[pos] < NNA);
 				}
-				if (nFailed > 0)
+				if (nFailed > 0) {		
+#ifdef _DEBUG
 					printf("!!!!!! %d   \"%s\" nFailed=%lld nA=%lld !!!!!!\n", id, nam.c_str(), nFailed,nA);
+#endif
+				}
 			}
 			else {
 				const HistoGRAM *histo = distri.histo;		assert(histo!=nullptr);
