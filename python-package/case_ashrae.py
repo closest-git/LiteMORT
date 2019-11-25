@@ -34,10 +34,10 @@ profile.Snapshot(":");          profile.Stat(":","::")
 
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 isMORT = True
-isMerge = False #len(sys.argv)>1 and sys.argv[1] == "merge"
+isMerge = True #len(sys.argv)>1 and sys.argv[1] == "merge"
 gbm='MORT' if isMORT else 'LGB'
 use_ucf=True
-nTargetMeter=1
+nTargetMeter=4
 
 
 print(f"====== MERGE={isMerge} gbm={gbm} ======\n\n")
@@ -212,7 +212,6 @@ class Whether(object):
         return feat_list
 
 class ASHRAE_data(object):
-    @classmethod
     def __init__(self, source,data_root,building_meta_df,weather_df):
         self.category_cols = ['building_id', 'site_id', 'primary_use']  # , 'meter'
 
@@ -224,8 +223,8 @@ class ASHRAE_data(object):
         self.feature_cols = ['square_feet', 'year_built'] + [
             'hour', 'weekend',  # 'month' , 'dayofweek'
             'building_median']+feats_whether
-        self.some_rows = 5000
-        #self.some_rows = None
+        #self.some_rows = 5000
+        self.some_rows = None
         self.df_base = self.Load_Processing()
         self.df_base_shape = self.df_base.shape
 
@@ -278,7 +277,7 @@ class ASHRAE_data(object):
                 pickle.dump([X_train, y_train], fp)
         return X_train, y_train
 
-    def OnTrain(self,df):
+    def OnTrain_(self,df):
         ucf_leak_df = LoadUCF(data_root)
         df = df.query('not (building_id <= 104 & meter == 0 & timestamp <= "2016-05-20")')
         if use_ucf:
@@ -295,11 +294,10 @@ class ASHRAE_data(object):
             print(f'====== Some Samples@{self.source} ... data={df.shape}')
         return df
 
-    @classmethod
     def Load_Processing(self):
         pkl_path = f'{self.data_root}/_ashrae_{self.source}_{self.some_rows}_{"ucf" if use_ucf else ""}_.pickle'
         build_group_pkl = f'{self.data_root}/_ashrae_build_group_{self.some_rows}_.pickle'
-        if os.path.isfile(pkl_path):
+        if False:#os.path.isfile(pkl_path):
             print("====== Load pickle @{} ......".format(pkl_path))
             with open(pkl_path, "rb") as fp:
                 [df] = pickle.load(fp)
@@ -309,7 +307,7 @@ class ASHRAE_data(object):
 
             #df = pd.concat([df, ucf_leak_df])
             if self.source=="train":    #All electricity meter is 0 until May 20 for site_id == 0
-                df = self.OnTrain(df)
+                df = self.OnTrain_(df)
                 '''                
                 ucf_leak_df = LoadUCF(data_root)
                 df = df.query('not (building_id <= 104 & meter == 0 & timestamp <= "2016-05-20")')
@@ -516,17 +514,21 @@ def pred(X_test, models, batch_size=1000000):
     y_test_pred_total = np.zeros(X_test.shape[0])
     for i, model in enumerate(models):
         print(f'predicting {i}-th model')
-        for k in tqdm(range(iterations)):
-        #for k in (range(iterations)):
-            y_pred_test = model.predict(X_test[k*batch_size:(k+1)*batch_size], num_iteration=model.best_iteration)
-            #print(y_pred_test[:100]);            input("pred ......")
-            y_test_pred_total[k*batch_size:(k+1)*batch_size] += y_pred_test
+        if isMORT and isMerge:
+            y_pred_test = model.predict(X_test, num_iteration=model.best_iteration)
+            y_test_pred_total += y_pred_test
+        else:
+            for k in tqdm(range(iterations)):
+                y_pred_test = model.predict(X_test[k*batch_size:(k+1)*batch_size], num_iteration=model.best_iteration)
+                #print(y_pred_test[:100]);            input("pred ......")
+                y_test_pred_total[k*batch_size:(k+1)*batch_size] += y_pred_test
 
     y_test_pred_total /= len(models)
     return y_test_pred_total
 
 print(f'\t test_datas.df_base......')
 test_datas = ASHRAE_data("test",data_root,building_meta_df,weather_test_df)
+del train_datas;        gc.collect()
 test_df = test_datas.df_base
 sample_submission = pd.read_csv(os.path.join(data_root, 'sample_submission.csv'))
 reduce_mem_usage(sample_submission)

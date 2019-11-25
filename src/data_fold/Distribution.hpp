@@ -217,8 +217,14 @@ namespace Grusoft {
 				impuri = a2 - (N - nNA)*mean*mean;
 				if(impuri<0 && fabs(impuri)<1.0e-6*a2)
 					impuri=0;
+#ifdef _DEBUG
 				assert(impuri >= 0);
-				devia = sqrt(impuri / (N - nNA));
+#endif
+				if (impuri < 0) {
+					printf("impur=%g\t", impuri);
+					devia = 0;		impuri = 0;
+				}else
+					devia = sqrt(impuri / (N - nNA));
 			}
 			else {
 				assert(nNA == 0 || nNA == N);

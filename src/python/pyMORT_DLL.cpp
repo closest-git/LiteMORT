@@ -86,9 +86,7 @@ void OnUserParams(LiteBOM_Config&config, PY_ITEM* params, int nParam, int flag =
 	char sERR[10000];
 	int i,err=0;
 	for (i = 0; i < nParam; ++i) {
-		printf("\"%s\"=%f\t", params[i].Keys, params[i].Values);
-		//printf("%d: Title = %s\n", i, params[i].Title);
-		//printf("%d: Index = %d\n", i, params[i].Index);
+		//printf("\"%s\"=%f\t", params[i].Keys, params[i].Values);
 		if (strcmp(params[i].Keys, "num_leaves") == 0) {
 			config.num_leaves = params[i].Values;
 			if (config.num_leaves <= 1) {
@@ -227,11 +225,11 @@ PYMORT_DLL_API void LiteMORT_set_mergesets(void *mort_0, PY_DATASET_LIST *merge_
 //GBRT *hGBRT = nullptr;
 PYMORT_DLL_API void* LiteMORT_init(PY_ITEM* params, int nParam, PY_DATASET_LIST *null_list, int64_t flag = 0x0) {
 	try {
-		printf("\nLiteMORT_api init......\n");		//大道至简
+		printf("\n======LiteMORT_api init......");		//大道至简
 
 		MORT *mort = new MORT();
 		OnUserParams(mort->config, params, nParam);
-		printf("\n======LiteMORT_api init @%p(hEDA=%p,hGBRT=%p)...OK\n", mort,mort->hEDA,mort->hGBRT);
+		printf("======LiteMORT_api init @%p(hEDA=%p,hGBRT=%p)...OK\n", mort,mort->hEDA,mort->hGBRT);
 		
 		return mort;
 	}

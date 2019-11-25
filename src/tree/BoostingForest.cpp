@@ -164,7 +164,7 @@ void BoostingForest::SetUserData( void*ud_,isTrueObj hf,int flag ){
 }
 
 void BoostingForest::ClearData( )	{
-	printf("********* BoostingForest::ClearData hTrainData=%p,hTestData=%p,hEvalData=%p", hTrainData, hTestData,hEvalData);
+	//printf("********* ClearData hTrainData=%p,hTestData=%p,hEvalData=%p", hTrainData, hTestData,hEvalData);
 	if (hTrainData != nullptr) {
 		delete hTrainData;		hTrainData = nullptr;
 	}

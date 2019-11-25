@@ -155,6 +155,9 @@ namespace Grusoft {
 		double goss_beta;
 
 		void dump(int type = 0x0) {
+			if (verbose <= 0)
+				return;
+
 			//string histo_alg = histo_algorithm==on_EDA ? "on_EDA" : histo_algorithm == on_subsample ? "on_subsample" : "on_Y";
 			string histo_alg = histo_bin_map == 0 ? "\"quantile\"" : (histo_bin_map == 1 ? "\"frequency\"" : histo_bin_map == 3 ? "\"Dcrimini on Y\"" : "XXX");
 			printf("\n\t%slr=%g sample=[%g,%g] min@leaf=%d stop=%d drop=%g num_leaves=%d "

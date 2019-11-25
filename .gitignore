@@ -302,3 +302,4 @@ ModelManifest.xml
 /python-package/LiteMORT_hyppo.py
 /python-package/shap_test.py
 *.pickle
+*.gz

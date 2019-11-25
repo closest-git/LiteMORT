@@ -660,7 +660,12 @@ namespace Grusoft {
 			}
 		}
 		virtual inline void* pValue_AtSamp(const size_t& samp, int flag = 0x0) {
-			assert(samp >= 0 && samp < size());
+			//assert(samp >= 0 && samp < size());
+			if (samp < 0 || samp >= size()) {
+				//printf("!!!pValue_AtSamp!!! samp=%lld,size=%lld", samp, size());
+				//throw "!!!pValue_AtSamp!!!";
+				return val + size()-1;
+			}
 			return val + samp;
 		}
 

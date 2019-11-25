@@ -53,7 +53,10 @@ class LiteMORT_profile(object):
 
     def Snapshot(self, title,params=None):
         process = psutil.Process(os.getpid())
-        self.shots[title] = process.memory_info()
+        dic_mem = process.memory_info()
+        dic_mem =dic_mem._asdict()
+        #dic_mem=dict(dic_mem)
+        self.shots[title] = dic_mem
         #print(process.memory_info().rss)
 
     def Stat(self,shot0,shot1,dump=True):
@@ -63,15 +66,16 @@ class LiteMORT_profile(object):
         assert (shot1 in self.shots)
         mem_0 = self.shots[shot0]
         mem_1 = self.shots[shot1]
-        self.memory_info['virtual memory']=a=(mem_1.vms-mem_0.vms)/1.0e6
-        self.memory_info['physical memory']=b=(mem_1.rss-mem_0.rss)/1.0e6
-        v0=mem_0.vms/1.0e6
+        self.memory_info['virtual memory']=a=(mem_1['vms']-mem_0['vms'])/1.0e6
+        self.memory_info['physical memory']=b=(mem_1['rss']-mem_0['rss'])/1.0e6
+        v0=mem_0['vms']/1.0e6
         if dump:
             print(f"\n{'-'* 120}\nMEMORY@[{shot0}-{shot1}]: physical={a:.2f}(M) virtual={b:.2f}(M) begin={v0:.2f}(M)")
-            if getattr(mem_1,"peak_pagefile") and getattr(mem_1,"peak_wset"):
-                peak_info=f"PEAK=[{mem_1.peak_pagefile/1.0e6:.1f},{mem_1.peak_wset/1.0e6:.1f}](M)"
+            if "peak_pagefile" in mem_1 and "peak_wset" in mem_1:
+                peak_info=f"PEAK=[{mem_1['peak_pagefile']/1.0e6:.1f},{mem_1['peak_wset']/1.0e6:.1f}](M)"
                 print(f"\t{peak_info}")
             print(f"\n{'-'* 120}\n")
+
         return
 
 class LiteMORT_params(object):
