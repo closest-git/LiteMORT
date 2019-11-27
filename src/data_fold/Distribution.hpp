@@ -221,7 +221,7 @@ namespace Grusoft {
 				assert(impuri >= 0);
 #endif
 				if (impuri < 0) {
-					printf("impur=%g\t", impuri);
+					printf("!!!!!! impur=%g !!!!!!\n", impuri);
 					devia = 0;		impuri = 0;
 				}else
 					devia = sqrt(impuri / (N - nNA));

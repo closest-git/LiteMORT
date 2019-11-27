@@ -24,10 +24,10 @@ profile = LiteMORT_profile()
 profile.Snapshot(":");          profile.Stat(":","::")
 #isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 isMORT = True    #Switch this flag to compare the performance between LiteMORT and lightGBM
-isImplicitMerge = True   #Switch to compare the memory usage
+isImplicitMerge = len(sys.argv)>1 and sys.argv[1] == "merge"
 gbm='MORT' if isMORT else 'LGB'
 use_ucf=True
-nTargetMeter=4
+nTargetMeter=1
 data_root = 'F:/Datasets/ashrae/'
 print(f"====== ImplicitMerge={isImplicitMerge} gbm={gbm} ======\n\n")
 
@@ -157,14 +157,14 @@ class ASHRAE_data(object):
         self.merge_infos = []
 
         target_train_df = train_df[train_df['meter'] == target_meter]
-        print(f"target@{target_meter}={target_train_df.shape}")
+        print(f"data_X_y target@{target_meter}={target_train_df.shape}")
         if isImplicitMerge:
             building_site = self.building_meta_df[['building_id', 'site_id']]
             target_train_df = target_train_df.merge(building_site, on='building_id', how='left')  # add 'site_id'
             self.building_merge_ = self.building_meta_df[['building_id', 'primary_use', 'square_feet', 'year_built']]  # only need 3 col for merge
             feat_v0 = feat_v0 + ['timestamp']
             # self.weather_df = self.weather_df[:1100]
-            feat_v1 = list(set(feat_v0).intersection(set(list(self.weather_df.columns))))
+            feat_v1 = [i for i in feat_v0 if i in self.weather_df.columns]#list(set(feat_v0).intersection(set(list(self.weather_df.columns))))
             # feat_v1 = ['site_id','timestamp','precip_depth_1_hr']       #测试需要
             self.weather_df = self.weather_df[feat_v1]
             self.merge_infos = [
@@ -173,10 +173,13 @@ class ASHRAE_data(object):
                  "feat_info": feat_infos},
             ]
         else:
+            #print(f"C0={target_train_df.columns}\nC1={self.building_meta_df.columns}\nC2={self.weather_df.columns}")
             target_train_df = target_train_df.merge(self.building_meta_df, on='building_id', how='left')
             target_train_df = target_train_df.merge(self.weather_df, on=['site_id', 'timestamp'], how='left')
-        feat_v1 = list(set(feat_v0).intersection(set(list(target_train_df.columns))))
+            #print(f"columns={target_train_df.columns}")
+        feat_v1 = [i for i in feat_v0 if i in target_train_df.columns]      #list(set(feat_v0).intersection(set(list(target_train_df.columns))))
         X_train = target_train_df[feat_v1]
+        #print(f"feat_v1={feat_v1}\ncolumns={X_train.columns}\n")
         print(f"data_X__@{target_meter}={X_train.shape}\toriginal={target_train_df.shape}\tmerge={isImplicitMerge}")
         if (self.source == "train"):
             y_train = target_train_df['meter_reading_log1p'].values
@@ -184,7 +187,7 @@ class ASHRAE_data(object):
             y_train=None
         del target_train_df
         gc.collect()
-
+        print(f"data_X_y X_={X_train} y={y_train}")
         return X_train, y_train
 
     def Load_Processing(self):
@@ -427,6 +430,8 @@ gc.collect()
 test_df = test_datas.df_base
 
 def pred(X_test, models, batch_size=1000000):
+    if isMORT and isImplicitMerge:
+        batch_size=batch_size*10
     iterations = (X_test.shape[0] + batch_size -1) // batch_size
     nSamp = X_test.shape[0]
     print(f'iterations={iterations}\tnSamp={nSamp}\tbatch_size={batch_size}')
@@ -457,9 +462,9 @@ def pred(X_test, models, batch_size=1000000):
     gc.collect()
 
 for target_meter in range(nTargetMeter):
-    print(f'\t target_meter={target_meter}......')
+    print(f'\t predict target_meter={target_meter}......')
     X_test,_ = test_datas.data_X_y(target_meter)
-    print(f'\t target_meter={target_meter} X_test={X_test.shape}\nfeatures={X_test.columns}')
+    print(f'\t predict target_meter={target_meter} X_test={X_test.shape}\nfeatures={X_test.columns}')
     gc.collect()
     if isMORT and isImplicitMerge:
         for i, model in enumerate(meter_models[target_meter]):

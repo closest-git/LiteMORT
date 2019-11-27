@@ -100,7 +100,7 @@ namespace Grusoft {
 
 				if (distri.histo != nullptr)
 					qHisto_0->CopyBins(*(distri.histo), true, 0x0);
-				hFeatSource->QuantiAtEDA(edaX,quanti,sizeof(tpQUANTI), nMostBin,  hData_->isTrain(), 0x0);
+				hFeatSource->QuantiAtEDA(edaX,quanti,sizeof(tpQUANTI), nMostBin,  hData_, 0x0);
 			}
 			else {
 				//hFeat->Split2Quanti(hData_->config,edaX, vThrsh, qHisto, yDown, nMostBin);

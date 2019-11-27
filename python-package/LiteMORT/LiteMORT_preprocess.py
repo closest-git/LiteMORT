@@ -116,7 +116,7 @@ class Mort_Preprocess(object):
             col.v_min=narr.min();      col.v_max=narr.max()
             col.data = narr.ctypes.data_as(c_void_p)
             col.dtype = str(narr.dtype).encode('utf8')
-            #print("\"{}\":\t{}\ttype={},data={},name={}".format(feat, x_info, col.dtype, col.data, col.name))
+            #print("\"{}\":\t{}\ttype={},name={}".format(feat, x_info, col.dtype, col.name))
         #_reset_cache()
         return col
 

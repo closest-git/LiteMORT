@@ -662,8 +662,8 @@ namespace Grusoft {
 		virtual inline void* pValue_AtSamp(const size_t& samp, int flag = 0x0) {
 			//assert(samp >= 0 && samp < size());
 			if (samp < 0 || samp >= size()) {
-				//printf("!!!pValue_AtSamp!!! samp=%lld,size=%lld", samp, size());
-				//throw "!!!pValue_AtSamp!!!";
+				printf("!!!pValue_AtSamp!!! samp=%lld,size=%lld", samp, size());
+				throw "!!!pValue_AtSamp!!!";
 				return val + size()-1;
 			}
 			return val + samp;
@@ -1158,7 +1158,8 @@ namespace Grusoft {
 				11/4/2019
 		*/
 		template<typename tpQUANTI>
-		void QuantiAtEDA_(const ExploreDA *edaX, tpQUANTI *quanti, int nMostBin,bool isSameSorted, int flag) {
+		void QuantiAtEDA_(const ExploreDA *edaX, tpQUANTI *quanti, int nMostBin, const FeatsOnFold *hData_, int flag) {
+			bool isSameSorted = hData_->isTrain();
 			assert(quanti != nullptr && edaX != nullptr);
 			tpQUANTI NNA = tpQUANTI(-1);
 			size_t nSamp_ = size(), i, i_0 = 0, i_1, noBin = 0, pos, nzHisto=0, nFailed=0;
@@ -1202,9 +1203,8 @@ namespace Grusoft {
 					//assert(quanti[pos] >= 0 && quanti[pos] < NNA);
 				}
 				if (nFailed > 0) {		
-#ifdef _DEBUG
-					printf("!!!!!! %d   \"%s\" nFailed=%lld nA=%lld !!!!!!\n", id, nam.c_str(), nFailed,nA);
-#endif
+					if(hData_->config.verbose>0)
+						printf("!!!!!! %d   \"%s\" nFailed=%lld nA=%lld !!!!!!\n", id, nam.c_str(), nFailed,nA);
 				}
 			}
 			else {
@@ -1265,16 +1265,16 @@ namespace Grusoft {
 			}
 		}
 
-		virtual void QuantiAtEDA(const ExploreDA *edaX, void *quanti,int sizeofQ, int nMostBin, bool isSameSorted, int flag) {
+		virtual void QuantiAtEDA(const ExploreDA *edaX, void *quanti,int sizeofQ, int nMostBin, const FeatsOnFold *hData_, int flag) {
 			switch (sizeofQ) {
 			case 1:
-				QuantiAtEDA_(edaX, (uint8_t*)quanti, nMostBin, isSameSorted, flag);
+				QuantiAtEDA_(edaX, (uint8_t*)quanti, nMostBin, hData_, flag);
 				break;
 			case 2:
-				QuantiAtEDA_(edaX, (uint16_t*)quanti, nMostBin, isSameSorted, flag);
+				QuantiAtEDA_(edaX, (uint16_t*)quanti, nMostBin, hData_, flag);
 				break;
 			case 4:
-				QuantiAtEDA_(edaX, (uint32_t*)quanti, nMostBin, isSameSorted, flag);
+				QuantiAtEDA_(edaX, (uint32_t*)quanti, nMostBin, hData_, flag);
 				break;
 			default:
 				throw "QuantiAtEDA is ...sizeofQ is XXX";
