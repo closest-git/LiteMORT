@@ -269,7 +269,7 @@ namespace Grusoft {
 				}
 				hDistri->STA_at(nSamp_, val, true, 0x0);
 			}*/
-			assert(histo = nullptr);
+			assert(histo == nullptr);
 			if (hFold != nullptr) {	//Loss中的各个feat没必要生成histo
 				if (histo == nullptr) {	//参见LiteMORT_EDA->Analysis(config, (float *)dataX, (tpY *)dataY, nSamp_, nFeat_0, 1, flag);
 					X2Histo_(hFold->config, nSamp_, samp_val, (double*)nullptr);

@@ -163,7 +163,7 @@ namespace Grusoft {
 		{ throw "FeatVector::_Samp2Histo_ is ..."; }
 		virtual void InitDistri(const FeatsOnFold *hFold,bool genHisto, const SAMP_SET *samp_set, int flag) { throw "FeatVector::InitDistri is ..."; }
 
-		virtual void QuantiAtEDA(const ExploreDA *eda, void *quanti, int sizeofQ, int nMostBin, const FeatsOnFold *hData_, int flag) { ; }
+		virtual void QuantiAtEDA(ExploreDA *eda, void *quanti, int sizeofQ, int nMostBin, const FeatsOnFold *hData_, int flag) { ; }
 		//virtual void Split2Quanti(const LiteBOM_Config&config, const ExploreDA *eda, vector<double>& vThrsh, HistoGRAM *qHisto, tpDOWN *yDown, int nMostBin, int flag = 0x0) { throw "FeatVector::SplitSort is ..."; }
 		//virtual void UpdateFruit(const FeatsOnFold*,MT_BiSplit *hBlit, int flag = 0x0) {}
 		virtual void RefineThrsh(const FeatsOnFold *hData_, const MT_BiSplit *hBlit, int flag = 0x0) {}

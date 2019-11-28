@@ -89,17 +89,18 @@ namespace Grusoft {
 
 			ExploreDA *edaX = hData_->edaX;
 			if (edaX != nullptr /*&& hData_->config.histo_algorithm == LiteBOM_Config::HISTO_ALGORITHM::on_EDA*/) {
-				Distribution& distri = edaX->arrDistri[FeatVector::id];
+				//Distribution& distri = edaX->arrDistri[FeatVector::id];
+				Distribution* distri = edaX->GetDistri(FeatVector::id);
 				if (isOnY) {
 					throw "!!!histogram_bins onY is ...!!!";
 					FeatVec_T<float> *hFeatFloat = dynamic_cast<FeatVec_T<float>*>(hFeatSource);
 					float *x = hFeatFloat->arr();
-					distri.ClearHisto();
-					distri.X2Histo_(hData_->config, nSamp, x, yDown);
+					distri->ClearHisto();
+					distri->X2Histo_(hData_->config, nSamp, x, yDown);
 				}
 
-				if (distri.histo != nullptr)
-					qHisto_0->CopyBins(*(distri.histo), true, 0x0);
+				if (distri->histo != nullptr)
+					qHisto_0->CopyBins(*(distri->histo), true, 0x0);
 				hFeatSource->QuantiAtEDA(edaX,quanti,sizeof(tpQUANTI), nMostBin,  hData_, 0x0);
 			}
 			else {

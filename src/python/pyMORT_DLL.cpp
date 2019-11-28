@@ -214,7 +214,7 @@ PYMORT_DLL_API void LiteMORT_set_mergesets(void *mort_0, PY_DATASET_LIST *merge_
 		for (int i = 0; i < merge_list->nSet; i++) {
 			PY_DATASET *set = merge_list->list + i;
 			printf("\n\t------MERGE@[\"%s\"](%lldx%d)......", set->name, set->nSamp, set->ldFeat);
-			ExploreDA *hEDA = new ExploreDA(mort->config, set->ldFeat, flag);
+			ExploreDA *hEDA = new ExploreDA(mort->config, flag);
 			FeatsOnFold *hMerge = FeatsOnFold_InitInstance(mort->config, hEDA, set, nullptr, flag | FeatsOnFold::DF_MERGE);
 			//hMerge->merge_right = set->merge_rigt;
 			mort->merge_folds.push_back(hMerge);
@@ -229,6 +229,7 @@ PYMORT_DLL_API void* LiteMORT_init(PY_ITEM* params, int nParam, PY_DATASET_LIST 
 
 		MORT *mort = new MORT();
 		OnUserParams(mort->config, params, nParam);
+		mort->hEDA_train = new ExploreDA(mort->config, flag);
 		printf("======LiteMORT_api init @%p(hEDA=%p,hGBRT=%p)...OK\n", mort,mort->hEDA_train,mort->hGBRT);
 		
 		return mort;
@@ -298,11 +299,15 @@ namespace Grusoft {
 	v0.1	cys
 		11/11/2019
 */
-FeatVector *PY_COL2FEAT(const FeatsOnFold *hFold, PY_COLUMN*col, Distribution *hDistri,size_t nSamp_,int id,bool isEDA,int flag) {
+FeatVector *PY_COL2FEAT(const FeatsOnFold *hFold, PY_COLUMN*col, size_t nSamp_,int id,bool isEDA,int flag) {
 	string desc = "feat_" + std::to_string(id);
 	desc = col->name;
 	FeatVector *hFeat = nullptr;
 	int flagF = flag | FeatVector::VAL_REFER;
+	if (hFold->isTrain()) {
+		hFold->edaX->AddDistri(col->name, id);		//col
+	}
+
 	if (col->isFloat()) {
 		hFeat = new FeatVec_T<float>(nSamp_, id, desc, flagF);
 	}
@@ -329,9 +334,10 @@ FeatVector *PY_COL2FEAT(const FeatsOnFold *hFold, PY_COLUMN*col, Distribution *h
 	else
 		throw "FeatsOnFold_InitInstance col->dtype is XXX";
 
+
 	hFeat->PY = col;
 	hFeat->nam = col->type_x;		hFeat->nam += col->name;
-	hFeat->hDistri = hDistri;// hFold->edaX == nullptr ? nullptr : &(hFold->edaX->arrDistri[i]);
+	hFeat->hDistri = hFold->edaX->GetDistri(id);// hFold->edaX == nullptr ? nullptr : &(hFold->edaX->arrDistri[i]);
 	hFeat->UpdateType();
 	/*if (col->isCategory()) {
 		BIT_SET(hFeat->hDistri->type, Distribution::CATEGORY);
@@ -348,8 +354,10 @@ FeatVector *PY_COL2FEAT(const FeatsOnFold *hFold, PY_COLUMN*col, Distribution *h
 	}*/
 
 	hFeat->Set(nSamp_, col);
-	if(isEDA)
+	if (hFold->isTrain()) {
 		hFeat->InitDistri(hFold, true,nullptr, 0x0);		//EDA基于全局分析，而这里的是局部分析。分布确实会不一样
+
+	}
 
 	return hFeat;
 }
@@ -380,17 +388,17 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY
 		PY_COLUMN *col = dataset_->columnX + i;//唯一的dtype处理
 		if (i != 18)
 			;// continue;
-		Distribution *hD_ = hFold->edaX == nullptr ? nullptr : &(hFold->edaX->arrDistri[i]);
-		if (hD_ != nullptr && hD_->nam.size() > 0)
+		//Distribution *hD_ = hFold->edaX == nullptr ? nullptr : &(hFold->edaX->arrDistri[i]);
+		//if (hD_ != nullptr && hD_->nam.size() > 0)
 			;// assert(hD_->nam == string(col->name));	//需要验证
-		hFold->feats.push_back(PY_COL2FEAT(hFold,col, hD_,nSamp_, i, isTrain ,flag));
+		hFold->feats.push_back(PY_COL2FEAT(hFold,col, nSamp_, i, isTrain ,flag));
 	}
 
 	if (mort != nullptr && mort->merge_folds.size() > 0) {
 		int i, nMerge = mort->merge_folds.size();
 		for (i = 0; i < nMerge; i++) {
 			PY_COLUMN *col = dataset_->merge_left + i;
-			FeatVector *hFeat = PY_COL2FEAT(hFold, col, nullptr, nSamp_, hFold->nFeat() + i, true,flag);
+			FeatVector *hFeat = PY_COL2FEAT(hFold, col,  nSamp_, hFold->nFeat() + i, true,flag);
 			BIT_SET(hFeat->type, FeatVector::AGGREGATE);
 			hFeat->map4set = new tpSAMP_ID[nSamp_ * 2];		//hFeat->map4feat = hFeat->map4set + nSamp_;
 			hFold->merge_lefts.push_back(hFeat);
@@ -618,7 +626,7 @@ PYMORT_DLL_API void LiteMORT_Imputer_d(double *X, tpY *y, size_t nFeat, size_t n
 	需要重新设计		11/12/2019	cys
 	*/
 //PYMORT_DLL_API void LiteMORT_EDA(const float *X, const tpY *y, size_t nFeat_0, size_t nSamp, size_t flag) {
-
+/*
 void LiteMORT_EDA(void *mort_0, const size_t nFeat_0, const size_t nSamp_,const size_t nValid, PY_ITEM* descs, int nParam, const size_t flag)		{
 	MORT *mort = MORT::From(mort_0);
 	assert(nValid>=0 && nValid <= nSamp_);
@@ -645,7 +653,7 @@ void LiteMORT_EDA(void *mort_0, const size_t nFeat_0, const size_t nSamp_,const 
 	
 	//g_hEDA->InitBundle(config, (float *)dataX, nSamp_, nFeat_0, flag);
 	return ;
-}
+}*/
 
 /*	增量式EDA很难设计
 	10/31/2018
@@ -853,11 +861,11 @@ PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_DATASET_LIST *train_list, PY
 		//	LiteMORT_clear();
 		bool isDelEDA = false;
 		ExploreDA *hEDA = (ExploreDA *)(mort->hEDA_train);
-		if (hEDA == nullptr) {
+		/*if (hEDA == nullptr) {
 			printf("\n********* g_hEDA on train_data ********* \n");
 			LiteMORT_EDA(mort, nFeat_0*4, nSamp, 0, nullptr, 0x0, flag);
 			hEDA = mort->hEDA_train;		//isDelEDA = true;
-		}
+		}*/
 		size_t i, feat, nTrain = nSamp;
 		printf("\n********* LiteMORT_fit nSamp=%d,nFeat_0=%d hEDA=%p********* \n\n", nSamp, nFeat_0, hEDA);
 

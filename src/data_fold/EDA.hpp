@@ -38,8 +38,9 @@ namespace Grusoft {
 	class FeatsOnFold;
 	class ExploreDA{
 	protected:
-		int nFeat=0;
+		//int nFeat=0;
 	public:
+		typedef map<int, Distribution*> MAP_DISTRI;
 		static bool isZERO(double len) {
 			return len==0;
 		}
@@ -50,14 +51,15 @@ namespace Grusoft {
 			vector<double> off;
 		};
 		Bundle bundle;
-		
-		vector<Distribution> arrDistri;
+		MAP_DISTRI mapDistri;
+		int nFeat() {	return mapDistri.size();	}
+		void AddDistri(const string&name, int id, int flag = 0x0);
+		Distribution* GetDistri(int id)	;
+		//vector<Distribution> arrDistri;
 
-		ExploreDA( LiteBOM_Config&,int nFeat,int flag=0x0);
+		ExploreDA( LiteBOM_Config&,int flag=0x0);
 		
-		virtual ~ExploreDA( ){
-			arrDistri.clear();
-		}
+		virtual ~ExploreDA();
 
 		virtual void CheckDuplicate(LiteBOM_Config config, int flag) {
 		}

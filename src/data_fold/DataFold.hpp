@@ -1068,11 +1068,14 @@ namespace Grusoft {
 		virtual void InitDistri(const FeatsOnFold *hFold,bool isY,const SAMP_SET *samp_set, int flag) {
 			//assert(hFold!=nullptr);
 			size_t i, nSamp_=size();
+
 			if (hDistri == nullptr) {	//only for Y
+				assert(hFold==nullptr);
 				hDistri = new Distribution();			
 			}	else {
 
 			}
+
 			Tx *samp_val = arr();
 			/*if (samp_set != nullptr) {//EDA on replacement sampling
 				nSamp_ = samp_set->nSamp;
@@ -1081,8 +1084,8 @@ namespace Grusoft {
 				for (i = 0; i < nSamp_; i++) {
 					samp_val[i] = val[samps[i]];
 				}
-			}*/
-			hDistri->nam = nam;
+			}
+			hDistri->nam = nam;*/
 			hDistri->EDA(hFold,nSamp_, samp_set, samp_val, 0x0);
 			//hDistri->STA_at(nSamp_, samp_val, true, 0x0);
 			if (ZERO_DEVIA(hDistri->vMin, hDistri->vMax))
@@ -1149,7 +1152,7 @@ namespace Grusoft {
 				11/4/2019
 		*/
 		template<typename tpQUANTI>
-		void QuantiAtEDA_(const ExploreDA *edaX, tpQUANTI *quanti, int nMostBin, const FeatsOnFold *hData_, int flag) {
+		void QuantiAtEDA_(ExploreDA *edaX, tpQUANTI *quanti, int nMostBin, const FeatsOnFold *hData_, int flag) {
 			bool isSameSorted = hData_->isTrain();
 			assert(quanti != nullptr && edaX != nullptr);
 			tpQUANTI NNA = tpQUANTI(-1);
@@ -1168,12 +1171,13 @@ namespace Grusoft {
 			Tx a0 = val[idx[0]], a1 = val[idx[nA - 1]];
 			double v0 = a0, v1, v2;
 			assert(a0 <= a1);
-			const Distribution& distri = edaX->arrDistri[id];
+			//const Distribution& distri = edaX->arrDistri[id];
+			const Distribution* distri = edaX->GetDistri(id);
 			//assert ( distri.histo != nullptr);
 			//const vector<double>& vThrsh = distri.vThrsh
 				
 			if (isCategory()) {
-				hDistri->mapCategory = distri.mapCategory;
+				hDistri->mapCategory = distri->mapCategory;
 				if (id == 31) {			//仅用于调试
 					//id = 31;
 				}				
@@ -1185,7 +1189,7 @@ namespace Grusoft {
 					MAP_CATEGORY::iterator failed = hDistri->mapCategory.end();
 					if (hDistri->mapCategory.find(key) == failed) {
 						//hDistri->mapCategory.insert(pair<int, int>(key, hDistri->mapCategory));
-						quanti[pos] = distri.histo->nBins - 1;	//很少的fail_match	也会严重降低准确率
+						quanti[pos] = distri->histo->nBins - 1;	//很少的fail_match	也会严重降低准确率
 						//quanti[pos] = 0;
 						nFailed++;
 					}else
@@ -1199,22 +1203,22 @@ namespace Grusoft {
 				}
 			}
 			else {
-				const HistoGRAM *histo = distri.histo;		assert(histo!=nullptr);
+				const HistoGRAM *histo = distri->histo;		assert(histo!=nullptr);
 				noBin = 0;	//v1 = vThrsh[noBin + 1];
-				v1 = distri.binFeatas[noBin + 1].split_F;		// bins[noBin + 1].split_F;
+				v1 = distri->binFeatas[noBin + 1].split_F;		// bins[noBin + 1].split_F;
 				i_0 = 0;
 				while (i_0 < nA) {
 					pos = idx[i_0];
 					assert(!IS_NAN_INF(val[pos]));
-					if (val[pos]< distri.vMin || val[pos]>distri.vMax) {//确实有可能
+					if (val[pos]< distri->vMin || val[pos]>distri->vMax) {//确实有可能
 						if (isSameSorted) {
 							quanti[pos] = NNA;	i_0++;
 						}
 						else {	//强制扰动
-							if (val[pos] < distri.vMin) {
+							if (val[pos] < distri->vMin) {
 								quanti[pos] = 0;
 							}
-							if (val[pos]>distri.vMax) {
+							if (val[pos]>distri->vMax) {
 								quanti[pos] = histo->nBins -2;
 							}
 							quanti[pos] = NNA;	i_0++;
@@ -1237,15 +1241,15 @@ namespace Grusoft {
 							continue;
 							//throw "QuantiAtEDA noBin is XXX";						
 						}
-						v1 = noBin+1==histo->nBins ? distri.vMax  : distri.binFeatas[noBin + 1].split_F;
+						v1 = noBin+1==histo->nBins ? distri->vMax  : distri->binFeatas[noBin + 1].split_F;
 					}
 					assert(noBin >= 0 && noBin < NNA);
 
 				}
 				//int noNA = distri.histo->bins.size()-1;				
-				int noNA = distri.histo->nBins - 1;
+				int noNA = distri->histo->nBins - 1;
 				assert(noNA <= NNA);
-				HISTO_BIN* hNA=distri.histo->hBinNA();
+				HISTO_BIN* hNA=distri->histo->hBinNA();
 				for (i = 0; i < nSamp_; i++) {
 					//if (quanti[i] == -1)
 					if (quanti[i] == NNA )
@@ -1256,7 +1260,7 @@ namespace Grusoft {
 			}
 		}
 
-		virtual void QuantiAtEDA(const ExploreDA *edaX, void *quanti,int sizeofQ, int nMostBin, const FeatsOnFold *hData_, int flag) {
+		virtual void QuantiAtEDA(ExploreDA *edaX, void *quanti,int sizeofQ, int nMostBin, const FeatsOnFold *hData_, int flag) {
 			switch (sizeofQ) {
 			case 1:
 				QuantiAtEDA_(edaX, (uint8_t*)quanti, nMostBin, hData_, flag);
