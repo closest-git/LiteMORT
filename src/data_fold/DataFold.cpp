@@ -793,36 +793,6 @@ void FeatsOnFold::SplitOn(MT_BiSplit *hBlit, int flag) {
 
 void FeatsOnFold::ExpandFeat(int flag) {
 	return;
-	/*	bool isTrain = BIT_TEST(dType,  FeatsOnFold::DF_TRAIN);
-	bool isPredict = BIT_TEST(dType,  FeatsOnFold::DF_PREDIC);
-	size_t nFeat_0 = feats.size(),i,nSamp_=nSample(),feat;
-	int flagF = flag, nQuant=0, nMostQ = config.feat_quanti;
-	for (feat = 0; feat < 2; feat++) {
-	FeatVector *hBase = feats[feat];
-	tpQUANTI pos,*quanti = hBase->GetQuantiBins();
-	if (quanti != nullptr) {
-	//edaX->arrDistri.resize(feats.size()+1);
-	vector<BIN_FEATA>& featas = hBase->hDistri->binFeatas;
-	if (!hBase->hDistri->isValidFeatas() )
-	continue;
-	FeatVec_T<float> *hExp = new FeatVec_T<float>(nSamp_, feats.size(), "exp" + std::to_string(feat), flagF);
-	hExp->hDistri = &(edaX->arrDistri[feats.size()]);
-	float *val = hExp->arr();
-	for (i = 0; i < nSamp_; i++) {
-	pos = quanti[i];
-	val[i] = featas[pos].density;
-	}
-	if (isTrain)
-	hExp->EDA(config, true, 0x0);
-	if (isQuanti) {
-	FeatVec_Q *hFQ = new FeatVec_Q(this, hExp, nMostQ);
-	hFQ->UpdateHisto(this, false, true);
-	feats.push_back(hFQ);
-	nQuant++;	//delete hFeat;
-	}else
-	feats.push_back(hExp);
-	}
-	}*/
 }
 
 /*

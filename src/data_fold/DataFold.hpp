@@ -663,7 +663,7 @@ namespace Grusoft {
 			//assert(samp >= 0 && samp < size());
 			if (samp < 0 || samp >= size()) {
 				printf("!!!pValue_AtSamp!!! samp=%lld,size=%lld", samp, size());
-				throw "!!!pValue_AtSamp!!!";
+				//throw "!!!pValue_AtSamp!!!";
 				return val + size()-1;
 			}
 			return val + samp;
@@ -1082,31 +1082,21 @@ namespace Grusoft {
 				}
 			}
 			hDistri->nam = nam;
-			hDistri->STA_at(nSamp_, samp_val, true, 0x0);
+			hDistri->EDA(config,nSamp_, genHisto, samp_val, 0x0);
+			//hDistri->STA_at(nSamp_, samp_val, true, 0x0);
 			if (ZERO_DEVIA(hDistri->vMin, hDistri->vMax))
-				BIT_SET(this->type, Distribution::V_ZERO_DEVIA);
-			/*else if (config.eda_Normal != LiteBOM_Config::NORMAL_off) {
-				Tx *val_c = arr();
-				double mean = hDistri->mean, s = 1.0 / hDistri->devia;
-				//for each(tpSAMP_ID samp in hDistri->sortedA
-				for (i = 0; i < nSamp_; i++) {
-					val_c[i] = (val_c[i] - mean)*s;
-				}
-				hDistri->STA_at(nSamp_, val, true, 0x0);
-			}*/
-			if (genHisto) {
+				BIT_SET(this->type, Distribution::V_ZERO_DEVIA);			
+			/*if (genHisto) {
 				if (hDistri->histo == nullptr) {	//参见LiteMORT_EDA->Analysis(config, (float *)dataX, (tpY *)dataY, nSamp_, nFeat_0, 1, flag);
 					hDistri->X2Histo_(config, nSamp_, samp_val, (double*)nullptr);
 					//hDistri->Dump(this->id, false, flag);
 				}			
-			}
+			}*/
 			if (samp_val != arr())
 				delete[] samp_val;
 //https://stackoverflow.com/questions/13944886/is-stdvector-memory-freed-upon-a-clear
-			vector<tpSAMP_ID>().swap(hDistri->sortedA);	
-			vector<Distribution::vDISTINCT>().swap(hDistri->vUnique);
-			//hDistri->sortedA.clear();		hDistri->sortedA.resize(0);
-			//hDistri->vUnique.clear();		hDistri->vUnique.resize(0);
+			//vector<tpSAMP_ID>().swap(hDistri->sortedA);	
+			///vector<Distribution::vDISTINCT>().swap(hDistri->vUnique);
 		}
 
 		//参见Distribution::STA_at，需要独立出来		8/20/2019

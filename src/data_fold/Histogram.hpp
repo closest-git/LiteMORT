@@ -113,6 +113,16 @@ namespace Grusoft {
 		char fold = -1;			//每个BIN属于一个FOLD
 		int tic = 0;			//X		可删除
 		double density, bandwidth;		//The bandwidth of the kernel is a free parameter which exhibits a strong influence on the resulting estimate
+		
+		bool operator==(const BIN_FEATA& right) const {
+			if (split_F != right.split_F)
+				return false;
+			if (fold != right.fold)
+				return false;			
+			if (tic != right.tic)
+				return false;			
+			return  true;
+		}
 	};
 
 	class FRUIT{

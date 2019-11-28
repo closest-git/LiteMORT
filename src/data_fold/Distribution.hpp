@@ -79,6 +79,9 @@ namespace Grusoft {
 		}
 	};
 
+	/*
+		吾道 一以贯之(Only init once before the train stage)
+	*/
 	struct Distribution {
 		static GRander rander_;
 		enum {
@@ -131,7 +134,10 @@ namespace Grusoft {
 
 		virtual void Dump(int feat,bool isQuanti, int flag);
 
-		bool isPass() {
+		Distribution() {}
+		bool VerifySame(const Distribution& rhs) const;
+
+		bool isPass()	const {
 			if (rNA == 1)
 				return true;
 			if (ZERO_DEVIA(vMin, vMax))
@@ -239,7 +245,31 @@ namespace Grusoft {
 		}
 
 		template<typename Tx>
-		void CheckUnique(LiteBOM_Config config, size_t nSamp_, Tx *val, const vector<tpSAMP_ID>& idx, vector<vDISTINCT>& vUnique, /*int nMostUnique,*/ int flag = 0x0) {
+		void EDA(const LiteBOM_Config&config, size_t nSamp_, bool genHisto, const Tx*samp_val,int flag) {
+			//hDistri->nam = nam;
+			STA_at<Tx>(nSamp_, samp_val, true, 0x0);
+			/*else if (config.eda_Normal != LiteBOM_Config::NORMAL_off) {
+				Tx *val_c = arr();
+				double mean = hDistri->mean, s = 1.0 / hDistri->devia;
+				//for each(tpSAMP_ID samp in hDistri->sortedA
+				for (i = 0; i < nSamp_; i++) {
+				val_c[i] = (val_c[i] - mean)*s;
+				}
+				hDistri->STA_at(nSamp_, val, true, 0x0);
+			}*/
+			if (genHisto) {
+				if (histo == nullptr) {	//参见LiteMORT_EDA->Analysis(config, (float *)dataX, (tpY *)dataY, nSamp_, nFeat_0, 1, flag);
+						X2Histo_(config, nSamp_, samp_val, (double*)nullptr);
+					//hDistri->Dump(this->id, false, flag);
+				}
+			}
+			//https://stackoverflow.com/questions/13944886/is-stdvector-memory-freed-upon-a-clear
+			vector<tpSAMP_ID>().swap(sortedA);
+			vector<Distribution::vDISTINCT>().swap(vUnique);
+		}
+
+		template<typename Tx>
+		void CheckUnique(LiteBOM_Config config, size_t nSamp_, const Tx *val, const vector<tpSAMP_ID>& idx, vector<vDISTINCT>& vUnique, /*int nMostUnique,*/ int flag = 0x0) {
 			size_t nA = idx.size(), i;
 			Tx a0 = val[idx[0]], a1 = val[idx[nA - 1]], pre = a0;
 			size_t nz=1;
@@ -426,7 +456,7 @@ namespace Grusoft {
 			else
 				sort_indexes(nSamp_, val, idx);
 			size_t i, i_0 = 0, i_1, noBin = 0, pos, nA = idx.size();
-			Tx a0 = val[idx[0]], a1 = val[idx[nA - 1]], v0 = a0, v1, v2;
+			Tx a0 = val[idx[0]], a1 = val[idx[nA - 1]], v0 = a0;
 			if (nA > 4 && a1>a0) {
 				q1 = val[idx[nA / 4]], q2 = val[idx[nA / 2]], q3 = val[idx[nA*3/4]];
 				//nMostBin = MIN2(nMostBin,Freedman_Diaconis_(val, idx));

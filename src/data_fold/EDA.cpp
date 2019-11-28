@@ -156,6 +156,24 @@ bool Distribution::isValidFeatas() {
 	return true;
 }
 
+bool Distribution::VerifySame(const Distribution& rhs) const {
+	if (nSamp != rhs.nSamp)
+		return false;
+	if (type != rhs.type)
+		return false;
+	//if (histo != rhs.histo)
+	//	return false;
+	
+	if(mapCategory != rhs.mapCategory)
+		return false;
+	if (binFeatas != rhs.binFeatas)
+		return false;/**/
+	if (nam != rhs.nam)
+		return false;
+	if (desc != rhs.desc)
+		return false;
+	return false;
+}
 
 void Distribution::Dump(int feat, bool isQuanti, int flag) {
 	char tmp[2000] = "";
