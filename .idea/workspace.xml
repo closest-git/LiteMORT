@@ -10,16 +10,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1f20a82c-2842-4728-bc01-7f01847a5972" name="Default" comment="README">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/python-package/case_ashrae_linux.py" beforeDir="false" afterPath="$PROJECT_DIR$/python-package/case_ashrae_linux.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/data_fold/Distribution.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/Distribution.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/data_fold/EDA.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/EDA.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_fold/FeatVec_EXP.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/FeatVec_EXP.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_fold/FeatVector.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/FeatVector.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/data_fold/FeatVector.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/FeatVector.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/data_fold/Histogram.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/Histogram.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/learn/LOSS.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/learn/LOSS.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/python/pyMORT_DLL.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/python/pyMORT_DLL.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/util/Float16.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/Float16.hpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -62,8 +60,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/python-package/case_ashrae.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="350">
-              <caret line="39" column="14" lean-forward="true" selection-start-line="39" selection-start-column="13" selection-end-line="39" selection-end-column="14" />
+            <state relative-caret-position="191">
+              <caret line="225" column="9" selection-start-line="225" selection-start-column="9" selection-end-line="225" selection-end-column="9" />
               <folding>
                 <element signature="e#182#228#0" expanded="true" />
               </folding>
@@ -127,7 +125,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>MORT_feat_select_</find>
       <find>Mort_PickSamples</find>
       <find>split_ids</find>
       <find>some_params</find>
@@ -157,6 +154,7 @@
       <find>fit_regressor</find>
       <find>VerifyMerge</find>
       <find>15000</find>
+      <find>pickle</find>
     </findStrings>
     <replaceStrings>
       <replace />
@@ -223,10 +221,10 @@
         <option value="$PROJECT_DIR$/python-package/litemort/LiteMORT_hyppo.py" />
         <option value="$PROJECT_DIR$/python-package/mort_local.py" />
         <option value="$PROJECT_DIR$/python-package/litemort/__version__.py" />
-        <option value="$PROJECT_DIR$/python-package/case_ashrae.py" />
         <option value="$PROJECT_DIR$/python-package/litemort/LiteMORT.py" />
         <option value="$PROJECT_DIR$/python-package/litemort/LiteMORT_preprocess.py" />
         <option value="$PROJECT_DIR$/python-package/case_ashrae_linux.py" />
+        <option value="$PROJECT_DIR$/python-package/case_ashrae.py" />
       </list>
     </option>
   </component>
@@ -554,7 +552,7 @@
       <workItem from="1574760735794" duration="2378000" />
       <workItem from="1574818177704" duration="6342000" />
       <workItem from="1574843498671" duration="3266000" />
-      <workItem from="1574904908100" duration="2851000" />
+      <workItem from="1574904908100" duration="4845000" />
     </task>
     <task id="LOCAL-00001" summary="README">
       <created>1556249780941</created>
@@ -599,7 +597,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1192512000" />
+    <option name="totallyTimeSpent" value="1194506000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="22" y="0" width="1376" height="871" extended-state="0" />
@@ -1316,8 +1314,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/python-package/case_ashrae.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="350">
-          <caret line="39" column="14" lean-forward="true" selection-start-line="39" selection-start-column="13" selection-end-line="39" selection-end-column="14" />
+        <state relative-caret-position="191">
+          <caret line="225" column="9" selection-start-line="225" selection-start-column="9" selection-end-line="225" selection-end-column="9" />
           <folding>
             <element signature="e#182#228#0" expanded="true" />
           </folding>

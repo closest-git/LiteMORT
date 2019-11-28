@@ -244,8 +244,20 @@ namespace Grusoft {
 			STA_at(vec.size(), arr, isSparse, flag);
 		}
 
+		//允许重采样
 		template<typename Tx>
-		void EDA(const LiteBOM_Config&config, size_t nSamp_, bool genHisto, const Tx*samp_val,int flag) {
+		void EDA(const FeatsOnFold *hFold, size_t nSamp_, const SAMP_SET *samp_set, const Tx*samp_val_0,int flag) {
+			Tx *samp_val = (Tx*)samp_val_0;
+			size_t i;
+			if (samp_set != nullptr) {//EDA on replacement sampling
+				nSamp_ = samp_set->nSamp;
+				samp_val = new Tx[nSamp_];
+				tpSAMP_ID *samps = samp_set->samps;
+				for (i = 0; i < nSamp_; i++) {
+					samp_val[i] = samp_val_0[samps[i]];
+				}
+			}
+			/**/
 			//hDistri->nam = nam;
 			STA_at<Tx>(nSamp_, samp_val, true, 0x0);
 			/*else if (config.eda_Normal != LiteBOM_Config::NORMAL_off) {
@@ -257,15 +269,19 @@ namespace Grusoft {
 				}
 				hDistri->STA_at(nSamp_, val, true, 0x0);
 			}*/
-			if (genHisto) {
+			assert(histo = nullptr);
+			if (hFold != nullptr) {	//Loss中的各个feat没必要生成histo
 				if (histo == nullptr) {	//参见LiteMORT_EDA->Analysis(config, (float *)dataX, (tpY *)dataY, nSamp_, nFeat_0, 1, flag);
-						X2Histo_(config, nSamp_, samp_val, (double*)nullptr);
+					X2Histo_(hFold->config, nSamp_, samp_val, (double*)nullptr);
 					//hDistri->Dump(this->id, false, flag);
 				}
 			}
+
 			//https://stackoverflow.com/questions/13944886/is-stdvector-memory-freed-upon-a-clear
 			vector<tpSAMP_ID>().swap(sortedA);
 			vector<Distribution::vDISTINCT>().swap(vUnique);
+			if (samp_val != samp_val_0)
+				delete[] samp_val;
 		}
 
 		template<typename Tx>

@@ -81,6 +81,7 @@ namespace Grusoft {
 		};
 		//FeatVector *fvMergeLeft = nullptr;			//仅指向
 		Distribution *hDistri = nullptr;		//仅指向
+
 		//Distribution *hDistriTrain = nullptr;	//仅指向
 		Feature_Selection* select_bins=nullptr;
 		double wSplit=0, wSplit_last=0;		//"split", result contains numbers of times the feature is used in a model.
@@ -105,7 +106,7 @@ namespace Grusoft {
 		typedef enum {
 			COPY_MEAN,
 		}BINARY_OPERATE;
-		int id = -1;
+		int id = -1;		//非常重要，唯一标识
 		int agg_no = -1;		//展开为一系列聚合特征
 		
 		string nam = "", desc = "";
@@ -160,7 +161,7 @@ namespace Grusoft {
 		virtual void Merge4Quanti(const SAMP_SET*samp_0, int flag=0x0)	{ throw "FeatVector::Merge4Quanti is ..."; }
 		virtual void Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, const tpSAMP_ID *samps4quanti=nullptr, int flag = 0x0) const
 		{ throw "FeatVector::_Samp2Histo_ is ..."; }
-		virtual void EDA(const LiteBOM_Config&config,bool genHisto, const SAMP_SET *samp_set, int flag) { throw "FeatVector::EDA is ..."; }
+		virtual void InitDistri(const FeatsOnFold *hFold,bool genHisto, const SAMP_SET *samp_set, int flag) { throw "FeatVector::InitDistri is ..."; }
 
 		virtual void QuantiAtEDA(const ExploreDA *eda, void *quanti, int sizeofQ, int nMostBin, const FeatsOnFold *hData_, int flag) { ; }
 		//virtual void Split2Quanti(const LiteBOM_Config&config, const ExploreDA *eda, vector<double>& vThrsh, HistoGRAM *qHisto, tpDOWN *yDown, int nMostBin, int flag = 0x0) { throw "FeatVector::SplitSort is ..."; }

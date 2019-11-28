@@ -662,7 +662,6 @@ FeatVec_Q::FeatVec_Q(const FeatsOnFold *hData_, FeatVector *hFeat,int nMostBin, 
 	hDistri = hFeatSource->hDistri;
 }*/
 
-
 /*
 	²Î¼ûlightGBM::BoostFromScore
 	v0.1	cys
@@ -670,13 +669,14 @@ FeatVec_Q::FeatVec_Q(const FeatsOnFold *hData_, FeatVector *hFeat,int nMostBin, 
 */
 void INIT_SCORE::Init(FeatsOnFold *hData_, int flag) {
 	LiteBOM_Config& config = hData_->config;
-	Distribution *yDis = hData_->GetY()->hDistri;
-	assert(yDis !=nullptr);
-	double mean = yDis->mean;
 	//hLoss->predict->Set(mean);
 	//size_t nSamp=down.size(),i;
-	if(config.init_scor=="mean")
+	if (config.init_scor == "mean") {
+		Distribution *yDis = hData_->GetY()->hDistri;
+		assert(yDis !=nullptr);
+		double mean = yDis->mean;
 		step = mean;
+	}
 	else //config.init_scor == "0")
 		step = 0;
 	printf("----Start training from score %g",step);
@@ -754,10 +754,13 @@ void FeatsOnFold::ExpandMerge(const vector<FeatsOnFold *>&merge_folds, int flag)
 			}
 
 			FeatVector *hRight = hFeat;
-			if (isEval()) {
+			if (isTrain()) {
+				hFeat->InitDistri(this, true, &samp1, 0x0);
+			}
+			/*if (isEval()) {
 				assert(hRight->hDistri!=nullptr);		//already in ExpandMerge@train
 			}else
-				hFeat->EDA(config, true, &samp1, 0x0);
+				hFeat->EDA(config, true, &samp1, 0x0);*/
 
 			if (isQuanti || hFeat->isCategory()) {
 				//assert(isTrain());
@@ -774,7 +777,8 @@ void FeatsOnFold::ExpandMerge(const vector<FeatsOnFold *>&merge_folds, int flag)
 				assert(hLeft->PY->isInt32());
 				hEXP = new FeatVec_EXP<int32_t>(this, hRight->nam + "@" + hLeft->nam, hLeft, hRight);
 			}
-			hEXP->EDA(this->config, false, nullptr, 0x0);
+			hEXP->hDistri = hRight->hDistri;
+			//hEXP->EDA(this->config, false, nullptr, 0x0);
 			feats.push_back(hEXP);
 			nExFeat++;
 		}

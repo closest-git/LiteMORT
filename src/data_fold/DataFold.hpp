@@ -548,7 +548,7 @@ namespace Grusoft {
 		//map<hMTNode,Tx> BLIT_thrsh,BLIT_mean;
 	public:
 		FeatVec_T() { 	}
-		FeatVec_T(size_t _len, int id_, const string&des_, int flag = 0x0) {
+		FeatVec_T(size_t _len, int id_, const string&des_, int flag = 0x0)  {
 			id = id_;
 			nSamp_0 = _len;
 			desc = des_;	assert(_len > 0);	
@@ -1065,24 +1065,25 @@ namespace Grusoft {
 			v0.3 no edaX 
 			v0.4 on samp_set
 		*/
-		virtual void EDA(const LiteBOM_Config&config,bool genHisto,const SAMP_SET *samp_set, int flag) {
+		virtual void InitDistri(const FeatsOnFold *hFold,bool isY,const SAMP_SET *samp_set, int flag) {
+			//assert(hFold!=nullptr);
 			size_t i, nSamp_=size();
 			if (hDistri == nullptr) {	//only for Y
-				hDistri = new Distribution();		
+				hDistri = new Distribution();			
 			}	else {
 
 			}
 			Tx *samp_val = arr();
-			if (samp_set != nullptr) {//EDA on replacement sampling
+			/*if (samp_set != nullptr) {//EDA on replacement sampling
 				nSamp_ = samp_set->nSamp;
 				samp_val = new Tx[nSamp_];
 				tpSAMP_ID *samps = samp_set->samps;
 				for (i = 0; i < nSamp_; i++) {
 					samp_val[i] = val[samps[i]];
 				}
-			}
+			}*/
 			hDistri->nam = nam;
-			hDistri->EDA(config,nSamp_, genHisto, samp_val, 0x0);
+			hDistri->EDA(hFold,nSamp_, samp_set, samp_val, 0x0);
 			//hDistri->STA_at(nSamp_, samp_val, true, 0x0);
 			if (ZERO_DEVIA(hDistri->vMin, hDistri->vMax))
 				BIT_SET(this->type, Distribution::V_ZERO_DEVIA);			
@@ -1174,7 +1175,7 @@ namespace Grusoft {
 			if (isCategory()) {
 				hDistri->mapCategory = distri.mapCategory;
 				if (id == 31) {			//仅用于调试
-					id = 31;
+					//id = 31;
 				}				
 				i_0 = 0;
 				while (i_0 < nA) {
