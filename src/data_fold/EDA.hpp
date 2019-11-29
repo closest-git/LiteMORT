@@ -53,7 +53,7 @@ namespace Grusoft {
 		Bundle bundle;
 		MAP_DISTRI mapDistri;
 		int nFeat() {	return mapDistri.size();	}
-		void AddDistri(const string&name, int id, int flag = 0x0);
+		void AddDistri(const PY_COLUMN*col, int id, int flag = 0x0);
 		Distribution* GetDistri(int id)	;
 		//vector<Distribution> arrDistri;
 

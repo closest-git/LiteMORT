@@ -265,8 +265,9 @@ PYMORT_DLL_API void LiteMORT_set_feat(PY_ITEM* params, int nParam, int flag = 0x
 namespace Grusoft {
 	FeatVector *FeatVecQ_InitInstance(FeatsOnFold *hFold, FeatVector *hFeat, int x, int flag) {
 		int nBins = hFold->config.feat_quanti;
-		assert(hFeat != nullptr && hFeat->hDistri != nullptr);
-		HistoGRAM *histo = hFeat->hDistri->histo;
+		//assert(hFeat != nullptr && hFeat->hDistri != nullptr);
+		Distribution *distri = hFold->histoDistri(hFeat);
+		HistoGRAM *histo = distri->histo;
 		if (histo != nullptr) {
 			nBins = histo->nBins;
 		}
@@ -305,7 +306,7 @@ FeatVector *PY_COL2FEAT(const FeatsOnFold *hFold, PY_COLUMN*col, size_t nSamp_,i
 	FeatVector *hFeat = nullptr;
 	int flagF = flag | FeatVector::VAL_REFER;
 	if (hFold->isTrain()) {
-		hFold->edaX->AddDistri(col->name, id);		//col
+		hFold->edaX->AddDistri(col, id);		//col
 	}
 
 	if (col->isFloat()) {
@@ -337,31 +338,20 @@ FeatVector *PY_COL2FEAT(const FeatsOnFold *hFold, PY_COLUMN*col, size_t nSamp_,i
 
 	hFeat->PY = col;
 	hFeat->nam = col->type_x;		hFeat->nam += col->name;
-	hFeat->hDistri = hFold->edaX->GetDistri(id);// hFold->edaX == nullptr ? nullptr : &(hFold->edaX->arrDistri[i]);
 	hFeat->UpdateType();
-	/*if (col->isCategory()) {
-		BIT_SET(hFeat->hDistri->type, Distribution::CATEGORY);
-		BIT_SET(hFeat->type, Distribution::CATEGORY);
-	}
-	if (col->isDiscrete()) {
-		BIT_SET(hFeat->hDistri->type, Distribution::DISCRETE);
-		BIT_SET(hFeat->type, Distribution::DISCRETE);
-	}
-	if (col->representive > 0) {
-		BIT_SET(hFeat->hDistri->type, Distribution::DISCRETE);
-		BIT_SET(hFeat->type, Distribution::DISCRETE);
-		BIT_SET(hFeat->type, FeatVector::REPRESENT_);
-	}*/
 
 	hFeat->Set(nSamp_, col);
 	if (hFold->isTrain()) {
-		hFeat->InitDistri(hFold, true,nullptr, 0x0);		//EDA基于全局分析，而这里的是局部分析。分布确实会不一样
+		Distribution *tDistri = hFold->edaX->GetDistri(id);// hFold->edaX == nullptr ? nullptr : &(hFold->edaX->arrDistri[i]);
+		hFeat->InitDistri(hFold, tDistri,nullptr, 0x0);		//EDA基于全局分析，而这里的是局部分析。分布确实会不一样
+	}
+	else {
+		hFeat->InitDistri(hFold, nullptr, nullptr, 0x0);		//EDA基于全局分析，而这里的是局部分析。分布确实会不一样
 
 	}
 
 	return hFeat;
 }
-
 
 //FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, string nam_, PY_COLUMN *cX_, PY_COLUMN *cY_, size_t nSamp_, size_t ldX_, size_t ldY_, int flag) {
 FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY_DATASET *dataset_, MORT *mort, int flag) {
@@ -437,10 +427,11 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY
 		FeatVector *hFeat = hFold->Feat(feat);		
 		if(feat==77)
 			feat = 77;
-		sparse += hFeat->hDistri->rSparse*nSamp_;
-		nana += hFeat->hDistri->rNA*nSamp_;
+		Distribution *fDistri = hFeat->myDistri();
+		sparse += fDistri->rSparse*nSamp_;
+		nana += fDistri->rNA*nSamp_;
 		//if (BIT_TEST(hFeat->type, FeatVector::V_ZERO_DEVIA)) {
-		if (hFeat->hDistri->isPass()) {
+		if (fDistri->isPass()) {
 			//printf("%d\n", feat);
 			nConstFeat++;			nLocalConst++;
 			//hFeat->Clear();		//释放内存
@@ -462,6 +453,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY
 	int nTotalBins = 0;
 	for (int feat = 0; feat < hFold->nFeat(); feat++) {
 		FeatVector *hFeat = hFold->Feat(feat);
+		Distribution *hDistri = hFold->histoDistri(hFeat);
 		if (config.feat_selector != nullptr) {
 			hFeat->select.user_rate = config.feat_selector[feat];
 			printf("%d(%.3g)\t", feat, hFeat->select.user_rate);
@@ -473,9 +465,9 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY
 			hFold->present.Append(hFeat, col->representive);
 		}
 		if (hFold->config.verbose>666 ) {
-			hFeat->hDistri->Dump(feat, false, flag);					//Train输出distribution信息
+			hFeat->myDistri()->Dump(feat, false, flag);					//Train输出distribution信息
 		}
-		nTotalBins += hFeat->hDistri == nullptr ? 0 : hFeat->hDistri->nHistoBin();
+		nTotalBins += hDistri->nHistoBin();
 	}
 											/*if (hFold->isQuanti) {
 	printf("\n********* FeatsOnFold::QUANTI nMostQ=%d\r\n", nMostQ);
@@ -760,7 +752,9 @@ void Feats_one_by_one(FeatsOnFold *hTrain, FeatsOnFold *hEval, BoostingForest::M
 	float *selector = hTrain->config.feat_selector;		//返回值
 	for (i = 0; i < nFeat; i++) {
 		FeatVector *hFeat = hTrain->Feat(i);
-		if (hFeat->hDistri != nullptr && hFeat->hDistri->isPass())
+		Distribution *hDistri = hTrain->histoDistri(hFeat);
+		//if (hFeat->hDistri != nullptr && hFeat->hDistri->isPass())
+		if (hDistri->isPass())
 			continue;
 		if (selector[i] != 1) {
 			hFeat->select.isPick = false;	nSelect++;

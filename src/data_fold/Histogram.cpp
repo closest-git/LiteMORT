@@ -355,24 +355,26 @@ FRUIT::~FRUIT() {
 }
 
 /**/
-FRUIT::FRUIT(const HistoGRAM *his_, int flag) : histo_refer(his_) {
+FRUIT::FRUIT(FeatsOnFold *hFold, const HistoGRAM *his_, int flag) : histo_refer(his_) {
 	const FeatVector *hFeat = his_->hFeat;
-	int nMaxBin = hFeat->hDistri->binFeatas.size(),i;
+	Distribution *hDistri = hFold->histoDistri(hFeat);
+	int nMaxBin = hDistri->binFeatas.size(),i;
 	//assert(nMaxBin == hFeat->hDistri->histo->nMostBins);
 	//²Î¼û	FeatVec_T::SplitOn		if (fold <= 0)	left[nLeft++] = samp;
 	mapFolds = new tpFOLD[nMaxBin]();
 	//for (i = 0; i < nMaxBin; i++)		mapFolds[i] = 1;
-	Set(his_);
+	Set(hFold,his_);
 }
 
 /*
 	v0.1	cys
 		11/1/2019
 */
-void FRUIT::Set(const HistoGRAM*histo, int flag) {
+void FRUIT::Set(FeatsOnFold *hFold,const HistoGRAM*histo, int flag) {
 	assert(histo != nullptr);
 	const FeatVector *hFeat = histo->hFeat;
-	int nMaxBin = hFeat->hDistri->binFeatas.size();
+	Distribution *hDistri = hFold->histoDistri(hFeat);
+	int nMaxBin = hDistri->binFeatas.size();
 	best_feat_id = histo->hFeat->id;
 	split_by = histo->split_by;
 	//assert(fruit->bin_S0.nz>0);
@@ -397,7 +399,8 @@ void FRUIT::Set(const HistoGRAM*histo, int flag) {
 		assert(pos > 0 && pos < histo->nBins);
 		tic_left = pos;
 		bin_S0 = histo->bins[pos - 1];			bin_S1 = histo->bins[pos];
-		adaptive_thrsh = histo->split_F(bin_S1.tic);	// bin_S1.split_F;
+		//adaptive_thrsh = histo->split_F(bin_S1.tic);	// bin_S1.split_F;
+		adaptive_thrsh = hDistri->split_F(bin_S1.tic);
 	}
 	//assert(fruit->adaptive_thrsh!= DBL_MAX);
 	isNanaLeft = false;
@@ -663,7 +666,8 @@ size_t HistoGRAM_BUFFER::SetBinsAtBuffer(const FeatsOnFold *hData_, vector<int>&
 		for (auto feat: pick_feats) {
 			no = NodeFeat2NO(node, feat);
 			FeatVector *hFV = hData_->feats[feat];
-			HistoGRAM *H_src = hFV->hDistri->histo,*histo = buffers[no];
+			Distribution *hDistri = hData_->histoDistri(hFV);
+			HistoGRAM *H_src = hDistri->histo,*histo = buffers[no];
 			if (H_src == nullptr) {
 				buffers[no] = nullptr;	 	continue;
 			}
@@ -694,10 +698,11 @@ HistoGRAM_BUFFER::HistoGRAM_BUFFER(const FeatsOnFold *hData_0, int flag):hData_(
 	nMostFeat = hData_->nFeat();	
 	for (nMostBin = 0,feat = 0; feat < nMostFeat; feat++) {
 		FeatVector *hFV = hData_->feats[feat];
-		if (hFV->hDistri->histo == nullptr)		{
+		Distribution *hDistr = hData_->histoDistri(hFV);
+		if (hDistr->histo == nullptr)		{
 			nzZ++;		 continue;
 		}
-		nMostBin += hFV->hDistri->histo->nBins;
+		nMostBin += hDistr->histo->nBins;
 	}
 	nMostBin *= nMostNode;
 	bins_buffer = new HISTO_BIN[nMostBin];	nzMEM +=sizeof(HISTO_BIN)*nMostBin;
@@ -817,11 +822,15 @@ void HistoGRAM::ReSet(size_t nMost, int flag) {
 	//a1 = -DBL_MAX, a0 = DBL_MAX;
 }
 
+/*
 double  HistoGRAM::split_F(int no, int flag) const { 
-	assert(hFeat != nullptr && hFeat->hDistri!=nullptr);
-	double a = hFeat->hDistri->split_F(no,flag);
+	assert(hFeat != nullptr );
+	Distribution *hDistr = hFeat->histoDistri();
+	double a = hDistr->split_F(no,flag);
 	return a; 
 }
+*/
+
 void  HistoGRAM::CopyBins(const HistoGRAM &src, bool isReset, int flag) {
 	//nSamp = src.nSamp;
 	if (nMostBins >= src.nBins) {

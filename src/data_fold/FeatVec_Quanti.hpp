@@ -21,7 +21,8 @@ namespace Grusoft {
 			FeatVector::desc = hFeat->desc;
 			FeatVector::nam = hFeat->nam;
 			FeatVector::type = hFeat->type;
-			FeatVector::hDistri = hFeatSource->hDistri;
+			//FeatVector::hDistri = hFeatSource->hDistri;
+			FeatVector::distri_ = hFeatSource->myDistri();
 			FeatVec_T<tpQUANTI>::nSamp_0 = hFeatSource->size();
 			FeatVector::PY = hFeatSource->PY;
 		}
@@ -31,7 +32,7 @@ namespace Grusoft {
 			if (qHisto_1 != nullptr)			delete qHisto_1;
 			if (hFeatSource != nullptr) {
 				delete hFeatSource;
-				FeatVector::hDistri = nullptr;
+				FeatVector::distri_ = nullptr;
 			}
 		}
 		virtual HistoGRAM *GetHisto(int flag = 0x0) { return qHisto_0; }

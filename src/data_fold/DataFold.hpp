@@ -260,6 +260,8 @@ namespace Grusoft {
 		FeatVector *Feat(const string&name) {
 			return nullptr;
 		}
+		//histo空间所依据的Distri，总是来自于train_data
+		Distribution *histoDistri(const FeatVector *hFeat, int flag=0x0)	const;
 
 		virtual int *Rank4Feat(int type, int flag = 0x0);	
 		virtual void nPick4Split(vector<int>&picks, GRander&rander, BoostingForest *hForest,int flag = 0x0);
@@ -967,13 +969,13 @@ namespace Grusoft {
 				rSet.samps = samps + nLeft;		rSet.nSamp = nRigt;
 				//FeatsOnFold::stat.tX += GST_TOC(t1);
 			}
-			else if (hBlit->fruit->split_by==BY_DENSITY) {
+			/*else if (hBlit->fruit->split_by==BY_DENSITY) {
 				assert(0);
 				SAMP_SET &lSet = left->samp_set, &rSet = rigt->samp_set;
 				tpSAMP_ID *samps = hBlit->samp_set.samps, *left = hBlit->samp_set.left, *rigt = hBlit->samp_set.rigt;
 				lSet = hBlit->samp_set;		rSet = hBlit->samp_set;	//直接复制父节点的一些数据
 				lSet.isRef = true;			rSet.isRef = true;
-				HistoGRAM *histo = hDistri->histo;
+				HistoGRAM *histo = tHisto();	// hDistri->histo;
 				for (i = 0; i < nSamp; i++) {
 					samp = hBlit->samp_set.samps[i];
 					if (isQuanti) {	//训练数据格子化
@@ -994,7 +996,7 @@ namespace Grusoft {
 				memcpy(samps + nLeft, rigt, sizeof(tpSAMP_ID)*nRigt);
 				lSet.samps = samps;				lSet.nSamp = nLeft;
 				rSet.samps = samps + nLeft;		rSet.nSamp = nRigt;
-			}
+			}*/
 			else/**/ {
 				//Value_AtSamp(&hBlit->samp_set, samp_val);
 				hBlit->SplitOn(hData_,samp_val, hData_->isQuanti,0x0);
@@ -1065,15 +1067,15 @@ namespace Grusoft {
 			v0.3 no edaX 
 			v0.4 on samp_set
 		*/
-		virtual void InitDistri(const FeatsOnFold *hFold,bool isY,const SAMP_SET *samp_set, int flag) {
+		virtual void InitDistri(const FeatsOnFold *hFold,Distribution *tDistri,const SAMP_SET *samp_set, int flag) {
 			//assert(hFold!=nullptr);
 			size_t i, nSamp_=size();
-
-			if (hDistri == nullptr) {	//only for Y
-				assert(hFold==nullptr);
-				hDistri = new Distribution();			
+			assert(distri_ == nullptr);
+			if (tDistri == nullptr) {	//Y in train; feats in valid and eavl
+				//assert(hFold==nullptr);
+				distri_ = new Distribution();
 			}	else {
-
+				distri_ = tDistri;
 			}
 
 			Tx *samp_val = arr();
@@ -1086,21 +1088,13 @@ namespace Grusoft {
 				}
 			}
 			hDistri->nam = nam;*/
-			hDistri->EDA(hFold,nSamp_, samp_set, samp_val, 0x0);
+			distri_->EDA(hFold,nSamp_, samp_set, samp_val, tDistri!=nullptr, 0x0);
+
 			//hDistri->STA_at(nSamp_, samp_val, true, 0x0);
-			if (ZERO_DEVIA(hDistri->vMin, hDistri->vMax))
+			if (ZERO_DEVIA(distri_->vMin, distri_->vMax))
 				BIT_SET(this->type, Distribution::V_ZERO_DEVIA);			
-			/*if (genHisto) {
-				if (hDistri->histo == nullptr) {	//参见LiteMORT_EDA->Analysis(config, (float *)dataX, (tpY *)dataY, nSamp_, nFeat_0, 1, flag);
-					hDistri->X2Histo_(config, nSamp_, samp_val, (double*)nullptr);
-					//hDistri->Dump(this->id, false, flag);
-				}			
-			}*/
 			if (samp_val != arr())
 				delete[] samp_val;
-//https://stackoverflow.com/questions/13944886/is-stdvector-memory-freed-upon-a-clear
-			//vector<tpSAMP_ID>().swap(hDistri->sortedA);	
-			///vector<Distribution::vDISTINCT>().swap(hDistri->vUnique);
 		}
 
 		//参见Distribution::STA_at，需要独立出来		8/20/2019
@@ -1158,8 +1152,9 @@ namespace Grusoft {
 			tpQUANTI NNA = tpQUANTI(-1);
 			size_t nSamp_ = size(), i, i_0 = 0, i_1, noBin = 0, pos, nzHisto=0, nFailed=0;
 			vector<tpSAMP_ID> idx;
-			if (hDistri->sortedA.size() > 0 && isSameSorted) {
-				idx = hDistri->sortedA;
+			Distribution *myDistri = distri_;
+			if (myDistri->sortedA.size() > 0 && isSameSorted) {
+				idx = myDistri->sortedA;
 				for (i = 0; i < nSamp_; i++)
 					quanti[i] = NNA;
 			}
@@ -1177,7 +1172,7 @@ namespace Grusoft {
 			//const vector<double>& vThrsh = distri.vThrsh
 				
 			if (isCategory()) {
-				hDistri->mapCategory = distri->mapCategory;
+				myDistri->mapCategory = distri->mapCategory;
 				if (id == 31) {			//仅用于调试
 					//id = 31;
 				}				
@@ -1186,14 +1181,14 @@ namespace Grusoft {
 					pos = idx[i_0];			
 					int key = (int)(val[pos]);		
 					//assert(key >= distri.vMin && key <= distri.vMax);
-					MAP_CATEGORY::iterator failed = hDistri->mapCategory.end();
-					if (hDistri->mapCategory.find(key) == failed) {
+					MAP_CATEGORY::iterator failed = myDistri->mapCategory.end();
+					if (myDistri->mapCategory.find(key) == failed) {
 						//hDistri->mapCategory.insert(pair<int, int>(key, hDistri->mapCategory));
 						quanti[pos] = distri->histo->nBins - 1;	//很少的fail_match	也会严重降低准确率
 						//quanti[pos] = 0;
 						nFailed++;
 					}else
-						quanti[pos] = hDistri->mapCategory[key];	
+						quanti[pos] = myDistri->mapCategory[key];
 					i_0++;
 					//assert(quanti[pos] >= 0 && quanti[pos] < NNA);
 				}

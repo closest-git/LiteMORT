@@ -128,7 +128,7 @@ namespace Grusoft {
 	class FRUIT{
 	public:
 		//FRUIT(HistoGRAM *his_ = nullptr,int flag=0x0) ;
-		FRUIT(const HistoGRAM *his_, int flag = 0x0);
+		FRUIT(FeatsOnFold *hFold, const HistoGRAM *his_, int flag = 0x0);
 		int best_feat_id=-1;
 		const HistoGRAM *histo_refer = nullptr;		//仅指向，不再删除
 		HISTO_BIN bin_S0, bin_S1;						//有变化，比较危险诶
@@ -172,7 +172,7 @@ namespace Grusoft {
 		//double lft_impuri,rgt_impuri;		//为了调试
 		virtual ~FRUIT();
 		
-		virtual void Set(const HistoGRAM*histo,int flag=0x0);		
+		virtual void Set(FeatsOnFold *hFold,const HistoGRAM*histo,int flag=0x0);
 	};
 
 	class HistoGRAM_BUFFER;
@@ -225,7 +225,7 @@ namespace Grusoft {
 		virtual void Dump(const vector<BIN_FEATA>&binFeatas, MAP_CATEGORY&mapCategory, int flag = 0x0);
 		//virtual void TicMap(tpQUANTI*map,int flag);
 
-		virtual double split_F(int no, int flag = 0x0) const;
+		//virtual double split_F(int no, int flag = 0x0) const;
 
 		HistoGRAM* FromDiff(const HistoGRAM*hP, const HistoGRAM*hB,bool isBuffer, int flag = 0x0);
 

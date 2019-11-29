@@ -18,8 +18,8 @@ void FeatVec_LOSS::Clear() {
 
 	if (samp_weight != nullptr)			delete[] samp_weight;
 	if (y != nullptr) {
-		if (y->hDistri != nullptr)
-			delete y->hDistri;
+		//if (y->hDistri != nullptr)
+		//	delete y->hDistri;
 		delete y;
 	}
 	if (predict != nullptr)		delete predict;
@@ -102,9 +102,10 @@ void FeatVec_LOSS::EDA( ExploreDA *edaX, int flag) {
 
 	}	else {
 		//y->EDA(config,true, nullptr, 0x0);
-		y->InitDistri(nullptr, true, nullptr, 0x0);
-		if(y->hDistri!=nullptr)
-			y->hDistri->Dump(-1, false, flag);
+		y->InitDistri(nullptr, nullptr, nullptr, 0x0);
+		Distribution *disY = y->myDistri();
+		if(disY !=nullptr)
+			disY->Dump(-1, false, flag);
 		size_t dim = size(),i,nOutlier;
 		if (config.objective == "outlier") {
 			y->loc(outliers,1);
@@ -118,7 +119,7 @@ void FeatVec_LOSS::EDA( ExploreDA *edaX, int flag) {
 			}
 		}else if (hBaseData_->config.objective == "binary") {
 			size_t nPosi = 0, nNega = 0;
-			HistoGRAM *histo = y->hDistri != nullptr ? y->hDistri->histo : nullptr;		assert(histo!=nullptr);
+			HistoGRAM *histo = disY != nullptr ? disY->histo : nullptr;		assert(histo!=nullptr);
 			if (histo != nullptr) {
 				assert(histo->nBins==2 || histo->nBins == 3);
 				nPosi = histo->bins[1].nz;		nNega = histo->bins[0].nz;

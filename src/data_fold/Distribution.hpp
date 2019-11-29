@@ -246,7 +246,7 @@ namespace Grusoft {
 
 		//允许重采样
 		template<typename Tx>
-		void EDA(const FeatsOnFold *hFold, size_t nSamp_, const SAMP_SET *samp_set, const Tx*samp_val_0,int flag) {
+		void EDA(const FeatsOnFold *hFold, size_t nSamp_, const SAMP_SET *samp_set, const Tx*samp_val_0,bool isGenHisto,int flag) {
 			Tx *samp_val = (Tx*)samp_val_0;
 			size_t i;
 			if (samp_set != nullptr) {//EDA on replacement sampling
@@ -270,11 +270,8 @@ namespace Grusoft {
 				hDistri->STA_at(nSamp_, val, true, 0x0);
 			}*/
 			assert(histo == nullptr);
-			if (hFold != nullptr) {	//Loss中的各个feat没必要生成histo
-				if (histo == nullptr) {	//参见LiteMORT_EDA->Analysis(config, (float *)dataX, (tpY *)dataY, nSamp_, nFeat_0, 1, flag);
-					X2Histo_(hFold->config, nSamp_, samp_val, (double*)nullptr);
-					//hDistri->Dump(this->id, false, flag);
-				}
+			if (isGenHisto) {	//Loss中的各个feat没必要生成histo
+				X2Histo_(hFold->config, nSamp_, samp_val, (double*)nullptr);
 			}
 
 			//https://stackoverflow.com/questions/13944886/is-stdvector-memory-freed-upon-a-clear

@@ -21,10 +21,10 @@ struct PY_COLUMN {
 	double v_max;
 	float representive;
 
-	bool isCategory() {
+	bool isCategory()	const {
 		return type_x!=NULL && strcmp(type_x,"*")==0;
 	}
-	bool isDiscrete() {
+	bool isDiscrete()	const {
 		return type_x != NULL && strcmp(type_x, "#") == 0;
 	}
 	bool isInt8() {

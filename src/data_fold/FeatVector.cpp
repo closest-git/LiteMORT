@@ -3,21 +3,33 @@
 #include "./FeatVector.hpp"
 using namespace Grusoft;
 
+FeatVector::~FeatVector() {
+	if (select_bins != nullptr)
+		delete select_bins;
+	if (wBins != nullptr)
+		delete[] wBins;
+	if (distri_ != nullptr && distri_->histo==nullptr) {		//delete in EDA
+		delete distri_;
+	}
+}
+
+
+//²Î¼ûExploreDA::AddDistri
 void FeatVector::UpdateType(int flag){
 	assert(PY != nullptr);
 	if (PY->isCategory()) {
-		if(hDistri!=nullptr)	//expanded feat has no hDistri
-			BIT_SET(hDistri->type, Distribution::CATEGORY);
+		//if(distri_!=nullptr)	//expanded feat has no hDistri
+		//	BIT_SET(distri_->type, Distribution::CATEGORY);
 		BIT_SET(type, Distribution::CATEGORY);
 	}
 	if (PY->isDiscrete()) {
-		if (hDistri != nullptr)
-			BIT_SET(hDistri->type, Distribution::DISCRETE);
+		//if (distri_ != nullptr)
+		//	BIT_SET(distri_->type, Distribution::DISCRETE);
 		BIT_SET(type, Distribution::DISCRETE);
 	}
 	if (PY->representive > 0) {
-		if (hDistri != nullptr)
-			BIT_SET(hDistri->type, Distribution::DISCRETE);
+		//if (distri_ != nullptr)
+		//	BIT_SET(distri_->type, Distribution::DISCRETE);
 		BIT_SET(type, Distribution::DISCRETE);
 		BIT_SET(type, FeatVector::REPRESENT_);
 	}

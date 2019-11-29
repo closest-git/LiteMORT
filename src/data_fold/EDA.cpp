@@ -27,11 +27,21 @@ ExploreDA::~ExploreDA() {
 	mapDistri.clear();
 }
 
-void ExploreDA::AddDistri(const string&name, int id, int flag) {
+
+void ExploreDA::AddDistri(const PY_COLUMN*PY, int id, int flag) {
 	assert(mapDistri.find(id) == mapDistri.end());
 
 	Distribution *distri = new Distribution();
-	distri->nam = name;
+	distri->nam = PY->name;
+	if (PY->isCategory()) {
+		BIT_SET(distri->type, Distribution::CATEGORY);
+	}
+	if (PY->isDiscrete()) {
+		BIT_SET(distri->type, Distribution::DISCRETE);
+	}
+	if (PY->representive > 0) {
+		BIT_SET(distri->type, Distribution::DISCRETE);
+	}
 	mapDistri.insert(pair<int, Distribution*>(id, distri));
 }
 

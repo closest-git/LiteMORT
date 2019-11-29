@@ -505,15 +505,14 @@ double MT_BiSplit::CheckGain(FeatsOnFold *hData_, const vector<int> &pick_feats,
 	if (feat_id >= 0) {
 		FeatVector *hFeat = hData_->Feat(feat_id);
 		hFeat->select.hasCheckGain = true;		//isSelect = true;
-		fruit = new FRUIT(GetHistogram(hData_, feat_id, false));
+		fruit = new FRUIT(hData_,GetHistogram(hData_, feat_id, false));
 		//fruit->Set(GetHistogram(hData_, feat_id, false));		
 		mxmxN = fruit->mxmxN;
 		feat_regress = -1;
 		assert( mxmxN == fruit->mxmxN );
 		//hFeat->UpdateFruit(hData_,this);
-		if (hFeat->hDistri != nullptr && hFeat->hDistri->rNA > 0) {			
-			//fruit->isNanaLeft = hFeat->hDistri;
-		}	
+		//if (hFeat->hDistri != nullptr && hFeat->hDistri->rNA > 0) {			
+		//}	
 		if (hFeat->select_bins!=nullptr) {
 			hFeat->select_bins->AddCandSalp( );
 			hFeat->select_bins->SetCost(1);

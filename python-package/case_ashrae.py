@@ -239,7 +239,7 @@ class ASHRAE_data(object):
         pkl_path = f'{data_root}/_ashrae_{self.source}_T{target_meter}_{self.some_rows}_{"Mg"if isMerge else ""}_.pickle'
         self.merge_infos = []
 
-        if os.path.isfile(pkl_path):
+        if True:#os.path.isfile(pkl_path):
             print("====== Load pickle @{} ......".format(pkl_path))
             with open(pkl_path, "rb") as fp:
                 [X_train, y_train] = pickle.load(fp)

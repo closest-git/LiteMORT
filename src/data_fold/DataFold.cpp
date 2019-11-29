@@ -186,7 +186,8 @@ void FeatsOnFold::nPick4Split(vector<int>&picks, GRander&rander, BoostingForest 
 			;// hFeat->select.isPick = false;
 #endif
 		}
-		if (hFeat->hDistri!=nullptr && hFeat->hDistri->isPass())
+		Distribution *hDistri = histoDistri(hFeat);
+		if (hDistri!=nullptr && hDistri->isPass())
 			continue;
 		if (BIT_TEST(hFeat->type, FeatVector::IS_BUNDLE))
 			continue;
@@ -326,14 +327,16 @@ void FeatsOnFold::BeforeTrain(BoostingForest *hGBRT, int flag) {
 	for (i = 0; i < nFeat; i++) {
 		//printf("\rFeatsOnFold::BeforeTrain\tfeat=%d\t......", i);
 		FeatVector *hFeat = Feat(i);
-		if (hFeat->hDistri != nullptr) {
-			if (hFeat->hDistri->histo == nullptr)
+		Distribution *hDistri = histoDistri(hFeat);
+		if (hDistri != nullptr) {
+			if (hDistri->histo == nullptr)
 			{			continue;			}
 			nValidFeat++;
 		}
 		//FeatVec_Q *hFQ = dynamic_cast<FeatVec_Q *>(hFeat);
-		if (hFeat->GetHisto() != nullptr) {
-			nTotalBin0 += hFeat->GetHisto()->nBins;
+		HistoGRAM *fHisto = hDistri->histo;
+		if (fHisto != nullptr) {
+			nTotalBin0 += fHisto->nBins;
 			if (isUpdate) {		//很多原因导致update
 				if (isByY) {
 					assert(0);
@@ -343,11 +346,12 @@ void FeatsOnFold::BeforeTrain(BoostingForest *hGBRT, int flag) {
 				}
 				//else if (hGBRT->stopping.isOscillate && hFeat->wSplit_last>64 && !hFeat->hDistri->isUnique) {
 				else if(config.isDynamicHisto) {
-					//if (/*hFeat->wSplit_last>1024 &&*/ !hFeat->hDistri->isUnique && !BIT_TEST(hFeat->hDistri->type, Distribution::CATEGORY)) {					
-					bool isDiscrete = hFeat->hDistri->isUnique || BIT_TEST(hFeat->hDistri->type, Distribution::CATEGORY);
+					//if (/*hFeat->wSplit_last>1024 &&*/ !hFeat->hDistri->isUnique && !BIT_TEST(hFeat->hDistri->type, Distribution::CATEGORY)) {	
+					Distribution * hDistri = histoDistri(hFeat);
+					bool isDiscrete = hDistri->isUnique || BIT_TEST(hDistri->type, Distribution::CATEGORY);
 					bool isUpdate = hFeat->wSplit_last > 1024;//future-sales,geotab等比赛验证，确实有效诶，但是。。。
 					if (isUpdate && !isDiscrete) {
-						hFeat->hDistri->UpdateHistoByW(this->config, hGBRT->forest.size(), hFeat->wBins);
+						hDistri->UpdateHistoByW(this->config, hGBRT->forest.size(), hFeat->wBins);
 						//GST_TIC(t1);
 						hFeat->UpdateHisto(this, false, isFirst, 0x0);
 						//FeatsOnFold::stat.tX += GST_TOC(t1);
@@ -355,7 +359,7 @@ void FeatsOnFold::BeforeTrain(BoostingForest *hGBRT, int flag) {
 				}
 			}
 		}
-		nTotalBin1 += hFeat->GetHisto()->nBins;
+		nTotalBin1 += fHisto->nBins;
 		//hFeat->XY2Histo_(config, this->samp_set, x);
 	}
 	if(hGBRT->skdu.noT%50==0 && nTotalBin1!=nTotalBin0)
@@ -671,9 +675,9 @@ void INIT_SCORE::Init(FeatsOnFold *hData_, int flag) {
 	LiteBOM_Config& config = hData_->config;
 	//hLoss->predict->Set(mean);
 	//size_t nSamp=down.size(),i;
+	Distribution *yDis = hData_->GetY()->myDistri();
+	assert(yDis !=nullptr);
 	if (config.init_scor == "mean") {
-		Distribution *yDis = hData_->GetY()->hDistri;
-		assert(yDis !=nullptr);
 		double mean = yDis->mean;
 		step = mean;
 	}
@@ -755,7 +759,7 @@ void FeatsOnFold::ExpandMerge(const vector<FeatsOnFold *>&merge_folds, int flag)
 
 			FeatVector *hRight = hFeat;
 			if (isTrain()) {
-				hFeat->InitDistri(this, true, &samp1, 0x0);
+				hFeat->InitDistri(this, nullptr, &samp1, 0x0);
 			}
 			/*if (isEval()) {
 				assert(hRight->hDistri!=nullptr);		//already in ExpandMerge@train
@@ -777,7 +781,7 @@ void FeatsOnFold::ExpandMerge(const vector<FeatsOnFold *>&merge_folds, int flag)
 				assert(hLeft->PY->isInt32());
 				hEXP = new FeatVec_EXP<int32_t>(this, hRight->nam + "@" + hLeft->nam, hLeft, hRight);
 			}
-			hEXP->hDistri = hRight->hDistri;
+			//hEXP->hDistri = hRight->hDistri;
 			//hEXP->EDA(this->config, false, nullptr, 0x0);
 			feats.push_back(hEXP);
 			nExFeat++;
@@ -798,6 +802,14 @@ void FeatsOnFold::SplitOn(MT_BiSplit *hBlit, int flag) {
 void FeatsOnFold::ExpandFeat(int flag) {
 	return;
 }
+
+//histo空间所依据的Distri，总是来自于train_data
+Distribution *FeatsOnFold::histoDistri(const FeatVector *hFeat,int flag) const {
+	Distribution *distri = edaX->GetDistri(hFeat->id);
+	assert(distri != nullptr && distri->histo != nullptr);
+	return distri;
+}
+
 
 /*
 void FeatVec_Q::UpdateFruit(const FeatsOnFold *hData_, MT_BiSplit *hBlit, int flag) {

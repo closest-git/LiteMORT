@@ -69,6 +69,8 @@ namespace Grusoft {
 
 	class FeatVector {
 	protected:
+		FeatsOnFold *hData_=nullptr;
+		Distribution *distri_ = nullptr;
 	public:
 		static bool OrderByName(const FeatVector *l, const FeatVector *r) { return l->nam<r->nam; }
 
@@ -80,9 +82,16 @@ namespace Grusoft {
 			bool hasCheckGain = false;
 		};
 		//FeatVector *fvMergeLeft = nullptr;			//仅指向
-		Distribution *hDistri = nullptr;		//仅指向
 
-		//Distribution *hDistriTrain = nullptr;	//仅指向
+		Distribution *myDistri(int flag = 0x0) {
+			return distri_;
+		}	
+
+		/*
+		Distribution *histoDistri(int flag = 0x0)	const;	
+		//histo空间，总是来自于train_data
+		HistoGRAM *tHISTO(int flag = 0x0);*/
+
 		Feature_Selection* select_bins=nullptr;
 		double wSplit=0, wSplit_last=0;		//"split", result contains numbers of times the feature is used in a model.
 		double wGain=0;			//"gain", result contains total gains of splits which use the feature.
@@ -103,6 +112,7 @@ namespace Grusoft {
 		bool isCategory()	const	{ return	BIT_TEST(type, Distribution::CATEGORY); }	
 		bool isReferVal()	const	{ return	BIT_TEST(type, VAL_REFER); }				
 		virtual bool isMerged()	const { return	false; }
+		//virtual bool isPass()	const;
 		typedef enum {
 			COPY_MEAN,
 		}BINARY_OPERATE;
@@ -112,12 +122,7 @@ namespace Grusoft {
 		string nam = "", desc = "";
 
 		FeatVector()	{}
-		virtual ~FeatVector() {
-			if (select_bins != nullptr)
-				delete select_bins;
-			if (wBins != nullptr)
-				delete[] wBins;
-		}
+		virtual ~FeatVector();
 		virtual inline size_t size()	const	{ throw"FeatVector::size() is ..."; }
 
 		//virtual void GetMergeSampSet(const SAMP_SET&samp_set,int * int flag = 0x0);
@@ -153,7 +158,7 @@ namespace Grusoft {
 		/*vResi=predict-target		pDown=target-predict*/
 		virtual double UpdateResi(FeatsOnFold *hData_, int flag = 0x0) { throw "FeatVector::UpdateResi is ..."; }
 
-		virtual HistoGRAM *GetHisto(int flag = 0x0) {	return nullptr; }
+		//virtual HistoGRAM *GetHisto(int flag = 0x0) {	return nullptr; }
 		//static bin mapping	生成基于EDA的格子	参见Samp2Histo
 		virtual void UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst, int flag = 0x0) { throw "FeatVector::UpdateHisto is ..."; }
 		virtual void PerturbeHisto(const FeatsOnFold *hData_, int flag = 0x0) { throw "FeatVector::PerturbeHisto is ..."; }
@@ -161,7 +166,7 @@ namespace Grusoft {
 		virtual void Merge4Quanti(const SAMP_SET*samp_0, int flag=0x0)	{ throw "FeatVector::Merge4Quanti is ..."; }
 		virtual void Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, const tpSAMP_ID *samps4quanti=nullptr, int flag = 0x0) const
 		{ throw "FeatVector::_Samp2Histo_ is ..."; }
-		virtual void InitDistri(const FeatsOnFold *hFold,bool genHisto, const SAMP_SET *samp_set, int flag) { throw "FeatVector::InitDistri is ..."; }
+		virtual void InitDistri(const FeatsOnFold *hFold, Distribution *tDistri, const SAMP_SET *samp_set, int flag) { throw "FeatVector::InitDistri is ..."; }
 
 		virtual void QuantiAtEDA(ExploreDA *eda, void *quanti, int sizeofQ, int nMostBin, const FeatsOnFold *hData_, int flag) { ; }
 		//virtual void Split2Quanti(const LiteBOM_Config&config, const ExploreDA *eda, vector<double>& vThrsh, HistoGRAM *qHisto, tpDOWN *yDown, int nMostBin, int flag = 0x0) { throw "FeatVector::SplitSort is ..."; }
