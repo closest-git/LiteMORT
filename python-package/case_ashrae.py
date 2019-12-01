@@ -36,8 +36,8 @@ isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 isMORT = True
 isMerge = True #len(sys.argv)>1 and sys.argv[1] == "merge"
 gbm='MORT' if isMORT else 'LGB'
-use_ucf=True
-nTargetMeter=4
+use_ucf=False
+nTargetMeter=2
 
 
 print(f"====== MERGE={isMerge} gbm={gbm} ======\n\n")
@@ -82,6 +82,45 @@ def reduce_mem_usage(df, use_float16=False):
     print('Decreased by {:.1f}%'.format(100 * (start_mem - end_mem) / start_mem))
 
     return df
+
+def VerifyMerge(ashrae_source,fold_train,fold_val,weather_train,weather_test_): #仅用于调试
+    '''
+    self.merge_infos = [
+        {'on': ['site_id', 'timestamp'], 'dataset': self.weather_df, "desc": "weather"},
+        {'on': ['building_id'], 'dataset': self.building_merge_, "desc": "building",
+         "feat_info": feat_infos},
+    ]
+    '''
+    import copy
+    cat_features = ashrae_source.category_cols
+    merge_info = ashrae_source.merge_infos
+    merge_test_info = copy.deepcopy(merge_info)
+
+    feat_w=merge_info[0]['dataset'].columns
+    weather_train = weather_train[feat_w]
+    weather_test_=weather_test_[feat_w]
+    merge_test_info[0]['dataset'] = weather_test_
+
+    X_train, y_train = fold_train
+    X_valid, y_valid = fold_val
+    assert(X_valid.shape[1]==X_train.shape[1])
+    assert (weather_train.shape[1] == weather_test_.shape[1])
+    #merge_info[0]['dataset'] = weather_test
+    params['n_estimators']=10
+    params['verbose']=667
+    model = LiteMORT(params, merge_infos=merge_info)
+    print(f"VerifyMerge model.fit")
+    model.fit(X_train, y_train, eval_set=[(X_valid, y_valid)], categorical_feature=cat_features)
+    print(f"VerifyMerge model.predict 1\t......")
+    model.MergeDataSets(merge_test_info, comment="_predict")
+    model.predict(X_valid)
+    print(f"VerifyMerge model.predict 2\t......")
+    model.MergeDataSets(merge_info, comment="_predict")
+    model.predict(X_train)
+    print(f"VerifyMerge model.predict 3\t......")
+    model.MergeDataSets(merge_test_info, comment="_predict")
+    model.predict(X_valid)
+    pass
 
 def LoadUCF(data_root):
     ucf_leak_df = pd.read_pickle(f'{data_root}site0.pkl')
@@ -223,8 +262,8 @@ class ASHRAE_data(object):
         self.feature_cols = ['square_feet', 'year_built'] + [
             'hour', 'weekend',  # 'month' , 'dayofweek'
             'building_median']+feats_whether
-        #self.some_rows = 500000
-        self.some_rows = None
+        self.some_rows = 5000
+        #self.some_rows = None
         self.df_base = self.Load_Processing()
         self.df_base_shape = self.df_base.shape
 
@@ -261,6 +300,7 @@ class ASHRAE_data(object):
                     {'on': ['building_id'], 'dataset': self.building_merge_, "desc": "building",
                      "feat_info": feat_infos},
                 ]
+                print(f"")
             else:
                 target_train_df = target_train_df.merge(self.building_meta_df, on='building_id', how='left')
                 target_train_df = target_train_df.merge(self.weather_df, on=['site_id', 'timestamp'], how='left')
@@ -273,8 +313,8 @@ class ASHRAE_data(object):
                 y_train=None
             del target_train_df
             gc.collect()
-            with open(pkl_path, "wb") as fp:
-                pickle.dump([X_train, y_train], fp)
+            #with open(pkl_path, "wb") as fp:
+            #    pickle.dump([X_train, y_train], fp)
         return X_train, y_train
 
     def OnTrain_(self,df):
@@ -371,7 +411,7 @@ early_stop = 20
 verbose_eval = 5
 metric = 'l2'
 #num_rounds=1000, lr=0.05, bf=0.3
-num_rounds = 1000;      lr = 0.05;          bf = 0.3
+num_rounds = 10;      lr = 0.05;          bf = 0.3
 params = {'num_leaves': 31, 'n_estimators': num_rounds,
               'objective': 'regression',
               'max_bin': 256,
@@ -488,6 +528,7 @@ for target_meter in range(nTargetMeter):
     #for (train_idx, valid_idx) in kf.split(X_train, X_train['building_id']):
         train_data = X_train.iloc[train_idx, :], y_train[train_idx]
         valid_data = X_train.iloc[valid_idx, :], y_train[valid_idx]
+        #VerifyMerge(train_datas, train_data, valid_data, weather_train_df, weather_test_df);        continue
         params['seed'] = seed
         print(f'fold={fold} train={train_data[0].shape},valid={valid_data[0].shape}')
         #     model, y_pred_valid, log = fit_cb(train_data, valid_data, cat_features=cat_features, devices=[0,])
@@ -505,7 +546,6 @@ for target_meter in range(nTargetMeter):
     #sns.distplot(y_train)
     del X_train, y_train
     gc.collect()
-    #break
 
 def pred(X_test, models, batch_size=1000000):
     iterations = (X_test.shape[0] + batch_size -1) // batch_size
@@ -526,6 +566,7 @@ def pred(X_test, models, batch_size=1000000):
     y_test_pred_total /= len(models)
     return y_test_pred_total
 
+X_test_pick_root = f"{data_root}/test/"
 print(f'\t test_datas.df_base......')
 test_datas = ASHRAE_data("test",data_root,building_meta_df,weather_test_df)
 del train_datas;        gc.collect()
@@ -536,6 +577,10 @@ reduce_mem_usage(sample_submission)
 for target_meter in range(nTargetMeter):
     print(f'\t target_meter={target_meter}......')
     X_test,_ = test_datas.data_X_y(target_meter)
+    if True:
+        X_test, _ = Mort_PickSamples(5000, X_test, None)
+        with open(f"{X_test_pick_root}_{target_meter}.pkl", "wb") as fp:
+            pickle.dump([X_test], fp)
     print(f'\t target_meter={target_meter} X_test={X_test.shape}\nfeatures={X_test.columns}')
     gc.collect()
     if isMORT and isMerge:

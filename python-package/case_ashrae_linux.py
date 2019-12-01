@@ -139,7 +139,7 @@ class ASHRAE_data(object):
             'hour', 'weekend',  # 'month' , 'dayofweek'
             'building_median']+feats_whether
         print(f"ASHRAE_data_{self.source}......category={self.category_cols}\nfeature_cols={self.feature_cols}......")
-        self.some_rows = 15000
+        self.some_rows = 500000
         #self.some_rows = None
         self.df_base = self.Load_Processing()
         self.df_base_shape = self.df_base.shape
@@ -333,12 +333,15 @@ def VerifyMerge(ashrae_source,fold_train,fold_val,weather_train,weather_test_): 
     '''
     cat_features = ashrae_source.category_cols
     merge_info = ashrae_source.merge_infos
+    merge_test_info = merge_info
+    merge_test_info[0]['dataset'] = weather_test_
 
     X_train, y_train = fold_val
     X_valid, y_valid = fold_train
     #merge_info[0]['dataset'] = weather_test
     model = LiteMORT(params, merge_infos=merge_info)
-    #model.MergeDataSets(test_datas.merge_infos, comment="_predict")
+    model.fit(X_train, y_train, eval_set=[(X_valid, y_valid)], categorical_feature=cat_features)
+    model.MergeDataSets(merge_test_info, comment="_predict")
     model.fit(X_train, y_train, eval_set=[(X_valid, y_valid)], categorical_feature=cat_features)
     pass
 

@@ -120,12 +120,12 @@ class Mort_Preprocess(object):
         #_reset_cache()
         return col
 
-    def OnMerge(self,df_base,merge_infos):
-        nFV=len(merge_infos)
+    def AddPivotOnMerge(self,df_base,merge_infos):
+        nMerges=len(merge_infos)
         self.df_merge = pd.DataFrame()#pd.DataFrame(0, index=np.arange(self.nSample), columns=feature_list)
         feature_list=[]
         merge_left=[]
-        for i in range(nFV):
+        for i in range(nMerges):
             info = merge_infos[i]
             df,cols_on = info['dataset'],info['on']
             feature_list.append("@M_"+info['desc'])
@@ -140,8 +140,12 @@ class Mort_Preprocess(object):
             df_left = df_left.merge(df_rigt, on=cols_on, how='left')
             self.df_merge[feature_list[i]]=df_left["row_no"]
             nNA = self.df_merge[feature_list[i]].isna().sum()
+            print(f"left={df_left.shape} rigt={df_rigt.shape} nNA={nNA}" )
+            if(nNA>=self.nSample):     #必须退出
+                raise Exception(f"AddPivotOnMerge Skip All-NAN@{cols_on}\tnNA={nNA}/{nNA * 100.0 / self.nSample:.3g}%%")
+
             if(nNA>0):      #真麻烦！！！
-                print(f"OnMerge STRANGE@{cols_on}\tnNA={nNA}/{nNA*100.0/self.nSample:.3g}%%")
+                print(f"AddPivotOnMerge NAN@{cols_on}\tnNA={nNA}/{nNA*100.0/self.nSample:.3g}%%")
                 nRightRow = df_rigt.shape[0]
                 self.df_merge[feature_list[i]].fillna(nRightRow-1, inplace=True)
                 self.df_merge[feature_list[i]]=self.df_merge[feature_list[i]].astype(np.int32)
@@ -199,7 +203,7 @@ class Mort_Preprocess(object):
         self.cpp_dat_ = cpp_dat_
 
         if merge_infos is not None:
-            self.OnMerge(X,merge_infos)
+            self.AddPivotOnMerge(X,merge_infos)
         return    #please implement this
 
     def OrdinalEncode_(X,X_test,features=None):

@@ -222,6 +222,7 @@ PYMORT_DLL_API void LiteMORT_set_mergesets(void *mort_0, PY_DATASET_LIST *merge_
 	}
 }
 
+
 //GBRT *hGBRT = nullptr;
 PYMORT_DLL_API void* LiteMORT_init(PY_ITEM* params, int nParam, PY_DATASET_LIST *null_list, int64_t flag = 0x0) {
 	try {
@@ -294,7 +295,6 @@ namespace Grusoft {
 		return hFQ;
 	}
 }
-
 
 /*
 	v0.1	cys

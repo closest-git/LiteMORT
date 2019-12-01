@@ -446,11 +446,11 @@ namespace Grusoft {
 		template<typename Tx, typename Ty>
 		void X2Histo_(const LiteBOM_Config&config, size_t nSamp_, Tx *val, Ty *y, int flag = 0x0) {
 			if (rNA == 1.0) {
-				//printf("!!!%s is NAN!!!\n", desc.c_str());
+				printf("X2Histo_::!!!%s is NAN!!!\n", desc.c_str());
 				return;
 			}
 			if (vMin == vMax) {
-				//printf(" %s is const(%g)!!!", desc.c_str(), a0);
+				printf("X2Histo_::%s is const(%g)!!!", desc.c_str(), val[0]);
 				return;
 			}			
 
