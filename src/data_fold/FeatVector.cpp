@@ -13,6 +13,12 @@ FeatVector::~FeatVector() {
 	}
 }
 
+void  FeatVector::SetDistri(Distribution*d_, int flag) {
+	assert(distri_ == nullptr);
+	distri_ = d_;
+	distri_->nam = this->nam;
+	distri_->type = this->type;
+}
 
 //²Î¼ûExploreDA::AddDistri
 void FeatVector::UpdateType(int flag){

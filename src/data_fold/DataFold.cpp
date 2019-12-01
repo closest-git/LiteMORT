@@ -738,8 +738,10 @@ int *FeatsOnFold::Tag() { return lossy->Tag(); }
 
 /*
 	hFeat必须保持不变诶
-	v0.1 cys
+	v0.1	cys
 		11/15/2019
+	v0.2	cys
+		12/1/2019
 */
 void FeatsOnFold::ExpandMerge(const vector<FeatsOnFold *>&merge_folds, int flag) {
 	int i,j,nMerge=0,nExFeat=0;
@@ -753,14 +755,22 @@ void FeatsOnFold::ExpandMerge(const vector<FeatsOnFold *>&merge_folds, int flag)
 		//for (auto hFeat : fold->feats) {
 		for(i=0;i<fold->feats.size();i++)	{
 			FeatVector *hFeat = fold->feats[i];
+			hFeat->id = feats.size();		//必须这样
 			if (hFeat->nam=="air_temperature" && samp1.nSamp==586)	{	//仅用于调试	
 				j = i;
 			}
 
 			FeatVector *hRight = hFeat;
+			Distribution *mDistri = nullptr;
 			if (isTrain()) {
-				hFeat->InitDistri(this, nullptr, &samp1, 0x0);
+				edaX->AddDistri(hRight->PY, feats.size());
+				mDistri = edaX->GetDistri(feats.size());// hFold->edaX == nullptr ? nullptr : &(hFold->edaX->arrDistri[i]);
+				hFeat->Distri4Merge(this, mDistri, &samp1,true, 0x0);
+			}	else {
+				mDistri = new Distribution();
+				hFeat->Distri4Merge(this, mDistri, &samp1, false, 0x0);
 			}
+			assert(mDistri->nSamp== hLeft->size());
 			/*if (isEval()) {
 				assert(hRight->hDistri!=nullptr);		//already in ExpandMerge@train
 			}else
@@ -768,7 +778,7 @@ void FeatsOnFold::ExpandMerge(const vector<FeatsOnFold *>&merge_folds, int flag)
 
 			if (isQuanti || hFeat->isCategory()) {
 				//assert(isTrain());
-				FeatVector *hFQ = FeatVecQ_InitInstance(fold, hFeat, 0x0);	// new FeatVec_Q<short>(hFold, hFeat, nMostQ);
+				FeatVector *hFQ = FeatVecQ_InitInstance(this, hFeat, 0x0);	// new FeatVec_Q<short>(hFold, hFeat, nMostQ);
 				hRight = hFQ;	//delete hFeat;
 			}
 			//assert(hRight->arr() != nullptr);
@@ -781,7 +791,8 @@ void FeatsOnFold::ExpandMerge(const vector<FeatsOnFold *>&merge_folds, int flag)
 				assert(hLeft->PY->isInt32());
 				hEXP = new FeatVec_EXP<int32_t>(this, hRight->nam + "@" + hLeft->nam, hLeft, hRight);
 			}
-			//hEXP->hDistri = hRight->hDistri;
+			hEXP->SetDistri(mDistri);
+
 			//hEXP->EDA(this->config, false, nullptr, 0x0);
 			feats.push_back(hEXP);
 			nExFeat++;

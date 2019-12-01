@@ -214,7 +214,7 @@ PYMORT_DLL_API void LiteMORT_set_mergesets(void *mort_0, PY_DATASET_LIST *merge_
 		for (int i = 0; i < merge_list->nSet; i++) {
 			PY_DATASET *set = merge_list->list + i;
 			printf("\n\t------MERGE@[\"%s\"](%lldx%d)......", set->name, set->nSamp, set->ldFeat);
-			ExploreDA *hEDA = new ExploreDA(mort->config, flag);
+			ExploreDA *hEDA = new ExploreDA(mort->config,set->name, flag);
 			FeatsOnFold *hMerge = FeatsOnFold_InitInstance(mort->config, hEDA, set, nullptr, flag | FeatsOnFold::DF_MERGE);
 			//hMerge->merge_right = set->merge_rigt;
 			mort->merge_folds.push_back(hMerge);
@@ -229,7 +229,7 @@ PYMORT_DLL_API void* LiteMORT_init(PY_ITEM* params, int nParam, PY_DATASET_LIST 
 
 		MORT *mort = new MORT();
 		OnUserParams(mort->config, params, nParam);
-		mort->hEDA_train = new ExploreDA(mort->config, flag);
+		mort->hEDA_train = new ExploreDA(mort->config,"MORT", flag);
 		printf("======LiteMORT_api init @%p(hEDA=%p,hGBRT=%p)...OK\n", mort,mort->hEDA_train,mort->hGBRT);
 		
 		return mort;
@@ -288,7 +288,7 @@ namespace Grusoft {
 		}
 		if (hFQ != nullptr) {
 			hFQ->UpdateHisto(hFold, false, true);
-			if (!hFold->config.isDynamicHisto && !hFold->isMerge())
+			if (!hFold->config.isDynamicHisto && !hFeat->AtFold_()->isMerge())
 				hFeat->FreeVals();		//需要dynamic update histo
 		}
 		return hFQ;
@@ -300,37 +300,37 @@ namespace Grusoft {
 	v0.1	cys
 		11/11/2019
 */
-FeatVector *PY_COL2FEAT(const FeatsOnFold *hFold, PY_COLUMN*col, size_t nSamp_,int id,bool isEDA,int flag) {
+FeatVector *PY_COL2FEAT(const FeatsOnFold *hFold, PY_COLUMN*col, size_t nSamp_,int id,bool isMergePivot,int flag) {
 	string desc = "feat_" + std::to_string(id);
 	desc = col->name;
 	FeatVector *hFeat = nullptr;
 	int flagF = flag | FeatVector::VAL_REFER;
-	if (hFold->isTrain()) {
+	if (hFold->isTrain() && !isMergePivot) {
 		hFold->edaX->AddDistri(col, id);		//col
 	}
 
 	if (col->isFloat()) {
-		hFeat = new FeatVec_T<float>(nSamp_, id, desc, flagF);
+		hFeat = new FeatVec_T<float>(hFold,nSamp_, id, desc, flagF);
 	}
 	else if (col->isFloat16()) {	//NO REFER!!!
 		//if (config.verbose>666)
 		//	printf("----%d\t \"%s\" is Float16\n", id, col->name);
-		hFeat = new FeatVec_T<float>(nSamp_, id, desc, flag);
+		hFeat = new FeatVec_T<float>(hFold, nSamp_, id, desc, flag);
 	}
 	else if (col->isInt32()) {
-		hFeat = new FeatVec_T<int32_t>(nSamp_, id, desc, flagF);
+		hFeat = new FeatVec_T<int32_t>(hFold, nSamp_, id, desc, flagF);
 	}
 	else if (col->isInt16()) {
-		hFeat = new FeatVec_T<int16_t>(nSamp_, id, desc, flagF);
+		hFeat = new FeatVec_T<int16_t>(hFold, nSamp_, id, desc, flagF);
 	}
 	else if (col->isInt8()) {
-		hFeat = new FeatVec_T<int8_t>(nSamp_, id, desc, flagF);
+		hFeat = new FeatVec_T<int8_t>(hFold, nSamp_, id, desc, flagF);
 	}
 	else if (col->isInt64()) {
-		hFeat = new FeatVec_T<int64_t>(nSamp_, id, desc, flagF);
+		hFeat = new FeatVec_T<int64_t>(hFold, nSamp_, id, desc, flagF);
 	}
 	else if (col->isDouble()) {
-		hFeat = new FeatVec_T<double>(nSamp_, id, desc, flagF);
+		hFeat = new FeatVec_T<double>(hFold, nSamp_, id, desc, flagF);
 	}
 	else
 		throw "FeatsOnFold_InitInstance col->dtype is XXX";
@@ -341,12 +341,12 @@ FeatVector *PY_COL2FEAT(const FeatsOnFold *hFold, PY_COLUMN*col, size_t nSamp_,i
 	hFeat->UpdateType();
 
 	hFeat->Set(nSamp_, col);
-	if (hFold->isTrain()) {
+	if (hFold->isTrain() && !isMergePivot) {
 		Distribution *tDistri = hFold->edaX->GetDistri(id);// hFold->edaX == nullptr ? nullptr : &(hFold->edaX->arrDistri[i]);
-		hFeat->InitDistri(hFold, tDistri,nullptr, 0x0);		//EDA基于全局分析，而这里的是局部分析。分布确实会不一样
+		hFeat->InitDistri(hFold, tDistri,nullptr,true, 0x0);		
 	}
 	else {
-		hFeat->InitDistri(hFold, nullptr, nullptr, 0x0);		//EDA基于全局分析，而这里的是局部分析。分布确实会不一样
+		hFeat->InitDistri(hFold, nullptr, nullptr,false, 0x0);		
 
 	}
 
@@ -381,7 +381,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY
 		//Distribution *hD_ = hFold->edaX == nullptr ? nullptr : &(hFold->edaX->arrDistri[i]);
 		//if (hD_ != nullptr && hD_->nam.size() > 0)
 			;// assert(hD_->nam == string(col->name));	//需要验证
-		hFold->feats.push_back(PY_COL2FEAT(hFold,col, nSamp_, i, isTrain ,flag));
+		hFold->feats.push_back(PY_COL2FEAT(hFold,col, nSamp_, i, false ,flag));
 	}
 
 	if (mort != nullptr && mort->merge_folds.size() > 0) {
@@ -436,7 +436,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY
 			nConstFeat++;			nLocalConst++;
 			//hFeat->Clear();		//释放内存
 		}
-		else if (hFeat->isMerged() || isMerge) {
+		else if (hFeat->isMerged() || hFold->isMerge() ) {		//(hFeat->isMerged() || isMerge)
 			nMergedFeat++;
 
 		}	else {
@@ -453,7 +453,6 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY
 	int nTotalBins = 0;
 	for (int feat = 0; feat < hFold->nFeat(); feat++) {
 		FeatVector *hFeat = hFold->Feat(feat);
-		Distribution *hDistri = hFold->histoDistri(hFeat);
 		if (config.feat_selector != nullptr) {
 			hFeat->select.user_rate = config.feat_selector[feat];
 			printf("%d(%.3g)\t", feat, hFeat->select.user_rate);
@@ -467,7 +466,10 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY
 		if (hFold->config.verbose>666 ) {
 			hFeat->myDistri()->Dump(feat, false, flag);					//Train输出distribution信息
 		}
-		nTotalBins += hDistri->nHistoBin();
+		if (!isMerge) {
+			Distribution *hDistri = hFold->histoDistri(hFeat);
+			nTotalBins += hDistri->nHistoBin();
+		}
 	}
 											/*if (hFold->isQuanti) {
 	printf("\n********* FeatsOnFold::QUANTI nMostQ=%d\r\n", nMostQ);
@@ -747,8 +749,8 @@ void Feats_one_by_one(FeatsOnFold *hTrain, FeatsOnFold *hEval, BoostingForest::M
 	vector<int> cands;
 	const FeatVector *T_y = hTrain->GetY(), *E_y = hEval->GetY();
 	FeatVector*T_predict = hTrain->GetPrecict(), *E_predict = hEval->GetPrecict(),*hBestFeat=nullptr;
-	FeatVector*T_best_predict = new FeatVec_T<tpDOWN>(T_predict->size(), 0, "T_best"),
-		*E_best_predict = new FeatVec_T<tpDOWN>(E_predict->size(),0,"E_best");
+	FeatVector*T_best_predict = new FeatVec_T<tpDOWN>(nullptr,T_predict->size(), 0, "T_best"),
+		*E_best_predict = new FeatVec_T<tpDOWN>(nullptr, E_predict->size(),0,"E_best");
 	float *selector = hTrain->config.feat_selector;		//返回值
 	for (i = 0; i < nFeat; i++) {
 		FeatVector *hFeat = hTrain->Feat(i);
@@ -909,6 +911,7 @@ PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_DATASET_LIST *train_list, PY
 	fflush(stdout);
 	return;
 }
+
 
 PYMORT_DLL_API void LiteMORT_feats_one_by_one(void *mort_0, PY_COLUMN *train_data, PY_COLUMN *train_target, size_t nFeat_0, size_t nSamp, PY_COLUMN *eval_data, PY_COLUMN *eval_target, size_t nEval, size_t flag) {
 

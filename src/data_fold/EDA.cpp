@@ -14,7 +14,7 @@ GRander Distribution::rander_(42);
     - If "most_frequent", then replace missing using the most frequent
         value along the axis.
 */
-ExploreDA::ExploreDA(LiteBOM_Config&config, int flag){
+ExploreDA::ExploreDA(LiteBOM_Config&config,const string&nam_, int flag):name(nam_){
 
 	//arrDistri.resize(nFeat);
 	
@@ -47,7 +47,7 @@ void ExploreDA::AddDistri(const PY_COLUMN*PY, int id, int flag) {
 
 Distribution* ExploreDA::GetDistri(int id)	{
 	if (mapDistri.find(id) == mapDistri.end()) {
-		printf("\nExploreDA::GetDistri id=%d is XXX\n", id);
+		printf("\nEDA_%s::GetDistri id=%d is XXX\n",name.c_str(), id);
 		throw "!!!!!! ExploreDA::GetDistri id is XXX	!!!!!!";
 	}
 	return mapDistri[id];

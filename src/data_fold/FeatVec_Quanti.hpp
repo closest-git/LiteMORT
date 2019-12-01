@@ -21,6 +21,7 @@ namespace Grusoft {
 			FeatVector::desc = hFeat->desc;
 			FeatVector::nam = hFeat->nam;
 			FeatVector::type = hFeat->type;
+			FeatVector::hFold_ = hFeatSource->AtFold_();
 			//FeatVector::hDistri = hFeatSource->hDistri;
 			FeatVector::distri_ = hFeatSource->myDistri();
 			FeatVec_T<tpQUANTI>::nSamp_0 = hFeatSource->size();
@@ -62,9 +63,13 @@ namespace Grusoft {
 		virtual void UpdateHisto(const FeatsOnFold *hData_, bool isOnY, bool isFirst, int flag = 0x0) {
 			if (qHisto_0 != nullptr)
 				delete qHisto_0;
-			//vThrsh.clear( );
-			//const SAMP_SET&samp_set = hData_->samp_set;
-			size_t nSamp = hData_->nSample(), i, samp, nValid = 0;
+			size_t nSamp = this->size(), i, samp, nValid = 0;
+			if (nSamp != hData_->nSample()) {	//确实有可能 1 merge_right
+				//assert(BIT_TEST(hFeat->type, FeatVector::RIGTH_MERGE) );
+				const FeatsOnFold* src_fold_ = hFeatSource->AtFold_();
+				assert(src_fold_->isMerge());
+				i = 0;
+			}
 			string optimal = hData_->config.leaf_optimal;
 			//qHisto = optimal == "grad_variance" ? new HistoGRAM(nSamp) : new Histo_CTQ(nSamp);
 			qHisto_0 = new HistoGRAM(this, nSamp);

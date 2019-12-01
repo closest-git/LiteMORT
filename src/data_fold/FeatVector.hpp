@@ -69,7 +69,7 @@ namespace Grusoft {
 
 	class FeatVector {
 	protected:
-		FeatsOnFold *hData_=nullptr;
+		const FeatsOnFold *hFold_ = nullptr;
 		Distribution *distri_ = nullptr;
 	public:
 		static bool OrderByName(const FeatVector *l, const FeatVector *r) { return l->nam<r->nam; }
@@ -83,6 +83,7 @@ namespace Grusoft {
 		};
 		//FeatVector *fvMergeLeft = nullptr;			//仅指向
 
+		void SetDistri(Distribution*d_, int flag = 0x0);
 		Distribution *myDistri(int flag = 0x0) {
 			return distri_;
 		}	
@@ -102,7 +103,8 @@ namespace Grusoft {
 			//V_ZERO_DEVIA = 0x10000,	//常值，一般可忽略
 			IS_BUNDLE = 0x20000,	//in Feature Bundle	参见FeatsOnFold::nPick4Split
 			AGGREGATE = 0x80000,
-			REPRESENT_ = 0x1000000
+			REPRESENT_ = 0x1000000,
+			//RIGTH_MERGE = 0x2000000
 		};
 		size_t type = 0x0;
 		tpSAMP_ID *map4set = nullptr;// , *map4feat = nullptr;
@@ -110,8 +112,9 @@ namespace Grusoft {
 		//float select_factor = 1;
 		SELECT select;
 		bool isCategory()	const	{ return	BIT_TEST(type, Distribution::CATEGORY); }	
-		bool isReferVal()	const	{ return	BIT_TEST(type, VAL_REFER); }				
+		bool isReferVal()	const	{ return	BIT_TEST(type, VAL_REFER); }		
 		virtual bool isMerged()	const { return	false; }
+		const FeatsOnFold *AtFold_()		{ return	hFold_; }
 		//virtual bool isPass()	const;
 		typedef enum {
 			COPY_MEAN,
@@ -166,7 +169,8 @@ namespace Grusoft {
 		virtual void Merge4Quanti(const SAMP_SET*samp_0, int flag=0x0)	{ throw "FeatVector::Merge4Quanti is ..."; }
 		virtual void Samp2Histo(const FeatsOnFold *hData_, const SAMP_SET&samp_set, HistoGRAM* histo, int nMostBin, const tpSAMP_ID *samps4quanti=nullptr, int flag = 0x0) const
 		{ throw "FeatVector::_Samp2Histo_ is ..."; }
-		virtual void InitDistri(const FeatsOnFold *hFold, Distribution *tDistri, const SAMP_SET *samp_set, int flag) { throw "FeatVector::InitDistri is ..."; }
+		virtual void InitDistri(const FeatsOnFold *hFold, Distribution *tDistri, const SAMP_SET *samp_set, bool isGenHisto, int flag) { throw "FeatVector::InitDistri is ..."; }
+		virtual void Distri4Merge(const FeatsOnFold *hFold, Distribution *M_Distri, const SAMP_SET *samp_set, bool isGenHisto, int flag) { throw "FeatVector::Distri4Merge is ..."; }
 
 		virtual void QuantiAtEDA(ExploreDA *eda, void *quanti, int sizeofQ, int nMostBin, const FeatsOnFold *hData_, int flag) { ; }
 		//virtual void Split2Quanti(const LiteBOM_Config&config, const ExploreDA *eda, vector<double>& vThrsh, HistoGRAM *qHisto, tpDOWN *yDown, int nMostBin, int flag = 0x0) { throw "FeatVector::SplitSort is ..."; }

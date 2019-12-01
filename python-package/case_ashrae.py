@@ -223,7 +223,7 @@ class ASHRAE_data(object):
         self.feature_cols = ['square_feet', 'year_built'] + [
             'hour', 'weekend',  # 'month' , 'dayofweek'
             'building_median']+feats_whether
-        #self.some_rows = 5000
+        #self.some_rows = 500000
         self.some_rows = None
         self.df_base = self.Load_Processing()
         self.df_base_shape = self.df_base.shape
@@ -239,7 +239,7 @@ class ASHRAE_data(object):
         pkl_path = f'{data_root}/_ashrae_{self.source}_T{target_meter}_{self.some_rows}_{"Mg"if isMerge else ""}_.pickle'
         self.merge_infos = []
 
-        if True:#os.path.isfile(pkl_path):
+        if False:#os.path.isfile(pkl_path):
             print("====== Load pickle @{} ......".format(pkl_path))
             with open(pkl_path, "rb") as fp:
                 [X_train, y_train] = pickle.load(fp)

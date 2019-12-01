@@ -82,6 +82,7 @@ params = {
           #'sparse_threshold': 1.0,
             'n_estimators':num_rounds,
             'early_stopping_rounds': 500,
+            'verbose':667,
           #'device': 'cpu'
            #'device': 'gpu',
           #'gpu_platform_id': 0,
@@ -105,8 +106,7 @@ for fold_n, (train_index, valid_index) in enumerate(folds.split(X)):
         np.savetxt("D:/LightGBM-master/examples/regression/geo_test.csv", d_train, delimiter='\t')
 
     if model_type == 'mort':
-        #model = LiteMORT(params).fit(X_train, y_train, eval_set=[(X_valid, y_valid)])
-        model = LiteMORT(params).fit_1(X_train, y_train, eval_set=[(X_valid, y_valid)])
+        model = LiteMORT(params).fit(X_train, y_train, eval_set=[(X_valid, y_valid)])
         #y_pred_valid = model.predict(X_valid)
         #y_pred = model.predict(X_test)
 

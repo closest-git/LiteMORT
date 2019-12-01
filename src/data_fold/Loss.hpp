@@ -465,7 +465,7 @@ namespace Grusoft {
 			else
 				throw	"tpResi should be flow or double!!!";
 
-			y = new FeatVec_T<Ty>(_len, 0, "loss");			predict = new FeatVec_T<Ty>(_len, 0, "predict");
+			y = new FeatVec_T<Ty>(hData_,_len, 0, "loss");			predict = new FeatVec_T<Ty>(hData_,_len, 0, "predict");
 			//best_predict = new FeatVec_T<Ty>(_len, 0, "best_predict");
 
 			resi.clear();			resi.resize(_len, 0);

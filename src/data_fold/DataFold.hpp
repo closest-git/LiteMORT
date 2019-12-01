@@ -550,7 +550,8 @@ namespace Grusoft {
 		//map<hMTNode,Tx> BLIT_thrsh,BLIT_mean;
 	public:
 		FeatVec_T() { 	}
-		FeatVec_T(size_t _len, int id_, const string&des_, int flag = 0x0)  {
+		FeatVec_T(const FeatsOnFold *hFold__, size_t _len, int id_, const string&des_, int flag = 0x0)  {
+			hFold_ = hFold__;
 			id = id_;
 			nSamp_0 = _len;
 			desc = des_;	assert(_len > 0);	
@@ -1067,34 +1068,36 @@ namespace Grusoft {
 			v0.3 no edaX 
 			v0.4 on samp_set
 		*/
-		virtual void InitDistri(const FeatsOnFold *hFold,Distribution *tDistri,const SAMP_SET *samp_set, int flag) {
+		virtual void InitDistri(const FeatsOnFold *hFold,Distribution *tDistri,const SAMP_SET *samp_set,bool isGenHisto, int flag) {
 			//assert(hFold!=nullptr);
 			size_t i, nSamp_=size();
 			assert(distri_ == nullptr);
 			if (tDistri == nullptr) {	//Y in train; feats in valid and eavl
-				//assert(hFold==nullptr);
-				distri_ = new Distribution();
+				//参见ExploreDA::AddDistri(const PY_COLUMN*PY, int id, int flag) 
+				distri_ = new Distribution();		distri_->nam = nam;
+				distri_->type = this->type;
+				if (isGenHisto) {
+					isGenHisto = true;
+				}
 			}	else {
 				distri_ = tDistri;
 			}
 
 			Tx *samp_val = arr();
-			/*if (samp_set != nullptr) {//EDA on replacement sampling
-				nSamp_ = samp_set->nSamp;
-				samp_val = new Tx[nSamp_];
-				tpSAMP_ID *samps = samp_set->samps;
-				for (i = 0; i < nSamp_; i++) {
-					samp_val[i] = val[samps[i]];
-				}
-			}
-			hDistri->nam = nam;*/
-			distri_->EDA(hFold,nSamp_, samp_set, samp_val, tDistri!=nullptr, 0x0);
+			distri_->EDA(hFold,nSamp_, samp_set, samp_val, isGenHisto, 0x0);
 
 			//hDistri->STA_at(nSamp_, samp_val, true, 0x0);
 			if (ZERO_DEVIA(distri_->vMin, distri_->vMax))
 				BIT_SET(this->type, Distribution::V_ZERO_DEVIA);			
-			if (samp_val != arr())
-				delete[] samp_val;
+			//if (samp_val != arr())
+			//	delete[] samp_val;
+		}
+
+		virtual void Distri4Merge(const FeatsOnFold *hFold, Distribution *M_Distri, const SAMP_SET *samp_set, bool isGenHisto, int flag) {
+			assert(samp_set !=nullptr);
+			size_t i, nSamp_ = size();			
+			Tx *samp_val = arr();			
+			M_Distri->EDA(hFold, nSamp_, samp_set, samp_val, isGenHisto, 0x0);
 		}
 
 		//参见Distribution::STA_at，需要独立出来		8/20/2019

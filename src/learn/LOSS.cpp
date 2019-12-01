@@ -102,7 +102,7 @@ void FeatVec_LOSS::EDA( ExploreDA *edaX, int flag) {
 
 	}	else {
 		//y->EDA(config,true, nullptr, 0x0);
-		y->InitDistri(nullptr, nullptr, nullptr, 0x0);
+		y->InitDistri(hBaseData_, nullptr, nullptr, config.objective == "binary", 0x0);
 		Distribution *disY = y->myDistri();
 		if(disY !=nullptr)
 			disY->Dump(-1, false, flag);

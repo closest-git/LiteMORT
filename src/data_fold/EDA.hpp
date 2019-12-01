@@ -50,6 +50,7 @@ namespace Grusoft {
 			vector<vector<int>> buns;
 			vector<double> off;
 		};
+		string name;
 		Bundle bundle;
 		MAP_DISTRI mapDistri;
 		int nFeat() {	return mapDistri.size();	}
@@ -57,7 +58,7 @@ namespace Grusoft {
 		Distribution* GetDistri(int id)	;
 		//vector<Distribution> arrDistri;
 
-		ExploreDA( LiteBOM_Config&,int flag=0x0);
+		ExploreDA( LiteBOM_Config&, const string&,int flag=0x0);
 		
 		virtual ~ExploreDA();
 
