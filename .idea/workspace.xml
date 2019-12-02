@@ -6,14 +6,15 @@
     <bookmark url="file://$PROJECT_DIR$/python-package/case_ashrae.py" line="401" />
     <bookmark url="file://$PROJECT_DIR$/python-package/case_ashrae.py" line="512" />
     <bookmark url="file://$PROJECT_DIR$/python-package/litemort/LiteMORT.py" line="214" />
-    <bookmark url="file://$PROJECT_DIR$/python-package/case_ashrae_linux.py" line="345" />
     <bookmark url="file://$PROJECT_DIR$/python-package/case_ashrae.py" line="109" />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1f20a82c-2842-4728-bc01-7f01847a5972" name="Default" comment="README">
-      <change beforePath="$PROJECT_DIR$/python-package/case_ashrae.py" beforeDir="false" afterPath="$PROJECT_DIR$/python-package/case_ashrae.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/python-package/case_ashrae_linux.py" beforeDir="false" afterPath="$PROJECT_DIR$/python-package/case_ashrae_linux.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/python-package/litemort/LiteMORT_preprocess.py" beforeDir="false" afterPath="$PROJECT_DIR$/python-package/litemort/LiteMORT_preprocess.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/DataFold.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/data_fold/Distribution.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/Distribution.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data_fold/EDA.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_fold/EDA.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/python/pyMORT_DLL.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/python/pyMORT_DLL.cpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -45,14 +46,22 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/python-package/case_ashrae_linux.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="247">
+              <caret line="17" column="49" lean-forward="true" selection-start-line="16" selection-end-line="17" selection-end-column="49" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/python-package/case_ashrae.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-779">
-              <caret line="478" column="9" selection-start-line="478" selection-start-column="8" selection-end-line="478" selection-end-column="9" />
+            <state relative-caret-position="242">
+              <caret line="74" column="21" lean-forward="true" selection-start-line="74" selection-start-column="21" selection-end-line="74" selection-end-column="21" />
               <folding>
                 <element signature="e#182#228#0" expanded="true" />
-                <element signature="e#1240#3083#0" />
                 <element signature="e#23204#23630#0" />
               </folding>
             </state>
@@ -74,8 +83,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/python-package/litemort/LiteMORT.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="87">
-              <caret line="529" selection-start-line="529" selection-end-line="529" />
+            <state relative-caret-position="279">
+              <caret line="452" selection-start-line="452" selection-end-line="452" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -92,11 +101,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/python-package/litemort/LiteMORT_preprocess.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="112">
-              <caret line="143" selection-start-line="143" selection-end-line="143" />
+            <state relative-caret-position="153">
+              <caret line="76" column="23" selection-start-line="76" selection-start-column="4" selection-end-line="76" selection-end-column="23" />
               <folding>
                 <element signature="e#0#19#0" expanded="true" />
               </folding>
@@ -115,9 +124,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>feat_useful_</find>
-      <find>BayesianOptimization</find>
-      <find>reduce_mem_usage</find>
       <find>tqdm</find>
       <find>OnTrain</find>
       <find>class</find>
@@ -143,8 +149,11 @@
       <find>VerifyMerge</find>
       <find>pickle</find>
       <find>pred</find>
-      <find>5000</find>
+      <find>1000</find>
       <find>some_rows</find>
+      <find>5000</find>
+      <find>is_datetime</find>
+      <find>dataset</find>
     </findStrings>
     <replaceStrings>
       <replace />
@@ -210,19 +219,18 @@
         <option value="$PROJECT_DIR$/python-package/litemort/LiteMORT_hyppo.py" />
         <option value="$PROJECT_DIR$/python-package/mort_local.py" />
         <option value="$PROJECT_DIR$/python-package/litemort/__version__.py" />
-        <option value="$PROJECT_DIR$/python-package/litemort/LiteMORT.py" />
         <option value="$PROJECT_DIR$/python-package/case_higgs.py" />
+        <option value="$PROJECT_DIR$/python-package/case_ashrae.py" />
+        <option value="$PROJECT_DIR$/python-package/litemort/LiteMORT.py" />
         <option value="$PROJECT_DIR$/python-package/case_ashrae_linux.py" />
         <option value="$PROJECT_DIR$/python-package/litemort/LiteMORT_preprocess.py" />
-        <option value="$PROJECT_DIR$/python-package/case_ashrae.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="242" />
-    <option name="y" value="93" />
+    <option name="x" value="20" />
     <option name="width" value="1720" />
-    <option name="height" value="1087" />
+    <option name="height" value="1090" />
   </component>
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="1" id="Add" />
@@ -244,6 +252,12 @@
               <item name="LiteMORT" type="b2602c69:ProjectViewProjectNode" />
               <item name="LiteMORT" type="462c0819:PsiDirectoryNode" />
               <item name="python-package" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="LiteMORT" type="b2602c69:ProjectViewProjectNode" />
+              <item name="LiteMORT" type="462c0819:PsiDirectoryNode" />
+              <item name="python-package" type="462c0819:PsiDirectoryNode" />
+              <item name="litemort" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="LiteMORT" type="b2602c69:ProjectViewProjectNode" />
@@ -545,7 +559,7 @@
       <workItem from="1574843498671" duration="3266000" />
       <workItem from="1574904908100" duration="6660000" />
       <workItem from="1574937218453" duration="3364000" />
-      <workItem from="1575098431371" duration="22133000" />
+      <workItem from="1575098431371" duration="28778000" />
     </task>
     <task id="LOCAL-00001" summary="README">
       <created>1556249780941</created>
@@ -590,19 +604,19 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1221818000" />
+    <option name="totallyTimeSpent" value="1228463000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1402" height="878" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.27628866" visible="true" weight="0.20833333" />
-      <window_info id="Structure" order="1" sideWeight="0.7237113" side_tool="true" visible="true" weight="0.20833333" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.5377176" visible="true" weight="0.20833333" />
+      <window_info active="true" id="Structure" order="1" sideWeight="0.4622824" side_tool="true" visible="true" weight="0.20833333" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3297587" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.34986594" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.5107239" />
+      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.3069705" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.41286862" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -618,7 +632,7 @@
       <window_info anchor="right" id="R Packages" order="3" />
       <window_info anchor="right" id="R Graphics" order="4" />
       <window_info anchor="right" id="Database" order="5" />
-      <window_info anchor="right" x="601" y="59" width="225" height="746" id="SciView" order="6" sideWeight="0.46989527" visible="true" weight="0.09821428" />
+      <window_info anchor="right" x="601" y="59" width="225" height="746" id="SciView" order="6" sideWeight="0.46989527" visible="true" weight="0.09970238" />
       <window_info anchor="right" x="0" y="0" width="314" height="678" id="Documentation" order="7" sideWeight="0.5301047" side_tool="true" visible="true" weight="0.1398892" />
     </layout>
   </component>
@@ -864,8 +878,18 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/python-package/litemort/LiteMORT_preprocess.py</url>
-          <line>143</line>
-          <option name="timeStamp" value="949" />
+          <line>181</line>
+          <option name="timeStamp" value="952" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/python-package/litemort/LiteMORT.py</url>
+          <line>450</line>
+          <option name="timeStamp" value="960" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/python-package/litemort/LiteMORT.py</url>
+          <line>444</line>
+          <option name="timeStamp" value="961" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -887,6 +911,7 @@
         <watch expression="Y_train" />
         <watch expression="self" />
         <watch expression="mem_0" />
+        <watch expression="df_left" />
       </configuration>
     </watches-manager>
   </component>
@@ -907,7 +932,7 @@
     <SUITE FILE_PATH="coverage/LiteMORT$case_future_sales.coverage" NAME="case_future_sales Coverage Results" MODIFIED="1571109032132" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
     <SUITE FILE_PATH="coverage/LiteMORT$LiteMORT_problems.coverage" NAME="LiteMORT_problems Coverage Results" MODIFIED="1571308687253" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package/litemort" />
     <SUITE FILE_PATH="coverage/LiteMORT$sparsipy.coverage" NAME="sparsipy Coverage Results" MODIFIED="1569571613830" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/learn" />
-    <SUITE FILE_PATH="coverage/LiteMORT$case_ashrae.coverage" NAME="case_ashrae Coverage Results" MODIFIED="1575203328325" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
+    <SUITE FILE_PATH="coverage/LiteMORT$case_ashrae.coverage" NAME="case_ashrae Coverage Results" MODIFIED="1575255979125" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
     <SUITE FILE_PATH="coverage/LiteMORT$pytest_in_pycharm_test_py.coverage" NAME="pytest in pycharm_test.py Coverage Results" MODIFIED="1564799919413" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
     <SUITE FILE_PATH="coverage/LiteMORT$case_ashrae_linux.coverage" NAME="case_ashrae_linux Coverage Results" MODIFIED="1575183999188" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
     <SUITE FILE_PATH="coverage/LiteMORT$geo_test.coverage" NAME="geo_test Coverage Results" MODIFIED="1564799540881" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python-package" />
@@ -928,13 +953,6 @@
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://D:/Anaconda3/Lib/site-packages/lightgbm/basic.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="97">
-          <caret line="458" column="33" selection-start-line="458" selection-start-column="33" selection-end-line="458" selection-end-column="33" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://D:/Anaconda3/Lib/site-packages/sklearn/model_selection/_split.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="196">
@@ -1240,13 +1258,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/case_ashrae_linux.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="129">
-          <caret line="387" column="16" selection-start-line="386" selection-start-column="8" selection-end-line="387" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/python-package/litemort/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="173">
@@ -1275,10 +1286,35 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/python-package/case_ashrae.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="242">
+          <caret line="74" column="21" lean-forward="true" selection-start-line="74" selection-start-column="21" selection-end-line="74" selection-end-column="21" />
+          <folding>
+            <element signature="e#182#228#0" expanded="true" />
+            <element signature="e#23204#23630#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://D:/Anaconda3/Lib/site-packages/pandas/core/dtypes/common.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="163">
+          <caret line="1077" column="4" selection-start-line="1077" selection-start-column="4" selection-end-line="1077" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python-package/case_ashrae_linux.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="247">
+          <caret line="17" column="49" lean-forward="true" selection-start-line="16" selection-end-line="17" selection-end-column="49" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/python-package/litemort/LiteMORT.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="87">
-          <caret line="529" selection-start-line="529" selection-end-line="529" />
+        <state relative-caret-position="279">
+          <caret line="452" selection-start-line="452" selection-end-line="452" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
@@ -1287,22 +1323,10 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/python-package/litemort/LiteMORT_preprocess.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="112">
-          <caret line="143" selection-start-line="143" selection-end-line="143" />
+        <state relative-caret-position="153">
+          <caret line="76" column="23" selection-start-line="76" selection-start-column="4" selection-end-line="76" selection-end-column="23" />
           <folding>
             <element signature="e#0#19#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/python-package/case_ashrae.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-779">
-          <caret line="478" column="9" selection-start-line="478" selection-start-column="8" selection-end-line="478" selection-end-column="9" />
-          <folding>
-            <element signature="e#182#228#0" expanded="true" />
-            <element signature="e#1240#3083#0" />
-            <element signature="e#23204#23630#0" />
           </folding>
         </state>
       </provider>

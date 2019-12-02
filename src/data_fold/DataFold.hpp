@@ -434,7 +434,8 @@ namespace Grusoft {
 			Tx **arrFeat = new Tx*[nFeat], *val = nullptr;
 			double *reduce = new double[nNode]();
 			for (t = 0; t < nFeat; t++) {
-				if (feats[t]->hDistri != nullptr && feats[t]->hDistri->isPass())	{
+				Distribution *hDistri = histoDistri(feats[t]);
+				if (hDistri != nullptr && hDistri->isPass())	{
 					arrFeat[t] = nullptr;
 				}
 				else {
@@ -591,11 +592,19 @@ namespace Grusoft {
 		virtual void Set(size_t len, PY_COLUMN *col, int flag = 0x0) { 
 			if (len != size())
 				throw "FeatVec_T::Set len mismatch!!!";
-			if (isReferVal()) {
-				val = (Tx*)(col->data);
+			assert(hFold_ != nullptr);
+			/*if (hFold_->isMerge) {
+				col->CopyTo_(len-1, val);
+
 			}
-			else {
-				col->CopyTo_(len, val);
+			else*/ {
+				if (isReferVal()) {
+					val = (Tx*)(col->data);
+				}
+				else {
+					col->CopyTo_(len, val);
+				}
+
 			}
 		}
 
@@ -1084,7 +1093,7 @@ namespace Grusoft {
 			}
 
 			Tx *samp_val = arr();
-			distri_->EDA(hFold,nSamp_, samp_set, samp_val, isGenHisto, 0x0);
+			distri_->EDA(hFold->config,nSamp_, samp_set, samp_val, isGenHisto, 0x0);
 
 			//hDistri->STA_at(nSamp_, samp_val, true, 0x0);
 			if (ZERO_DEVIA(distri_->vMin, distri_->vMax))
@@ -1097,7 +1106,7 @@ namespace Grusoft {
 			assert(samp_set !=nullptr);
 			size_t i, nSamp_ = size();			
 			Tx *samp_val = arr();			
-			M_Distri->EDA(hFold, nSamp_, samp_set, samp_val, isGenHisto, 0x0);
+			M_Distri->EDA(hFold->config, nSamp_, samp_set, samp_val, isGenHisto, 0x0);
 		}
 
 		//参见Distribution::STA_at，需要独立出来		8/20/2019

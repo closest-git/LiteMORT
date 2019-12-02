@@ -64,7 +64,7 @@ namespace Grusoft {
 
 		virtual void CheckDuplicate(LiteBOM_Config config, int flag) {
 		}
-
+		/*
 		template<typename Tx, typename Ty>
 		void Analysis(LiteBOM_Config config, Tx *X_, Ty *Y_, size_t nSamp_, size_t ldX_, size_t ldY_, int flag) {
 			clock_t t0=clock();
@@ -107,12 +107,12 @@ namespace Grusoft {
 			}
 			sparse/=(nSamp_*ldX_);		nana /= (nSamp_*ldX_);
 			printf("\n********* EDA::Analysis const=%ld sparse=%g NAN=%g T=%.3g........OK\n",  nConstFeat, sparse, nana, (clock() - t0) / 1000.0);
-		}
+		}*/
 		
 
 		/*
 			原则上只适用于稀疏的数值特征！！！
-		*/
+		
 		template<typename Tx>
 		void InitBundle(LiteBOM_Config config, Tx *X_, size_t nSamp_, size_t ldX_, int flag) {			//GST_TIC(tick);
 
@@ -156,7 +156,7 @@ namespace Grusoft {
 			printf("\n********* bundles=%d nMerge=%d nPass=%d\n", bundle.buns.size(), nMerge, nPass);
 			delete[] mask;		delete[] used;
 				
-		}
+		}*/
 
 		
 	};

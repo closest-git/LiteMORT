@@ -257,7 +257,7 @@ early_stop = 20
 verbose_eval = 5
 metric = 'l2'
 #num_rounds=1000, lr=0.05, bf=0.3
-num_rounds = 10;      lr = 0.05;          bf = 0.3
+num_rounds = 1000;      lr = 0.05;          bf = 0.3
 params = {'num_leaves': 31, 'n_estimators': num_rounds,
               'objective': 'regression',
               'max_bin': 256,
@@ -323,29 +323,7 @@ def fit_regressor(train, val,target_meter,fold, some_params, devices=(-1,), merg
     #input("......");   os._exit(-200)      #
     return model, y_pred_valid, log
 
-def VerifyMerge(ashrae_source,fold_train,fold_val,weather_train,weather_test_): #仅用于调试
-    '''
-    self.merge_infos = [
-        {'on': ['site_id', 'timestamp'], 'dataset': self.weather_df, "desc": "weather"},
-        {'on': ['building_id'], 'dataset': self.building_merge_, "desc": "building",
-         "feat_info": feat_infos},
-    ]
-    '''
-    cat_features = ashrae_source.category_cols
-    merge_info = ashrae_source.merge_infos
-    merge_test_info = merge_info
-    merge_test_info[0]['dataset'] = weather_test_
-
-    X_train, y_train = fold_val
-    X_valid, y_valid = fold_train
-    #merge_info[0]['dataset'] = weather_test
-    model = LiteMORT(params, merge_infos=merge_info)
-    model.fit(X_train, y_train, eval_set=[(X_valid, y_valid)], categorical_feature=cat_features)
-    model.MergeDataSets(merge_test_info, comment="_predict")
-    model.fit(X_train, y_train, eval_set=[(X_valid, y_valid)], categorical_feature=cat_features)
-    pass
-
-train_datas = ASHRAE_data("train",data_root,building_meta_df,weather_train_df)
+rain_datas = ASHRAE_data("train",data_root,building_meta_df,weather_train_df)
 print(train_datas.building_mean.shape)
 print(train_datas.building_mean.head(5))
 
@@ -384,8 +362,6 @@ for target_meter in range(nTargetMeter):
     for train_idx, valid_idx in kf.split(X_train, y_train):
         train_data = X_train.iloc[train_idx, :], y_train[train_idx]
         valid_data = X_train.iloc[valid_idx, :], y_train[valid_idx]
-        VerifyMerge(train_datas,train_data,valid_data,weather_train_df,weather_test_df)
-        continue
         params['seed'] = seed
         print(f'fold={fold} train={train_data[0].shape},valid={valid_data[0].shape}')
         #     model, y_pred_valid, log = fit_cb(train_data, valid_data, cat_features=cat_features, devices=[0,])

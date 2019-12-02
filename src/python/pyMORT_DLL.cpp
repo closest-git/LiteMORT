@@ -207,6 +207,7 @@ END:
 	printf("********* OnUserParams ********* \n\n");
 }
 
+
 PYMORT_DLL_API void LiteMORT_set_mergesets(void *mort_0, PY_DATASET_LIST *merge_list, int64_t flag) {
 	MORT *mort = MORT::From(mort_0);
 	mort->merge_folds.clear();
@@ -308,7 +309,9 @@ FeatVector *PY_COL2FEAT(const FeatsOnFold *hFold, PY_COLUMN*col, size_t nSamp_,i
 	if (hFold->isTrain() && !isMergePivot) {
 		hFold->edaX->AddDistri(col, id);		//col
 	}
-
+	/*if (hFold->isMerge) {		//item['dataset']=item['dataset'].append(pd.Series(), ignore_index=True)#name='last_nan'
+		nSamp_ = nSamp_ + 1;
+	}*/
 	if (col->isFloat()) {
 		hFeat = new FeatVec_T<float>(hFold,nSamp_, id, desc, flagF);
 	}

@@ -439,9 +439,19 @@ class LiteMORT(object):
         no = 0
         merge_sets = []
         for item in merge_infos:
-            item['dataset']=item['dataset'].append(pd.Series(), ignore_index=True)#name='last_nan'
+            if True:
+                last_row = item['dataset'][-1:]
+                nValid = last_row.count().sum()
+                if nValid==0:
+                    pass
+                else:
+                    item['dataset'] = item['dataset'].append(pd.Series(), ignore_index=True)  # name='last_nan'
+                df = item['dataset']
+            else:
+                df = item['dataset'].copy()
+                df = df.append(pd.Series(), ignore_index=True)#name='last_nan'
             feat_info=item['feat_info'] if 'feat_info' in item else {}
-            df=item['dataset']
+            #df=item['dataset']
             cols_on = item['on']
             pos_on = list(df.columns).index(cols_on[0])
             feat_info["merge_right"]=cols_on
