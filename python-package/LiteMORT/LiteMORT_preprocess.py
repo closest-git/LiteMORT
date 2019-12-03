@@ -177,7 +177,7 @@ class Mort_Preprocess(object):
             df_left = df_left.merge(df_rigt, on=cols_on, how='left')
             self.df_merge[feature_list[i]]=df_left["row_no"]
             nNA = self.df_merge[feature_list[i]].isna().sum()
-            print(f"left={df_left.shape} rigt={df_rigt.shape} nNA={nNA}" )
+            #print(f"left={df_left.shape} rigt={df_rigt.shape} nNA={nNA}" )
             if(nNA>=self.nSample):     #必须退出
                 raise Exception(f"AddPivotOnMerge Skip All-NAN@{cols_on}\tnNA={nNA}/{nNA * 100.0 / self.nSample:.3g}%%")
 

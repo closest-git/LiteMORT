@@ -64,8 +64,8 @@ GBRT::GBRT(FeatsOnFold *hTrain, FeatsOnFold *hEval, double sOOB, MODEL mod_, int
 		prune = new EnsemblePruning(this, hPruneData, hTrain->config.nMostPrune);
 
 	const char *mod = model==CLASIFY ? "CLASIFY" : "REGRESSION";
-	printf("\n\n********* GBRT[%s]\n\tnTrainSamp=%d,nTree=%d,maxDepth=%d regress@LEAF=%s thread=%d feat_quanti=%d...",
-		mod,nTrain, nTree, maxDepth, hTrain->config.leaf_regression.c_str(),nThread, hTrain->config.feat_quanti);
+	printf("\n\n********* GBRT[%s]\n\tnTrainSamp=%d,nTree=%d,thread=%d...",
+		mod,nTrain, nTree,  nThread);
 	hTrain->config.dump( );
 	hTrain->present.dump();
 	printf("\n********* GBRT *********\n" );
@@ -467,11 +467,12 @@ int GBRT::Train(string sTitle, int x, int flag) {
 	}	else {
 		printf("\n********* best_@[%d,%d]!!!", stopping.best_no, stopping.best_round);
 	}
-
-	printf("\n********* GBRT::Train ERR@train=%s E_best@%s=%s nTree=%d nFeat={%d-%d} aNode=%.6g maxDepth=%d thread=%d" 
-		"\n********* train=%g(hTree->Train=%g,tCheckGain=%g,tHisto=%g(%d,%g),tX=%g) sec\r\n", 
-		sLossT.c_str(), sEval.c_str(), sLossE.c_str(),forest.size(),stat.nMinFeat,stat.nMaxFeat, aNode, maxDepth, nThread,
-		GST_TOC(tick), t_train,FeatsOnFold::stat.tCheckGain, FeatsOnFold::stat.tHisto, HistoGRAM::nAlloc, FeatsOnFold::stat.tSamp2Histo, FeatsOnFold::stat.tX);
+	if (hTrainData->config.verbose > 0) {
+		printf("\n********* GBRT::Train ERR@train=%s E_best@%s=%s nTree=%d nFeat={%d-%d} aNode=%.6g maxDepth=%d thread=%d" 
+			"\n********* train=%g(hTree->Train=%g,tCheckGain=%g,tHisto=%g(%d,%g),tX=%g) sec\r\n", 
+			sLossT.c_str(), sEval.c_str(), sLossE.c_str(),forest.size(),stat.nMinFeat,stat.nMaxFeat, aNode, maxDepth, nThread,
+			GST_TOC(tick), t_train,FeatsOnFold::stat.tCheckGain, FeatsOnFold::stat.tHisto, HistoGRAM::nAlloc, FeatsOnFold::stat.tSamp2Histo, FeatsOnFold::stat.tX);
+	}
 
 	if (nOOB>0)
 		TestOOB(hTrainData);

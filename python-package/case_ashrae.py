@@ -449,7 +449,7 @@ def fit_regressor(train, val,target_meter,fold, some_params, devices=(-1,), merg
         print("X_train={}, y_train={} d_train={}".format(col_X.shape, col_y.shape, d_train.shape))
 
     if isMORT:
-        params['verbose']=667
+        some_params['verbose'] = 667 if fold == 0 else 0
         merge_datas=[]
         model = LiteMORT(some_params,merge_infos=merge_info)   # all train,eval,predict would use same merge infomation
         model.fit(X_train, y_train, eval_set=[(X_valid, y_valid)], categorical_feature=cat_features)

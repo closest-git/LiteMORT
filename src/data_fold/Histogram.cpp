@@ -717,8 +717,10 @@ HistoGRAM_BUFFER::HistoGRAM_BUFFER(const FeatsOnFold *hData_0, int flag):hData_(
 	size_t pos = SetBinsAtBuffer(hData_,feats);
 	assert(pos==nMostBin);
 
-	printf("\n********* HistoGRAM_BUFFER MEM=%.6g(M) nMostBin=%lld\n********* \tnMostFeat=%d,nMostNode=%d zero=%d\n", 
-		nzMEM/1.0e6, nMostBin, nMostNode, nMostFeat, nzZ);
+	if (hData_->config.verbose > 0) {
+		printf("\n********* HistoGRAM_BUFFER MEM=%.6g(M) nMostBin=%lld\n********* HistoGRAM_BUFFER nMostFeat=%d,nMostNode=%d zero=%d\n", 
+			nzMEM/1.0e6, nMostBin, nMostFeat,nMostNode,  nzZ);
+	}
 }
 
 void HistoGRAM_BUFFER::BeforeTrainTree(vector<int>& pick_feats, size_t nPickSamp, int flag) {

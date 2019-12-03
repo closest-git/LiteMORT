@@ -160,15 +160,16 @@ namespace Grusoft {
 
 			//string histo_alg = histo_algorithm==on_EDA ? "on_EDA" : histo_algorithm == on_subsample ? "on_subsample" : "on_Y";
 			string histo_alg = histo_bin_map == 0 ? "\"quantile\"" : (histo_bin_map == 1 ? "\"frequency\"" : histo_bin_map == 3 ? "\"Dcrimini on Y\"" : "XXX");
-			printf("\n\t%slr=%g sample=[%g,%g] min@leaf=%d stop=%d drop=%g num_leaves=%d "
-				"\n\tOBJECTIVE=\"%s\"\teval_metric=\"%s\"\tleaf_optimal=\"%s\" \n\t init=%s"
+			printf("\n\t%slr=%g sample=[%g,%g] min@leaf=%d stop=%d drop=%g num_leaves=%d feat_quanti=%d"
+				"\n\tOBJECTIVE=\"%s\"\teval_metric=\"%s\"\tleaf_optimal=\"%s\""
+				"\n\t init=%s maxDepth=%d"
 				"\n\tL2=%.8g\tLf=%.8g\tImputation=%s\tNormal=%s"
 				"\n\tnElitism=%g,Iter_refine=%g \tRefine_split=%d"
 				"\n\tnMostPrune=%d node_task=%s debug=%s"
 				"\n\tnMostSalp4Bins=%d histo_bin_::map=%s",
-				lr_adptive_leaf?"a_":"",learning_rate, subsample, feature_fraction, min_data_in_leaf, early_stopping_round, drop_out, num_leaves,
+				lr_adptive_leaf?"a_":"",learning_rate, subsample, feature_fraction, min_data_in_leaf, early_stopping_round, drop_out, num_leaves, feat_quanti,
 				objective.c_str(), eval_metric.c_str(), leaf_optimal.c_str(),
-				init_scor.c_str(),
+				init_scor.c_str(), max_depth,
 				lambda_l2, lambda_Feat,eda_NA == -1 ? "OFF" : eda_NA == 0 ? "0" : "Other",
 				eda_Normal == 0 ? "OFF" : "Gaussian", 
 				rElitism,T_iterrefine,split_refine,

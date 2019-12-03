@@ -683,7 +683,8 @@ void INIT_SCORE::Init(FeatsOnFold *hData_, int flag) {
 	}
 	else //config.init_scor == "0")
 		step = 0;
-	printf("----Start training from score %g",step);
+	if(hData_->config.verbose>0)
+		printf("----Start training from score %g",step);
 	//if(hData_->config.eval_metric == "auc"){
 	if (hData_->config.objective == "binary") {
 		double sigmoid_ = 1, a = step;

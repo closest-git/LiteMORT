@@ -38,6 +38,7 @@ struct MORT{
 	GBRT *hGBRT = nullptr;
 	ExploreDA *hEDA_train = nullptr;
 	vector<FeatsOnFold *>merge_folds;
+	string merge_info;
 
 	MORT() {
 
@@ -204,22 +205,29 @@ END:
 		printf("\n\n!!!Invalid Parameters!!! %s err=%d \n********* OnUserParams ********* \n\n", sERR, err);
 		throw sERR;
 	}
-	printf("********* OnUserParams ********* \n\n");
+	if(config.verbose>0)
+		printf("********* OnUserParams ********* \n\n");
 }
 
 
 PYMORT_DLL_API void LiteMORT_set_mergesets(void *mort_0, PY_DATASET_LIST *merge_list, int64_t flag) {
 	MORT *mort = MORT::From(mort_0);
 	mort->merge_folds.clear();
+	int nMergeFeat = 0;
 	if (merge_list != nullptr) {
 		for (int i = 0; i < merge_list->nSet; i++) {
 			PY_DATASET *set = merge_list->list + i;
 			printf("\n\t------MERGE@[\"%s\"](%lldx%d)......", set->name, set->nSamp, set->ldFeat);
 			ExploreDA *hEDA = new ExploreDA(mort->config,set->name, flag);
 			FeatsOnFold *hMerge = FeatsOnFold_InitInstance(mort->config, hEDA, set, nullptr, flag | FeatsOnFold::DF_MERGE);
+			nMergeFeat += hMerge->feats.size();
 			//hMerge->merge_right = set->merge_rigt;
 			mort->merge_folds.push_back(hMerge);
 		}/**/
+		char tmp[1000];
+		sprintf(tmp, "nFeat@Merge=[%d@%d]", nMergeFeat, mort->merge_folds.size());
+		mort->merge_info = tmp;
+		fflush(stdout);
 	}
 }
 
@@ -866,7 +874,7 @@ PYMORT_DLL_API void LiteMORT_fit_1(void *mort_0, PY_DATASET_LIST *train_list, PY
 			hEDA = mort->hEDA_train;		//isDelEDA = true;
 		}*/
 		size_t i, feat, nTrain = nSamp;
-		printf("\n********* LiteMORT_fit nSamp=%d,nFeat_0=%d hEDA=%p********* \n\n", nSamp, nFeat_0, hEDA);
+		printf("\n********* LiteMORT_fit nSamp=%d,nFeat_0=%d %s hEDA=%p********* \n\n", nSamp, nFeat_0, mort->merge_info.c_str(),hEDA);
 
 		size_t f1 = FeatsOnFold::DF_TRAIN;
 		vector<FeatsOnFold*> folds;

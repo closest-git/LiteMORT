@@ -74,7 +74,7 @@ class LiteMORT_profile(object):
             if "peak_pagefile" in mem_1 and "peak_wset" in mem_1:
                 peak_info=f"PEAK=[{mem_1['peak_pagefile']/1.0e6:.1f},{mem_1['peak_wset']/1.0e6:.1f}](M)"
                 print(f"\t{peak_info}")
-            print(f"\n{'-'* 120}\n")
+            print(f"{'-'* 120}")
 
         return
 
@@ -83,7 +83,7 @@ class LiteMORT_params(object):
         for alias in alia_list:
             if alias not in dict_param:
                 continue
-            if alias!=key:
+            if alias!=key and self.verbose>0:
                 print(f"Found `{alias}`(alias of {key}) in params. Will use it instead of argument")
                 #warnings.warn("Found `{}`(alias of {}) in params. Will use it instead of argument".format(alias,key))
             value = (type(default_value))(dict_param[alias])
@@ -92,6 +92,7 @@ class LiteMORT_params(object):
 
     def OnArgs(self,dict_param):
         self.isOK = False
+        self.verbose = self.alias_param('verbose', 0, dict_param, ['verbosity', "verbose"])
         if 'metric' in dict_param:
             if(dict_param['metric'] in ['regression_l2', 'mse', 'l2'] ):
                 self.metric = 'mse'
@@ -147,7 +148,7 @@ class LiteMORT_params(object):
         if 'representive' in dict_param:
             self.representive = dict_param['representive']
         self.n_threads = self.alias_param('n_threads', 0, dict_param, ['n_threads', "n_jobs", "num_threads"])
-        self.verbose = self.alias_param('verbose',0,dict_param,['verbosity',"verbose"])
+
         #if 'early_stop' in dict_param:
         #    self.early_stopping_rounds = dict_param['early_stop']
         self.early_stopping_rounds = self.alias_param('early_stop',50,dict_param,['early_stop',"early_stopping_round", "early_stopping_rounds", "early_stopping"])
