@@ -445,19 +445,19 @@ namespace Grusoft {
 		*/
 		template<typename Tx, typename Ty>
 		void X2Histo_(const LiteBOM_Config&config, size_t nSamp_, Tx *val, Ty *y, int flag = 0x0) {
-			if (rNA == 1.0) {
-				printf("X2Histo_::!!!%s is NAN!!!\n", desc.c_str());
+			assert(histo == nullptr);
+			//histo = optimal == "grad_variance" ? new HistoGRAM(nSamp_) : new Histo_CTQ(nSamp_);
+			histo = new HistoGRAM(nullptr,nSamp_);
+			if (rNA == 1.0) {	//由于复杂的pandas操作，确实存在可能
+				if(config.verbose>0)	printf("X2Histo_::!!!%s-%s is all NAN!!!\n", nam.c_str(),desc.c_str());
 				return;
 			}
 			if (vMin == vMax) {
-				printf("X2Histo_::%s is const(%g)!!!", desc.c_str(), val[0]);
+				if (config.verbose>0)	printf("X2Histo_::%s-%s is const(%g)!!!", nam.c_str(), desc.c_str(), val[0]);
 				return;
 			}			
 
 			string optimal = config.leaf_optimal;
-			assert(histo == nullptr);
-			//histo = optimal == "grad_variance" ? new HistoGRAM(nSamp_) : new Histo_CTQ(nSamp_);
-			histo = new HistoGRAM(nullptr,nSamp_);
 
 			int nMostBin = config.feat_quanti;		
 			//if(BIT_TEST(type,Distribution::DISCRETE))

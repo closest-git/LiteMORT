@@ -37,7 +37,7 @@ isMORT = True
 isMerge = True #len(sys.argv)>1 and sys.argv[1] == "merge"
 gbm='MORT' if isMORT else 'LGB'
 use_ucf=False
-nTargetMeter=2
+nTargetMeter=4
 
 
 print(f"====== MERGE={isMerge} gbm={gbm} ======\n\n")
@@ -262,8 +262,8 @@ class ASHRAE_data(object):
         self.feature_cols = ['square_feet', 'year_built'] + [
             'hour', 'weekend',  # 'month' , 'dayofweek'
             'building_median']+feats_whether
-        self.some_rows = 5000
-        #self.some_rows = None
+        #self.some_rows = 500000
+        self.some_rows = None
         self.df_base = self.Load_Processing()
         self.df_base_shape = self.df_base.shape
 
@@ -476,7 +476,7 @@ def fit_regressor(train, val,target_meter,fold, some_params, devices=(-1,), merg
     #input("......");   os._exit(-200)      #
     return model, y_pred_valid, log
 
-folds = 5
+folds = 10
 seed = 666
 shuffle = False
 kf = KFold(n_splits=folds, shuffle=shuffle, random_state=seed)

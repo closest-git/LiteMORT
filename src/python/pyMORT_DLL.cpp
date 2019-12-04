@@ -945,7 +945,7 @@ void GRUS_LITEMORT_VERSION(char * str) {
 	sprintf(str, "%s%s%s",
 		"********************************************************************\n",
 		sName,
-		"*                   for personal, non-commercial use.              *\n"
+		//"*                   for personal, non-commercial use.              *\n"
 		"*    Copyright (c) 2018-2019 by YingShiChen. All Rights Reserved.  *\n"
 		"*                         gsp@grusoft.com                          *\n"
 		"********************************************************************\n"

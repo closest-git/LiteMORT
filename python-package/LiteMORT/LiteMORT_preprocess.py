@@ -181,7 +181,7 @@ class Mort_Preprocess(object):
             if(nNA>=self.nSample):     #必须退出
                 raise Exception(f"AddPivotOnMerge Skip All-NAN@{cols_on}\tnNA={nNA}/{nNA * 100.0 / self.nSample:.3g}%%")
 
-            if(nNA>0):      #真麻烦！！！
+            if(nNA>0):
                 print(f"AddPivotOnMerge NAN@{cols_on}\tnNA={nNA}/{nNA*100.0/self.nSample:.3g}%%")
                 nRightRow = df_rigt.shape[0]
                 self.df_merge[feature_list[i]].fillna(nRightRow-1, inplace=True)

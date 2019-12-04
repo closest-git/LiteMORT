@@ -67,7 +67,7 @@ GBRT::GBRT(FeatsOnFold *hTrain, FeatsOnFold *hEval, double sOOB, MODEL mod_, int
 	printf("\n\n********* GBRT[%s]\n\tnTrainSamp=%d,nTree=%d,thread=%d...",
 		mod,nTrain, nTree,  nThread);
 	hTrain->config.dump( );
-	hTrain->present.dump();
+	hTrain->present.dump( );
 	printf("\n********* GBRT *********\n" );
 	//printf("\n\tlr=%g sample=%g leaf_optimal=\"%s\" num_leaves=%d*********\n********* GBRT *********\n",
 	//	lr, hTrain->config.leaf_optimal.c_str(),hTrain->config.num_leaves);
