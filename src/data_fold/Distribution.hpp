@@ -100,7 +100,7 @@ namespace Grusoft {
 			size_t nz=0;
 			int type = BASIC;
 		};			
-
+		double IMPUT_most_freq = -1;
 		string nam,desc;
 		vector<tpSAMP_ID> sortedA;		//排序后的有意义数据(NA-无意义数据)
 		//vector<double>  vUnique;		
@@ -379,7 +379,7 @@ namespace Grusoft {
 		void HistoOnUnique(const LiteBOM_Config&config, Tx *val, const vector<tpSAMP_ID>& sort_ids, vector<vDISTINCT>&uniques, int flag = 0x0) {
 			size_t nMostBin = uniques.size();
 			assert(histo != nullptr);
-			size_t i, i_0 = 0, i_1, noBin = -1, pos, nA = sort_ids.size(), T_min = int(nA / nMostBin) + 1;
+			size_t i, i_0 = 0, i_1, noBin = -1, pos, nA = sort_ids.size(), T_min = int(nA / nMostBin) + 1, nz_1=0;
 			Tx a0 = val[sort_ids[0]], a1 = val[sort_ids[nA - 1]], v0;
 			//vThrsh.clear();		
 			binFeatas.resize(nMostBin);
@@ -406,10 +406,18 @@ namespace Grusoft {
 			histo->nBins = noBin + 1;
 			//AddBin(config, noBin + 1, a1, DBL_MAX, -0x0);	//last bin for NA
 			binFeatas[noBin].split_F = DBL_MAX;
+
+			IMPUT_most_freq = -1;
+			for (nz_1=0,i = 0; i < histo->nBins; i++) {
+				if (histo->bins[i].nz > nz_1) {
+					nz_1 = histo->bins[i].nz;
+					IMPUT_most_freq = i;
+				}
+			}
+
 			size_t n1 = ceil(noBin / 4.0), n2 = ceil(noBin / 2.0), n3 = ceil(noBin *3.0 / 4);
 			H_q0 = uniques[0].val,			H_q4 = uniques[noBin].val;
 			H_q1 = q1 = uniques[n1].val,	H_q2 = q2 = uniques[n2].val;		H_q3 = q3 = uniques[n3].val;/**/
-
 		}
 
 		/*可以减少histo的bin数，但对准确率似乎没啥影响

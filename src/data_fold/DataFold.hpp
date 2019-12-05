@@ -1152,6 +1152,50 @@ namespace Grusoft {
 			}
 		}
 
+		//很好的测试算例 case_ashrae_divide.py
+		template<typename tpQUANTI>
+		void CategoryAtEDA_(ExploreDA *edaX, const vector<tpSAMP_ID>& idx, tpQUANTI *quanti, int nMostBin, const FeatsOnFold *hData_, int flag) {
+			size_t nA = idx.size();
+			const Distribution* distri = edaX->GetDistri(id);
+			size_t nSamp_ = size(), i, i_0 = 0, i_1, noBin = 0, pos, nzHisto = 0, nFailed = 0;
+			Distribution *myD_ = distri_;
+			myD_->mapCategory = distri->mapCategory;
+			MAP_CATEGORY::iterator failed = myD_->mapCategory.end();
+			if (id == 31) {			//仅用于调试
+									//id = 31;
+			}
+			MAP_CATEGORY map_1;
+			i_0 = 0;
+			while (i_0 < nA) {
+				pos = idx[i_0];
+				int key = (int)(val[pos]), BIN_1 = distri->histo->nBins;
+				//assert(key >= distri.vMin && key <= distri.vMax);
+				if (myD_->mapCategory.find(key) == failed) {
+					quanti[pos] = BIN_1 - 1;				//很少的fail_match	也会严重降低准确率
+					//quanti[pos] = (int)(distri->IMPUT_most_freq);		
+					/*if (map_1.find(key) == map_1.end()) {
+						quanti[pos] = rand() % distri->histo->nBins;
+						
+						map_1.insert(pair<int, int>(key, quanti[pos]));
+					}
+					else {
+						quanti[pos] = map_1[key];
+					}*/
+					assert(quanti[pos] >= 0 && quanti[pos]<BIN_1);
+					nFailed++;
+				}
+				else {
+					quanti[pos] = myD_->mapCategory[key];
+				}
+				i_0++;
+				//assert(quanti[pos] >= 0 && quanti[pos] < NNA);
+			}
+			if (nFailed > 0) {
+				if (hData_->config.verbose>0)
+					printf("!!!!!! %d   \"%s\" nFailed=%lld(%d) nA=%lld !!!!!!\n", id, nam.c_str(), nFailed, map_1.size(), nA);
+			}
+		}
+
 		/*
 			isSameSorted 仅对应于isTrain()
 			v0.1	cys
@@ -1164,9 +1208,9 @@ namespace Grusoft {
 			tpQUANTI NNA = tpQUANTI(-1);
 			size_t nSamp_ = size(), i, i_0 = 0, i_1, noBin = 0, pos, nzHisto=0, nFailed=0;
 			vector<tpSAMP_ID> idx;
-			Distribution *myDistri = distri_;
-			if (myDistri->sortedA.size() > 0 && isSameSorted) {
-				idx = myDistri->sortedA;
+			Distribution *myD_ = distri_;
+			if (myD_->sortedA.size() > 0 && isSameSorted) {
+				idx = myD_->sortedA;
 				for (i = 0; i < nSamp_; i++)
 					quanti[i] = NNA;
 			}
@@ -1184,19 +1228,20 @@ namespace Grusoft {
 			//const vector<double>& vThrsh = distri.vThrsh
 				
 			if (isCategory()) {
-				myDistri->mapCategory = distri->mapCategory;
+				CategoryAtEDA_(edaX, idx, quanti, nMostBin, hData_, flag);
+				/*myDistri->mapCategory = distri->mapCategory;
 				if (id == 31) {			//仅用于调试
 					//id = 31;
 				}				
 				i_0 = 0;
 				while (i_0 < nA) {
 					pos = idx[i_0];			
-					int key = (int)(val[pos]);		
+					int key = (int)(val[pos]),BIN_1= distri->histo->nBins;
 					//assert(key >= distri.vMin && key <= distri.vMax);
 					MAP_CATEGORY::iterator failed = myDistri->mapCategory.end();
 					if (myDistri->mapCategory.find(key) == failed) {
 						//hDistri->mapCategory.insert(pair<int, int>(key, hDistri->mapCategory));
-						quanti[pos] = distri->histo->nBins - 1;	//很少的fail_match	也会严重降低准确率
+						quanti[pos] = distri->histo->nBins - 1;		//很少的fail_match	也会严重降低准确率
 						//quanti[pos] = 0;
 						nFailed++;
 					}else
@@ -1207,7 +1252,7 @@ namespace Grusoft {
 				if (nFailed > 0) {		
 					if(hData_->config.verbose>0)
 						printf("!!!!!! %d   \"%s\" nFailed=%lld nA=%lld !!!!!!\n", id, nam.c_str(), nFailed,nA);
-				}
+				}*/
 			}
 			else {
 				const HistoGRAM *histo = distri->histo;		assert(histo!=nullptr);

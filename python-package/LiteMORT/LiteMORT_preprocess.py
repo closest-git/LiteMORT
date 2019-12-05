@@ -167,7 +167,8 @@ class Mort_Preprocess(object):
             df,cols_on = info['dataset'],info['on']
             feature_list.append("@M_"+info['desc'])
 
-            df_left, df_rigt = df_base[cols_on], df[cols_on].copy()
+            df_left = df_base[cols_on]
+            df_rigt = df[cols_on].copy()
             #df_left_0 = df_left.reset_index()
             df_rigt["row_no"] = df_rigt.reset_index().index
             dtype = np.int32

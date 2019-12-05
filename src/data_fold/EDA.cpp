@@ -227,10 +227,8 @@ void Distribution::Dump(int feat, bool isQuanti, int flag) {
 		//printf("%4d %c%12s [%.3g,%.3g,%.3g,%.3g,%.3g]\tnBin=%d[%.3g,%.3g,%.3g,%.3g,%.3g]%s \n", feat, typ, nam.c_str(), 
 		//	vMin, q1, q2, q3, vMax,
 		//需要输出中位数
-		printf("%4d %c%12s [%.4g-%.8g]\tBIG=%d\tnBin=%d[%.4g,%.4g,%.4g,%.4g,%.4g]%s \n", feat, typ, nam.c_str(),
-			vMin, vMax, histo == nullptr ? 0 : histo->nBigBins /*corr.D_sum*/,
-			 histo == nullptr ? 0 : histo->nBins,
-			H_q0, H_q1, H_q2, H_q3, H_q4, tmp);
+		printf("%4d %c%12s [%.4g-%.8g]\t[%.4g,%.4g,%.4g,%.4g,%.4g]%s \n", feat, typ, nam.c_str(),
+			vMin, vMax,H_q0, H_q1, H_q2, H_q3, H_q4, tmp);
 	}
 }
 
@@ -239,7 +237,7 @@ void Distribution::HistoOnUnique_1(const LiteBOM_Config&config, vector<vDISTINCT
 	size_t nMostBin = uniques.size();
 	assert(histo != nullptr);
 	//int noBin = 0;
-	size_t i, i_0 = 0, nUnique = vUnique.size(), nz;
+	size_t i, i_0 = 0, nUnique = vUnique.size(), nz, nz_1=0;
 	double a0 = vUnique[0].val, a1 = vUnique[vUnique.size() - 1].val, v0, vLeftOuter;
 	if(isMap)
 		mapCategory.clear();
@@ -267,6 +265,15 @@ void Distribution::HistoOnUnique_1(const LiteBOM_Config&config, vector<vDISTINCT
 	histo->nMostBins = histo->nBins;	// bins.size();
 	assert(binFeatas.size() >= nBin);
 	binFeatas.resize(nBin);
+
+	IMPUT_most_freq = -1;
+	for (nz_1 = 0, i = 0; i < histo->nBins; i++) {
+		if (histo->bins[i].nz > nz_1) {
+			nz_1 = histo->bins[i].nz;
+			IMPUT_most_freq = i;
+		}
+	}
+
 	histo->CheckValid(config);
 }
 
