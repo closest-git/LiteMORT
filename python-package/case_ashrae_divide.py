@@ -18,12 +18,13 @@ print(litemort.__version__)
 
 data_root = 'F:/Datasets/ashrae/'
 isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
-#isMORT = True
-isMerge = False #len(sys.argv)>1 and sys.argv[1] == "merge"
+isMORT = True
+isMerge = True #len(sys.argv)>1 and sys.argv[1] == "merge"
 gbm='MORT' if isMORT else 'LGB'
 use_ucf=False
 some_rows = 500000
 some_rows = None
+lag_hours=[18,72]
 
 def reduce_mem_usage(df, use_float16=False):
     """
@@ -71,7 +72,7 @@ def create_lag_features(df, window):
     Creating lag-based features looking back in time.
     """
 
-    feature_cols = ["air_temperature", "cloud_coverage", "dew_temperature", "precip_depth_1_hr"]
+    feature_cols = ["air_temperature", "cloud_coverage", "dew_temperature", "precip_depth_1_hr", 'sea_level_pressure','wind_direction', 'wind_speed']
     df_site = df.groupby("site_id")
 
     df_rolled = df_site[feature_cols].rolling(window=window, min_periods=0)
@@ -124,7 +125,7 @@ path_weather_train = path_data + "weather_train.csv"
 path_weather_test = path_data + "weather_test.csv"
 myfavouritenumber = 13
 seed = myfavouritenumber
-pkl_path = f'{data_root}/site_divide_{some_rows}_{"merge"if isMerge else ""}.pickle'
+pkl_path = f'{data_root}/site_divide_{some_rows}_{"merge"if isMerge else ""}_{lag_hours}_.pickle'
 
 if os.path.isfile(pkl_path):
     print("====== Load pickle @{} ......".format(pkl_path))
@@ -145,8 +146,8 @@ else:
     building.primary_use = le.fit_transform(building.primary_use)
     weather_train = pd.read_csv(path_weather_train)
     weather_test = pd.read_csv(path_weather_test)
-    weather_train.drop(["sea_level_pressure", "wind_direction", "wind_speed"], axis=1, inplace=True)
-    weather_test.drop(["sea_level_pressure", "wind_direction", "wind_speed"], axis=1, inplace=True)
+    #weather_train.drop(["sea_level_pressure", "wind_direction", "wind_speed"], axis=1, inplace=True)
+    #weather_test.drop(["sea_level_pressure", "wind_direction", "wind_speed"], axis=1, inplace=True)
     weather_train = weather_train.groupby("site_id").apply(lambda group: group.interpolate(limit_direction="both"))
     weather_test = weather_test.groupby("site_id").apply(lambda group: group.interpolate(limit_direction="both"))
     print(f"df_train={df_train.shape} df_test={df_test.shape} weather_train={weather_train.shape} weather_test={weather_test.shape}")
@@ -193,10 +194,11 @@ else:
     df_test = df_test.merge(df_building_meter_hour, on=["building_id", "meter", "hour"])
     print(f"Aggregation... df_train={df_train.shape} df_test={df_test.shape}")
 
-    weather_train = create_lag_features(weather_train, 18)
-    #weather_train.drop(["air_temperature", "cloud_coverage", "dew_temperature", "precip_depth_1_hr"], axis=1, inplace=True)
-    weather_test = create_lag_features(weather_test, 18)
-    #weather_test.drop(["air_temperature", "cloud_coverage", "dew_temperature", "precip_depth_1_hr"], axis=1,inplace=True)
+    for h in lag_hours:
+        weather_train = create_lag_features(weather_train, h)
+        #weather_train.drop(["air_temperature", "cloud_coverage", "dew_temperature", "precip_depth_1_hr"], axis=1, inplace=True)
+        weather_test = create_lag_features(weather_test, h)
+        #weather_test.drop(["air_temperature", "cloud_coverage", "dew_temperature", "precip_depth_1_hr"], axis=1,inplace=True)
     if isMerge:
         pass
     else:
@@ -229,18 +231,18 @@ models = {}
 cv_scores = {"site_id": [], "cv_score": []}
 
 early_stop = 21
-verbose_eval = 101
+verbose_eval = 5
 metric = 'l2'
 num_rounds=999; lr=0.049; bf=0.51;ff=0.81;nLeaf=41
-#num_rounds = 15;    lr = 0.05;  verbose_eval=1;     bf=1;   ff=1;nLeaf=2
+#num_rounds = 30;    lr = 0.05;  verbose_eval=1;     bf=1;   ff=1;nLeaf=41
 
 params = {"objective": "regression", "metric": "rmse",
           "num_leaves": nLeaf, "learning_rate": 0.049,'n_estimators': num_rounds,
-          "bagging_freq": 1, "bagging_fraction": bf, "feature_fraction": ff,
+          "bagging_freq": 1, "bagging_fraction": bf, "feature_fraction": ff,'min_data_in_leaf': 10000,
             'verbose_eval': verbose_eval,"early_stopping_rounds": early_stop,'n_jobs': 8, "elitism": 0
           }
-#for site_id in tqdm(range(16), desc="site_id"):
-for site_id in [8]:
+for site_id in tqdm(range(16), desc="site_id"):
+#for site_id in [0]:
     print(cv, "fold CV for site_id:", site_id)
     kf = KFold(n_splits=cv, random_state=seed)
     models[site_id] = []
@@ -256,7 +258,7 @@ for site_id in [8]:
         y_train, y_valid = y_train_site.iloc[train_index], y_train_site.iloc[valid_index]
 
         if isMORT:
-            params['verbose'] = 666 if site_id==8 and fold == 0 else 0
+            params['verbose'] = 667 if site_id==0 and fold == 0 else 1
             merge_datas = []
             model = LiteMORT(params,merge_infos=merge_infos)
             model.fit(X_train, y_train, eval_set=[(X_valid, y_valid)], categorical_feature=categorical_features)
@@ -273,24 +275,29 @@ for site_id in [8]:
         rmse = np.sqrt(mean_squared_error(y_valid, y_pred_valid))
         print("Site Id:", site_id, ", Fold:", fold + 1, ", RMSE:", rmse)
         score += rmse / cv
-
+        del  X_train, X_valid,y_train, y_valid
         gc.collect()
-        input("......")
+        #input("......")
+
     cv_scores["site_id"].append(site_id)
     cv_scores["cv_score"].append(score)
 
     print("\nSite Id:", site_id, ", CV RMSE:", np.sqrt(mean_squared_error(y_train_site, y_pred_train_site)), "\n")
+    del X_train_site, y_train_site,y_pred_train_site
+    gc.collect()
 
-
+del df_train;   gc.collect()
 df_test_sites = []
-
+merge_test_info = [{'on': ['site_id', 'timestamp'], 'dataset': weather_test, "desc": "weather"}]
 for site_id in tqdm(range(16), desc="site_id"):
     print("Preparing test data for site_id", site_id)
 
     X_test_site = df_test[df_test.site_id == site_id]
-    weather_test_site = weather_test[weather_test.site_id == site_id]
-
-    X_test_site = X_test_site.merge(weather_test_site, on=["site_id", "timestamp"], how="left")
+    if isMerge:
+        pass
+    else:
+        weather_test_site = weather_test[weather_test.site_id == site_id]
+        X_test_site = X_test_site.merge(weather_test_site, on=["site_id", "timestamp"], how="left")
 
     row_ids_site = X_test_site.row_id
     #print(X_test_site.columns);    print(X_test_site.head())
@@ -300,6 +307,8 @@ for site_id in tqdm(range(16), desc="site_id"):
     print("Scoring for site_id", site_id)
     for fold in range(cv):
         model_lgb = models[site_id][fold]
+        if isMerge:
+            model_lgb.MergeDataSets(merge_test_info, comment="_predict")
         y_pred_test_site += model_lgb.predict(X_test_site, num_iteration=model_lgb.best_iteration) / cv
         gc.collect()
 
@@ -311,13 +320,13 @@ for site_id in tqdm(range(16), desc="site_id"):
 
 submit = pd.concat(df_test_sites)
 submit.meter_reading = np.clip(np.expm1(submit.meter_reading), 0, a_max=None)
-#submit.to_csv("submission_noleak.csv", index=False)
+submit.to_csv("submission_noleak.csv", index=False, float_format='%.4f',compression='gzip')
 
 del df_test_sites;        gc.collect()
+if False:
+    submit = submit.merge(leak[["row_id", "meter_reading_scraped"]], on=["row_id"], how="left")
+    submit.loc[submit.meter_reading_scraped.notnull(), "meter_reading"] = submit.loc[submit.meter_reading_scraped.notnull(), "meter_reading_scraped"]
+    submit.drop(["meter_reading_scraped"], axis=1, inplace=True)
 
-submit = submit.merge(leak[["row_id", "meter_reading_scraped"]], on=["row_id"], how="left")
-submit.loc[submit.meter_reading_scraped.notnull(), "meter_reading"] = submit.loc[submit.meter_reading_scraped.notnull(), "meter_reading_scraped"]
-submit.drop(["meter_reading_scraped"], axis=1, inplace=True)
-
-submit.to_csv("submission.csv.gz", index=False, float_format='%.4f',compression='gzip')
+    submit.to_csv("submission.csv.gz", index=False, float_format='%.4f',compression='gzip')
 print(submit.head(100),submit.tail(100))

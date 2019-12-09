@@ -104,8 +104,13 @@ void FeatVec_LOSS::EDA( ExploreDA *edaX, int flag) {
 		//y->EDA(config,true, nullptr, 0x0);
 		y->InitDistri(hBaseData_, nullptr, nullptr, config.objective == "binary", 0x0);
 		Distribution *disY = y->myDistri();
-		if(disY !=nullptr)
+		if (disY != nullptr) {
 			disY->Dump(-1, false, flag);
+			assert(disY->rNA==0);
+			if (disY->rNA > 0) {
+				throw "FeatVec_LOSS::EDA disY->rNA > 0!!! Please check the value of Y!!!";
+			}
+		}
 		size_t dim = size(),i,nOutlier;
 		if (config.objective == "outlier") {
 			y->loc(outliers,1);

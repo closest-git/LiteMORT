@@ -177,10 +177,11 @@ double GBRT::Predict(FeatsOnFold *hData_, bool updateStopping,bool checkLossy, b
 		err = hData_->lossy->ERR();	
 		if (BIT_TEST(hData_->dType, FeatsOnFold::DF_EVAL)) {
 			if ((skdu.noT <= 100 && skdu.noT % 5 == 0) || skdu.noT % hData_->config.verbose_eval == 0) {
+				if (hData_->config.verbose_eval == 1)	printf("\n");
 				if (hData_->config.eval_metric == "auc") {
 					printf("auc_%d=%-8.5g ", skdu.noT, hData_->lossy->err_auc);
 				}else
-					printf("%s_%d=%-8.5g ", hData_->nam.c_str(),skdu.noT,  err);		//eval_
+					printf("%s_%d=%-8.6g ", hData_->nam.c_str(),skdu.noT,  err);		//eval_
 				if(skdu.noT > 100)	printf("tX=%.3g ", FeatsOnFold::stat.tX);
 			}
 

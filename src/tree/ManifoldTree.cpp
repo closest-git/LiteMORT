@@ -625,7 +625,7 @@ void ManifoldTree::Train(int flag) {
 				hGuideTree->GrowLeaf(hSplit, info,false);
 				hSplit->fruit = nullptr;/**/
 			}
-			//hBest->Dump(info, 0x0);		//输出每个nodal的信息
+			//hBest->Dump(hData_,info, 0x0);		//输出每个nodal的信息
 			size_t nLeft_0 = hBest->left->nSample(), nRigt_0 = hBest->right->nSample();
 			assert( hBest->left->nSample()==hBest->fruit->nLeft && hBest->right->nSample()==hBest->fruit->nRight);
 			if (hBest->left->nSample() < hBest->right->nSample()) {
@@ -995,12 +995,13 @@ WeakLearner::~WeakLearner( )		{
 void WeakLearner::ToCPP( int flag )	{	hTree->hForest->ToCPP( this,flag );		}
 
 
-void MT_BiSplit::Dump(const char* info_0, int type, int flag) {
+void MT_BiSplit::Dump(FeatsOnFold *hData_, const char* info_0, int type, int flag) {
 	assert(fruit!=nullptr);
 	double f= fruit->Thrshold(false);	//fruit.Get_<float>( );
 	if (left == nullptr) {
 
 	}	else {
+		//hData_->Feat(feat_id);
 		double l_down=left->GetDownStep(),r_down = right->GetDownStep();
 		string ft= flag ==0 ? "BLIT":"FOLD";
 		printf( "\t%s\tF=%d samp=%lld(%lld,%lld),fruit=%g impuri={%g,%g} down={%g,%g}\n", info_0,feat_id,nSample(),

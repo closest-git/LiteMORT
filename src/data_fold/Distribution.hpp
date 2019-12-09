@@ -457,11 +457,11 @@ namespace Grusoft {
 			//histo = optimal == "grad_variance" ? new HistoGRAM(nSamp_) : new Histo_CTQ(nSamp_);
 			histo = new HistoGRAM(nullptr,nSamp_);
 			if (rNA == 1.0) {	//由于复杂的pandas操作，确实存在可能
-				if(config.verbose>0)	printf("X2Histo_::!!!%s-%s is all NAN!!!\n", nam.c_str(),desc.c_str());
+				if(config.verbose>0)	printf("X2Histo_::!!!\"%s\"-%s is all NAN!!!\n", nam.c_str(),desc.c_str());
 				return;
 			}
 			if (vMin == vMax) {
-				if (config.verbose>0)	printf("X2Histo_::%s-%s is const(%g)!!!", nam.c_str(), desc.c_str(), val[0]);
+				if (config.verbose>0)	printf("X2Histo_::\"%s\"-%s is const(%g)!!!", nam.c_str(), desc.c_str(), val[0]);
 				return;
 			}			
 

@@ -737,6 +737,7 @@ tpDOWN *FeatsOnFold::GetSampleHessian() const {
 
 int *FeatsOnFold::Tag() { return lossy->Tag(); }
 
+
 /*
 	hFeat必须保持不变诶
 	v0.1	cys
@@ -757,7 +758,7 @@ void FeatsOnFold::ExpandMerge(const vector<FeatsOnFold *>&merge_folds, int flag)
 		for(i=0;i<fold->feats.size();i++)	{
 			FeatVector *hFeat = fold->feats[i];
 			hFeat->id = feats.size();		//必须这样
-			if (hFeat->nam=="air_temperature" && samp1.nSamp==586)	{	//仅用于调试	
+			if (hFeat->nam=="precip_depth_1_hr" )	{	//仅用于调试	
 				j = i;
 			}
 
@@ -777,10 +778,16 @@ void FeatsOnFold::ExpandMerge(const vector<FeatsOnFold *>&merge_folds, int flag)
 			}else
 				hFeat->EDA(config, true, &samp1, 0x0);*/
 
-			if (isQuanti || hFeat->isCategory()) {
-				//assert(isTrain());
-				FeatVector *hFQ = FeatVecQ_InitInstance(this, hFeat, 0x0);	// new FeatVec_Q<short>(hFold, hFeat, nMostQ);
-				hRight = hFQ;	//delete hFeat;
+			Distribution *hDistri = edaX->GetDistri(feats.size());
+			if (hDistri->histo->nBins==0) {//train无法利用该feat信息
+				
+			}
+			else {
+				if (isQuanti || hFeat->isCategory()) {
+					//assert(isTrain());
+					FeatVector *hFQ = FeatVecQ_InitInstance(this, hFeat, 0x0);	// new FeatVec_Q<short>(hFold, hFeat, nMostQ);
+					hRight = hFQ;	//delete hFeat;
+				}
 			}
 			//assert(hRight->arr() != nullptr);
 			FeatVector *hEXP = nullptr;
@@ -793,6 +800,8 @@ void FeatsOnFold::ExpandMerge(const vector<FeatsOnFold *>&merge_folds, int flag)
 				hEXP = new FeatVec_EXP<int32_t>(this, hRight->nam + "@" + hLeft->nam, hLeft, hRight);
 			}
 			hEXP->SetDistri(mDistri);
+			bool isPass = hEXP->myDistri()->isPass();
+
 
 			//hEXP->EDA(this->config, false, nullptr, 0x0);
 			feats.push_back(hEXP);

@@ -271,7 +271,6 @@ PYMORT_DLL_API void LiteMORT_set_feat(PY_ITEM* params, int nParam, int flag = 0x
 	}
 }
 
-
 namespace Grusoft {
 	FeatVector *FeatVecQ_InitInstance(FeatsOnFold *hFold, FeatVector *hFeat, int x, int flag) {
 		int nBins = hFold->config.feat_quanti;
@@ -425,7 +424,7 @@ FeatsOnFold *FeatsOnFold_InitInstance(LiteBOM_Config config, ExploreDA *edaX, PY
 
 	GST_TIC(t1);
 	int nFeat = hFold->nFeat();
-	if (true) {	//为了调试
+	if (false) {	//为了调试 可是和FeatVector::Feat(int no)冲突啊
 		std::sort(hFold->feats.begin(), hFold->feats.end(), FeatVector::OrderByName );
 		for (int i = 0; i < nFeat; i++) {
 			//hFold->feats[i]->id = i;		指向eda->distribution，不能改
@@ -573,6 +572,7 @@ PYMORT_DLL_API void LiteMORT_predict(void *mort_0,float *X, tpY *y, size_t nFeat
 	}
 	delete hDat;
 }*/
+
 
 /*
 	v0.2

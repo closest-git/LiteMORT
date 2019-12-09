@@ -103,7 +103,7 @@ namespace Grusoft {
 		virtual double GetGain(int flag = 0x0);
 		virtual void BeforeTrain(FeatsOnFold*, int flag = 0x0) { throw "MT_BiSplit::BeforeTrain is ..."; }
 		//virtual void SetSamp_(FeatsOnFold *hData_);
-		virtual void Dump(const char*, int type, int flag = 0x0);
+		virtual void Dump(FeatsOnFold *hData_, const char*, int type, int flag = 0x0);
 		static bool isBig(const MT_BiSplit *l, const MT_BiSplit *r) { return true; }/**/
 
 		virtual tpDOWN GetDownStep();
