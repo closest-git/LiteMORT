@@ -1,4 +1,5 @@
 #https://www.kaggle.com/rohanrao/ashrae-divide-and-conquer
+#https://www.kaggle.com/isaienkov/lightgbm-fe-1-19
 '''
     [3,18,72]=0.937 [3,18]=0.939 [18]=0.946min_data_in_leaf [18,72] =0.933      [3,72] =0.938       [72] =0.933 [72,168]=0.939
     min_data_in_leaf:   20=0.933    200=0.932       2000=0.930      10000=0.9289    20000=0.930
@@ -26,11 +27,11 @@ isMORT = len(sys.argv)>1 and sys.argv[1] == "mort"
 #isMORT = False
 isMerge = False #len(sys.argv)>1 and sys.argv[1] == "merge"
 gbm='MORT' if isMORT else 'LGB'
-use_ucf=False
+use_building_id=False
 leak_some_rows=2000000
 #some_rows = 500
 some_rows = None
-lag_hours=[18,72]            #[3,18,72]内存溢出
+lag_hours=[72]            #[3,18,72]内存溢出
 use_building_id=True
 
 def reduce_mem_usage(df, use_float16=False):
@@ -88,8 +89,10 @@ def create_lag_features(df, window):
     df_median = df_rolled.median().reset_index().astype(np.float16)
     df_min = df_rolled.min().reset_index().astype(np.float16)
     df_max = df_rolled.max().reset_index().astype(np.float16)
-    df_std = df_rolled.std().reset_index().astype(np.float16)
-    df_skew = df_rolled.skew().reset_index().astype(np.float16)
+#https://stackoverflow.com/questions/50306914/pandas-groupby-agg-std-nan
+#pd.DataFrame.std assumes 1 degree of freedom by default, also known as sample standard deviation. This results in NaN results for groups with one number.
+    df_std = df_rolled.std().reset_index().astype(np.float16).fillna(0)
+    df_skew = df_rolled.skew().reset_index().astype(np.float16).fillna(0)
 
     for feature in feature_cols:
         df[f"{feature}_mean_lag{window}"] = df_mean[feature]
@@ -130,7 +133,7 @@ def get_leak_():
         test = pd.read_csv(path_test)
         shape_0=test.shape
         test = test[test.building_id.isin(leak_building_ids)]
-        leak = leak.merge(test, on=["building_id", "meter", "timestamp"])
+        leak = leak.merge(test, on=["building_id", "meter", "timestamp"],how = "left")
         leak = reduce_mem_usage(leak, use_float16=True)
         print(f"test0={shape_0} test@leak={test.shape} leak={leak.shape},mem={sys.getsizeof(leak)/1.0e6:.3f} ")
         leak.drop(["row_id"],axis=1, inplace=True)
@@ -144,13 +147,57 @@ def get_leak_():
 path_data = data_root   #"/kaggle/input/ashrae-energy-prediction/"
 path_train = path_data + "train.csv"
 path_test = path_data + "test.csv"
-#get_leak_()
 path_building = path_data + "building_metadata.csv"
 path_weather_train = path_data + "weather_train.csv"
 path_weather_test = path_data + "weather_test.csv"
 myfavouritenumber = 13
 seed = myfavouritenumber
 pkl_path = f'{data_root}/cys_{"merge"if isMerge else ""}_{lag_hours}_.pickle'
+df_building_meter=None
+df_building_meter_hour=None
+
+def EDA_(df_,weather_,building,isTrain=False,isLogMeter=False):
+    global df_building_meter,df_building_meter_hour
+    df_ = df_.merge(building, on="building_id",how = "left")
+    #print(f"{df_.shape}")
+    # df_train = df_train.merge(weather_train, on=["site_id", "timestamp"], how="left")
+    if isTrain:
+        df_ = df_[~((df_.site_id == 0) & (df_.meter == 0) & (df_.building_id <= 104) & (
+                    df_.timestamp < "2016-05-21"))]
+
+    df_.reset_index(drop=True, inplace=True)
+    #print(f"{df_.shape}")
+    df_.timestamp = pd.to_datetime(df_.timestamp, format='%Y-%m-%d %H:%M:%S')
+    if isLogMeter:
+        df_["log_meter_reading"] = np.log1p(df_.meter_reading)
+    # Feature Engineering: Time
+    df_["hour"] = df_.timestamp.dt.hour
+    df_["weekday"] = df_.timestamp.dt.weekday
+    print(f"{df_.shape}")
+    print("EDA_ Aggregation@building_meter@building_meter_hour...")
+    if isTrain:
+        df_building_meter = df_.groupby(["building_id", "meter"]). \
+            agg(mean_building_meter=("log_meter_reading", "mean"),
+                median_building_meter=("log_meter_reading", "median")).reset_index()
+        df_building_meter_hour = df_.groupby(["building_id", "meter", "hour"]). \
+            agg(mean_building_meter=("log_meter_reading", "mean"),
+                median_building_meter=("log_meter_reading", "median")).reset_index()
+
+    df_ = df_.merge(df_building_meter, on=["building_id", "meter"], how="left")
+    df_ = df_.merge(df_building_meter_hour, on=["building_id", "meter", "hour"], how="left")
+    print(f"{df_.shape}")
+    if weather_ is not None:
+        if isMerge:
+            pass
+        else:
+            df_ = df_.merge(weather_, on=["site_id", "timestamp"], how="left")
+    gc.collect()
+
+    df_ = reduce_mem_usage(df_)
+    print(f"{df_.shape}")
+    # df_train = df_train.reindex(sorted(df_train.columns), axis=1)
+    # df_test = df_test.reindex(sorted(df_test.columns), axis=1)
+    return df_
 
 if os.path.isfile(pkl_path):
     print("====== Load pickle @{} ......".format(pkl_path))
@@ -160,12 +207,12 @@ if os.path.isfile(pkl_path):
             merge_infos = [{'on': ['site_id', 'timestamp'], 'dataset': weather_train, "desc": "weather"}]
         else:
             merge_infos = None
-            [df_train, df_leak_test,weather_test] = pickle.load(fp)
+            [df_train, df_leak_test,df_test_,weather_test] = pickle.load(fp)
 else:
     df_leak_test,leak_building_ids = get_leak_()
     df_leak_test.rename(columns={'meter_reading_scraped': 'meter_reading'}, inplace=True)
     df_train = pd.read_csv(path_train)
-    df_train = df_train[df_train.building_id.isin(leak_building_ids)]
+    #df_train = df_train[df_train.building_id.isin(leak_building_ids)]
     print(f"df_train={df_train.shape} cols={df_train.columns}")
     print(f"df_leak_test={df_leak_test.shape} cols={df_leak_test.columns}")
 
@@ -178,23 +225,7 @@ else:
     #weather_test.drop(["sea_level_pressure", "wind_direction", "wind_speed"], axis=1, inplace=True)
     weather_train = weather_train.groupby("site_id").apply(lambda group: group.interpolate(limit_direction="both"))
     weather_test = weather_test.groupby("site_id").apply(lambda group: group.interpolate(limit_direction="both"))
-    print(f"df_train={df_train.shape} df_test={df_leak_test.shape} weather_train={weather_train.shape} weather_test={weather_test.shape}")
-
-    df_train = df_train.merge(building, on="building_id")
-    #df_train = df_train.merge(weather_train, on=["site_id", "timestamp"], how="left")
-    df_train = df_train[~((df_train.site_id==0) & (df_train.meter==0) & (df_train.building_id <= 104) & (df_train.timestamp < "2016-05-21"))]
-
-    df_train.reset_index(drop=True, inplace=True)
-    df_train.timestamp = pd.to_datetime(df_train.timestamp, format='%Y-%m-%d %H:%M:%S')
-    df_train["log_meter_reading"] = np.log1p(df_train.meter_reading)
-
-    df_test = df_leak_test.merge(building, on="building_id")
-    #df_test = df_test.merge(weather_test, on=["site_id", "timestamp"], how="left")
-    df_test.reset_index(drop=True, inplace=True)
-    df_test.timestamp = pd.to_datetime(df_test.timestamp, format='%Y-%m-%d %H:%M:%S')
-    #df_test["log_meter_reading"] = np.log1p(df_test.meter_reading)
-    del building, le
-    gc.collect()
+    print(f"df_train={df_train.shape} df_leak_test={df_leak_test.shape} weather_train={weather_train.shape} weather_test={weather_test.shape}")
 
     #df_train = reduce_mem_usage(df_train, use_float16=True)
     #df_test = reduce_mem_usage(df_test, use_float16=True)
@@ -202,52 +233,32 @@ else:
     weather_test.timestamp = pd.to_datetime(weather_test.timestamp, format='%Y-%m-%d %H:%M:%S')
     weather_train = reduce_mem_usage(weather_train, use_float16=True)
     weather_test = reduce_mem_usage(weather_test, use_float16=True)
-    #Feature Engineering: Time
-    df_train["hour"] = df_train.timestamp.dt.hour
-    df_train["weekday"] = df_train.timestamp.dt.weekday
-    df_test["hour"] = df_test.timestamp.dt.hour
-    df_test["weekday"] = df_test.timestamp.dt.weekday
-
-    print("Aggregation...")
-    df_building_meter = df_train.groupby(["building_id", "meter"]).\
-        agg(mean_building_meter=("log_meter_reading", "mean"), median_building_meter=("log_meter_reading", "median")).reset_index()
-    df_train = df_train.merge(df_building_meter, on=["building_id", "meter"])
-    df_test = df_test.merge(df_building_meter, on=["building_id", "meter"])
-
-    df_building_meter_hour = df_train.groupby(["building_id", "meter", "hour"]).\
-        agg(mean_building_meter=("log_meter_reading", "mean"),median_building_meter=("log_meter_reading", "median")).reset_index()
-    df_train = df_train.merge(df_building_meter_hour, on=["building_id", "meter", "hour"])
-    df_test = df_test.merge(df_building_meter_hour, on=["building_id", "meter", "hour"])
-    print(f"Aggregation... df_train={df_train.shape} df_test={df_test.shape}")
 
     for h in lag_hours:
         weather_train = create_lag_features(weather_train, h)
         #weather_train.drop(["air_temperature", "cloud_coverage", "dew_temperature", "precip_depth_1_hr"], axis=1, inplace=True)
         weather_test = create_lag_features(weather_test, h)
         #weather_test.drop(["air_temperature", "cloud_coverage", "dew_temperature", "precip_depth_1_hr"], axis=1,inplace=True)
-    if isMerge:
-        pass
-    else:
-        df_train = df_train.merge(weather_train, on=["site_id", "timestamp"], how="left")
-        df_test = df_test.merge(weather_test, on=["site_id", "timestamp"], how="left")
-        del weather_train
-        gc.collect()
 
-    df_train = reduce_mem_usage(df_train)
-    df_test = reduce_mem_usage(df_test)
-    #df_train = df_train.reindex(sorted(df_train.columns), axis=1)
-    #df_test = df_test.reindex(sorted(df_test.columns), axis=1)
+    df_train = EDA_(df_train, weather_train, building, isTrain=True, isLogMeter=True)
+    df_test_ = pd.read_csv(path_test)
+    print(df_test_.shape)
+    df_test_ = EDA_(df_test_, None, building, isTrain=False, isLogMeter=False)
+    print(df_test_.head(100));      print(df_test_.tail(100))
+    df_leak_test = EDA_(df_leak_test, weather_test, building, isTrain=False,isLogMeter=True)
+
+    del building, le;    del weather_train;
+    gc.collect()
     print(f"df_train={df_train.shape} cols={df_train.columns}")
-    print(f"df_test={df_test.shape} cols={df_test.columns} NAN={df_test.isna().sum()}")
+    print(f"df_leak_test={df_leak_test.shape} cols={df_leak_test.columns} NAN={df_leak_test.isna().sum()}")
+    print(f"df_test_={df_test_.shape} cols={df_test_.columns} NAN={df_test_.isna().sum()}")
     with open(pkl_path, "wb") as fp:
         if isMerge:     #df_train=1172.185  df_test=2960.530 weather_test=18.021 weather_train=9.085 leak=253.434
-
-            print(f"df_train={sys.getsizeof(df_train) / 1.0e6:.3f}  df_test={sys.getsizeof(df_test) / 1.0e6:.3f} weather_test={sys.getsizeof(weather_test) / 1.0e6:.3f}"
+            print(f"df_train={sys.getsizeof(df_train) / 1.0e6:.3f}  df_leak_test={sys.getsizeof(df_leak_test) / 1.0e6:.3f} weather_test={sys.getsizeof(weather_test) / 1.0e6:.3f}"
                   f"\tweather_train={sys.getsizeof(weather_train) / 1.0e6:.3f}")
-            pickle.dump([df_train, df_test, weather_test, weather_train], fp)
+            pickle.dump([df_train, df_leak_test, weather_test, weather_train], fp)
         else:
-            pickle.dump([df_train, df_test,weather_test], fp, protocol=4)
-    df_leak_test = df_test
+            pickle.dump([df_train, df_leak_test,df_test_,weather_test], fp, protocol=4)
     #sys.exit(-1)
 
 categorical_features = ["primary_use","meter", "weekday","hour"]
@@ -261,7 +272,7 @@ models = []
 cv_scores = {"site_id": [], "cv_score": []}
 
 early_stop = 21
-verbose_eval = 10
+verbose_eval = 20
 metric = 'l2'
 num_rounds=999; lr=0.049; bf=0.51;ff=0.81;nLeaf=41
 #num_rounds = 30;    lr = 0.05;  verbose_eval=1;     bf=1;   ff=1;nLeaf=41
@@ -274,24 +285,23 @@ params = {"objective": "regression", "metric": "rmse",
 
 kf = KFold(n_splits=cv, random_state=seed)
 
-X_train = df_train;         X_leak = df_leak_test
+#X_train = df_train;
 if some_rows is not None:
-    X_train, _ = Mort_PickSamples(some_rows, X_train, None)
-    X_leak, _ = Mort_PickSamples(some_rows, X_leak, None)
-y_train = X_train.log_meter_reading;        y_leak = X_leak.log_meter_reading
-
-X_train = X_train[all_features]
+    df_train, _ = Mort_PickSamples(some_rows, df_train, None)
+    df_leak_test, _ = Mort_PickSamples(some_rows, df_leak_test, None)
+X_leak = df_leak_test;  y_leak = X_leak.log_meter_reading
+Y_train = df_train.log_meter_reading
+#X_train = X_train[all_features]
 X_leak = X_leak[all_features]
-y_pred_train_site = np.zeros(X_train.shape[0])
-#print(f"X_train={X_train.shape} cols={X_train.columns}")
-#print(f"X_leak={X_leak.shape} cols={X_leak.columns}")
+y_pred_train_site = np.zeros(df_train.shape[0])
 score = 0
 
-for fold, (train_index, valid_index) in enumerate(kf.split(X_train, y_train)):
-    X_train, X_valid = X_train.loc[train_index], X_leak
-    y_train, y_valid = y_train.iloc[train_index], y_leak
-    print(f"X_train={X_train.shape} cols={X_train.columns}")
-    print(f"X_valid={X_leak.shape} cols={X_valid.columns}")
+for fold, (train_index, valid_index) in enumerate(kf.split(df_train, Y_train)):
+    X_train, X_valid = df_train[all_features].loc[train_index], X_leak
+    y_train, y_valid = Y_train.iloc[train_index], y_leak
+    if fold==0:
+        print(f"X_train={X_train.shape} cols={X_train.columns}")
+        print(f"X_valid={X_leak.shape} cols={X_valid.columns}")
 
     if isMORT:
         params['verbose'] = 667 if fold == 0 else 1
@@ -311,58 +321,60 @@ for fold, (train_index, valid_index) in enumerate(kf.split(X_train, y_train)):
     rmse = np.sqrt(mean_squared_error(y_valid, y_pred_valid))
     print(", Fold:", fold + 1, ", RMSE:", rmse)
     score += rmse / cv
-    del  X_train, X_valid,y_train, y_valid
+    del  X_train, y_train
     gc.collect()
-    input("......")
-
-cv_scores["site_id"].append(site_id)
+    #input("......")
+del  X_leak, y_leak
+gc.collect()
 cv_scores["cv_score"].append(score)
 
-print("\nSite Id:", site_id, ", CV RMSE:", np.sqrt(mean_squared_error(y_train_site, y_pred_train_site)), "\n")
-del X_train_site, y_train_site,y_pred_train_site
+del df_train,df_leak_test
 gc.collect()
 
-del df_train;   gc.collect()
-df_test_sites = []
 merge_test_info = [{'on': ['site_id', 'timestamp'], 'dataset': weather_test, "desc": "weather"}]
-for site_id in tqdm(range(16), desc="site_id"):
-    print("Preparing test data for site_id", site_id)
+submit = pd.read_csv(os.path.join(data_root, 'sample_submission.csv'))
 
-    X_test_site = df_test[df_test.site_id == site_id]
-    if isMerge:
-        pass
-    else:
-        weather_test_site = weather_test[weather_test.site_id == site_id]
-        X_test_site = X_test_site.merge(weather_test_site, on=["site_id", "timestamp"], how="left")
+def pred(X_test, models, batch_size=1000000):
+    iterations = (X_test.shape[0] + batch_size -1) // batch_size
+    print('iterations', iterations)
 
-    row_ids_site = X_test_site.row_id
-    #print(X_test_site.columns);    print(X_test_site.head())
-    X_test_site = X_test_site[all_features]
-    y_pred_test_site = np.zeros(X_test_site.shape[0])
+    y_test_pred_total = np.zeros(X_test.shape[0])
+    for i, model in enumerate(models):
+        print(f'predicting {i}-th model')
+        if isMORT and isMerge:
+            y_pred_test = model.predict(X_test, num_iteration=model.best_iteration)
+            y_test_pred_total += y_pred_test
+        else:
+            for k in tqdm(range(iterations)):
+            #for k in range(1):
+                y_pred_test = model.predict(X_test[k*batch_size:(k+1)*batch_size], num_iteration=model.best_iteration)
+                #print(y_pred_test[:100]);            input("pred ......")
+                y_test_pred_total[k*batch_size:(k+1)*batch_size] += y_pred_test
 
-    print("Scoring for site_id", site_id)
-    for fold in range(cv):
-        model_lgb = models[site_id][fold]
-        if isMerge:
-            model_lgb.MergeDataSets(merge_test_info, comment="_predict")
-        y_pred_test_site += model_lgb.predict(X_test_site, num_iteration=model_lgb.best_iteration) / cv
-        gc.collect()
+    y_test_pred_total /= len(models)
+    return y_test_pred_total
 
-    df_test_site = pd.DataFrame({"row_id": row_ids_site, "meter_reading": y_pred_test_site})
-    df_test_sites.append(df_test_site)
+if isMerge:
+    pass
+else:
+    print("Before Merge::df_test_={df_test_.shape}")
+    df_test_ = df_test_.merge(weather_test, on=["site_id", "timestamp"], how="left")
 
-    print("Scoring for site_id", site_id, "completed\n")
-    gc.collect()
+submit.row_id = df_test_.row_id
+df_test_ = df_test_[all_features]
+print(f"df_test_={df_test_.shape} cols={df_test_.columns} NAN={df_test_.isna().sum()} submit={submit.shape}")
+print(f"df_test_={df_test_.head()} {df_test_.tail()}")
 
-submit = pd.concat(df_test_sites)
-submit.meter_reading = np.clip(np.expm1(submit.meter_reading), 0, a_max=None)
-#submit.to_csv("submission_noleak.csv", index=False, float_format='%.4f',compression='gzip')
+assert(submit.shape[0]==df_test_.shape[0])
+y_pred_ = pred(df_test_,models)
 
-del df_test_sites;        gc.collect()
-if True:
+submit.meter_reading = np.clip(np.expm1(y_pred_), 0, a_max=None)
+print(submit.head(100),submit.tail(100))
+submit.to_csv("submission_cys_noleak.csv.gz", index=False, float_format='%.4f',compression='gzip')
+
+if False:
     submit = submit.merge(leak[["row_id", "meter_reading_scraped"]], on=["row_id"], how="left")
     submit.loc[submit.meter_reading_scraped.notnull(), "meter_reading"] = submit.loc[submit.meter_reading_scraped.notnull(), "meter_reading_scraped"]
     submit.drop(["meter_reading_scraped"], axis=1, inplace=True)
 
     submit.to_csv("submission.csv.gz", index=False, float_format='%.4f',compression='gzip')
-print(submit.head(100),submit.tail(100))
