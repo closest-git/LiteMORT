@@ -1,4 +1,6 @@
-A fast gradient boosting framework on manifolds(from regression tree,classification tree,neural net....).
+Gradient boosting algorithm is one of the most interesting and overlooked algorithm in machine learning. There are huge gaps between the simple theoretical formula  and practical implementations, especially the histogram technique . The histogram-based feature representation not only greatly improves the speed, but also improves the accuracy. In some sense, the histogram is a sparse embedding technique, which map the noisy feature to a more compact and  more robust space. And we could get more along this direction.  Based on the deep understanding of feature embedding technique, we present LiteMORT, which use much less memory than other GBDT libs. It also has higher accuracy in some datasets. LiteMORT reveals that GBDT algorithm can have much more potential than most people would expect. 
+
+## Some key features of LiteMORT
 
 ##### 1) Faster than LightGBM with higher accuracy
 
