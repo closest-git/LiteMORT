@@ -359,7 +359,6 @@ FeatVector *PY_COL2FEAT(const FeatsOnFold *hFold, PY_COLUMN*col, size_t nSamp_,i
 		hFeat->InitDistri(hFold, nullptr, nullptr,false, 0x0);		
 
 	}
-
 	return hFeat;
 }
 

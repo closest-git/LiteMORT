@@ -1,3 +1,6 @@
+'''
+https://github.com/scikit-learn-contrib/categorical-encoding
+'''
 import pandas as pd
 import numpy as np
 import gc

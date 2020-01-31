@@ -2,7 +2,7 @@ Gradient boosting algorithm is one of the most interesting and overlooked algori
 
 ## Some key features of LiteMORT
 
-##### 1) Faster than LightGBM with higher accuracy
+#### 1. Faster than LightGBM with higher accuracy
 
 For example , in the latest Kaggle competition  [IEEE-CIS Fraud Detection competition](https://www.kaggle.com/c/ieee-fraud-detection/overview) (binary classification problem) :
 
@@ -16,11 +16,17 @@ For example , in the latest Kaggle competition  [IEEE-CIS Fraud Detection compet
 
 For the detail comparison of this competition, please see https://github.com/closest-git/ieee_fraud.
 
-##### 2)Use much less memory than LightGBM for large data problems 
+#### 2. Use much less memory than other GBDT libs 
 
-Share memory with pandas dataframe or numpy ndarray.
+1) **Share memory with data source** (pandas dataframe, numpy ndarray, list, vector… )
 
-##### 3)sklearn-like api interface.
+LiteMORT would not allocate extra memory for features stored in continuous memory. In the gradient boosting process, nearly all visit to data is on the pointer and some offsets. 
+
+2) **Implicit merging  for “merge overflow problem”**
+
+In real application, we usually don’t save all the data in one big data table. They are always many smaller ones instead. But in the data analysis or machine learning task, we have to access all datas. Or we have to merge some small datasets to get some huge datasets, which are too huge to be processed by many classical machine learning algorithms. We called this phenomenon as **“merge overflow problem”**. 		LiteMORT use a smart implicit merging technique to deal with this problem. Just send all small datasets to LiteMORT, LiteMORT would generate the histograms for each merged features. In the later training process, all operations are on these histograms. No need to generate the huge merged dataset as the classical method or other GBDT libs(LightGBM, XGBoost,...)
+
+#### 3. sklearn-like api interface.
 
 ```python
 from litemort import *
@@ -29,7 +35,7 @@ pred_val = model.predict(eval_x)
 pred_raw = model.predict_raw(eval_x)
 ```
 
-##### 4)Just one line to transform from lightGBM to LiteMORT.
+#### 4. Just one line to transform from lightGBM to LiteMORT.
 
 Support parameters of LightGBM
 
@@ -46,7 +52,14 @@ pred_test = model.predict(X_test)
 
 
 
-|      |      |      |      |
-| ---- | ---- | ---- | ---- |
-|      |      |      |      |
+## Citation
 
+Please use the following bibtex entry:
+
+```
+[1] Chen, Yingshi."LiteMORT: A memory efficient gradient boosting tree system on adaptive compact distributions." arXiv preprint arXiv:2001.09419 (2020).
+```
+
+## Author
+
+LiteMORT was written by Yingshi Chen (gsp.cys@gmail.com)
