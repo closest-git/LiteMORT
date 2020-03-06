@@ -644,10 +644,10 @@ void ManifoldTree::Train(int flag) {
 	while (!leafs.empty()) {
 		hMTNode node = leafs.top();		leafs.pop();
 		assert(node->isLeaf());
-		/*if (node->gain_ > 0 && node->nSample()>hData_->config.min_data_in_leaf * 3 ) {	//可以试试&& rander_.Uniform_(0,1)<0.5
+		if (node->gain_ > 0 && node->nSample()>hData_->config.min_data_in_leaf * 3 ) {	//可以试试&& rander_.Uniform_(0,1)<0.5
 			GrowLeaf(node, "more_leaf", true);
 			nMoreLeaf++;
-		} */
+		} /**/
 	}
 	assert(nMoreLeaf<=hData_->config.num_leaves);
 

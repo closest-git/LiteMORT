@@ -17,8 +17,7 @@
 
 	3_1_2019
 	1)	"Finding Influential Training Samples for Gradient Boosted Decision Trees"
-	2)	"Pruning Decision Trees via Max-Heap Projection"
-		
+	2)	"Pruning Decision Trees via Max-Heap Projection"		
 */
 
 #include "pyMORT_DLL.h"
@@ -945,7 +944,7 @@ void GRUS_LITEMORT_VERSION(char * str) {
 		"********************************************************************\n",
 		sName,
 		//"*                   for personal, non-commercial use.              *\n"
-		"*    Copyright (c) 2018-2019 by YingShiChen. All Rights Reserved.  *\n"
+		"*    Copyright (c) 2018-2020 by YingShiChen. All Rights Reserved.  *\n"
 		"*                         gsp@grusoft.com                          *\n"
 		"********************************************************************\n"
 	);	

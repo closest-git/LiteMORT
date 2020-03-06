@@ -211,6 +211,7 @@ class Mort_Preprocess(object):
 
         if not (isinstance(X, pd.DataFrame) or isinstance(X, np.ndarray)):
             raise NotImplementedError("Mort_Preprocess failed to init @{}".format(X))
+
         self.name = name_
         self.nSample,self.nFeature = X.shape[0],X.shape[1]
         self.feat_info=feat_info
@@ -220,15 +221,18 @@ class Mort_Preprocess(object):
         if features is None:
             if isinstance(X, pd.DataFrame):
                 self.features = X.columns
-            else:
-                pass
+            else:       #np.ndarray
+                self.features = [i for i in range(self.nFeature)]
         else:
             self.features = features
 
         for feat in self.features:
             if  FeatIs_(feat_info,"merge_right",feat):
                 continue
-            col = self.column_info(feat,X,self.feat_info)
+            if isinstance(X, np.ndarray):
+                col = self.column_info(feat, X[:,feat:feat+1], self.feat_info)
+            else:
+                col = self.column_info(feat, X, self.feat_info)
             if 'representive' in params.__dict__ and feat in params.representive:
                 col.representive = params.representive[feat]
             if col.data is not None:
