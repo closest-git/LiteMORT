@@ -21,8 +21,35 @@ import lightgbm as lgb
 from sklearn.model_selection import KFold
 from qhoptim.pyt import QHAdam
 from tabular_data import *
+import multiprocessing
+from multiprocessing import Process
+import psutil
 #You should set the path of each dataset!!!
 data_root = "F:/Datasets/"
+
+
+def Monitor_Process(pid,isExitMemCheck,process_info):     #https://blog.csdn.net/u012234115/article/details/102687721
+    mem_info = psutil.virtual_memory()
+    p = psutil.Process(pid)
+    process_info["mem_peak"] = 0.0
+    process_info["cpu_peak"] = 0.0
+    interval = 1 # polling seconds
+    #with open("process_monitor_" + p.name() + '_' + str(pid) + ".csv", "a+") as f:
+        #f.write("time,cpu%,mem%\n") # titles
+    while isExitMemCheck.value==0:
+        current_time = time.strftime('%Y%m%d-%H%M%S',time.localtime(time.time()))
+        cpu_percent = p.cpu_percent()
+        mem_percent = p.memory_percent()
+        mem_peak = mem_info.total/100.0*mem_percent/1.0e6
+        line = current_time + ',' + str(cpu_percent) + ',' + str(mem_percent)
+        print (line)
+        process_info["mem_peak"] = max(process_info["mem_peak"],mem_peak)
+        process_info["cpu_peak"] = max(process_info["cpu_peak"],cpu_percent)
+        #f.write(line + "\n")
+        time.sleep(interval)
+    process_info["memory"] = process_info["mem_peak"]
+    print(f"exit!!!")
+
 
 def GetImportLibs(libs_0):
     libs = []
@@ -169,7 +196,8 @@ class Experiment:
         result = {"method":lib}
         t0 = time.time()
         if lib in self.GBDT_libs:  
-            result.update({"accuracy":0})   #self.GBDT_learn(lib)
+            result.update(self.GBDT_learn(lib))   #
+            #result.update({"accuracy":0.0})
         elif lib == "QForest":
             pass
             if config.feat_info == "importance":
@@ -186,7 +214,7 @@ class Experiment:
         self.profile.Stat("fit_0","fit_1",dump=False)     #https://psutil.readthedocs.io/en/latest/
         result['virtual memory']=self.profile.memory_info['virtual memory']         #total amount of virtual memory used by the process
         result['physical memory']=self.profile.memory_info['physical memory']       #non-swapped physical memory a process has used  
-        result["memory"] = result['physical memory']     
+        #result["memory"] = result['physical memory']     
         return result
     
     def Fold_learning(self,fold_n,data,config,visual):
@@ -213,53 +241,77 @@ class Compare(Experiment):
         pass
     
     #https://stackoverflow.com/questions/38807895/seaborn-multiple-barplots/38808042
-    def plot_factor(self):
-        pass
+    def plot_factor(self,title_,df,feat_X,feat_Y,feat_Group,ext_info=""):
+        label='%.4f'
+        if feat_Y=="memory":
+            label='%.2f M'
+        elif feat_Y=="accuracy":
+            label='AUC=%.4f'
+        elif feat_Y=="time":
+            label='%.2f s'
+        df_1 = df[[feat_X,feat_Y,feat_Group]]
+        #df_2 = pd.melt(df_1, id_vars="method", var_name="dataset", value_name="accuracy")
+        sns.factorplot(feat_X, feat_Y, col=feat_Group, data=df_1, kind="bar")
+        # Get current axis on current figure
+        y_max = df_1[feat_Y].max() 
+                
+        axes = plt.gcf().get_axes()
+        for ax in axes:
+            ax.set_ylim([0, y_max*1.2])    
+            # Iterate through the list of axes' patches
+            for p in ax.patches:            
+                height = p.get_height() # height of bar, which is basically the data value
+                ax.text(p.get_x() + p.get_width()/2., height, label%height, 
+                        fontsize=16, color='red', ha='center', va='bottom')
+
+        plt.savefig(f"{title_}___{feat_Y}@{feat_X}@{feat_Group}.jpg")
+        plt.show()
+        plt.close()        
     
-    def plot_compare(self,results):
+    def plot_compare(self,title,results):
         df = pd.DataFrame(results["list"])
-        df_1 = df[["accuracy","method","memory"]]
-        df_2 = pd.melt(df_1, id_vars="method", var_name="datasets", value_name="accuracy")
-        sns.factorplot("method", "accuracy", col="compare", data=df_2, kind="bar")
-        plt.show()
+        
+        self.plot_factor(title,df,"method","memory","dataset")
+        self.plot_factor(title,df,"method","accuracy","dataset")      
+        self.plot_factor(title,df,"method","time","dataset")     
 
-        #groupedvalues=df.groupby('day').sum().reset_index()
-        pal = sns.color_palette("Greens_d", len(acc))
-        #rank = groupedvalues["total_bill"].argsort().argsort() 
-        g=sns.barplot(x='method',y='accuracy',data=df)  
-        plt.show()
-        g=sns.barplot(x='method',y='memory',data=df)  
-        plt.show()
-        pass
-
-    def run(self,data_name,just_plot=False):
-        pkl_path=f"{data_root}{data_name}/compare_.pickle"
-        if False and just_plot and os.path.isfile(pkl_path): 
+    def run(self,data_list,exp_name="cys_",just_plot=False):
+        pkl_path=f"./data/{exp_name}_{data_list}_compare_.pickle"
+        plot_title = f"./data/{data_list}"
+        if just_plot and os.path.isfile(pkl_path): 
             with open(pkl_path, "rb") as fp:
                 results = pickle.load(fp)
-            self.plot_compare(results)
-            return
+            self.plot_compare(plot_title,results)
+            return    
 
-        self.data_name = data_name
+        pid = os.getpid()
         date = '{}.{:0>2d}.{:0>2d}_{:0>2d}_{:0>2d}'.format(*time.gmtime()[:5])
         results={"date":date,"list":[]}
-        for data_trans in self.data_trans:
-            self.data = TabularDataset(data_name,data_path=data_root, random_state=1337)
-            self.data.onTrans(0,self.config,pkl_path=f"{data_root}{data_name}/{data_trans}_.pickle")
-            key=(data_trans)
-            for lib in libs:
-                key = key+(lib)                
-                result = self.learn(lib)   
-                results[key] = result                     
-                results["list"].append(result)
+        for data_name in data_list:
+            self.data_name = data_name
+            for data_trans in self.data_trans:
+                self.data = TabularDataset(data_name,data_path=data_root, random_state=1337)
+                self.data.onTrans(data_trans,self.config,pkl_path=f"{data_root}{data_name}/{data_trans}_.pickle")
+                key=(data_trans,)
+                for lib in libs:
+                    key = key+(lib,)    
+                    isExitMemCheck = multiprocessing.Value("i",0)
+                    process_info=multiprocessing.Manager().dict()
+                    p = Process(target=Monitor_Process,args=(pid,isExitMemCheck,process_info))
+                    p.start()                    
+                    result = self.learn(lib) 
+                    isExitMemCheck.value = 1  
+                    p.join()
+                    #mem_info = mem_info["peak"]                    print(mem_info)
+                    result.update(process_info)
+                    result.update({"dataset":data_name})
+                    results[key] = result                     
+                    results["list"].append(result)
                 
         if pkl_path is not None:
                 with open(pkl_path, "wb") as fp:
                     pickle.dump(results,fp)
-        self.plot_compare(results)
-            
-
-
+        self.plot_compare(plot_title,results)
     
 
 def get_feature_info(data,fold_n):
@@ -318,7 +370,7 @@ if __name__ == "__main__":
     config = {
         "random_state":             42,
         "device":                   ["CPU","GPU"],
-        "data_trans":               ["Quantile"],
+        #"data_trans":               ["Quantile"],
         "cross_fold":               5,
         "result_path":              "./result/",
     }
@@ -327,7 +379,7 @@ if __name__ == "__main__":
 
     experiment = Compare(libs,config)
     #"MICROSOFT","YAHOO","YEAR","CLICK","HIGGS"
-    experiment.run("CLICK",just_plot=True)   
+    experiment.run(["CLICK","MICROSOFT",],just_plot=True)   
     
             
 

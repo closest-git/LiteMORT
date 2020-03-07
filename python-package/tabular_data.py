@@ -161,17 +161,18 @@ class TabularDataset:
             
             t0=time.time()
             self.quantile_noise = 1.0e-3
-            if False:
+            if trans=="Normal":
                 mean = np.mean(self.X_train, axis=0)
                 std = np.std(self.X_train, axis=0)
                 self.X_train = (self.X_train - mean) / std
                 self.X_valid = (self.X_valid - mean) / std
                 self.X_test = (self.X_test - mean) / std
-            listX, _ = self.quantile_trans_(self.random_state, self.X_train,
+            elif trans=="Quantile":
+                listX, _ = self.quantile_trans_(self.random_state, self.X_train,
                     [self.X_train, self.X_valid, self.X_test],distri='normal', noise=self.quantile_noise)
-            self.X_train, self.X_valid, self.X_test = listX[0], listX[1], listX[2]            
-            print(f"====== TabularDataset::quantile_transform X_train={self.X_train.shape} X_valid={self.X_valid.shape} noise={self.quantile_noise} time={time.time()-t0:.5f}")
-            gc.collect()
+                self.X_train, self.X_valid, self.X_test = listX[0], listX[1], listX[2]            
+                print(f"====== TabularDataset::quantile_transform X_train={self.X_train.shape} X_valid={self.X_valid.shape} noise={self.quantile_noise} time={time.time()-t0:.5f}")
+                gc.collect()
 
             if pkl_path is not None:
                 with open(pkl_path, "wb") as fp:
